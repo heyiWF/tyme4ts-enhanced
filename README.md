@@ -23,7 +23,7 @@
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
 | 民俗数据 | 民俗节日（接神日、人日、天穿节、填仓节、中和节、寒食、春社秋社、天贶节、寒衣节、下元节、尾牙、祭灶等）、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
 | 节假日 | 26 个国家和地区（中国大陆及港/澳/台、日韩越、新马泰、美英加澳新、德法意西荷、巴墨俄南非、印度、菲律宾），含补假规则 | 政府公告、祝日法与银行假日表 |
-| 互操作 | ICS 订阅解析，年度循环事件转换为 tyme `Event` | iCalendar RFC 5545 |
+| 互操作 | ICS 订阅解析（年度循环事件转 tyme `Event`）与节假日 ICS 导出 | iCalendar RFC 5545 |
 
 ---
 
@@ -157,6 +157,9 @@ c.getEvents();        // 原始 iCalendar 事件
 c.toTymeEvents();     // 年度循环事件 → tyme Event（可直接注册）
 c.getOneOffDays();    // 单次事件：tyme 的循环事件模型无法表达，单独返回日期
 c.getUnsupported();   // 非年度循环（如 FREQ=MONTHLY）
+
+// 反向：把某年节假日导出为 ICS
+const ics = HolidayCalendar.of('CN').toIcs(2025);
 
 // 注册后即可用 Event.fromSolarDay 反查
 c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));

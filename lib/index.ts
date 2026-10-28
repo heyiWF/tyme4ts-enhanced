@@ -9226,6 +9226,35 @@ export class HolidayCalendar {
         }
     }
 
+    /**
+     * 导出为 iCalendar 文本，可与 IcsCalendar 互相印证
+     */
+    toIcs(year: number, includeWork: boolean = false): string {
+        const days: Holiday[] = this.getDays(year, includeWork);
+        const l: string[] = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Tyme Enhanced//Almanac//' + this.region,
+            'CALSCALE:GREGORIAN',
+        ];
+        for (let i: number = 0; i < days.length; i++) {
+            const h: Holiday = days[i];
+            const d: SolarDay = h.getDay();
+            const date: string = d.getYear() + (d.getMonth() < 10 ? '0' : '') + d.getMonth() + (d.getDay() < 10 ? '0' : '') + d.getDay();
+            l.push('BEGIN:VEVENT');
+            l.push('UID:' + date + '-' + this.region + '@tyme');
+            l.push('DTSTART;VALUE=DATE:' + date);
+            l.push('SUMMARY:' + HolidayCalendar.escape(h.getName()));
+            l.push('END:VEVENT');
+        }
+        l.push('END:VCALENDAR');
+        return l.join('\r\n') + '\r\n';
+    }
+
+    protected static escape(text: string): string {
+        return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+    }
+
     getHoliday(solarDay: SolarDay): Holiday | null {
         const days: Holiday[] = this.getDays(solarDay.getYear(), true);
         const key: string = HolidayCalendar.getKey(solarDay);
@@ -9487,13 +9516,20 @@ export class IcsCalendar {
 
     protected static build(fields: { [key: string]: string }): IcsEvent {
         return new IcsEvent(
-            fields['SUMMARY'] || '',
+            IcsCalendar.unescape(fields['SUMMARY'] || ''),
             IcsCalendar.parseDate(fields['DTSTART']),
             fields['DTEND'] ? IcsCalendar.parseDate(fields['DTEND']) : null,
             fields['RRULE'] || '',
             fields['UID'] || '',
-            fields['LOCATION'] || '',
-            fields['DESCRIPTION'] || '');
+            IcsCalendar.unescape(fields['LOCATION'] || ''),
+            IcsCalendar.unescape(fields['DESCRIPTION'] || ''));
+    }
+
+    /**
+     * 还原 iCalendar 文本转义
+     */
+    protected static unescape(text: string): string {
+        return text.replace(/\\n/gi, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\');
     }
 
     protected static parseDate(value: string): SolarDay {

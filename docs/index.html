@@ -167,6 +167,15 @@ table.checks td.no{color:var(--red)}
 .sum-no{color:var(--red);font-weight:600}
 footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);font-size:12.5px}
 .hide{display:none}
+
+@media print{
+  header.site,.bar,nav.tabs,footer,.searchbar{display:none}
+  body{background:#fff}
+  .grid{display:block}
+  .card{break-inside:avoid;margin-bottom:10px;border-color:#bbb}
+  .hero{display:block}
+  .hero-main,.side-card{margin-bottom:10px}
+}
 </style>
 </head>
 <body>
@@ -352,7 +361,10 @@ const c = HolidayCalendar.of('US');
 c.importJson(JSON.stringify({
   region: 'US',
   days: [{date: '2027-12-24', name: '圣诞前夕', work: false}]
-}));</pre>
+}));
+
+<span class="c">// 反向导出为 iCalendar，可订阅或再解析</span>
+const ics = c.toIcs(2025);</pre>
   </section>
 
   <section id="page-check" class="doc hide">

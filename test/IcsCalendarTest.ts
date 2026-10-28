@@ -1,6 +1,6 @@
 import {suite, test} from '@testdeck/mocha';
-import {Event, IcsCalendar, IcsEvent} from '../lib';
-import {deepEqual, equal} from 'assert';
+import {Event, HolidayCalendar, IcsCalendar, IcsEvent} from '../lib';
+import {deepEqual, equal, ok} from 'assert';
 
 @suite
 class IcsCalendarTest {
@@ -62,6 +62,27 @@ class IcsCalendarTest {
 
     @test
     test3(): void {
+        const c: HolidayCalendar = HolidayCalendar.of('US');
+        const text: string = c.toIcs(2025);
+        equal(text.indexOf('BEGIN:VCALENDAR'), 0);
+        equal(text.indexOf('SUMMARY:元旦') > -1, true);
+        const parsed: IcsCalendar = IcsCalendar.parse(text);
+        equal(parsed.getEvents().length, 11);
+        equal(parsed.getEvents()[0].getName(), '元旦');
+        deepEqual(parsed.getOneOffDays().map((d) => d.toString()).slice(0, 1), ['2025年1月1日']);
+    }
+
+    @test
+    test4(): void {
+        // 导出与解析的转义往返
+        const c: HolidayCalendar = HolidayCalendar.of('CN');
+        c.importJson(JSON.stringify({days: [{date: '2025-05-02', name: '甲,乙;丙'}]}));
+        const parsed: IcsCalendar = IcsCalendar.parse(c.toIcs(2025));
+        ok(parsed.getEvents().some((e) => e.getName() === '甲,乙;丙'));
+    }
+
+    @test
+    test5(): void {
         // 折行处理
         const text: string = ['BEGIN:VEVENT', 'SUMMARY:很长的事件名', 'DTS', ' TART:20250701', 'RRULE:FREQ=YEARLY', 'END:VEVENT'].join('\r\n');
         const c: IcsCalendar = IcsCalendar.parse(text);

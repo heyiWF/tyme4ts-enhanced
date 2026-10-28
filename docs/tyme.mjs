@@ -10454,6 +10454,33 @@ class HolidayCalendar {
       }
     }
   }
+  /**
+   * 导出为 iCalendar 文本，可与 IcsCalendar 互相印证
+   */
+  toIcs(year, includeWork = false) {
+    const days = this.getDays(year, includeWork);
+    const l = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Tyme Enhanced//Almanac//" + this.region,
+      "CALSCALE:GREGORIAN"
+    ];
+    for (let i = 0; i < days.length; i++) {
+      const h = days[i];
+      const d = h.getDay();
+      const date = d.getYear() + (d.getMonth() < 10 ? "0" : "") + d.getMonth() + (d.getDay() < 10 ? "0" : "") + d.getDay();
+      l.push("BEGIN:VEVENT");
+      l.push("UID:" + date + "-" + this.region + "@tyme");
+      l.push("DTSTART;VALUE=DATE:" + date);
+      l.push("SUMMARY:" + HolidayCalendar.escape(h.getName()));
+      l.push("END:VEVENT");
+    }
+    l.push("END:VCALENDAR");
+    return l.join("\r\n") + "\r\n";
+  }
+  static escape(text) {
+    return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  }
   getHoliday(solarDay) {
     const days = this.getDays(solarDay.getYear(), true);
     const key = HolidayCalendar.getKey(solarDay);
@@ -10670,14 +10697,20 @@ class IcsCalendar {
   }
   static build(fields) {
     return new IcsEvent(
-      fields["SUMMARY"] || "",
+      IcsCalendar.unescape(fields["SUMMARY"] || ""),
       IcsCalendar.parseDate(fields["DTSTART"]),
       fields["DTEND"] ? IcsCalendar.parseDate(fields["DTEND"]) : null,
       fields["RRULE"] || "",
       fields["UID"] || "",
-      fields["LOCATION"] || "",
-      fields["DESCRIPTION"] || ""
+      IcsCalendar.unescape(fields["LOCATION"] || ""),
+      IcsCalendar.unescape(fields["DESCRIPTION"] || "")
     );
+  }
+  /**
+   * 还原 iCalendar 文本转义
+   */
+  static unescape(text) {
+    return text.replace(/\\n/gi, "\n").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\");
   }
   static parseDate(value) {
     const s = value.replace(/[^0-9]/g, "");
