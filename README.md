@@ -8,7 +8,7 @@
 
 零运行时依赖，单文件产物，全部数据以整数与字符串编码——便于逐行移植到 Kotlin、Swift、Go、Rust、Python。
 
-> 在线演示与文档：[docs/index.html](./docs/index.html)（本地直接打开即可，全部计算在浏览器完成）
+> 在线演示与文档：[docs/index.html](./docs/index.html)（黄历 / 字段 / 地区 / 校验 / 数据，本地直接打开即可，全部计算在浏览器完成）
 
 ---
 

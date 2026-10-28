@@ -7296,7 +7296,7 @@ export class DayAlmanac {
      * 民俗节日
      */
     getFolkFestivals(): FolkFestival {
-        return FolkFestival.of(this.solarDay);
+        return FolkFestival.of(this.solarDay, this.getLunarDay());
     }
 
     /**
@@ -8321,6 +8321,11 @@ export enum HolidayType {
  * 起止年份用于处理古今异名、异地异日之节日。
  */
 export class HolidayRule extends AbstractCulture {
+    /**
+     * 干支纪日基准：2000-01-07 为甲子日
+     */
+    protected static EPOCH: SolarDay = SolarDay.fromYmd(2000, 1, 7);
+
     protected type: HolidayType;
     protected name: string;
     protected month: number;
@@ -8466,7 +8471,8 @@ export class HolidayRule extends AbstractCulture {
                 return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
             case HolidayType.TERM_STEM: {
                 const start: SolarDay = HolidayRule.getTermDay(year, this.termIndex);
-                const stem: number = start.getLunarDay().getSixtyCycle().getHeavenStem().getIndex();
+                // 干支纪日与农历无关，直接按距甲子日的天数推算，避免农历换算
+                const stem: number = SixtyCycle.fromIndex(start.subtract(HolidayRule.EPOCH)).getHeavenStem().getIndex();
                 // 「立春后第五个戊日」不含节气当日，故同日须再进十辰
                 let offset: number = (this.stemIndex - stem + 10) % 10;
                 if (offset === 0) {
@@ -9321,22 +9327,34 @@ export class FolkFestival extends AbstractCulture {
         this.names = names;
     }
 
-    static of(solarDay: SolarDay): FolkFestival {
+    static of(solarDay: SolarDay, lunarDay?: LunarDay): FolkFestival {
         const names: string[] = [];
-        const lunar: LunarDay = solarDay.getLunarDay();
+        const lunar: LunarDay = lunarDay || solarDay.getLunarDay();
         const year: number = solarDay.getYear();
         FolkFestival.append(names, FolkFestival.LUNAR[Math.abs(lunar.getMonth()) + '-' + lunar.getDay()]);
         FolkFestival.append(names, FolkFestival.SOLAR[solarDay.getMonth() + '-' + solarDay.getDay()]);
-        FolkFestival.appendByRules(names, FolkFestival.WEEK_RULES, solarDay, year);
-        FolkFestival.appendByRules(names, FolkFestival.TERM_RULES, solarDay, year);
-        FolkFestival.appendByRules(names, FolkFestival.TERM_STEM_RULES, solarDay, year);
+        FolkFestival.appendByRules(names, FolkFestival.WEEK_RULES, solarDay, year, 'w');
+        FolkFestival.appendByRules(names, FolkFestival.TERM_RULES, solarDay, year, 't');
+        FolkFestival.appendByRules(names, FolkFestival.TERM_STEM_RULES, solarDay, year, 's');
         return new FolkFestival(solarDay, names);
     }
 
-    protected static appendByRules(target: string[], rules: HolidayRule[], solarDay: SolarDay, year: number): void {
+    /**
+     * 规则日期按年缓存，值为「月-日」，避免逐日重复推算
+     */
+    protected static DATE_CACHE: { [key: string]: string } = {};
+
+    protected static appendByRules(target: string[], rules: HolidayRule[], solarDay: SolarDay, year: number, prefix: string): void {
+        const md: string = solarDay.getMonth() + '-' + solarDay.getDay();
         for (let i: number = 0; i < rules.length; i++) {
-            const d: SolarDay | null = rules[i].getDay(year);
-            if (d && d.equals(solarDay)) {
+            const key: string = prefix + i + '-' + year;
+            let value: string = FolkFestival.DATE_CACHE[key];
+            if (value === undefined) {
+                const d: SolarDay | null = rules[i].getDay(year);
+                value = d ? d.getMonth() + '-' + d.getDay() : '';
+                FolkFestival.DATE_CACHE[key] = value;
+            }
+            if (value === md) {
                 target.push(rules[i].getName());
             }
         }
