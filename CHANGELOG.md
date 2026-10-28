@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.6.0] - 2026-10-29
+
+以 tyme4ts 1.5.4 为基础的通胜扩展版。
+
+1. 新增：`DayAlmanac` 通胜日聚合，一次取齐宜忌、神煞、冲煞、胎神、方位、时辰、九宫、择日、神诞、号码、解梦、风水等栏目。
+2. 新增：`WuHouDay` 诸葛武侯出行择日（三元将军值日），依《玉匣记》「选择逐年出行图」。
+3. 新增：`Clash` 日冲煞，输出「冲猴(丙申)煞北」。
+4. 新增：`LifeRelation` 年命择日，含十神、互禄、进禄、贵人、六合、三合，对应通胜「日禄」「择日须知」。
+5. 新增：`HourFortune` 十二时辰吉凶，兼记贵人时、日禄时、六合时。
+6. 新增：`Palace`、`NineStarChart` 九宫飞星，洛书轨迹顺逆飞布。
+7. 新增：`ZodiacNumbers` 生肖号码（六合、三合、年肖三组）。
+8. 新增：`MonthGeneral` 十二月将，中气换将。
+9. 新增：`DeityFestival` 神明诞辰，录《玉匣记》三元五腊圣诞。
+10. 新增：`DreamOracle` 周公解梦，取维基文库公有领域本，二十七类九百八十八条。
+11. 新增：`FengShuiTip` 风水常识、`DailyNumbers` 吉数推演、`ZodiacFortune` 生肖流月运程。
+12. 新增：`ElementBalance`、`Naming` 出生取名，八字五行统计与喜用取字。
+13. 新增：`HolidayRule`、`HolidayCalendar` 多地区节假日，支持规则推算与逐年数据导入。
+14. 新增：`Era` 日本年号、佛历、民国、主体纪年。
+15. 新增：`IcsCalendar`、`IcsEvent` 解析 iCalendar，年度循环事件转换为 `Event`。
+16. 新增：`EarthBranch` 三合、三合五行、相刑、相破；`HeavenStem` 禄、天乙贵人、福神方位。
+17. 新增：`Sound.getElement()` 纳音五行、`HijriMonth.getEnglishName()` 拉丁月名、`Zodiac.getVietnameseName()` 越南生肖、`LegalHoliday.getDays()` 全量读取、`SolarDay.getMonthGeneral()`。
+18. 修复：庚日阳贵神应为丑（东北）、阴贵神应为未（西南），原表作南、东北，与《甲戊庚牛羊》及通行黄历不符。
+19. 优化：`DreamOracle` 数据以「分类:条目|条目」压缩存储，较对象结构减少约七成体积。
+
 ## [1.0.4] - 2024-02-20
 1. 童限计算支持自定义，增加元亨利贞的起运算法。
 2. 增加八字转公历时刻。

@@ -1,0 +1,279 @@
+# 移植指南
+
+本库刻意不使用 JavaScript 特有设施：没有 `Map`/`Set`、没有浮点累加、没有正则回溯依赖、没有本地化 API。全部逻辑由整数、字符串、数组与类组成，可直接照搬为 Kotlin / Swift / Go / Rust / Python。
+
+---
+
+## 一、类型对应
+
+| 本库 | Kotlin | Swift | Go | Python |
+| --- | --- | --- | --- | --- |
+| `number`（整数） | `Int` / `Long` | `Int` | `int` | `int` |
+| `string` | `String` | `String` | `string` | `str` |
+| `T[]` | `List<T>` | `[T]` | `[]T` | `list` |
+| `{ [k: string]: T }` | `Map<String, T>` | `[String: T]` | `map[string]T` | `dict` |
+| `enum` | `enum class` | `enum` | `const` + `iota` | `IntEnum` |
+| `class` + `static` | `object` / `companion object` | `static` | 包级函数 | `@staticmethod` |
+
+约定：所有「文化对象」（`HeavenStem`、`Duty`、`NineStar`…）都是**名称数组 + 索引**的循环结构，只需实现 `getName()` 与 `next(n)` 两个原语，其余皆为派生。
+
+---
+
+## 二、基础原语
+
+```
+LoopTyme(names[], index):
+    getName()  = names[index mod names.length]
+    getIndex() = index mod names.length      // 负数需补正
+    next(n)    = new LoopTyme(names, index + n)
+```
+
+`EarthBranch` 索引 0..11 即子..亥，`HeavenStem` 索引 0..9 即甲..癸，`Zodiac` 索引与地支同序（0 鼠）。
+
+---
+
+## 三、历法核心
+
+### 3.1 儒略日与公历互转
+
+```
+jd(y, m, d):
+    若 m <= 2: y -= 1; m += 12
+    a = floor(y / 100); b = 2 - a + floor(a / 4)      // 儒略历改格里历：1582-10-15 起
+    return floor(365.25 * (y + 4716)) + floor(30.6001 * (m + 1)) + d + b - 1524.5
+```
+
+1582-10-05 至 1582-10-14 不存在，构造时应抛错。
+
+### 3.2 日干支
+
+以 2000-01-07 为甲子日基准：
+
+```
+sixtyCycleIndex(solarDay) = daysBetween(solarDay, 2000-01-07) mod 60
+```
+
+### 3.3 节气（寿星天文历）
+
+```
+SolarTerm(year, index):                       // index 0=冬至, 1=小寒 … 23=大雪
+    jd   = floor((year - 2000) * 365.2422 + 180)
+    w    = floor((jd - 355 + 183) / 365.2422) * 365.2422 + 355
+    if calcQi(w) > jd: w -= 365.2422
+    cursory = calcQi(w + 15.2184 * index)     // 粗算
+    accurate = qiAccurate2(cursory)           // 精算（qiAccurate + ΔT）
+```
+
+`calcQi`、`saLonT`、`dtT` 等函数见源文件 `ShouXingUtil`，为许剑伟《寿星天文历》的移植，含 24 组摄动项与 ΔT 表，建议直接逐函数翻译，不要重写。
+
+注意：`index = 0` 的冬至属于**上一公历年**的 12 月，这是「节气年」与「公历年」的唯一错位点。
+
+### 3.4 朔与农历月
+
+```
+newMoon(lunarYear, monthIndexInYear):
+    dz = 冬至(lunarYear).cursoryJD
+    w  = calcShuo(dz); if w > dz: w -= 29.53
+    offset = 2; if 8 < year < 24: offset = 1
+               else if leapMonth(year - 1) > 10: offset = 3
+    return w + 29.5306 * (offset + monthIndexInYear)
+
+dayCount(month) = floor(calcShuo(newMoon + 29.5306) - calcShuo(newMoon))
+```
+
+闰月由「无中气置闰」判定，闰月表以 60 进制压缩存储于 `LunarYear.LEAP`（12 行，每行按年累计存储闰月序号）。
+
+---
+
+## 四、通胜栏目
+
+### 4.1 建除十二神
+
+```
+duty = Duty[(dayBranch - monthBranch + 12) mod 12]
+```
+
+### 4.2 二十八宿
+
+```
+base = [10, 18, 26, 6, 14, 22, 2][weekday]      // 0=周日
+star = TwentyEightStar[(base - 7 * dayBranch + 28 * k) mod 28]
+```
+
+### 4.3 黄黑道十二神
+
+```
+index = hourOrDayBranch + (8 - monthBranch mod 6) * 2      // 日家以月支，时家以日支
+ecliptic = [黄,黄,黑,黑,黄,黄,黑,黄,黑,黑,黄,黑][index mod 12]
+```
+
+### 4.4 日冲煞
+
+```
+clashing = SixtyCycle[(dayIndex - 6 + 60) mod 60]          // 天干退四、地支相冲
+ominous  = [南, 东, 北, 西][dayBranch mod 4]               // 申子辰煞南 …
+```
+
+### 4.5 旬空
+
+```
+voidStart = (10 + dayBranch - dayStem + 12) mod 12
+voids     = [voidStart, voidStart + 1]
+```
+
+### 4.6 九宫飞星
+
+```
+order = [4, 5, 6, 7, 8, 0, 1, 2, 3]        // 中、乾、兑、艮、离、坎、坤、震、巽
+starAt(order[k]) = center.next(forward ? k : -k)
+```
+
+`Palace` 索引 0..8 即坎、坤、震、巽、中、乾、兑、艮、离，洛书数 = 索引 + 1。
+
+### 4.7 诸葛武侯择日
+
+```
+yuan   = [上元, 中元, 下元][ (month mod 3 == 1) ? 0 : (month mod 3 == 2) ? 1 : 2 ]
+names  = 上元 6 神 / 中元 8 神 / 下元 8 神
+index  = (lunarDay - 1) mod names.length
+```
+
+上元：堂房 金库 金堂 顺阳 盗贼 宝仓
+中元：天盗 天门 天堂 天财 天贼 天阳 天侯 天仓
+下元：朱雀 白虎头 白虎胁 白虎足 玄武 青龙头 青龙胁 青龙足
+
+### 4.8 生肖号码
+
+```
+offset = (yearZodiac - zodiac + 12) mod 12
+numbers = [offset + 1, offset + 13, offset + 25, offset + 37, offset + 49]   // <= 49
+```
+
+以 2025 乙巳蛇年为例：蛇 01/13/25/37/49，猪 07/19/31/43。
+
+### 4.9 月将
+
+```
+t = 当日所处节气索引（0..23）
+index = 11 - floor(((t < 4 ? t + 24 : t) - 4) / 2)
+```
+
+`index` 即月将地支索引，名称表（按子..亥）：神后 大吉 功曹 太冲 天罡 太乙 胜光 小吉 传送 从魁 河魁 登明。
+
+### 4.10 年命择日
+
+```
+年命 = SixtyCycle[birthYear - 4]
+十神 = 年命天干.getTenStar(日干)             // 以年命为日主
+互禄 = 日干之禄 == 年命支
+进禄 = 年命干之禄 == 日支
+贵   = 年命支 ∈ 日干之天乙贵人
+六合 / 三合 = 年命支与日支的关系
+```
+
+禄：甲寅 乙卯 丙戊巳 丁己午 庚申 辛酉 壬亥 癸子。
+天乙贵人：甲戊庚丑未、乙己子申、丙丁亥酉、辛午寅、壬癸卯巳。
+
+### 4.11 天赦、四离、四绝
+
+```
+天赦：月支季组 [寅卯辰→戊寅, 巳午未→甲午, 申酉戌→戊申, 亥子丑→甲子] == 日干支
+四离：明日为二分二至（节气索引 mod 6 == 0）
+四绝：明日为四立（节气索引 mod 6 == 3）
+```
+
+### 4.12 复活节
+
+Anonymous Gregorian 算法：
+
+```
+a=y%19; b=y/100; c=y%100; d=b/4; e=b%4; f=(b+8)/25; g=(b-f+1)/3
+h=(19a+b-d-g+15)%30; i=c/4; k=c%4; l=(32+2e+2i-h-k)%7; m=(a+11h+22l)/451
+month=(h+l-7m+114)/31; day=((h+l-7m+114)%31)+1
+```
+
+### 4.13 纳音五行与河图数
+
+纳音名末字即五行；河图数按五行索引（木火土金水）：
+
+```
+pairs = [[3,8],[2,7],[5,10],[4,9],[1,6]]
+numbers = 1..49 中个位属于该组者（土含 10、20、30、40）
+```
+
+---
+
+## 五、数据表编码
+
+### 5.1 Event 九字符编码
+
+`Event` 用 9 个字符描述一个年度循环事件，字符表 `CHARS`（63 个）：
+
+```
+CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTU_VWXYZabcdefghijklmnopqrstuvwxyz"
+index of 'A' = 10, '_' = 31, 'V' = 32 … 'z' = 62
+```
+
+| 位置 | 含义 |
+| --- | --- |
+| 0 | 固定 `@` |
+| 1 | 类型：`0` 公历日、`1` 公历周、`2` 农历日、`3` 节气日、`4` 节气+天干、`5` 节气+地支 |
+| 2 | 月 / 节气索引 |
+| 3 | 日 / 第几个星期 / 天干或地支索引 |
+| 4 | 星期几 / 偏移 |
+| 5 | 偏移天数 |
+| 6..8 | 起始年，63 进制，低位在 8 |
+
+取值一律为 `CHARS.indexOf(ch) - 31`。
+
+### 5.2 神煞与宜忌
+
+`God.dayGods` 为 12 行（月支）字符串，每行以 `;` 分段，段首两位十六进制为日干支索引，其后每两位为一个神煞索引。
+
+`Taboo.dayTaboo` 为 12 行（月支），每行以 `;` 分段，段内 `,` 前为「宜」、后为「忌」，均为十六进制索引串。
+
+### 5.3 民俗数据
+
+`DeityFestival.DATA`：键为 `MMDD`（农历），值为条目数组。
+`DreamOracle.CATEGORY_DATA`：`分类:条目|条目|…`，共 27 类 988 条。
+`Naming.CHARS`：`字|五行|字义|性别`，性别 0 通用、1 男、2 女。
+
+---
+
+## 六、跨语言基准
+
+以下断言可直接作为移植后的回归测试（详见 `test/DayAlmanacTest.ts`）：
+
+| 断言 | 值 |
+| --- | --- |
+| `DayAlmanac(2025,4,3).getLunarDay()` | 农历乙巳年三月初六 |
+| 日干支 | 壬寅 |
+| 建除 | 闭 |
+| 值神 / 黄道 | 青龙 / 黄道 |
+| 二十八宿 | 角（蛟，吉） |
+| 冲煞 | 冲猴(丙申)煞北 |
+| 胎神 | 仓库炉 房内南 |
+| 日九星 | 九紫 |
+| 喜神 / 财神 / 福神 | 南 / 南 / 东南 |
+| 阳贵 / 阴贵 | 东 / 东南 |
+| 旬空 | 辰、巳 |
+| 武侯 | 下元 青龙头 吉 |
+| 六合号码 | 猪 07 19 31 43 |
+| 月将 | 河魁（戌） |
+| 宜 | 冠笄 立券 交易 修造 动土 安机械 入殓 安葬 破土 |
+| 忌 | 嫁娶 祈福 出火 入宅 |
+| 立春时刻（东八区） | 2025-02-03 22:10:28 |
+| 春分时刻 | 2025-03-20 17:01:29 |
+| 清明时刻 | 2025-04-04 20:48:36 |
+
+移植后若以上全部通过，即可认为历法与通胜核心一致。
+
+---
+
+## 七、注意事项
+
+1. **时区**：节气与朔望以北京时间（UTC+8）计算，`JulianDay` 已含 `+8/24` 修正；其他时区需自行平移。
+2. **年界**：年柱、月柱以**立春**为界，农历年以**正月初一**为界，二者不同，切勿混用。
+3. **闰月**：农历月以负数表示闰月（`-6` 即闰六月），所有按月循环的规则应使用绝对值。
+4. **节气年**：`SolarTerm(year, 0)` 为上一公历年的冬至，这是唯一的跨年错位，涉及「冬至」栏目时须特判。
+5. **精度**：`getSolarDay()` 用粗算值以保证性能，需要精确时刻时用 `getJulianDay().getSolarTime()`。

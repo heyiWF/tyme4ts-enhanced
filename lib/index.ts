@@ -998,6 +998,13 @@ export class Sound extends LoopTyme {
     next(n: number): Sound {
         return Sound.fromIndex(this.nextIndex(n));
     }
+
+    /**
+     * 纳音五行
+     */
+    getElement(): Element {
+        return Element.fromName(this.getName().charAt(this.getName().length - 1));
+    }
 }
 
 export class Taboo extends LoopTyme {
@@ -1161,6 +1168,13 @@ export class Zodiac extends LoopTyme {
     getEarthBranch(): EarthBranch {
         return EarthBranch.fromIndex(this.index);
     }
+
+    /**
+     * 越南生肖，以猫代兔
+     */
+    getVietnameseName(): string {
+        return ['鼠', '牛', '虎', '猫', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'][this.index];
+    }
 }
 
 export class EarthBranch extends LoopTyme {
@@ -1249,6 +1263,62 @@ export class EarthBranch extends LoopTyme {
     combine(target: EarthBranch): Element | null {
         return this.getCombine().equals(target) ? Element.fromIndex([2, 2, 0, 1, 3, 4, 2, 2, 4, 3, 1, 0][this.index]) : null;
     }
+
+    /**
+     * 三合：申子辰、巳酉丑、寅午戌、亥卯未
+     *
+     * 返回本支之外的另一支
+     */
+    getTriangle(): EarthBranch[] {
+        const start: number = [8, 5, 2, 11][this.index % 4];
+        const l: EarthBranch[] = [];
+        for (let i: number = 0; i < 3; i++) {
+            const branch: EarthBranch = EarthBranch.fromIndex(start + i * 4);
+            if (branch.getIndex() !== this.index) {
+                l.push(branch);
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 三合局五行：申子辰水、巳酉丑金、寅午戌火、亥卯未木
+     */
+    getTriangleElement(): Element {
+        return Element.fromIndex([4, 3, 1, 0][this.index % 4]);
+    }
+
+    /**
+     * 相刑：子卯相刑，寅巳申、丑戌未三刑，辰午酉亥自刑
+     *
+     * 返回与本支相刑的所有地支，自刑返回自身
+     */
+    getPunishments(): EarthBranch[] {
+        const table: number[] = [3, 10, 5, 0, 4, 8, 6, 1, 2, 9, 7, 11];
+        const target: number = table[this.index];
+        const l: EarthBranch[] = [];
+        if (target === this.index) {
+            l.push(this);
+            return l;
+        }
+        l.push(EarthBranch.fromIndex(target));
+        for (let i: number = 0; i < 12; i++) {
+            if (table[i] === this.index) {
+                if (i !== target) {
+                    l.push(EarthBranch.fromIndex(i));
+                }
+                break;
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 相破：子酉、丑辰、寅亥、卯午、巳申、未戌
+     */
+    getDestruction(): EarthBranch {
+        return EarthBranch.fromIndex([9, 4, 11, 6, 1, 8, 3, 10, 5, 0, 7, 2][this.index]);
+    }
 }
 
 export class HeavenStem extends LoopTyme {
@@ -1296,11 +1366,11 @@ export class HeavenStem extends LoopTyme {
     }
 
     getYangDirection(): Direction {
-        return Direction.fromIndex([1, 1, 6, 5, 7, 0, 8, 7, 2, 3][this.index]);
+        return Direction.fromIndex([1, 1, 6, 5, 7, 0, 7, 7, 2, 3][this.index]);
     }
 
     getYinDirection(): Direction {
-        return Direction.fromIndex([7, 0, 5, 6, 1, 1, 7, 8, 3, 2][this.index]);
+        return Direction.fromIndex([7, 0, 5, 6, 1, 1, 1, 8, 3, 2][this.index]);
     }
 
     getWealthDirection(): Direction {
@@ -1309,6 +1379,32 @@ export class HeavenStem extends LoopTyme {
 
     getMascotDirection(): Direction {
         return Direction.fromIndex([3, 3, 2, 2, 0, 8, 1, 1, 5, 6][this.index]);
+    }
+
+    /**
+     * 福神方位：甲己正北、乙庚西南、丙辛西北、丁壬东南、戊癸东北
+     */
+    getFortuneDirection(): Direction {
+        return Direction.fromIndex([0, 1, 5, 3, 7][this.index % 5]);
+    }
+
+    /**
+     * 禄：甲禄在寅、乙禄在卯、丙戊禄在巳、丁己禄在午、庚禄在申、辛禄在酉、壬禄在亥、癸禄在子
+     */
+    getProsperity(): EarthBranch {
+        return EarthBranch.fromIndex([2, 3, 5, 6, 5, 6, 8, 9, 11, 0][this.index]);
+    }
+
+    /**
+     * 天乙贵人：甲戊庚牛羊、乙己鼠猴乡、丙丁猪鸡位、壬癸兔蛇藏、六辛逢马虎
+     */
+    getNoble(): EarthBranch[] {
+        const l: EarthBranch[] = [];
+        const data: number[][] = [[1, 7], [0, 8], [11, 9], [11, 9], [1, 7], [0, 8], [1, 7], [6, 2], [3, 5], [3, 5]];
+        for (let i: number = 0; i < 2; i++) {
+            l.push(EarthBranch.fromIndex(data[this.index][i]));
+        }
+        return l;
     }
 
     getPengZuHeavenStem(): PengZuHeavenStem {
@@ -2635,14 +2731,28 @@ export class SixtyCycleDay extends AbstractTyme {
 }
 
 export class SixtyCycleHour extends AbstractTyme {
+    protected static SPRING_CACHE: { [year: number]: SolarTime } = {};
+
     protected solarTime: SolarTime;
     protected day: SixtyCycleDay;
     protected hour: SixtyCycle;
 
+    /**
+     * 立春时刻，按年缓存，避免逐时重复精算
+     */
+    protected static getSpringSolarTime(year: number): SolarTime {
+        let t: SolarTime = SixtyCycleHour.SPRING_CACHE[year];
+        if (!t) {
+            t = SolarTerm.fromIndex(year, 3).getJulianDay().getSolarTime();
+            SixtyCycleHour.SPRING_CACHE[year] = t;
+        }
+        return t;
+    }
+
     constructor(solarTime: SolarTime) {
         super();
         const solarYear: number = solarTime.getYear();
-        const springSolarTime: SolarTime = SolarTerm.fromIndex(solarYear, 3).getJulianDay().getSolarTime();
+        const springSolarTime: SolarTime = SixtyCycleHour.getSpringSolarTime(solarYear);
         const lunarHour: LunarHour = solarTime.getLunarHour();
         const lunarDay: LunarDay = lunarHour.getLunarDay();
         let lunarYear: LunarYear = lunarDay.getLunarMonth().getLunarYear();
@@ -2658,7 +2768,7 @@ export class SixtyCycleHour extends AbstractTyme {
 
         const term: SolarTerm = solarTime.getTerm();
         let index: number = term.getIndex() - 3;
-        if (index < 0 && term.getJulianDay().getSolarTime().isAfter(SolarTerm.fromIndex(solarYear, 3).getJulianDay().getSolarTime())) {
+        if (index < 0 && term.getJulianDay().getSolarTime().isAfter(springSolarTime)) {
             index += 24;
         }
         const d: SixtyCycle = lunarDay.getSixtyCycle();
@@ -4357,6 +4467,13 @@ export class SolarDay extends AbstractDay {
         return NineStar.fromIndex(this.isBefore(n) ? n.subtract(this) - 1 : this.subtract(n));
     }
 
+    /**
+     * 月将
+     */
+    getMonthGeneral(): MonthGeneral {
+        return MonthGeneral.fromSolarDay(this);
+    }
+
     getHijriDay(): HijriDay {
         let d: number = this.subtract(new SolarDay(622, 7, 16));
         const z: number = Math.floor(d / 10631);
@@ -4478,6 +4595,24 @@ export class LegalHoliday extends AbstractTyme {
         this.day = SolarDay.fromYmd(year, month, day);
         this.work = data.charCodeAt(8) === 48;
         this.name = LegalHoliday.NAMES[data.charCodeAt(9) - 48];
+    }
+
+    /**
+     * 法定节假日，可限定年份
+     */
+    static getDays(year?: number): LegalHoliday[] {
+        const l: LegalHoliday[] = [];
+        const reg: RegExp = new RegExp('\\d{8}[0-1][0-8][+|-]\\d{2}', 'g');
+        let matcher: RegExpExecArray | null;
+        while (matcher = reg.exec(LegalHoliday.DATA)) {
+            const d: string = matcher[0];
+            const y: number = parseInt(d.substring(0, 4), 10);
+            if (year !== undefined && y !== year) {
+                continue;
+            }
+            l.push(new LegalHoliday(y, parseInt(d.substring(4, 6), 10), parseInt(d.substring(6, 8), 10), d));
+        }
+        return l;
     }
 
     static fromYmd(year: number, month: number, day: number): LegalHoliday | null {
@@ -5776,6 +5911,14 @@ export class HijriMonth extends AbstractMonth {
         return HijriMonth.NAMES[this.getIndexInYear()];
     }
 
+    /**
+     * 拉丁字母月名，如 Shawwal
+     */
+    getEnglishName(): string {
+        return ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Ula', 'Jumada al-Akhirah',
+            'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'][this.getIndexInYear()];
+    }
+
     next(n: number): HijriMonth {
         const i: number = this.month - 1 + n;
         return HijriMonth.fromYm(~~((this.year * 12 + i) / 12), this.indexOf(i, 12) + 1);
@@ -6172,5 +6315,2645 @@ export class EventManager {
 
     static update(name: string, e: Event): void {
         EventManager.saveOrUpdate(name, e.getData() + (e.getName() ? e.getName() : name));
+    }
+}
+
+
+/**
+ * 建除十二神宜忌
+ *
+ * 十二建除为月建与日辰的相对关系，其宜忌取自《协纪辨方书》及通行通书的定性解释。
+ * 各流派对细目互有出入，此处给出「宜/忌关键词 + 定性描述」两套表述，便于按需取用。
+ */
+export class DutyAdvice extends AbstractCulture {
+    protected duty: Duty;
+
+    protected static RECOMMENDS: string[] = [
+        '出行、上任、会友、上书、见工',
+        '除服、疗病、扫舍、出行、嫁娶',
+        '祭祀、祈福、结亲、开市、立券',
+        '修造、涂泥、平治道涂、嫁娶',
+        '祭祀、祈福、嫁娶、造屋、安床',
+        '祈福、祭祀、捕捉、纳畜、造屋',
+        '破屋坏垣、求医治病',
+        '祭祀、安床、拆卸',
+        '开市、嫁娶、入宅、入学、上任',
+        '纳财、收账、进人口、纳畜、捕捉',
+        '开市、出行、嫁娶、入学、上任',
+        '筑堤、补垣、修屋、埋穴',
+    ];
+
+    protected static AVOIDS: string[] = [
+        '动土、开仓、出货财、安葬',
+        '求官、上任、开市、搬家',
+        '服药、栽种、安葬、赴任',
+        '开渠、栽种、针灸',
+        '诉讼、出行、交涉',
+        '搬家、开市、出行、开仓',
+        '嫁娶、开市、动土、签约',
+        '登高、行船、远行',
+        '诉讼、破土',
+        '开市、出行、安葬',
+        '安葬、破土',
+        '开市、出行、就医、上任',
+    ];
+
+    protected static DESCRIPTIONS: string[] = [
+        '建为一月之主，诸事可为，惟不宜动土修造。',
+        '除旧布新，大吉，少有不宜之事。',
+        '只宜祭祀祈愿，忌上任、嫁娶，余事不利。',
+        '平治道涂，万事平常，无大吉亦无大凶。',
+        '宜宴饮、协议，忌医疗、诉讼及出师。',
+        '宜新建、种莳、捕捉，忌移居、出行、开市。',
+        '万事不利，只宜破垣坏屋。',
+        '万事皆凶，惟宜安床、祭祀。',
+        '宜开业、入学、嫁娶、上任，不利诉讼。',
+        '宜收获、纳财，忌出行、葬礼。',
+        '百事皆吉，惟破土安葬则凶。',
+        '万事皆凶，惟修筑堤防之类则吉。',
+    ];
+
+    protected constructor(duty: Duty) {
+        super();
+        this.duty = duty;
+    }
+
+    static fromDuty(duty: Duty): DutyAdvice {
+        return new DutyAdvice(duty);
+    }
+
+    getDuty(): Duty {
+        return this.duty;
+    }
+
+    getName(): string {
+        return this.duty.getName();
+    }
+
+    /**
+     * 宜
+     */
+    getRecommends(): string {
+        return DutyAdvice.RECOMMENDS[this.duty.getIndex()];
+    }
+
+    /**
+     * 忌
+     */
+    getAvoids(): string {
+        return DutyAdvice.AVOIDS[this.duty.getIndex()];
+    }
+
+    /**
+     * 定性描述
+     */
+    getDescription(): string {
+        return DutyAdvice.DESCRIPTIONS[this.duty.getIndex()];
+    }
+}
+
+/**
+ * 日冲煞
+ *
+ * 冲，指与本日地支相冲的干支，于六十甲子中向前推六位（天干退四、地支相冲），
+ * 如壬寅日冲丙申；煞，指该日所煞之方，申子辰日煞南、巳酉丑日煞东、寅午戌日煞北、亥卯未日煞西。
+ */
+export class Clash extends AbstractCulture {
+    protected day: SixtyCycle;
+
+    protected constructor(day: SixtyCycle) {
+        super();
+        this.day = day;
+    }
+
+    static fromSixtyCycle(day: SixtyCycle): Clash {
+        return new Clash(day);
+    }
+
+    getSixtyCycle(): SixtyCycle {
+        return this.day;
+    }
+
+    /**
+     * 所冲干支
+     */
+    getClashingSixtyCycle(): SixtyCycle {
+        return this.day.next(-6);
+    }
+
+    /**
+     * 所冲生肖
+     */
+    getZodiac(): Zodiac {
+        return this.getClashingSixtyCycle().getEarthBranch().getZodiac();
+    }
+
+    /**
+     * 煞方
+     */
+    getDirection(): Direction {
+        return this.day.getEarthBranch().getOminous();
+    }
+
+    getName(): string {
+        return `冲${this.getZodiac().getName()}`;
+    }
+
+    toString(): string {
+        return `${this.getName()}(${this.getClashingSixtyCycle().getName()})煞${this.getDirection().getName()}`;
+    }
+}
+
+/**
+ * 诸葛武侯出行择日（三元将军值日）
+ *
+ * 以农历月份分三元：四孟月（正、四、七、十月）为上元，四仲月（二、五、八、十一月）为中元，
+ * 四季月（三、六、九、十二月）为下元；再以农历日序在本元内循环取神煞。
+ * 上元六神循环，中元、下元各八神循环。
+ *
+ * 规则出自《玉匣记》所载「诸葛武侯选择逐年出行图」，与常见港台通胜一致。
+ * 例：2025-04-03 为农历三月初六，属下元，初六为青龙头。
+ */
+export class WuHouDay extends AbstractCulture {
+    static TANG: string[] = ['堂房', '金库', '金堂', '顺阳', '盗贼', '宝仓'];
+    static ZHONG: string[] = ['天盗', '天门', '天堂', '天财', '天贼', '天阳', '天侯', '天仓'];
+    static XIA: string[] = ['朱雀', '白虎头', '白虎胁', '白虎足', '玄武', '青龙头', '青龙胁', '青龙足'];
+
+    protected static NAMES: string[][] = [WuHouDay.TANG, WuHouDay.ZHONG, WuHouDay.XIA];
+
+    protected static DESCRIPTIONS: string[][] = [
+        [
+            '神道不在宅中，求财称意，贵人得遇，大吉。',
+            '车马不成，求财反失，路逢盗贼，大有失误，大凶。',
+            '贵人相遇，财利通达，词讼有理，大吉。',
+            '去处通达，好人相逢，求财得意，争讼有理。',
+            '百事不利，枷锁临身，人亡财散，宜回避，不可用。',
+            '利见大人，求财遂心，百事如意，衣锦还乡，大吉。',
+        ],
+        [
+            '求财不成，纵有主失脱，官事无理，大凶。',
+            '凡事遂心，所求和合，去处通达，大吉。',
+            '所求顺遂，贵人接引，买卖亨通，诸事如意，大吉。',
+            '最宜求财，必定通利，好人相逢，百事和顺，大吉。',
+            '求财不成，纵有主失脱，官事无理，大凶。',
+            '求财得财，求婚得婚，大吉。',
+            '吉少凶多，主有口舌是非，血光之灾，大凶。',
+            '见官得喜，财源丰盈，凡事顺利，大吉。',
+        ],
+        [
+            '求财不得，主反失财，见官无理，大凶。',
+            '主宜远行，求财必得，去处通达，大吉。',
+            '求财如意，东西任行，南北利往，好人相逢，大吉。',
+            '不宜远行，作事不成，求财不利，大凶。',
+            '主招口舌，百事不利，不可用之，大凶。',
+            '宜鸡鸣时或卯时出门，求财通达，百事大吉。',
+            '求财遂心，凡事满意，东西南北任行，大吉。',
+            '求财不得，见官没理，凡事不吉，不宜用，凶。',
+        ],
+    ];
+
+    protected static LUCK: number[][] = [
+        [0, 1, 0, 0, 1, 0],
+        [1, 0, 0, 0, 1, 0, 1, 0],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+    ];
+
+    protected lunarDay: LunarDay;
+    protected yuan: Sixty;
+    protected index: number;
+
+    protected constructor(lunarDay: LunarDay, yuan: Sixty, index: number) {
+        super();
+        this.lunarDay = lunarDay;
+        this.yuan = yuan;
+        this.index = index;
+    }
+
+    static fromLunarDay(lunarDay: LunarDay): WuHouDay {
+        // 农历月除以三的余数：一为孟、二为仲、零为季
+        const remainder: number = Math.abs(lunarDay.getMonth()) % 3;
+        const yuan: number = remainder === 0 ? 2 : remainder - 1;
+        const size: number = WuHouDay.NAMES[yuan].length;
+        return new WuHouDay(lunarDay, Sixty.fromIndex(yuan), (lunarDay.getDay() - 1) % size);
+    }
+
+    getLunarDay(): LunarDay {
+        return this.lunarDay;
+    }
+
+    /**
+     * 三元：上元、中元、下元
+     */
+    getYuan(): Sixty {
+        return this.yuan;
+    }
+
+    /**
+     * 在本元内的序号（0起）
+     */
+    getIndex(): number {
+        return this.index;
+    }
+
+    getName(): string {
+        return WuHouDay.NAMES[this.yuan.getIndex()][this.index];
+    }
+
+    getLuck(): Luck {
+        return Luck.fromIndex(WuHouDay.LUCK[this.yuan.getIndex()][this.index]);
+    }
+
+    getDescription(): string {
+        return WuHouDay.DESCRIPTIONS[this.yuan.getIndex()][this.index];
+    }
+
+    toString(): string {
+        return this.getName();
+    }
+}
+
+/**
+ * 月将（十二月将）
+ *
+ * 以太阳过宫为序，中气换将：雨水后登明（亥）、春分后河魁（戌）、谷雨后从魁（酉）、
+ * 小满后传送（申）、夏至后小吉（未）、大暑后胜光（午）、处暑后太乙（巳）、
+ * 秋分后天罡（辰）、霜降后太冲（卯）、小雪后功曹（寅）、冬至后大吉（丑）、大寒后神后（子）。
+ */
+export class MonthGeneral extends LoopTyme {
+    static NAMES: string[] = ['神后', '大吉', '功曹', '太冲', '天罡', '太乙', '胜光', '小吉', '传送', '从魁', '河魁', '登明'];
+
+    protected constructor(indexOrName: number | string) {
+        super(MonthGeneral.NAMES, indexOrName);
+    }
+
+    static fromIndex(index: number | string): MonthGeneral {
+        return new MonthGeneral(MonthGeneral.numeric(index, 'month general index'));
+    }
+
+    static fromName(name: string): MonthGeneral {
+        return new MonthGeneral(name);
+    }
+
+    static fromSolarDay(solarDay: SolarDay): MonthGeneral {
+        const termIndex: number = solarDay.getTerm().getIndex();
+        return MonthGeneral.fromIndex(11 - ~~(((termIndex < 4 ? termIndex + 24 : termIndex) - 4) / 2));
+    }
+
+    next(n: number): MonthGeneral {
+        return MonthGeneral.fromIndex(this.nextIndex(n));
+    }
+
+    /**
+     * 月将地支
+     */
+    getEarthBranch(): EarthBranch {
+        return EarthBranch.fromIndex(this.index);
+    }
+
+    /**
+     * 起始中气在当年的索引（0 为冬至）
+     */
+    getStartTermIndex(): number {
+        return (4 + (11 - this.index) * 2) % 24;
+    }
+
+    toString(): string {
+        return `${this.getName()}（${this.getEarthBranch().getName()}）`;
+    }
+}
+
+/**
+ * 九宫（洛书宫位）
+ *
+ * 顺序即洛书数：坎一、坤二、震三、巽四、中五、乾六、兑七、艮八、离九。
+ */
+export class Palace extends LoopTyme {
+    static NAMES: string[] = ['坎', '坤', '震', '巽', '中', '乾', '兑', '艮', '离'];
+
+    protected constructor(indexOrName: number | string) {
+        super(Palace.NAMES, indexOrName);
+    }
+
+    static fromIndex(index: number | string): Palace {
+        return new Palace(Palace.numeric(index, 'palace index'));
+    }
+
+    static fromName(name: string): Palace {
+        return new Palace(name);
+    }
+
+    next(n: number): Palace {
+        return Palace.fromIndex(this.nextIndex(n));
+    }
+
+    /**
+     * 洛书数
+     */
+    getNumber(): number {
+        return this.index + 1;
+    }
+
+    getDirection(): Direction {
+        return Direction.fromIndex(this.index);
+    }
+
+    getElement(): Element {
+        return Element.fromIndex([4, 2, 0, 0, 2, 3, 3, 2, 1][this.index]);
+    }
+
+    toString(): string {
+        return this.getName() + this.getNumber();
+    }
+}
+
+/**
+ * 九宫飞星盘
+ *
+ * 以入中之星为起点，按洛书轨迹（中、乾、兑、艮、离、坎、坤、震、巽）顺飞或逆飞布九宫。
+ */
+export class NineStarChart {
+    protected static ORDER: number[] = [4, 5, 6, 7, 8, 0, 1, 2, 3];
+
+    protected center: NineStar;
+    protected forward: boolean;
+
+    protected constructor(center: NineStar, forward: boolean) {
+        this.center = center;
+        this.forward = forward;
+    }
+
+    /**
+     * @param center 入中之星
+     * @param forward 是否顺飞，默认顺飞
+     */
+    static fromCenter(center: NineStar, forward: boolean = true): NineStarChart {
+        return new NineStarChart(center, forward);
+    }
+
+    getCenterStar(): NineStar {
+        return this.center;
+    }
+
+    isForward(): boolean {
+        return this.forward;
+    }
+
+    /**
+     * 指定宫位所飞之星
+     */
+    getStar(palace: Palace): NineStar {
+        const i: number = NineStarChart.ORDER.indexOf(palace.getIndex());
+        return this.center.next(this.forward ? i : -i);
+    }
+
+    /**
+     * 星所在之宫
+     */
+    getPalace(star: NineStar): Palace {
+        for (let i: number = 0; i < 9; i++) {
+            if (this.getStar(Palace.fromIndex(i)).getIndex() === star.getIndex()) {
+                return Palace.fromIndex(i);
+            }
+        }
+        throw new Error(`illegal nine star: ${star}`);
+    }
+
+    /**
+     * 九宫之星，按坎一至离九排列
+     */
+    getStars(): NineStar[] {
+        const l: NineStar[] = [];
+        for (let i: number = 0; i < 9; i++) {
+            l.push(this.getStar(Palace.fromIndex(i)));
+        }
+        return l;
+    }
+
+    /**
+     * 三行九宫格，自左上起为巽四、离九、坤二
+     */
+    toString(): string {
+        const rows: number[][] = [[3, 8, 1], [2, 4, 6], [7, 0, 5]];
+        const lines: string[] = [];
+        for (let i: number = 0; i < 3; i++) {
+            const cells: string[] = [];
+            for (let j: number = 0; j < 3; j++) {
+                const star: NineStar = this.getStar(Palace.fromIndex(rows[i][j]));
+                cells.push(star.getName() + star.getColor());
+            }
+            lines.push(cells.join(' '));
+        }
+        return lines.join('\n');
+    }
+}
+
+/**
+ * 生肖号码
+ *
+ * 港澳通胜的常见栏目：以当年农历年肖为首，将 01 至 49 每十二个号码分为一组，
+ * 组内按地支倒序分配。以 2025 乙巳蛇年为例，蛇为 01、13、25、37、49，猪为 07、19、31、43。
+ */
+export class ZodiacNumbers extends AbstractCulture {
+    protected lunarYear: number;
+    protected zodiac: Zodiac;
+
+    protected constructor(lunarYear: number, zodiac: Zodiac) {
+        super();
+        this.lunarYear = lunarYear;
+        this.zodiac = zodiac;
+    }
+
+    /**
+     * 当年十二生肖的号码，自年肖起依次排列
+     */
+    static fromLunarYear(lunarYear: number): ZodiacNumbers[] {
+        const yearZodiac: Zodiac = LunarYear.fromYear(lunarYear).getSixtyCycle().getEarthBranch().getZodiac();
+        const l: ZodiacNumbers[] = [];
+        for (let i: number = 0; i < 12; i++) {
+            l.push(new ZodiacNumbers(lunarYear, yearZodiac.next(-i)));
+        }
+        return l;
+    }
+
+    /**
+     * 农历日所在年肖的号码
+     */
+    static fromLunarDay(lunarDay: LunarDay): ZodiacNumbers {
+        const yearZodiac: Zodiac = lunarDay.getLunarMonth().getLunarYear().getSixtyCycle().getEarthBranch().getZodiac();
+        return new ZodiacNumbers(lunarDay.getYear(), yearZodiac);
+    }
+
+    /**
+     * 指定农历年与生肖
+     */
+    static of(lunarYear: number, zodiac: Zodiac): ZodiacNumbers {
+        return new ZodiacNumbers(lunarYear, zodiac);
+    }
+
+    getLunarYear(): number {
+        return this.lunarYear;
+    }
+
+    getZodiac(): Zodiac {
+        return this.zodiac;
+    }
+
+    getNumbers(): number[] {
+        const yearZodiac: Zodiac = LunarYear.fromYear(this.lunarYear).getSixtyCycle().getEarthBranch().getZodiac();
+        const offset: number = this.indexOf(yearZodiac.getIndex() - this.zodiac.getIndex(), 12);
+        const l: number[] = [];
+        for (let i: number = offset + 1; i <= 49; i += 12) {
+            l.push(i);
+        }
+        return l;
+    }
+
+    getName(): string {
+        return this.zodiac.getName();
+    }
+
+    toString(): string {
+        const numbers: string[] = [];
+        const l: number[] = this.getNumbers();
+        for (let i: number = 0; i < l.length; i++) {
+            numbers.push((l[i] < 10 ? '0' : '') + l[i]);
+        }
+        return `${this.getName()} ${numbers.join(' ')}`;
+    }
+}
+
+/**
+ * 神明诞辰
+ *
+ * 数据为《玉匣记》所载「三元五腊圣诞」与「十殿阎君圣诞」中固定于农历月日的条目，
+ * 转录自 nihaixia-app（Apache-2.0）整理的维基文库本，闰月不过节。
+ */
+export class DeityFestival extends AbstractCulture {
+    protected month: number;
+    protected day: number;
+    protected names: string[];
+
+    protected constructor(month: number, day: number, names: string[]) {
+        super();
+        this.month = month;
+        this.day = day;
+        this.names = names;
+    }
+
+    static fromLunarMonthDay(month: number, day: number): DeityFestival | null {
+        const key: string = (month < 10 ? '0' : '') + month + (day < 10 ? '0' : '') + day;
+        const names: string[] | undefined = DeityFestival.DATA[key];
+        return names ? new DeityFestival(month, day, names) : null;
+    }
+
+    static fromLunarDay(lunarDay: LunarDay): DeityFestival | null {
+        return DeityFestival.fromLunarMonthDay(Math.abs(lunarDay.getMonth()), lunarDay.getDay());
+    }
+
+    getMonth(): number {
+        return this.month;
+    }
+
+    getDay(): number {
+        return this.day;
+    }
+
+    getNames(): string[] {
+        return this.names;
+    }
+
+    getName(): string {
+        return this.names.join('、');
+    }
+
+    toString(): string {
+        return `${LunarMonth.NAMES[this.month - 1]}${LunarDay.NAMES[this.day - 1]} ${this.getName()}`;
+    }
+
+    protected static DATA: { [key: string]: string[] } = {
+        '0101': ['天腊之辰·弥勒佛圣诞'],
+        '0103': ['孙真人、郝真人圣诞'],
+        '0106': ['走光佛圣诞'],
+        '0108': ['江东神圣诞', '显大神通降魔（斋期）', '五殿阎罗天子圣诞'],
+        '0109': ['玉皇上帝圣诞', '显大神通降魔（斋期）'],
+        '0110': ['显大神通降魔（斋期）'],
+        '0111': ['显大神通降魔（斋期）'],
+        '0112': ['显大神通降魔（斋期）'],
+        '0113': ['刘猛将军圣诞', '显大神通降魔（斋期）'],
+        '0114': ['显大神通降魔（斋期）'],
+        '0115': ['上元节·上元天官等圣诞', '显大神通降魔（斋期）'],
+        '0119': ['长春邱真人（丘处机）等圣诞'],
+        '0201': ['太阳升殿之辰·勾陈、刘真人圣诞', '一殿秦广王圣诞'],
+        '0202': ['土地正神圣诞'],
+        '0203': ['文昌梓潼帝君圣诞'],
+        '0204': ['曹大将军圣诞'],
+        '0205': ['东华帝君圣诞'],
+        '0208': ['张大帝、昌福真君圣诞', '三殿宋帝王圣诞'],
+        '0213': ['葛真君圣诞'],
+        '0215': ['太上老君等圣诞'],
+        '0217': ['东方杜将军圣诞'],
+        '0218': ['四殿五官王圣诞'],
+        '0219': ['观音菩萨圣诞'],
+        '0221': ['普贤菩萨、水母圣诞'],
+        '0225': ['玄天圣父明真帝圣诞'],
+        '0301': ['二殿楚江王圣诞'],
+        '0303': ['北极真武玄天上帝圣诞'],
+        '0306': ['眼光娘娘等圣诞'],
+        '0308': ['六殿卞城王圣诞'],
+        '0312': ['中央五道圣诞'],
+        '0315': ['昊天大帝等圣诞'],
+        '0316': ['准提菩萨、山神圣诞'],
+        '0318': ['后土娘娘等圣诞'],
+        '0320': ['子孙娘娘圣诞'],
+        '0323': ['天妃娘娘（妈祖）圣诞'],
+        '0327': ['七殿泰山王圣诞'],
+        '0328': ['东岳大帝等圣诞'],
+        '0401': ['萧公圣诞', '八殿都市王圣诞'],
+        '0404': ['文殊菩萨、狄梁公圣诞'],
+        '0408': ['浴佛节·释迦文佛圣诞', '九殿平等王圣诞'],
+        '0413': ['天尹真人等圣诞'],
+        '0414': ['吕纯阳祖师（吕洞宾）等圣诞'],
+        '0415': ['钟离祖师圣诞'],
+        '0417': ['十殿转轮王圣诞'],
+        '0418': ['紫微大帝等圣诞'],
+        '0420': ['眼光圣母娘娘圣诞'],
+        '0426': ['钟山蒋公圣诞'],
+        '0428': ['药王（孙思邈）圣诞'],
+        '0501': ['南极长生大帝圣诞'],
+        '0505': ['地腊之辰、端午节·地祗温元帅等圣诞'],
+        '0507': ['朱太尉圣诞'],
+        '0508': ['南方五道圣诞'],
+        '0511': ['都城隍圣诞'],
+        '0512': ['炳灵公圣诞'],
+        '0513': ['关圣帝君降神'],
+        '0516': ['天地主炁及造化万物之辰（禁忌日）'],
+        '0518': ['张天师圣诞'],
+        '0520': ['丹阳马真人圣诞'],
+        '0529': ['许威显王（唐忠臣许远）等圣诞'],
+        '0604': ['南瞻部洲转大法轮（法会日）'],
+        '0606': ['崔府君、杨四将军圣诞'],
+        '0610': ['刘海蟾帝君圣诞'],
+        '0611': ['井泉龙王圣诞'],
+        '0619': ['观音菩萨成道'],
+        '0623': ['火神等圣诞'],
+        '0624': ['雷祖圣诞'],
+        '0626': ['二郎真君圣诞'],
+        '0629': ['天枢左相莫君（宋文丞相文天祥）等圣诞'],
+        '0707': ['道德腊之辰、七夕（腊日）'],
+        '0712': ['长真谭真人圣诞'],
+        '0713': ['大势至菩萨圣诞'],
+        '0715': ['中元节·中元地官等圣诞'],
+        '0718': ['王母娘娘圣诞'],
+        '0719': ['值年太岁圣诞'],
+        '0721': ['普庵祖师等圣诞'],
+        '0722': ['增福财神圣诞'],
+        '0723': ['天枢上相真君（汉诸葛丞相诸葛亮）等圣诞'],
+        '0724': ['龙树王菩萨圣诞'],
+        '0730': ['地藏王菩萨圣诞'],
+        '0801': ['神功妙济真君（许真君）等圣诞'],
+        '0803': ['灶君圣诞', '北斗下降（下降）'],
+        '0805': ['雷声大帝圣诞'],
+        '0810': ['北岳大帝圣诞'],
+        '0812': ['西方五道圣诞'],
+        '0815': ['太阴朝元之辰、中秋节（朝元）'],
+        '0818': ['酒仙圣诞'],
+        '0822': ['燃灯佛圣诞'],
+        '0823': ['伏魔副将张显王（汉桓侯张飞）等圣诞'],
+        '0827': ['北斗下降（下降）'],
+        '0901': ['南斗下降之辰（下降）', '北斗九皇降世之辰（斋期）'],
+        '0902': ['北斗九皇降世之辰（斋期）'],
+        '0903': ['北斗九皇降世之辰（斋期）', '五瘟圣诞'],
+        '0904': ['北斗九皇降世之辰（斋期）'],
+        '0905': ['北斗九皇降世之辰（斋期）'],
+        '0906': ['北斗九皇降世之辰（斋期）'],
+        '0907': ['北斗九皇降世之辰（斋期）'],
+        '0908': ['北斗九皇降世之辰（斋期）'],
+        '0909': ['北斗九皇降世之辰（斋期）', '斗母元君等圣诞'],
+        '0916': ['机神圣诞'],
+        '0917': ['金龙四大王等圣诞'],
+        '0923': ['萨真人圣诞'],
+        '0928': ['五显灵宫、马元帅圣诞'],
+        '0930': ['药师琉璃光王佛圣诞'],
+        '1001': ['民岁腊之辰·东皇大帝等圣诞'],
+        '1003': ['三茅应化真君圣诞'],
+        '1005': ['达摩祖师圣诞'],
+        '1006': ['天曹诸司五岳五帝圣诞'],
+        '1008': ['涅槃（纪念日）'],
+        '1015': ['下元节·下元水官等圣诞'],
+        '1020': ['虚靖天师（三十代天师弘悟张真人）等圣诞'],
+        '1027': ['北极紫微大帝圣诞'],
+        '1104': ['大成至圣先师文宣王孔子等圣诞'],
+        '1106': ['西岳大帝圣诞'],
+        '1111': ['太乙救苦天尊圣诞'],
+        '1117': ['阿弥陀佛圣诞'],
+        '1119': ['日光天子等圣诞'],
+        '1123': ['南斗下降·张仙圣诞'],
+        '1126': ['北方五道圣诞'],
+        '1208': ['王侯腊之辰、腊八节·张英济王（唐忠臣张巡）等圣诞'],
+        '1216': ['南岳大帝圣诞'],
+        '1220': ['鲁班圣诞'],
+        '1221': ['天猷上帝圣诞'],
+        '1224': ['司命灶君上天朝玉帝'],
+        '1229': ['华严菩萨圣诞'],
+        '1230': ['诸佛下界探访善恶'],
+    };
+}
+
+/**
+ * 黄历日
+ *
+ * 以同一公历日期为基准，聚合历法、神煞、择日与民俗栏目，供通胜类应用一次取用。
+ * 基础历法数据仍由 SolarDay、LunarDay、SixtyCycleDay 提供，本类只补充原库未覆盖的栏目。
+ */
+export class DayAlmanac {
+    protected solarDay: SolarDay;
+    protected lunarDayCache: LunarDay | null;
+    protected sixtyCycleDayCache: SixtyCycleDay | null;
+    protected hoursCache: SixtyCycleHour[] | null;
+
+    protected constructor(solarDay: SolarDay) {
+        this.solarDay = solarDay;
+        this.lunarDayCache = null;
+        this.sixtyCycleDayCache = null;
+        this.hoursCache = null;
+    }
+
+    static fromSolarDay(solarDay: SolarDay): DayAlmanac {
+        return new DayAlmanac(solarDay);
+    }
+
+    static fromYmd(year: number | string, month: number | string, day: number | string): DayAlmanac {
+        return new DayAlmanac(SolarDay.fromYmd(year, month, day));
+    }
+
+    /**
+     * 以本地时区的年月日构造
+     */
+    static fromDate(date: Date): DayAlmanac {
+        return new DayAlmanac(SolarDay.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate()));
+    }
+
+    getSolarDay(): SolarDay {
+        return this.solarDay;
+    }
+
+    getLunarDay(): LunarDay {
+        if (!this.lunarDayCache) {
+            this.lunarDayCache = this.solarDay.getLunarDay();
+        }
+        return this.lunarDayCache;
+    }
+
+    getSixtyCycleDay(): SixtyCycleDay {
+        if (!this.sixtyCycleDayCache) {
+            this.sixtyCycleDayCache = this.solarDay.getSixtyCycleDay();
+        }
+        return this.sixtyCycleDayCache;
+    }
+
+    /**
+     * 十二时辰，同一实例内复用
+     */
+    protected getHours(): SixtyCycleHour[] {
+        if (!this.hoursCache) {
+            this.hoursCache = this.getSixtyCycleDay().getHours();
+        }
+        return this.hoursCache;
+    }
+
+    getDuty(): Duty {
+        return this.getSixtyCycleDay().getDuty();
+    }
+
+    getDutyAdvice(): DutyAdvice {
+        return DutyAdvice.fromDuty(this.getDuty());
+    }
+
+    /**
+     * 日冲煞
+     */
+    getClash(): Clash {
+        return Clash.fromSixtyCycle(this.getSixtyCycleDay().getSixtyCycle());
+    }
+
+    /**
+     * 诸葛武侯出行择日
+     */
+    getWuHouDay(): WuHouDay {
+        return WuHouDay.fromLunarDay(this.getLunarDay());
+    }
+
+    /**
+     * 月将
+     */
+    getMonthGeneral(): MonthGeneral {
+        return MonthGeneral.fromSolarDay(this.solarDay);
+    }
+
+    /**
+     * 神明诞辰，无则返回 null
+     */
+    getDeityFestival(): DeityFestival | null {
+        return DeityFestival.fromLunarDay(this.getLunarDay());
+    }
+
+    /**
+     * 年肖号码
+     */
+    getYearZodiacNumbers(): ZodiacNumbers {
+        return ZodiacNumbers.fromLunarDay(this.getLunarDay());
+    }
+
+    /**
+     * 六合生肖号码，如「六合猪 07 19 31 43」
+     */
+    getCombineZodiacNumbers(): ZodiacNumbers {
+        const branch: EarthBranch = this.getSixtyCycleDay().getSixtyCycle().getEarthBranch();
+        return ZodiacNumbers.of(this.getLunarDay().getYear(), branch.getCombine().getZodiac());
+    }
+
+    /**
+     * 三合生肖号码
+     */
+    getTriangleZodiacNumbers(): ZodiacNumbers[] {
+        const branches: EarthBranch[] = this.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getTriangle();
+        const l: ZodiacNumbers[] = [];
+        for (let i: number = 0; i < branches.length; i++) {
+            l.push(ZodiacNumbers.of(this.getLunarDay().getYear(), branches[i].getZodiac()));
+        }
+        return l;
+    }
+
+    /**
+     * 旬空（空亡）
+     */
+    getVoidBranches(): EarthBranch[] {
+        return this.getSixtyCycleDay().getSixtyCycle().getExtraEarthBranches();
+    }
+
+    /**
+     * 贵人时（天乙贵人所在时辰）
+     */
+    getNobleHours(): SixtyCycleHour[] {
+        const nobels: EarthBranch[] = this.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getNoble();
+        const l: SixtyCycleHour[] = [];
+        const hours: SixtyCycleHour[] = this.getHours();
+        for (let i: number = 0; i < hours.length; i++) {
+            const branch: EarthBranch = hours[i].getSixtyCycle().getEarthBranch();
+            for (let j: number = 0; j < nobels.length; j++) {
+                if (branch.getIndex() === nobels[j].getIndex()) {
+                    l.push(hours[i]);
+                    break;
+                }
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 吉时（黄道时辰）
+     */
+    getLuckyHours(): SixtyCycleHour[] {
+        const l: SixtyCycleHour[] = [];
+        const hours: SixtyCycleHour[] = this.getHours();
+        for (let i: number = 0; i < hours.length; i++) {
+            if (hours[i].getTwelveStar().getEcliptic().getLuck().getIndex() === 0) {
+                l.push(hours[i]);
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 月破（日支冲月建）
+     */
+    isMonthBreak(): boolean {
+        const day: SixtyCycleDay = this.getSixtyCycleDay();
+        return day.getSixtyCycle().getEarthBranch().equals(day.getMonth().getEarthBranch().getOpposite());
+    }
+
+    /**
+     * 岁破（日支冲年支）
+     */
+    isYearBreak(): boolean {
+        const day: SixtyCycleDay = this.getSixtyCycleDay();
+        return day.getSixtyCycle().getEarthBranch().equals(day.getYear().getEarthBranch().getOpposite());
+    }
+
+    /**
+     * 天赦日：春月戊寅、夏月甲午、秋月戊申、冬月甲子
+     */
+    isHeavenlyPardon(): boolean {
+        const month: number = this.getSixtyCycleDay().getMonth().getEarthBranch().getIndex();
+        const season: number = ~~(((month + 10) % 12) / 3);
+        return this.getSixtyCycleDay().getSixtyCycle().getName() === ['戊寅', '甲午', '戊申', '甲子'][season];
+    }
+
+    /**
+     * 四离日：春分、秋分、夏至、冬至前一日
+     */
+    isFourDeparture(): boolean {
+        const termDay: SolarTermDay = this.solarDay.next(1).getTermDay();
+        return termDay.getDayIndex() === 0 && termDay.getSolarTerm().getIndex() % 6 === 0;
+    }
+
+    /**
+     * 四绝日：立春、立夏、立秋、立冬前一日
+     */
+    isFourSeverance(): boolean {
+        const termDay: SolarTermDay = this.solarDay.next(1).getTermDay();
+        return termDay.getDayIndex() === 0 && termDay.getSolarTerm().getIndex() % 6 === 3;
+    }
+
+    /**
+     * 年家九宫飞星
+     */
+    getYearNineStarChart(forward: boolean = true): NineStarChart {
+        return NineStarChart.fromCenter(this.getSixtyCycleDay().getSixtyCycleMonth().getSixtyCycleYear().getNineStar(), forward);
+    }
+
+    /**
+     * 月家九宫飞星
+     */
+    getMonthNineStarChart(forward: boolean = true): NineStarChart {
+        return NineStarChart.fromCenter(this.getSixtyCycleDay().getSixtyCycleMonth().getNineStar(), forward);
+    }
+
+    /**
+     * 日家九宫飞星
+     */
+    getDayNineStarChart(forward: boolean = true): NineStarChart {
+        return NineStarChart.fromCenter(this.solarDay.getNineStar(), forward);
+    }
+
+    /**
+     * 时家九宫飞星
+     */
+    getHourNineStarChart(hour: SixtyCycleHour, forward: boolean = true): NineStarChart {
+        return NineStarChart.fromCenter(hour.getNineStar(), forward);
+    }
+
+    /**
+     * 农历月大小
+     */
+    getLunarMonthSize(): string {
+        return this.getLunarDay().getLunarMonth().getDayCount() === 30 ? '大' : '小';
+    }
+
+    /**
+     * 十二时辰吉凶
+     */
+    getHourFortunes(): HourFortune[] {
+        const hours: SixtyCycleHour[] = this.getHours();
+        const l: HourFortune[] = [];
+        for (let i: number = 0; i < hours.length; i++) {
+            l.push(HourFortune.fromSixtyCycleHour(hours[i]));
+        }
+        return l;
+    }
+
+    /**
+     * 某年命与今日的关系，对应通胜「日禄」「择日须知」两栏
+     */
+    getLifeRelation(birthYear: number): LifeRelation {
+        return LifeRelation.fromBirthYear(birthYear, this.getSixtyCycleDay().getSixtyCycle());
+    }
+
+    /**
+     * 十二生肖流月运程
+     */
+    getZodiacFortunes(): ZodiacFortune[] {
+        const month: SixtyCycle = this.getSixtyCycleDay().getMonth();
+        const l: ZodiacFortune[] = [];
+        for (let i: number = 0; i < 12; i++) {
+            l.push(ZodiacFortune.fromZodiac(Zodiac.fromIndex(i), month));
+        }
+        return l;
+    }
+
+    /**
+     * 今日吉数（规则推演，非原版数值）
+     */
+    getDailyNumbers(count: number = 6): number[] {
+        return DailyNumbers.fromSixtyCycleDay(this.getSixtyCycleDay()).getNumbers(count);
+    }
+
+    /**
+     * 风水常识
+     */
+    getFengShuiTip(): FengShuiTip {
+        return FengShuiTip.of(this.solarDay);
+    }
+
+    /**
+     * 周公解梦，逐日一则
+     */
+    getDreamOracle(): DreamOracle {
+        return DreamOracle.of(this.solarDay);
+    }
+}
+
+
+/**
+ * 年命与日辰的关系（禄命择日）
+ *
+ * 通胜「日禄」「择日须知」两栏即由此而来：
+ * 日干之禄所在之地支，其年生人谓「互禄」；日支恰为某干之禄，该干年命者谓「进禄」；
+ * 日干之天乙贵人所临之地支，其年生人谓「贵」；年命支与日支六合、三合者亦为吉。
+ * 十神以年命天干为日主、日干为对象推得，故「己丁乙命财官印」者，谓己、丁、乙年生人
+ * 遇壬日，分别为财、官、印。
+ */
+export class LifeRelation extends AbstractCulture {
+    protected birthYear: number;
+    protected birth: SixtyCycle;
+    protected day: SixtyCycle;
+
+    protected constructor(birthYear: number, birth: SixtyCycle, day: SixtyCycle) {
+        super();
+        this.birthYear = birthYear;
+        this.birth = birth;
+        this.day = day;
+    }
+
+    /**
+     * @param birthYear 出生年（以立春为界）
+     */
+    static fromBirthYear(birthYear: number, day: SixtyCycle): LifeRelation {
+        return new LifeRelation(birthYear, SixtyCycle.fromIndex(birthYear - 4), day);
+    }
+
+    getBirthYear(): number {
+        return this.birthYear;
+    }
+
+    /**
+     * 年命干支
+     */
+    getBirthSixtyCycle(): SixtyCycle {
+        return this.birth;
+    }
+
+    getDaySixtyCycle(): SixtyCycle {
+        return this.day;
+    }
+
+    /**
+     * 日干对年命的十神
+     */
+    getTenStar(): TenStar {
+        return this.birth.getHeavenStem().getTenStar(this.day.getHeavenStem());
+    }
+
+    /**
+     * 互禄：日干之禄临年命支
+     */
+    isMutualProsperity(): boolean {
+        return this.day.getHeavenStem().getProsperity().getIndex() === this.birth.getEarthBranch().getIndex();
+    }
+
+    /**
+     * 进禄：年命干之禄临日支
+     */
+    isAdvanceProsperity(): boolean {
+        return this.birth.getHeavenStem().getProsperity().getIndex() === this.day.getEarthBranch().getIndex();
+    }
+
+    /**
+     * 贵：年命支为日干之天乙贵人
+     */
+    isNoble(): boolean {
+        const nobles: EarthBranch[] = this.day.getHeavenStem().getNoble();
+        for (let i: number = 0; i < nobles.length; i++) {
+            if (nobles[i].getIndex() === this.birth.getEarthBranch().getIndex()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 六合：年命支与日支六合
+     */
+    isCombine(): boolean {
+        return this.birth.getEarthBranch().getCombine().getIndex() === this.day.getEarthBranch().getIndex();
+    }
+
+    /**
+     * 三合：年命支与日支三合
+     */
+    isTriangle(): boolean {
+        const branches: EarthBranch[] = this.day.getEarthBranch().getTriangle();
+        for (let i: number = 0; i < branches.length; i++) {
+            if (branches[i].getIndex() === this.birth.getEarthBranch().getIndex()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getName(): string {
+        return `${this.birth.getHeavenStem().getName()}命${this.getTenStar().getName()}`;
+    }
+
+    toString(): string {
+        const l: string[] = [this.getName()];
+        if (this.isMutualProsperity()) {
+            l.push('互禄');
+        }
+        if (this.isAdvanceProsperity()) {
+            l.push('进禄');
+        }
+        if (this.isNoble()) {
+            l.push('贵');
+        }
+        if (this.isCombine()) {
+            l.push('六合');
+        }
+        if (this.isTriangle()) {
+            l.push('三合');
+        }
+        return l.join('，');
+    }
+}
+
+/**
+ * 时辰吉凶
+ *
+ * 以黄道黑道为本，兼记贵人时、日禄时、六合时。
+ * 「吉、中、凶」三级为便于排版的推演：黄道而兼贵、禄、合者为吉，黄道为中也，黑道为凶。
+ */
+export class HourFortune extends AbstractCulture {
+    protected hour: SixtyCycleHour;
+
+    protected constructor(hour: SixtyCycleHour) {
+        super();
+        this.hour = hour;
+    }
+
+    static fromSixtyCycleHour(hour: SixtyCycleHour): HourFortune {
+        return new HourFortune(hour);
+    }
+
+    getHour(): SixtyCycleHour {
+        return this.hour;
+    }
+
+    getTwelveStar(): TwelveStar {
+        return this.hour.getTwelveStar();
+    }
+
+    getEcliptic(): Ecliptic {
+        return this.getTwelveStar().getEcliptic();
+    }
+
+    /**
+     * 黄道为吉，黑道为凶
+     */
+    getLuck(): Luck {
+        return this.getEcliptic().getLuck();
+    }
+
+    /**
+     * 贵人时
+     */
+    isNoble(): boolean {
+        const nobles: EarthBranch[] = this.hour.getDay().getHeavenStem().getNoble();
+        for (let i: number = 0; i < nobles.length; i++) {
+            if (nobles[i].getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 日禄时
+     */
+    isProsperity(): boolean {
+        return this.hour.getDay().getHeavenStem().getProsperity().getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex();
+    }
+
+    /**
+     * 六合时
+     */
+    isCombine(): boolean {
+        return this.hour.getDay().getEarthBranch().getCombine().getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex();
+    }
+
+    getGrade(): number {
+        if (this.getLuck().getIndex() !== 0) {
+            return 2;
+        }
+        return (this.isNoble() || this.isProsperity() || this.isCombine()) ? 0 : 1;
+    }
+
+    getName(): string {
+        return ['吉', '中', '凶'][this.getGrade()];
+    }
+
+    toString(): string {
+        const l: string[] = [this.hour.getSixtyCycle().getName(), this.getName()];
+        if (this.isNoble()) {
+            l.push('贵');
+        }
+        if (this.isProsperity()) {
+            l.push('禄');
+        }
+        if (this.isCombine()) {
+            l.push('合');
+        }
+        return l.join('');
+    }
+}
+
+/**
+ * 五行强弱
+ *
+ * 以八字四柱八字（四干四支）计五行个数，月支加权二，用于取用参考。
+ * 日主同类为比劫与印，异类为食伤、财、官杀；同类不弱于异类即视为身强。
+ */
+export class ElementBalance extends AbstractCulture {
+    protected eightChar: EightChar;
+    protected counts: number[];
+    protected strong: boolean;
+
+    protected constructor(eightChar: EightChar) {
+        super();
+        this.eightChar = eightChar;
+        const stems: HeavenStem[] = [
+            eightChar.getYear().getHeavenStem(), eightChar.getMonth().getHeavenStem(),
+            eightChar.getDay().getHeavenStem(), eightChar.getHour().getHeavenStem(),
+        ];
+        const branches: EarthBranch[] = [
+            eightChar.getYear().getEarthBranch(), eightChar.getMonth().getEarthBranch(),
+            eightChar.getDay().getEarthBranch(), eightChar.getHour().getEarthBranch(),
+        ];
+        const counts: number[] = [0, 0, 0, 0, 0];
+        for (let i: number = 0; i < 4; i++) {
+            counts[stems[i].getElement().getIndex()]++;
+            counts[branches[i].getElement().getIndex()]++;
+        }
+        counts[branches[1].getElement().getIndex()] += 2;
+        this.counts = counts;
+        const me: number = eightChar.getDay().getHeavenStem().getElement().getIndex();
+        const supporting: number = counts[me] + counts[(me + 4) % 5];
+        let total: number = 0;
+        for (let i: number = 0; i < 5; i++) {
+            total += counts[i];
+        }
+        this.strong = supporting * 2 >= total;
+    }
+
+    static fromEightChar(eightChar: EightChar): ElementBalance {
+        return new ElementBalance(eightChar);
+    }
+
+    getEightChar(): EightChar {
+        return this.eightChar;
+    }
+
+    /**
+     * 木火土金水五行个数
+     */
+    getCounts(): number[] {
+        return this.counts;
+    }
+
+    getDayMaster(): HeavenStem {
+        return this.eightChar.getDay().getHeavenStem();
+    }
+
+    isStrong(): boolean {
+        return this.strong;
+    }
+
+    /**
+     * 未出现的五行
+     */
+    getMissing(): Element[] {
+        const l: Element[] = [];
+        for (let i: number = 0; i < 5; i++) {
+            if (this.counts[i] === 0) {
+                l.push(Element.fromIndex(i));
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 取用五行：身强取克泄耗，身弱取生扶
+     */
+    getFavorable(): Element[] {
+        const me: number = this.getDayMaster().getElement().getIndex();
+        const l: Element[] = [];
+        if (this.strong) {
+            l.push(Element.fromIndex((me + 2) % 5));
+            l.push(Element.fromIndex((me + 1) % 5));
+            l.push(Element.fromIndex((me + 3) % 5));
+        } else {
+            l.push(Element.fromIndex((me + 4) % 5));
+            l.push(Element.fromIndex(me));
+        }
+        return l;
+    }
+
+    getName(): string {
+        return this.getDayMaster().getName() + this.getDayMaster().getElement().getName();
+    }
+
+    toString(): string {
+        const names: string[] = [];
+        for (let i: number = 0; i < 5; i++) {
+            names.push(Element.fromIndex(i).getName() + this.counts[i]);
+        }
+        return `${this.getName()}（${names.join(' ')}）${this.strong ? '身强' : '身弱'}`;
+    }
+}
+
+/**
+ * 生肖流月运程
+ *
+ * 以流月地支与生肖地支的关系（六合、三合、冲、刑、害、破、同气）断吉凶，判词为据此拟定的通例文字，
+ * 不涉具体命局，亦非原版通胜的出版社文案。
+ */
+export class ZodiacFortune extends AbstractCulture {
+    protected zodiac: Zodiac;
+    protected month: SixtyCycle;
+
+    protected static TEXTS: string[] = [
+        '与月建六合，诸事顺遂，宜合作求财。',
+        '与月建三合，贵人相助，谋事可成。',
+        '与月建同气，运势平稳，宜按部就班。',
+        '与月建无涉，运势平常，宜守常待时。',
+        '与月建相冲，变动较多，宜守不宜攻。',
+        '与月建相刑，口舌是非，宜谨言慎行。',
+        '与月建相害，小人暗损，宜防微杜渐。',
+        '与月建相破，事多反复，宜稳中求进。',
+    ];
+
+    protected static LUCK: number[] = [0, 0, 0, 1, 1, 1, 1, 1];
+
+    protected constructor(zodiac: Zodiac, month: SixtyCycle) {
+        super();
+        this.zodiac = zodiac;
+        this.month = month;
+    }
+
+    static fromZodiac(zodiac: Zodiac, month: SixtyCycle): ZodiacFortune {
+        return new ZodiacFortune(zodiac, month);
+    }
+
+    getZodiac(): Zodiac {
+        return this.zodiac;
+    }
+
+    getMonth(): SixtyCycle {
+        return this.month;
+    }
+
+    /**
+     * 关系序号：0 六合、1 三合、2 同气、3 无涉、4 冲、5 刑、6 害、7 破
+     */
+    getRelationIndex(): number {
+        const b: EarthBranch = this.zodiac.getEarthBranch();
+        const m: EarthBranch = this.month.getEarthBranch();
+        if (b.getCombine().getIndex() === m.getIndex()) {
+            return 0;
+        }
+        const triangles: EarthBranch[] = m.getTriangle();
+        for (let i: number = 0; i < triangles.length; i++) {
+            if (triangles[i].getIndex() === b.getIndex()) {
+                return 1;
+            }
+        }
+        if (b.getIndex() === m.getIndex()) {
+            return 2;
+        }
+        if (b.getOpposite().getIndex() === m.getIndex()) {
+            return 4;
+        }
+        const punishments: EarthBranch[] = m.getPunishments();
+        for (let i: number = 0; i < punishments.length; i++) {
+            if (punishments[i].getIndex() === b.getIndex() && punishments[i].getIndex() !== m.getIndex()) {
+                return 5;
+            }
+        }
+        if (b.getHarm().getIndex() === m.getIndex()) {
+            return 6;
+        }
+        if (b.getDestruction().getIndex() === m.getIndex()) {
+            return 7;
+        }
+        return 3;
+    }
+
+    getLuck(): Luck {
+        return Luck.fromIndex(ZodiacFortune.LUCK[this.getRelationIndex()]);
+    }
+
+    getName(): string {
+        return this.zodiac.getName();
+    }
+
+    getText(): string {
+        return ZodiacFortune.TEXTS[this.getRelationIndex()];
+    }
+
+    toString(): string {
+        return `${this.getName()}：${this.getText()}`;
+    }
+}
+
+/**
+ * 风水常识
+ *
+ * 通胜页眉的「风水」小栏，逐日轮换。文字为本项目整理的常识性说明，不作堪舆断验之用。
+ */
+export class FengShuiTip extends AbstractCulture {
+    protected index: number;
+
+    protected static DATA: string[] = [
+        '大门是气口，属内外气流动的必经之地，是与外界联系的咽喉和屏障。',
+        '明堂宜开阔明亮，忌堆积杂物，气聚则财聚，气滞则运滞。',
+        '玄关为入门第一印象，宜整洁通透，不宜直对门窗形成穿堂。',
+        '客厅宜方正，沙发宜背有实墙，主人坐卧安稳，行事有靠。',
+        '卧室宜静，床头忌靠窗、忌对镜、忌压梁，以求安眠。',
+        '厨房属火，宜与厕所分隔，灶口不宜正对水槽，取水火既济之意。',
+        '灶位宜坐煞向吉，忌压梁、忌对门，古称「灶为养命之源」。',
+        '厕所属水，宜隐蔽通风，忌居宅中、忌对大门，以免秽气冲堂。',
+        '书房宜明亮安静，书桌宜面向开阔，背后有靠，取文昌安定之象。',
+        '阳台为纳气之所，宜通透，忌封闭过密，亦忌正对街巷直冲。',
+        '楼梯宜靠墙，忌居中盘踞，上下之气宜回旋而不宜直冲。',
+        '神位宜洁净安静，忌对厕、忌对卧、忌置于楼梯之下。',
+        '财位多取入门斜角，宜安稳明亮，忌空、忌压、忌水冲。',
+        '文昌位宜置书桌书柜，忌堆放杂物，主学业功名之思。',
+        '床位宜南北顺地磁，忌正对房门，忌与厕所相邻。',
+        '镜宜藏不宜露，忌对床、忌对门，以免夜间惊扰、气散不聚。',
+        '鱼缸属水，宜置于衰位以化煞，忌置于财位以泄气。',
+        '绿植宜阔叶常绿，忌尖叶带刺，枯萎宜及时更换。',
+        '梁柱压顶谓之「横梁压顶」，坐卧其上易生压抑，宜以吊顶化解。',
+        '门窗宜比例相称，门大窗小则气散，窗大门小则气滞。',
+        '庭院宜留白，忌满铺硬地，草木得气，居者亦得舒畅。',
+        '排水宜顺畅，忌积水滞留，水聚不流则湿气生。',
+        '采光宜柔和，忌终日不见日光，阳气不足则居者倦怠。',
+        '通风宜对流而不宜直冲，气缓则聚，气急则散。',
+    ];
+
+    protected constructor(index: number) {
+        super();
+        this.index = index;
+    }
+
+    /**
+     * 依日期确定性轮换
+     */
+    static of(solarDay: SolarDay): FengShuiTip {
+        return new FengShuiTip((solarDay.getYear() * 373 + solarDay.getMonth() * 37 + solarDay.getDay()) % FengShuiTip.DATA.length);
+    }
+
+    static fromIndex(index: number): FengShuiTip {
+        return new FengShuiTip(index % FengShuiTip.DATA.length);
+    }
+
+    getIndex(): number {
+        return this.index;
+    }
+
+    /**
+     * 栏目名，取正文首句主语
+     */
+    getTopic(): string {
+        const text: string = this.getText();
+        const i: number = text.indexOf('宜');
+        return i > 0 ? text.substring(0, i) : text.substring(0, 2);
+    }
+
+    getText(): string {
+        return FengShuiTip.DATA[this.index];
+    }
+
+    getName(): string {
+        return this.getText();
+    }
+}
+
+/**
+ * 周公解梦
+ *
+ * 正文取自维基文库《周公解夢》公有领域本（二十七类，九百余条断语）。
+ * 原书每条为一句占断，此处以「主」字或首个吉凶字为界，析为梦象与判词；
+ * 无法切分者，梦象取全文、判词为空。
+ */
+export class DreamOracle extends AbstractCulture {
+    protected static CATEGORY_DATA: string[] = [
+        '天地日月星辰:天門開貴人薦引|天光照主疾病除|天晴雨散百憂去|天明婦人生貴子|天門赤主有大起|仰面向天大富貴|乘龍上天大主貴|上天求妻兒女貴|天上取物位王侯|飛上天富貴大吉|登天上屋得高官|天裂有分國之憂|天星明主公卿至|天愈鐃益壽命吉|渡天河主有所吉|天地富所求皆得|天公使有大吉祥|日月初出家道昌|日月照身得重位|日月落憂沒父母|日月昏暗孕婦吉|日月欲出有官職|日月合會妻有子|日月啣山奴欺主|負抱日月貴侯王|吞日月當生貴子|禮拜日月大吉昌|日光入屋官位至|日初出無雲大吉|日出有光有好事|雲開日出凶事散|日入懷貴子月女|拜星月燒香大吉|雲忽遮日有陰私|星入懷主生貴子|星落有病及官事|星列行主添奴婢|持執星宿大富貴|流星不落主移居|巡天摩星位公卿|雲起四方交易吉|五色雲主大吉昌|雲赤白吉青黑凶|見浮雲作事不成|雲霧遮事大吉利|黑雲至地時氣病|霜雪降主事不成|雪下及時大吉利|雪落身上萬事成|雪不沾身主孝服|雪落家庭主喪事|陰雨晦暗主凶事|行路逢雨有酒食|雷霆作事官位至|雷聲恐怕移居吉|雷從地震主志遂|身被霹靂主富貴|電光照身有吉慶|赤虹見吉黑虹凶|霞滿天百事歡悅|狂風大雨人死亡|風吹人衣主疾病|忽大風國有號令|風如吼主遠信至',
+        '地理山石樹木:地動主遷官位吉|地裂主疾病大凶|修平田地大吉昌|地高下不平主病|臥於石上主大吉|地中黑氣上主凶|運石入家主富貴|石上得利祿大吉|盤石安穩無憂疑|登岩抱石官職遷|手弄小石生貴子|身入土中百事吉|自身取土被恥辱|昇山落地主失位|上山恐怕祿位至|上山毀壞主凶惡|遊看高山春夏吉|行走上坡病思除|居住高山有喜事|山行得財有福緣|抱物上山孕貴子|山中農稼衣食豐|枯木再發子孫興|堂上地陷主母憂|園林茂盛大吉利|樹木枯死宅不安|林中坐臥病欲痊|樹木凋零主人凶|林中樹生添貴子|種植樹木大吉昌|登大樹名利顯揚|上樹忽折有死傷|與人分花主分散|枯木開花子孫興|大樹落人屋上吉|立樹下貴人庇蔭|樹生堂上父母憂|大樹忽折主凶惡|擔木來家得財喜|砍伐大樹多得財|草木茂盛家道興|門中生果樹有子|松生腹上位三公|家中生松事轉豐|家中生柏多吉利|庭前竹木喜重重|楓生屋上百事遂|蘭生庭前主添孫|果林中行主得財|入菜園中大發財|桑生井上主有憂|果樹多熟子孫安|折筍到家女有子|見筍者主添子孫|掃地除糞家欲破|糞土堆者錢財聚',
+        '身體面目齒髮:自身白衣人所謀|梳頭洗面百憂去|身拜尊長大吉昌|身上汗出主凶惡|身病蟲生得軍職|身上蟲行病患安|繩索繫身長命吉|枷鎖臨身病欲來|身成肥瘦皆為凶|面對官者主大吉|露體無衣大吉利|婦人披頭有私情|頭白主長命大吉|頭生兩角有爭競|頭禿髮落皆凶事|面生瘡黑主子凶|頭鬚白落憂子孫|頭鬚再生主長命|沐浴遷官疾病除|洗手洗足舊病除|照鏡明吉暗者凶|破鏡照人主分散|手足膿血出大吉|屎尿污人大吉亨|露頭披髮主人謀|披髮蓋面官訟至|剃頭剪髮家內凶|眉與髮齊祿位至|齒自落者父母凶|齒落更生子孫興',
+        '冠帶衣服鞋襪:戴官登車官欲遷|自戴襆頭巾帽吉|簪冠登台職位遷|貴人與之衣冠吉|新換衣冠祿位至|燒毀冠帽欲更官|失去冠帽去退職|拾得官帶祿位至|與人公服主得職|人與公服加官職|女著冠帶主生子|洗笏染服新官來|執笏見貴人大吉|笏硫憂凶三不祥|與人笏綬主官遷|腰帶者主官至吉|文書用印有名聲|帶印主妻生貴子|著新袍主添妻妾|著錦繡衣子孫榮|洗染衣服皆大吉|披蓑衣主大恩至|被油污衣大恩澤|衣服忽破妻外心|新衣攢米百事凶|與人衣服主患至|裁衣著孛衣皆吉|衣帶自解百事吉|著黃衣皂衣皆吉|著白衣主有人請|著青衣神人助力|著藍繡衣妻大利|眾人著紫主情獘|與人著青家人散|眾人著白主官事|眾人著緋大吉利|妻著夫衣生貴子|女子著衣平無事|與人共衣妻私情|失卻衣服妻難產|好被自蓋得富貴|人著己履妻有私|得靴鞋主奴婢吉|失履主奴婢逃走|脫靴束帶主有凶|鞋破子孫妻妾病|著麻鞋百事和合|新授官爵主貴子|乞得鞋履人助力|木履脫時己出厄',
+        '刀劍旌節鐘鼓:君王對仗有異吉|旌旂有龍大吉利|抱旌節主貴人扶|旌劍引入山主凶|造旌蓋主大吉利|羽蓋蓋身主富貴|旂旛迎接大富貴|旗旛竟出主疾病|手持旌節有恩賞|白蓋覆身大吉利|見做新旌大吉利|與人分傘主分散|拔刀出行主大吉|得人刀主行人至|人與三刀作刺史|與人與斫大吉慶|被刀出血得酒食|折刀刺人主失利|刀斧自傷大吉利|得人刀斧祿位至|刀落水中妻妾亡|失落刀劍主破財|帶刀劍行有財利|磨刀劍鋒快大吉|與人刀劍皆主凶|劍在床頭大吉利|女人帶刀大吉慶|女人拔刀主有子|剪刀主分財之事|剪刀剪物主得財|剪刀折股妻妾亡|甲冑庇身主吉利|鎗槊主官位吉利|見軍兵散主有凶|鐘磐有聲遠人來|鐘豉大鳴福祿至|打鼓有聲遠人來|見鼓佳聲懽樂吉|見鼓不嗚凶必至|看放煙火百憂散',
+        '帝王文武呼召:帝王宣召有驚喜|后妃呼召飲有疾|太子召大喜吉利|天子賜坐有財吉|見老君言有仙分|拜佛欲動大有財|看火上陳事大吉|神佛嗔怒皆不吉|王侯並坐大吉利|來見貴人不得凶|與聖賢說話大吉|使命入門大吉利|白衣召作便死亡|拜尊長者有吉慶|先祖考言求食吉|人云大好者即凶|人云死者得長命|人在外呼之招凶|我欲共汝去大凶|人云不用汝大吉|與惡人言主口舌|被殺害吉伏藏凶|身生羽翼飛大吉|身逃去得脫病去|與人交易主有疾|貧窮兵居主大吉|合伴同行凶事至|一切貴人皆吉祥',
+        '宮室屋宇倉庫:入帝王宮行大吉|拜朝廷者主富貴|入王侯府庫大吉|行道宮見仙主吉|坐官府中主大吉|神廟廣大事事吉|上樓閣壇主大吉|上高堂大富貴至|高樓飲酒富貴至|家起高樓安穩事|上城為人所拽吉|上城被執官職顯|城郭廣大財喜多|城中行凶出門吉|連城青色有喜吉|登赤城郭主大吉|蓋城上屋大吉利|上屋主富出園吉|上屋破壞家道凶|堂上有棺身安樂|正堂倒陷家主凶|覆蓋屋宇長命吉|屋宅更新主大吉|風吹屋動主遷移|遷入他人新宅吉|居出宅主妻喜事|搬移破屋主美妻|人或典房主官位|家道貧窮大吉利|洒掃宅舍遠人來|典賣典舍主失位|屋宅無人主死亡|屋上穿舟有暗昧|踰牆渡宅百事去|與人爭屋主大凶|與婦人爭屋主吉|房樑忽折主大凶|院宅坑下主死亡|妻男牆下官位至|牆上掘土主更政|軍人入宅主大吉|死央瓦落婦爭鬥|屋中生馬男信至|屋中生草家欲空|屋上生松柏益壽|修理田舍有大喜|入寺院中生男子|寺舍有經病人痊|遷移尼寺主病至|起蓋倉庫福祿至|入倉庫中大吉昂|倉庫崩壞百事凶',
+        '門戶井灶廚廁:門戶高大主富貴|新開門戶大富貴|門戶忽開主大吉|門戶大開大吉利|門更新主生貴子|門自開妻有私情|門戶裂開主大吉|門戶破壞有凶事|城門大開主口舌|宮城塞者口舌至|門戶閉塞事不通|門戶破壞主大凶|門扇自折奴僕走|門戶內無人大凶|修移門戶大吉利|石為門戶主壽命|門前生草作刺史|門前坑溝事不成|天火燒門主凶事|屋開小門主私情|穿井見水遠信至|井自損壞家大敗|井中沸溢主得財|井枯涸者家財散|井中照身祿位至|身墜井中疾病凶|房在井中主見病|取井水清吉混凶|井水負泥出財主|井中欲乾家欲破|井中有魚身主貴|窺井有聲口舌生|伏藏井中刑獄事|醉落井中官事至|家住井中長子凶|人云出井喜氣至|淘井造井主大貴|器皿落井有吉事|灶下水流得橫財|灶下燃火有聲名|灶釜破敗有死亡|灶下吹者家破敗|灶下鳴器主口舌|屋有二灶事不成|修造廚灶大吉利|在官廚中得財祿|自吹臼中妻妾亡|淘廁者主得橫財|上廁在屎尿中吉|廁中屎溢大吉利|糞中坐者主大凶|糞土堆積主得財',
+        '金銀珠玉絹帛:金銀寶者主富貴|金銀珠玉大吉利|金銀杯皿有貴孕|金銀作鐺器大吉|玉積如山大富貴|得金玉環生貴子|銅鐺主有口舌至|珠玉滿懷主大凶|得玉碗器物皆吉|見鐵器物主得財|鉛與鍚者主得財|得銅物主大富貴|鑲嵌器物疾病去|還人錢物疾病去|拾得錢物皆大吉|錢春夏吉秋冬凶|家中分財主離敗|贈彩帛者主有權|貴人賜綾錦官至|人賜絹帛大吉昌|與人絲帛大凶惡|得他人麻布衣凶|得布帛遠親來至|與人衣服官事至|尋絲絹主進入口|紡績者主壽命長|經絡者主被人辱|箱器主口舌之事',
+        '鏡環釵釧梳篦:明鏡者吉暗者凶|拾得鏡者招好妻|將鏡自照遠信至|鏡照他人妻妾凶|得他人鏡有貴子|他人弄己鏡妻凶|鏡破主夫妻離別|金釵動有遠行事|金鈿成雙增愛妾|釵釧相敲妻別凶|金釵耀主生貴子|花釵妻妾有姦佞|銀釧夫妻主相毆|花壓妻妾生外心|人與梳篦得美妾|牙木梳舊事盡去|見篦子貴人提攜|得篦子者美女至|刷牙者病患不生|得胭脂粉主生女|見脂粉主大財利|得粉僕妻生嬌女|手帕者主口舌事|針線得者百事就',
+        '衣帳毯褥匙櫡:床帳改主官遷移|舒展床帳大富貴|新安床帳遠人來|床帳出門者妻亡|床帳收換移居吉|床上有蟻至不祥|床帳破損妻欲亡|開帳幔主有酒食|帳幔壞者妻子病|床腳新換奴僕凶|上床臥者大凶惡|血在床妻妾有姦|洗床帳則主大吉|薦蓆入吉出則凶|破蓆者主失官位|換蓆入吉出則凶|蓆簞者主有力助|毯褥舖陳萬事穩|毀蓆幔者妻有姦|新簾者主得好妻|舖蓆合坐得官位|好被自蓋主大吉|見好枕有貴人扶|見手帕主有口舌|手中縛布病患至|毛肩忽持官事至|鼎鼐者主得大財|釜溢者主得大財|玉石器主有人助|銅鐺者主口舌至|鍋鐵破主喪事來|鐺盞破主有惡事|磁碗者主酒食至|磁碟者主口舌至|匙主益妻妾子孫|櫡主益田宅奴僕|盆主益倉庫大吉|棳盆脫底主財散|入盆甕器大富貴|洗面盆者美妾至|大小盆者主團圓|得盆子者所求得|桶盛水者主大吉|桶無水者主大凶|人送大桶主得利|桌架於宅事不成|鋸主有斷決之事|碾衣食移居大吉|鎚鑽者主侵害事|鎚欲舉動有人持|鑿主被人驅使吉|熨斗盛火好事成|燻籠者益增田產|人與秤者主權位|繩索主長命大吉|繩索斷者主凶惡|人與鑿者得失金|人送帶者主得位',
+        '船車遊行物件:船飛行主大富貴|船淺在岸是非厄|乘船渡江河得官|船中有水主得財|乘船看日月得職|乘船過日月主富|乘船飲酒遠客至|與人同船主移居|乘船風帆大吉利|乘船見舵主安穩|乘船橋下過大吉|病人乘船必主死|助父乘船官位至|身臥船中主有凶|執火入船主大吉|家中乘船主沒財|乘船看花酒食至|船車破碎主不祥|車輪破夫妻相別|車輪折倒主破敗|車載不起厄事去|駕車遊行祿位至|車行主百事順和|車不行所求不遂|車入門主有凶事|病人上車主大凶|喪車遇者主災散|行車白馬主大吉|四馬駕車吉反凶|以羊駕車事不常|備馬者主遠行事|遠行出入命通達',
+        '道路橋梁市集:見四路通名利遂|道中得財主通達|道泥荊棘事不成|大道崩陷主失財|修橋樑者萬事和|見渡橋主有官事|橋上坐主祿位至|見橋壞主有官事|攜手上橋妻有孕|橋上呼喚訟得理|新造橋者大和合|橋斷者主有口舌|橋柱折者子孫凶|橋路上往車皆凶|夫妻入市主置產|見市中無人主凶',
+        '夫妻產孕交懽:夫妻宴會主相別|夫妻相罵主病患|夫妻分釵主離別|夫妻相打欲和會|同婦人行主失財|抱婦人主有喜事|與婦人交有邪祟|與婦人共坐大吉|抱夫主大得財喜|婦人與夫入水吉|夫妻各與梳頭吉|夫妻相拜主分散|交接男子主失財|妻著錦衣生貴子|妻有孕主外私情|見婦人陰主口舌|婦人赤身主大吉|男子裸體命通達|兄弟分別口舌臨|抱小兒女主口舌|小兒死者主口舌|新生男女主大吉|見嫁娶及孝主凶|男子化為尼姑凶',
+        '飲食酒肉瓜菜:人請飲酒主長命|與人飲酒有口舌|與人吃會富貴至|筵會客人家欲破|飲酒者主哭泣事|飲酒至醉主疾病|貴人賜宴主疾病|與貴人對飲大吉|人請吃酥酪主喜|與人吃乳尊親至|與人吃蜜大吉利|嘔吐者病人主瘥|食水者主得大利|死人食者主疾病|食牛肉於堂上吉|食犬肉主有爭訟|食豬肉主疾病至|刀割豬肉主生病|食生肉凶熟肉吉|食自死肉主別離|食鵝肉主妾疾病|食雞鴨等肉皆吉|食饅頭主口舌散|見饅頭未食主氣|食爛瓜主生疾病|食餅食飯心不遂|食瓜子主生貴子|食柿食柑主疾病|食柿桃離而復合|食棗者主生貴子|食桑椹主生貴子|食粟者主有分離|食梨者主失財帛|食一切菜者凶至|食茄者主妻有子|食蔥韭主有爭鬥|食薤者有重傷至|食蒜者主災害至|食菜見菜黃主凶|食油鹽醬酸豉吉',
+        '塚墓棺槨迎送:塚墓高者大吉利|新塚棺槨主憂除|塚墓上有雲氣吉|塚墓門開百事吉|塚墓上明吉暗凶|塚墓生樹吉折凶|塚墓上開花大吉|棺自出墓中大吉|抬棺入宅祿位至|死人出棺外客至|開棺與死人言凶|棺殮死人主得財|見棺水上大得財|空遠無人主遠行',
+        '文書筆硯兵器:各色經書大富貴|五色紙者大益財|吞五色紙詩書進|几上有書祿位至|詩文書寫字大吉|有人教書大富貴|見讀書者主聰明|觀人讀書生貴子|得曆日者中黃甲|封書信者主通達|手弄筆硯主遠信|人與墨者文章進|人將己筆文章退|他人送筆主才進|君王隊伍有異名|得大赦者宅舍凶|就人卜易主疾病|受人紙錢主大吉|公座移動主遷官|受職上官財物來|佩印公爵主大吉|佩印執節主移居|佩印信者名譽出|緩印改遷生貴子|碁子主添丁進口|打球者主得虛名|兵馬入城福祿至|率眾破賊所求得|在軍陣中主大吉|將卒隨行主喜事|征人初出事未成|征人回者主疾病|見軍兵敗主凶事|己射人必主遠行|人射己有行人至|持弓矢者主大吉|挽弓斷弦主凶惡|人送弓弩得人力|弩弦難上兄弟散|弓弩相鬥主爭論|戈鉞有光祿位至|披甲仗劍得高官',
+        '哀樂病死歌唱:與人哭泣有慶賀|放聲大哭歡樂至|身著孝服官祿至|遠人來悲泣主凶|床上哭泣主大凶|見歌舞者口舌至|家中歡喜百事吉|懷中琵琶得人助|他人與笛有名聲|與人拍板有口舌|堂上歌樂主喪事|吹笙者主有更改|吹笛打鼓有吉慶|他人作樂訟有理|露齒哭者有爭訟|病臥為人扶加官|病重者主有凶事|自疾病者主有喜|病人歌唱主大凶|病人哭笑疾病除|病人起者必定死|病人裝車必死亡|死人哭泣有口舌|死人立者主大凶|死人哭懷者得財|死人復活主有信|見人死自死者吉|子死者有添喜事|見先亡尊長大吉|問弔他人主生子',
+        '佛道僧尼鬼神:諸佛菩薩大吉利|法師登座主疾病|老君真入皆主吉|畫神佛者得人欽|入神廟神動大吉|造旛蓋者大吉利|僧師教人唸經吉|道士女冠言語吉|和尚尼姑看經悶|被神鬼打大不祥|堂上神佛大吉利|神佛不成形大凶|燒香禮拜皆大吉|迎神賽社有外財|仙聖到家福祿至|與鬼鬥者主延壽|祭祀神道大吉利|身受戒行者子孝|與神女通得貴子|與尼姑交主失財|看神佛者妻有子|佛共人言有福助',
+        '被害鬥傷打罵:被人殺害者大吉|殺死他人大富貴|持刀自殺者大吉|殺人血污衣得財|被刀刺火出快利|持刀相殺見血吉|刀傷出血主酒食|砍刺見血主大吉|炙身見血流大吉|刀斧自傷主大吉|持刀斫人自失財|人砍頭腦中二吉|被人打者主得力|被人腳踢主求財|打妻妾者主失力|家中人鬥主分散|斷頭而行主大喜|女人相打主病至|兄弟相打大吉利|被妻妾打主凶事|看見殺人主大吉|被人簽刺大吉昌|手措折者主子病|向人叩頭百事吉|與人相罵者主吉|被罵佯顛大貴至|被人凌辱主得財|殺豬豖者大吉利|殺羊打羊主病凶|殺虎豹主得重印|殺牛鹿者大富貴|殺牛食肉主生財|殺驢騾馬有酒食|殺龜者主有喪事|殺鳥雀妻妾災難|殺雞鵝鴨主大吉',
+        '捕禁刑罰獄具:牢獄崩壞有赦吉|坐獄中必有恩赦|入獄愛災主榮貴|獄中死者官事散|使人入獄得財吉|入牢獄主有大貴|盜賊自入獄大凶|牢獄臭污百事吉|罪人走脫疾病去|趕賊行見者大吉|枷銷臨身疾病至|枷鎖折損口舌散|枷鎖入宅主大凶|繩索繫身大吉利|身被羅網主官事|被羅網罩主酒食|被人決罰祿位至|被人作賤者大吉|被人綁住疾病至|被官打身主孝服|自以杖決恥辱生|枷鎖怕怖主分散|入官詞訟主大吉|邀人入官主大吉|吏引入司主大吉|為吏所錄有急事|貴人走馬官事明|拷訊杖責主大吉',
+        '田園五榖耕種:田中生草主得財|種田廣大有祿位|自種田禾主出行|見種田者祿位至|教人耕種遠行至|使人種田地大吉|買人田宅主進職|身在禾中大吉利|破敗田地主大吉|割收田禾家居安|屋上生禾官位吉|禾苗豊熟富貴長|見麥稻主得大財|粳精米者有財吉|五穀茂盛主得財|穀穗齊秀大吉利|米谷堆吉散主凶|大小麥主妻私心|大豆苗葉子孫凶|米麥相排大吉利|坐臥米麥主大吉|手中把榖主福祿|得禾榖者主大吉|得禾忽失主得志|粟米必有獻物至|種菜主長命大吉|喬麥麵餅官事遷|麵糠相交家欲儉|涓麴必主枉屈事|萌芽者主惡事連|麻叢身者主疾至|麻生如林大吉利',
+        '水火盜賊燈燭:水上行者主大吉|水上立者主凶事|水流洋洋有新婚|水上火出主大吉|自在水中大吉利|自跌水中不出凶|飲水不休得大財|流水遶身有獄訟|大水澄清大吉利|人家有水兒子亡|江海漲漫大吉昌|河水沙石益文章|火燒日月有人助|火燒河水長命吉|火燒山野大顯達|火燒自屋主興旺|火焰炎炎主發財|火從地生疾病至|執火乘行官位至|大火燒天主國安|身在火中貴人扶|火煙黑色主疾病|把火行路大通達|把火燒井主疾病|宅中火光大吉利|廚中火出有急事|聽選燃火作明府|燒人臭穢主大吉|見燭者主大發財|燈燭光明主大吉|眾人闈爐和合吉|惡人相引疾病至|趕賊入市不出凶|強賊入宅主家破|與賊同行大吉利|己身作賊所求得',
+        '垢污沐浴凌辱:尿屎污身主得財|大便滿地主富貴|處廁中得官祿位|落廁出吉不出凶|廁屋上臥主得財|廁中乾者主家破|架廁屋主有財喜|挑糞回家大吉利|在泥中所求不成|失大小便主失財|污泥衣裳主產凶|泥污衫衣主身辱|男女沐浴上床凶|沐浴塵土疾病安|洗頭遷居疾病除|被辱罵惹人詞訟',
+        '龍蛇禽獸等類:乘龍入水有貴位|龍眠水中求事遂|龍當門者大吉昌|龍死亡主失貴位|乘龍上山所求遂|龍入井中官被辱|龍飛有官位大貴|乘龍入市主貴位|龍蛇入門主得財|龍蛇入灶有官至|蛇化龍得貴人助|婦人見龍生貴子|龍蛇殺人主大凶|蛇蛟人主得大財|蛇入懷中生貴子|蛇行水內主榮遷|蛇隨人去妻外心|蛇入谷道主口舌|蛇遶身者生貴子|蛇多者主陰司事|蛇赤黑口舌青吉|蛇黃白主有官事|鳳凰主有貴人助|鳳集掌上母病至|孔雀者主大吉利|鶴上天主小口災|鶴鳴者祿位大顯|鶴入懷中生貴子|鶴駕車主征代事|放鶴者主得財吉|孔雀飛舞有文章|鸚鵡婦人主口舌|鴛鴦散去主妻凶|鳧入宅主有大凶|駕鷂者主祿位至|鳩鳴者婦人口舌|燕飛入懷妻貴子|燕子至有遠客來|空中鳥鳴主妻亡|飛鳥入懷皆主吉|捉住飛鳥遠信至|雀鼠爭鬥有官事|鴉雀相噪主酒食|鵝鴨同游添好妾|鳥赴蛇來人引薦|洗雞得官鳴口舌|雞抱卵主有大喜|雞在樹上主得財|麒麟者名震天下|白象江豬官位至|獅子叫吼聲名震|猛虎大吼主得官|騎虎行者無惡事|虎入宅中官職重|虎狼不動見官吉|豹狼惡狗有盜賊|狼啖腳者主不得|駱駝豹豸得重印|熊羆主身生貴子|群兔上天得貴位|獐鹿在家得官祿|活兔在園百憂去|貓捕鼠者大得財|白鼠引路人提攜|鼠咬人衣所求得|鼠大走主有喜事|山猴主有爭訟端|白猴主有祿位得',
+        '牛馬豬羊六畜:黃牛來家主富貴|水牛主先祖索食|牛上山坡大吉昌|牽牛上山主富貴|牛角有血主三公|牛觸人凡事不成|牛出門好事立至|水牛來家主喪事|牛生犢所求皆得|騎牛入城有喜臨|馬舞庭前凶事散|牽牛羊來家歡樂|馬行千里大喜至|乘馬快吉鈍主凶|走馬來往文書事|馬駝錢物失祿位|馬入室主奸情事|披洗放馬皆喜事|群馬奔遠百凶解|罪人走馬厄事去|被馬咬有祿位至|乘白馬者主疾病|騎驢騾主得財吉|殺豬吉豬自死凶|豬豚變人官事至|羊作豚行行人至|豬羊搔癢主口舌|騎羊上街主得財|子母羊益命大吉|犬吠人鬼來求食|犬吠主人失財凶|屋中生馬主大吉',
+        '龜鱉魚蝦昆蟲:龜入井宅富貴至|龜蛇相同主生財|見龜者主女人貴|捉龜者主喪事至|見鱉者主有得財|魚飛水上百事散|井內有魚遷官至|張網捕魚大吉利|人捕魚主食皆吉|搶魚食魚主小疾|水中釣魚大吉利|林中魚獵事無成|群魚游水主有財|鯉魚妻有孕大吉|大魚揚動主聲名|小魚生子大吉利|乾魚下水命復通|蝦變魚主失財物|身坐魚蟲病患除|螃蟹主百病消散|蝦蛤鳴走有口舌|水蛭主女人失財|螺螄主在外不利|蛤蜊主老來生子|飛蛾入燈他人敗|蚤飛不繭主小吉|蜂蝶交戲事不成|蜂螫人腳有財喜|蜣蜋作堆主失財|蜻蜓對飛美人來|促織聲繁有小惱|蝙蝠群飛陰事長|蜈蚣咬人壽命吉|蜓蚰主有小財吉|蚯蚓主田宅大吉|蚊子咬人主有失|蠅汸人衣必有讒|螻蟈主有不明事',
+    ];
+
+    protected static ENTRIES: string[] = [];
+    protected static CATEGORIES: string[] = [];
+    protected static isInit: boolean = false;
+
+    protected index: number;
+
+    protected static init(): void {
+        if (DreamOracle.isInit) {
+            return;
+        }
+        for (let i: number = 0; i < DreamOracle.CATEGORY_DATA.length; i++) {
+            const item: string = DreamOracle.CATEGORY_DATA[i];
+            const p: number = item.indexOf(':');
+            const category: string = item.substring(0, p);
+            const entries: string[] = item.substring(p + 1).split('|');
+            for (let j: number = 0; j < entries.length; j++) {
+                DreamOracle.CATEGORIES.push(category);
+                DreamOracle.ENTRIES.push(entries[j]);
+            }
+        }
+        DreamOracle.isInit = true;
+    }
+
+    protected constructor(index: number) {
+        super();
+        this.index = index;
+    }
+
+    /**
+     * 逐日一则，同日同条
+     */
+    static of(solarDay: SolarDay): DreamOracle {
+        DreamOracle.init();
+        const n: number = (solarDay.getYear() * 373 + solarDay.getMonth() * 37 + solarDay.getDay()) % DreamOracle.ENTRIES.length;
+        return new DreamOracle(n);
+    }
+
+    static fromIndex(index: number): DreamOracle {
+        DreamOracle.init();
+        return new DreamOracle(index % DreamOracle.ENTRIES.length);
+    }
+
+    static getSize(): number {
+        DreamOracle.init();
+        return DreamOracle.ENTRIES.length;
+    }
+
+    static getCategories(): string[] {
+        DreamOracle.init();
+        return DreamOracle.CATEGORY_DATA.map((item) => item.substring(0, item.indexOf(':')));
+    }
+
+    getIndex(): number {
+        return this.index;
+    }
+
+    getCategory(): string {
+        DreamOracle.init();
+        return DreamOracle.CATEGORIES[this.index];
+    }
+
+    /**
+     * 原文断语
+     */
+    getText(): string {
+        DreamOracle.init();
+        return DreamOracle.ENTRIES[this.index];
+    }
+
+    getDream(): string {
+        const text: string = this.getText();
+        const i: number = DreamOracle.splitIndex(text);
+        return i < 0 ? text : text.substring(0, i);
+    }
+
+    getInterpretation(): string {
+        const text: string = this.getText();
+        const i: number = DreamOracle.splitIndex(text);
+        return i < 0 ? '' : text.substring(i);
+    }
+
+    protected static splitIndex(text: string): number {
+        let i: number = text.indexOf('主');
+        if (i > 0) {
+            return i;
+        }
+        i = -1;
+        const marks: string[] = ['大吉', '大凶', '吉', '凶'];
+        for (let k: number = 0; k < marks.length; k++) {
+            const j: number = text.indexOf(marks[k], 2);
+            if (j > 0 && (i < 0 || j < i)) {
+                i = j;
+            }
+        }
+        return i;
+    }
+
+    getName(): string {
+        return this.getText();
+    }
+
+    toString(): string {
+        const text: string = this.getInterpretation();
+        return text ? `梦见：${this.getDream()}　解：${text}` : this.getText();
+    }
+}
+
+
+/**
+ * 今日吉数
+ *
+ * 原版通胜的六个吉数并无公开算法。此处取日干、日支、纳音三者之五行，按河图数
+ * （水一六、火二七、木三八、金四九、土五十）取一至四十九中同尾之数，依五行次序轮流取足。
+ * 属规则推演，非原版数值。
+ */
+export class DailyNumbers extends AbstractCulture {
+    protected day: SixtyCycleDay;
+
+    // 依 Element 之序：木、火、土、金、水
+    protected static PAIRS: number[][] = [[3, 8], [2, 7], [5, 10], [4, 9], [1, 6]];
+
+    protected constructor(day: SixtyCycleDay) {
+        super();
+        this.day = day;
+    }
+
+    static fromSixtyCycleDay(day: SixtyCycleDay): DailyNumbers {
+        return new DailyNumbers(day);
+    }
+
+    getSixtyCycleDay(): SixtyCycleDay {
+        return this.day;
+    }
+
+    /**
+     * 日干、日支、纳音之五行
+     */
+    getElements(): Element[] {
+        const l: Element[] = [];
+        const source: Element[] = [
+            this.day.getSixtyCycle().getHeavenStem().getElement(),
+            this.day.getSixtyCycle().getEarthBranch().getElement(),
+            this.day.getSixtyCycle().getSound().getElement(),
+        ];
+        for (let i: number = 0; i < source.length; i++) {
+            let exists: boolean = false;
+            for (let j: number = 0; j < l.length; j++) {
+                if (l[j].getIndex() === source[i].getIndex()) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                l.push(source[i]);
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 河图数对应之数（一至四十九）
+     */
+    getElementNumbers(element: Element): number[] {
+        const l: number[] = [];
+        const pair: number[] = DailyNumbers.PAIRS[element.getIndex()];
+        for (let n: number = 1; n <= 49; n++) {
+            if (pair.indexOf(n % 10) > -1 || (n % 10 === 0 && pair.indexOf(10) > -1)) {
+                l.push(n);
+            }
+        }
+        return l;
+    }
+
+    getNumbers(count: number = 6): number[] {
+        const elements: Element[] = this.getElements();
+        const lists: number[][] = [];
+        for (let i: number = 0; i < elements.length; i++) {
+            lists.push(this.getElementNumbers(elements[i]));
+        }
+        const l: number[] = [];
+        for (let round: number = 0; l.length < count; round++) {
+            let added: boolean = false;
+            for (let i: number = 0; i < lists.length && l.length < count; i++) {
+                if (round < lists[i].length) {
+                    const n: number = lists[i][round];
+                    if (l.indexOf(n) < 0) {
+                        l.push(n);
+                        added = true;
+                    }
+                }
+            }
+            if (!added) {
+                break;
+            }
+        }
+        return l;
+    }
+
+    getName(): string {
+        const l: number[] = this.getNumbers();
+        const names: string[] = [];
+        for (let i: number = 0; i < l.length; i++) {
+            names.push((l[i] < 10 ? '0' : '') + l[i]);
+        }
+        return names.join(' ');
+    }
+
+    toString(): string {
+        return this.getName();
+    }
+}
+
+/**
+ * 姓名建议
+ */
+export class NameSuggestion extends AbstractCulture {
+    protected surname: string;
+    protected givenName: string;
+    protected elements: Element[];
+    protected meaning: string;
+
+    constructor(surname: string, givenName: string, elements: Element[], meaning: string) {
+        super();
+        this.surname = surname;
+        this.givenName = givenName;
+        this.elements = elements;
+        this.meaning = meaning;
+    }
+
+    getSurname(): string {
+        return this.surname;
+    }
+
+    getGivenName(): string {
+        return this.givenName;
+    }
+
+    getFullName(): string {
+        return this.surname + this.givenName;
+    }
+
+    getElements(): Element[] {
+        return this.elements;
+    }
+
+    getMeaning(): string {
+        return this.meaning;
+    }
+
+    getName(): string {
+        return this.getFullName();
+    }
+
+    toString(): string {
+        return `${this.getFullName()}（${this.meaning}）`;
+    }
+}
+
+/**
+ * 出生取名
+ *
+ * 先以八字五行个数取用，再从字库中择取喜用五行之字，按「姓 + 双字名」组合。
+ * 字之五行依偏旁归类（艹木属木、日火属火、土山石属土、金玉属金、水雨属水），
+ * 为字形五行之通行做法；未作五格剖象、音韵格律推演。
+ */
+export class Naming {
+    /**
+     * 字|五行|字义|性别（0 通用、1 男、2 女）
+     */
+    protected static CHARS: string[] = [
+        '桐|木|梧桐，高洁挺拔|0', '楠|木|楠木，坚实贵重|0', '楷|木|楷模，端正可法|1',
+        '楚|木|楚楚，清秀明晰|0', '柏|木|柏木，岁寒长青|1', '森|木|林木，繁茂昌盛|1',
+        '荣|木|荣华，显达兴旺|1', '萱|木|萱草，忘忧安和|2', '芸|木|芸香，清雅自持|2',
+        '芷|木|白芷，芬芳高洁|2', '若|木|杜若，温婉舒徐|2', '茜|木|茜草，明艳可人|2',
+        '煜|火|光耀，明亮照人|1', '烨|火|火光，盛明灿烂|0', '煊|火|温暖，声势显赫|1',
+        '熙|火|和乐，光明熙然|0', '彤|火|朱红，热烈鲜明|2', '旭|火|朝阳，初升有望|1',
+        '晗|火|天将明，含光|0', '晴|火|晴朗，开朗明净|2', '昭|火|显著，贤明昭彰|0',
+        '曜|火|日月之辉，光耀|1', '曦|火|晨光，熹微初照|0', '灵|火|灵秀，聪慧敏捷|2',
+        '坤|土|坤厚载物，宽宏|1', '垚|土|山高而稳，厚重|0', '培|土|培植，厚德载物|1',
+        '城|土|城池，坚固可守|1', '均|土|均平，中正不偏|0', '墨|土|翰墨，文雅有致|1',
+        '圣|土|圣明，通达事理|0', '岚|土|山雾，清幽缥缈|0', '峰|土|山峰，高远独立|1',
+        '峻|土|峻拔，严正不阿|1', '崇|土|崇高，景仰有德|1', '岩|土|岩石，刚毅不移|1',
+        '铭|金|铭记，刻骨不忘|1', '锐|金|锐利，进取有为|1', '锦|金|锦绣，华美绚烂|0',
+        '钧|金|权衡，稳重得体|1', '铃|金|清铃，灵动悦耳|2', '铎|金|木铎，警醒世人|1',
+        '鑫|金|三金相叠，兴旺|1', '铮|金|铮然，刚直不曲|1', '钰|金|珍宝，坚润|0',
+        '瑜|金|美玉，瑕不掩瑜|0', '琛|金|珍宝，贵重|1', '瑞|金|祥瑞，吉庆|0',
+        '泽|水|恩泽，润物无声|1', '洋|水|汪洋，宽广无涯|0', '浩|水|浩荡，正大光明|1',
+        '润|水|温润，滋养有度|0', '清|水|清澈，高洁自守|0', '涵|水|涵养，包容深厚|0',
+        '洁|水|洁白，守身如玉|2', '淳|水|淳厚，质朴无华|0', '渊|水|深渊，博学沉静|1',
+        '溪|水|溪流，柔韧不绝|0', '汐|水|潮汐，应时有信|2', '沐|水|沐浴，承恩受润|0',
+    ];
+
+    protected static ELEMENTS: string[] = ['木', '火', '土', '金', '水'];
+
+    /**
+     * 八字五行分析
+     */
+    static analyze(eightChar: EightChar): ElementBalance {
+        return ElementBalance.fromEightChar(eightChar);
+    }
+
+    /**
+     * 依喜用五行取双字名
+     *
+     * @param surname 姓氏
+     * @param eightChar 生辰八字
+     * @param gender 性别，用于筛选偏女性或偏男性用字
+     * @param count 返回条数
+     */
+    static suggest(surname: string, eightChar: EightChar, gender: Gender, count: number = 6): NameSuggestion[] {
+        const balance: ElementBalance = ElementBalance.fromEightChar(eightChar);
+        const favorable: Element[] = balance.getFavorable();
+        const pools: string[][] = [];
+        for (let i: number = 0; i < favorable.length; i++) {
+            pools.push(Naming.getChars(favorable[i], gender));
+        }
+        const l: NameSuggestion[] = [];
+        for (let i: number = 0; i < pools.length && l.length < count; i++) {
+            const secondPool: string[] = pools[(i + 1) % pools.length];
+            if (pools[i].length === 0 || secondPool.length === 0) {
+                continue;
+            }
+            for (let j: number = 0; j < pools[i].length && l.length < count; j++) {
+                const first: string = pools[i][j];
+                const second: string = secondPool[j % secondPool.length];
+                if (second === first || surname.indexOf(first) > -1 || surname.indexOf(second) > -1) {
+                    continue;
+                }
+                l.push(Naming.build(surname, first, second));
+            }
+        }
+        return l;
+    }
+
+    protected static build(surname: string, first: string, second: string): NameSuggestion {
+        const elements: Element[] = [];
+        const meanings: string[] = [];
+        const chars: string[] = [first, second];
+        for (let i: number = 0; i < chars.length; i++) {
+            const data: string[] = Naming.getCharData(chars[i]);
+            elements.push(Element.fromName(data[1]));
+            meanings.push(chars[i] + '：' + data[2]);
+        }
+        return new NameSuggestion(surname, first + second, elements, meanings.join('；'));
+    }
+
+    protected static getCharData(char: string): string[] {
+        for (let i: number = 0; i < Naming.CHARS.length; i++) {
+            if (Naming.CHARS[i].charAt(0) === char) {
+                return Naming.CHARS[i].split('|');
+            }
+        }
+        throw new Error(`illegal char: ${char}`);
+    }
+
+    protected static getChars(element: Element, gender: Gender): string[] {
+        const l: string[] = [];
+        for (let i: number = 0; i < Naming.CHARS.length; i++) {
+            const data: string[] = Naming.CHARS[i].split('|');
+            if (data[1] !== Naming.ELEMENTS[element.getIndex()]) {
+                continue;
+            }
+            const g: number = parseInt(data[3], 10);
+            if (g !== 0 && g !== (gender === Gender.MAN ? 1 : 2)) {
+                continue;
+            }
+            l.push(data[0]);
+        }
+        return l;
+    }
+
+    /**
+     * 字库规模
+     */
+    static getCharCount(): number {
+        return Naming.CHARS.length;
+    }
+}
+
+
+/**
+ * 年号纪年
+ *
+ * 日本年号自明治起，改元之日以公历记；另附佛历、民国、主体纪年之换算。
+ */
+export class Era extends AbstractCulture {
+    protected name: string;
+    protected start: SolarDay;
+
+    static JAPANESE: Era[] = [
+        new Era('令和', SolarDay.fromYmd(2019, 5, 1)),
+        new Era('平成', SolarDay.fromYmd(1989, 1, 8)),
+        new Era('昭和', SolarDay.fromYmd(1926, 12, 25)),
+        new Era('大正', SolarDay.fromYmd(1912, 7, 30)),
+        new Era('明治', SolarDay.fromYmd(1868, 1, 25)),
+    ];
+
+    constructor(name: string, start: SolarDay) {
+        super();
+        this.name = name;
+        this.start = start;
+    }
+
+    /**
+     * 所在年号，早于明治者返回 null
+     */
+    static of(solarDay: SolarDay): Era | null {
+        for (let i: number = 0; i < Era.JAPANESE.length; i++) {
+            if (!solarDay.isBefore(Era.JAPANESE[i].getStart())) {
+                return Era.JAPANESE[i];
+            }
+        }
+        return null;
+    }
+
+    getStart(): SolarDay {
+        return this.start;
+    }
+
+    getName(): string {
+        return this.name;
+    }
+
+    /**
+     * 年号年，元年为一
+     */
+    getYear(solarDay: SolarDay): number {
+        return solarDay.getYear() - this.start.getYear() + 1;
+    }
+
+    getYearName(solarDay: SolarDay): string {
+        const y: number = this.getYear(solarDay);
+        return y === 1 ? '元' : String(y);
+    }
+
+    toString(): string {
+        return this.name;
+    }
+
+    /**
+     * 佛历纪年，公历加五四三
+     */
+    static getBuddhistYear(solarYear: number): number {
+        return solarYear + 543;
+    }
+
+    /**
+     * 民国纪年，公历减一九一一
+     */
+    static getMinguoYear(solarYear: number): number {
+        return solarYear - 1911;
+    }
+
+    /**
+     * 主体纪年，公历减一九一一
+     */
+    static getJucheYear(solarYear: number): number {
+        return solarYear - 1911;
+    }
+}
+
+export enum HolidayType {
+    SOLAR = 0,
+    LUNAR = 1,
+    WEEK = 2,
+    EASTER = 3,
+    TERM = 4
+}
+
+/**
+ * 节日规则
+ *
+ * 支持公历月日、农历月日、某月第几个星期几、复活节偏移、节气日五类；
+ * 起止年份用于处理古今异名、异地异日之节日。
+ */
+export class HolidayRule extends AbstractCulture {
+    protected type: HolidayType;
+    protected name: string;
+    protected month: number;
+    protected day: number;
+    protected weekIndex: number;
+    protected week: number;
+    protected offset: number;
+    protected termIndex: number;
+    protected startYear: number;
+    protected endYear: number;
+
+    protected constructor(type: HolidayType, name: string) {
+        super();
+        this.type = type;
+        this.name = name;
+        this.month = 1;
+        this.day = 1;
+        this.weekIndex = 1;
+        this.week = 0;
+        this.offset = 0;
+        this.termIndex = 0;
+        this.startYear = 1;
+        this.endYear = 9999;
+    }
+
+    static solar(month: number, day: number, name: string, startYear: number = 1, endYear: number = 9999): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.SOLAR, name);
+        o.month = month;
+        o.day = day;
+        o.startYear = startYear;
+        o.endYear = endYear;
+        return o;
+    }
+
+    static lunar(month: number, day: number, name: string, offset: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.LUNAR, name);
+        o.month = month;
+        o.day = day;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * @param weekIndex 第几个，负数自月末倒推
+     * @param week 星期，0 为周日
+     */
+    static week(month: number, weekIndex: number, week: number, name: string, startYear: number = 1): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.WEEK, name);
+        o.month = month;
+        o.weekIndex = weekIndex;
+        o.week = week;
+        o.startYear = startYear;
+        return o;
+    }
+
+    static easter(offset: number, name: string): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.EASTER, name);
+        o.offset = offset;
+        return o;
+    }
+
+    static term(termIndex: number, name: string, offset: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.TERM, name);
+        o.termIndex = termIndex;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * 复活节（西方教会），Anonymous Gregorian 算法
+     */
+    static getEasterDay(year: number): SolarDay {
+        const a: number = year % 19;
+        const b: number = ~~(year / 100);
+        const c: number = year % 100;
+        const d: number = ~~(b / 4);
+        const e: number = b % 4;
+        const f: number = ~~((b + 8) / 25);
+        const g: number = ~~((b - f + 1) / 3);
+        const h: number = (19 * a + b - d - g + 15) % 30;
+        const i: number = ~~(c / 4);
+        const k: number = c % 4;
+        const l: number = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m: number = ~~((a + 11 * h + 22 * l) / 451);
+        const month: number = ~~((h + l - 7 * m + 114) / 31);
+        const day: number = (h + l - 7 * m + 114) % 31 + 1;
+        return SolarDay.fromYmd(year, month, day);
+    }
+
+    getName(): string {
+        return this.name;
+    }
+
+    getStartYear(): number {
+        return this.startYear;
+    }
+
+    getDay(year: number): SolarDay | null {
+        if (year < this.startYear || year > this.endYear) {
+            return null;
+        }
+        switch (this.type) {
+            case HolidayType.SOLAR:
+                return SolarDay.fromYmd(year, this.month, this.day).next(this.offset);
+            case HolidayType.LUNAR:
+                return LunarDay.fromYmd(year, this.month, this.day).getSolarDay().next(this.offset);
+            case HolidayType.TERM:
+                // 节气以冬至为首，本年冬至属下一节气年
+                return SolarTerm.fromIndex(this.termIndex === 0 ? year + 1 : year, this.termIndex).getSolarDay().next(this.offset);
+            case HolidayType.EASTER:
+                return HolidayRule.getEasterDay(year).next(this.offset);
+            case HolidayType.WEEK:
+                return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+        }
+        return null;
+    }
+
+    protected static getWeekDay(year: number, month: number, weekIndex: number, week: number): SolarDay {
+        const m: SolarMonth = SolarMonth.fromYm(year, month);
+        if (weekIndex > 0) {
+            const first: SolarDay = m.getFirstDay();
+            return first.next(first.getWeek().stepsTo(week) + 7 * (weekIndex - 1));
+        }
+        const last: SolarDay = SolarDay.fromYmd(year, month, m.getDayCount());
+        return last.next(last.getWeek().stepsBackTo(week) + 7 * (weekIndex + 1));
+    }
+}
+
+/**
+ * 节假日
+ */
+export class Holiday extends AbstractCulture {
+    protected day: SolarDay;
+    protected name: string;
+    protected work: boolean;
+
+    constructor(day: SolarDay, name: string, work: boolean = false) {
+        super();
+        this.day = day;
+        this.name = name;
+        this.work = work;
+    }
+
+    getDay(): SolarDay {
+        return this.day;
+    }
+
+    getName(): string {
+        return this.name;
+    }
+
+    /**
+     * 是否为调休上班日
+     */
+    isWork(): boolean {
+        return this.work;
+    }
+
+    toString(): string {
+        return `${this.day} ${this.name}${this.work ? '（班）' : ''}`;
+    }
+}
+
+/**
+ * 节假日历
+ *
+ * 以规则推算为主，另可导入逐年公布的法定节假日与调休数据。
+ * 中国大陆的调休安排需国务院逐年公布，故以数据导入为准；其余地区同理。
+ */
+export class HolidayCalendar {
+    protected region: string;
+    protected rules: HolidayRule[];
+    protected data: { [date: string]: Holiday };
+    protected substitute: boolean;
+
+    protected constructor(region: string, rules: HolidayRule[], substitute: boolean) {
+        this.region = region;
+        this.rules = rules;
+        this.data = {};
+        this.substitute = substitute;
+    }
+
+    static of(region: string): HolidayCalendar {
+        const r: string = region.toUpperCase();
+        switch (r) {
+            case 'CN': {
+                const c: HolidayCalendar = new HolidayCalendar(r, HolidayCalendar.chinaRules(), false);
+                const days: LegalHoliday[] = LegalHoliday.getDays();
+                for (let i: number = 0; i < days.length; i++) {
+                    const d: LegalHoliday = days[i];
+                    c.data[d.getDay().toString()] = new Holiday(d.getDay(), d.getName(), d.isWork());
+                }
+                return c;
+            }
+            case 'HK':
+                return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), false);
+            case 'MO':
+                return new HolidayCalendar(r, HolidayCalendar.macaoRules(), false);
+            case 'TW':
+                return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), false);
+            case 'JP':
+                return new HolidayCalendar(r, HolidayCalendar.japanRules(), true);
+            case 'KR':
+                return new HolidayCalendar(r, HolidayCalendar.koreaRules(), false);
+            case 'VN':
+                return new HolidayCalendar(r, HolidayCalendar.vietnamRules(), false);
+            case 'SG':
+                return new HolidayCalendar(r, HolidayCalendar.singaporeRules(), false);
+            default:
+                throw new Error(`illegal region: ${region}`);
+        }
+    }
+
+    static getRegions(): string[] {
+        return ['CN', 'HK', 'MO', 'TW', 'JP', 'KR', 'VN', 'SG'];
+    }
+
+    protected static chinaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.lunar(1, 1, '春节'),
+            HolidayRule.term(7, '清明节'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.lunar(5, 5, '端午节'),
+            HolidayRule.lunar(8, 15, '中秋节'),
+            HolidayRule.solar(10, 1, '国庆节'),
+        ];
+    }
+
+    protected static hongKongRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.lunar(1, 1, '农历年初一'),
+            HolidayRule.lunar(1, 2, '农历年初二'),
+            HolidayRule.lunar(1, 3, '农历年初三'),
+            HolidayRule.term(7, '清明节'),
+            HolidayRule.easter(-2, '耶稣受难节'),
+            HolidayRule.easter(-1, '耶稣受难节翌日'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.lunar(4, 8, '佛诞'),
+            HolidayRule.lunar(5, 5, '端午节'),
+            HolidayRule.solar(7, 1, '香港特别行政区成立纪念日'),
+            HolidayRule.lunar(8, 16, '中秋节翌日'),
+            HolidayRule.solar(10, 1, '国庆日'),
+            HolidayRule.lunar(9, 9, '重阳节'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '圣诞节后第一个周日'),
+        ];
+    }
+
+    protected static macaoRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.lunar(1, 1, '农历年初一'),
+            HolidayRule.lunar(1, 2, '农历年初二'),
+            HolidayRule.lunar(1, 3, '农历年初三'),
+            HolidayRule.term(7, '清明节'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(-1, '复活节前日'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.lunar(4, 8, '佛诞节'),
+            HolidayRule.lunar(5, 5, '端午节'),
+            HolidayRule.lunar(8, 16, '中秋节翌日'),
+            HolidayRule.solar(10, 1, '国庆日'),
+            HolidayRule.lunar(9, 9, '重阳节'),
+            HolidayRule.solar(11, 2, '追思节'),
+            HolidayRule.solar(12, 8, '圣母无原罪瞻礼'),
+            HolidayRule.term(0, '冬至'),
+            HolidayRule.solar(12, 20, '澳门特别行政区成立纪念日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static taiwanRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '开国纪念日'),
+            HolidayRule.lunar(1, 1, '春节', -1),
+            HolidayRule.lunar(1, 1, '春节'),
+            HolidayRule.lunar(1, 2, '春节'),
+            HolidayRule.lunar(1, 3, '春节'),
+            HolidayRule.solar(2, 28, '和平纪念日'),
+            HolidayRule.term(7, '儿童节、清明节'),
+            HolidayRule.lunar(5, 5, '端午节'),
+            HolidayRule.lunar(8, 15, '中秋节'),
+            HolidayRule.solar(10, 10, '国庆日'),
+        ];
+    }
+
+    protected static japanRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元日'),
+            HolidayRule.week(1, 2, 1, '成人の日', 2000),
+            HolidayRule.solar(2, 11, '建国記念の日'),
+            HolidayRule.solar(12, 23, '天皇誕生日', 1989, 2018),
+            HolidayRule.solar(2, 23, '天皇誕生日', 2020),
+            HolidayRule.term(6, '春分の日'),
+            HolidayRule.solar(4, 29, '昭和の日', 2007),
+            HolidayRule.solar(5, 3, '憲法記念日'),
+            HolidayRule.solar(5, 4, 'みどりの日', 2007),
+            HolidayRule.solar(5, 5, 'こどもの日'),
+            HolidayRule.week(7, 3, 1, '海の日', 2003),
+            HolidayRule.solar(8, 11, '山の日', 2016),
+            HolidayRule.week(9, 3, 1, '敬老の日', 2003),
+            HolidayRule.term(18, '秋分の日'),
+            HolidayRule.week(10, 2, 1, 'スポーツの日', 2020),
+            HolidayRule.solar(11, 3, '文化の日'),
+            HolidayRule.solar(11, 23, '勤労感謝の日'),
+        ];
+    }
+
+    protected static koreaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '新正'),
+            HolidayRule.lunar(1, 1, '春节', -1),
+            HolidayRule.lunar(1, 1, '春节'),
+            HolidayRule.lunar(1, 1, '春节', 1),
+            HolidayRule.solar(3, 1, '三一节'),
+            HolidayRule.lunar(4, 8, '佛诞节'),
+            HolidayRule.solar(5, 5, '儿童节'),
+            HolidayRule.solar(6, 6, '显忠日'),
+            HolidayRule.solar(8, 15, '光复节'),
+            HolidayRule.lunar(8, 15, '秋夕', -1),
+            HolidayRule.lunar(8, 15, '秋夕'),
+            HolidayRule.lunar(8, 15, '秋夕', 1),
+            HolidayRule.solar(10, 3, '开天节'),
+            HolidayRule.solar(10, 9, '韩文节'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static vietnamRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.lunar(1, 1, '春节', -1),
+            HolidayRule.lunar(1, 1, '春节'),
+            HolidayRule.lunar(1, 1, '春节', 1),
+            HolidayRule.lunar(3, 10, '雄王忌日'),
+            HolidayRule.solar(4, 30, '南方解放日'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(9, 2, '国庆日'),
+        ];
+    }
+
+    protected static singaporeRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.lunar(1, 1, '农历新年'),
+            HolidayRule.lunar(1, 2, '农历新年'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.lunar(4, 15, '卫塞节'),
+            HolidayRule.solar(8, 9, '国庆日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    getRegion(): string {
+        return this.region;
+    }
+
+    getRules(): HolidayRule[] {
+        return this.rules;
+    }
+
+    /**
+     * 导入节假日数据，返回导入条数
+     *
+     * JSON 形如 {"region":"CN","days":[{"date":"2026-01-01","name":"元旦","work":false}]}
+     */
+    importJson(json: string): number {
+        const o: { region?: string, days?: { date: string, name: string, work?: boolean }[] } = JSON.parse(json);
+        const days: { date: string, name: string, work?: boolean }[] = o.days || [];
+        let n: number = 0;
+        for (let i: number = 0; i < days.length; i++) {
+            const item: { date: string, name: string, work?: boolean } = days[i];
+            const d: SolarDay = SolarDay.fromYmd(
+                parseInt(item.date.substring(0, 4), 10),
+                parseInt(item.date.substring(5, 7), 10),
+                parseInt(item.date.substring(8, 10), 10));
+            this.data[d.toString()] = new Holiday(d, item.name, item.work === true);
+            n++;
+        }
+        return n;
+    }
+
+    static fromJson(json: string): HolidayCalendar {
+        const o: { region?: string } = JSON.parse(json);
+        const c: HolidayCalendar = HolidayCalendar.of(o.region || 'CN');
+        c.importJson(json);
+        return c;
+    }
+
+    toString(): string {
+        return this.region;
+    }
+
+    protected static getKey(day: SolarDay): string {
+        return day.toString();
+    }
+
+    /**
+     * 一年节假日，含规则推算与导入数据，按日期排序
+     */
+    getDays(year: number, includeWork: boolean = false): Holiday[] {
+        const map: { [key: string]: Holiday } = {};
+        for (const k in this.data) {
+            if (this.data[k].getDay().getYear() === year) {
+                map[k] = this.data[k];
+            }
+        }
+        for (let i: number = 0; i < this.rules.length; i++) {
+            const d: SolarDay | null = this.rules[i].getDay(year);
+            if (d && !map[HolidayCalendar.getKey(d)]) {
+                map[HolidayCalendar.getKey(d)] = new Holiday(d, this.rules[i].getName());
+            }
+        }
+        if (this.substitute) {
+            this.applySubstitutes(year, map);
+        }
+        const l: Holiday[] = [];
+        for (const k in map) {
+            if (includeWork || !map[k].isWork()) {
+                l.push(map[k]);
+            }
+        }
+        l.sort((a: Holiday, b: Holiday) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
+        return l;
+    }
+
+    /**
+     * 日本振替休日与国民の休日
+     */
+    protected applySubstitutes(year: number, map: { [key: string]: Holiday }): void {
+        const days: SolarDay[] = [];
+        let d: SolarDay = SolarDay.fromYmd(year, 1, 1);
+        const end: SolarDay = SolarDay.fromYmd(year, 12, 31);
+        while (!d.isAfter(end)) {
+            days.push(d);
+            d = d.next(1);
+        }
+        const isHoliday = (x: SolarDay): boolean => !!map[HolidayCalendar.getKey(x)];
+        for (let i: number = 1; i < days.length - 1; i++) {
+            const cur: SolarDay = days[i];
+            if (!isHoliday(cur) && cur.getWeek().getIndex() !== 0 && isHoliday(days[i - 1]) && isHoliday(days[i + 1])) {
+                map[HolidayCalendar.getKey(cur)] = new Holiday(cur, '国民の休日');
+            }
+        }
+        for (let i: number = 0; i < days.length; i++) {
+            const cur: SolarDay = days[i];
+            if (isHoliday(cur) && cur.getWeek().getIndex() === 0) {
+                let next: SolarDay = cur.next(1);
+                while (isHoliday(next)) {
+                    next = next.next(1);
+                }
+                map[HolidayCalendar.getKey(next)] = new Holiday(next, '振替休日');
+            }
+        }
+    }
+
+    getHoliday(solarDay: SolarDay): Holiday | null {
+        const days: Holiday[] = this.getDays(solarDay.getYear(), true);
+        const key: string = HolidayCalendar.getKey(solarDay);
+        for (let i: number = 0; i < days.length; i++) {
+            if (HolidayCalendar.getKey(days[i].getDay()) === key) {
+                return days[i];
+            }
+        }
+        return null;
+    }
+}
+
+/**
+ * ICS 日程
+ */
+export class IcsEvent extends AbstractCulture {
+    protected summary: string;
+    protected start: SolarDay;
+    protected end: SolarDay | null;
+    protected rrule: string;
+    protected uid: string;
+    protected location: string;
+    protected description: string;
+
+    constructor(summary: string, start: SolarDay, end: SolarDay | null, rrule: string, uid: string, location: string, description: string) {
+        super();
+        this.summary = summary;
+        this.start = start;
+        this.end = end;
+        this.rrule = rrule;
+        this.uid = uid;
+        this.location = location;
+        this.description = description;
+    }
+
+    getName(): string {
+        return this.summary;
+    }
+
+    getStart(): SolarDay {
+        return this.start;
+    }
+
+    getEnd(): SolarDay | null {
+        return this.end;
+    }
+
+    getRrule(): string {
+        return this.rrule;
+    }
+
+    getUid(): string {
+        return this.uid;
+    }
+
+    getLocation(): string {
+        return this.location;
+    }
+
+    getDescription(): string {
+        return this.description;
+    }
+
+    toString(): string {
+        return `${this.start} ${this.summary}`;
+    }
+}
+
+/**
+ * ICS 日历
+ *
+ * 解析 iCalendar 文本，并将「每年同月同日」「每年某月第几个星期几」两类循环事件
+ * 转换为 tyme 的 Event；其余事件以日期列表返回。
+ */
+export class IcsCalendar {
+    protected events: IcsEvent[];
+
+    protected constructor(events: IcsEvent[]) {
+        this.events = events;
+    }
+
+    static parse(text: string): IcsCalendar {
+        const lines: string[] = text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
+        const events: IcsEvent[] = [];
+        let fields: { [key: string]: string } | null = null;
+        for (let i: number = 0; i < lines.length; i++) {
+            const line: string = lines[i];
+            if (line === 'BEGIN:VEVENT') {
+                fields = {};
+                continue;
+            }
+            if (line === 'END:VEVENT') {
+                if (fields && fields['DTSTART']) {
+                    events.push(IcsCalendar.build(fields));
+                }
+                fields = null;
+                continue;
+            }
+            if (!fields) {
+                continue;
+            }
+            const p: number = line.indexOf(':');
+            if (p < 0) {
+                continue;
+            }
+            const key: string = line.substring(0, p).split(';')[0].toUpperCase();
+            fields[key] = line.substring(p + 1);
+        }
+        return new IcsCalendar(events);
+    }
+
+    protected static build(fields: { [key: string]: string }): IcsEvent {
+        return new IcsEvent(
+            fields['SUMMARY'] || '',
+            IcsCalendar.parseDate(fields['DTSTART']),
+            fields['DTEND'] ? IcsCalendar.parseDate(fields['DTEND']) : null,
+            fields['RRULE'] || '',
+            fields['UID'] || '',
+            fields['LOCATION'] || '',
+            fields['DESCRIPTION'] || '');
+    }
+
+    protected static parseDate(value: string): SolarDay {
+        const s: string = value.replace(/[^0-9]/g, '');
+        return SolarDay.fromYmd(parseInt(s.substring(0, 4), 10), parseInt(s.substring(4, 6), 10), parseInt(s.substring(6, 8), 10));
+    }
+
+    getEvents(): IcsEvent[] {
+        return this.events;
+    }
+
+    /**
+     * 可表达为 tyme 循环事件者
+     */
+    toTymeEvents(): Event[] {
+        const l: Event[] = [];
+        for (let i: number = 0; i < this.events.length; i++) {
+            const e: Event | null = this.toTymeEvent(this.events[i]);
+            if (e) {
+                l.push(e);
+            }
+        }
+        return l;
+    }
+
+    protected toTymeEvent(event: IcsEvent): Event | null {
+        const start: SolarDay = event.getStart();
+        const rule: { [key: string]: string } = {};
+        const rrule: string = event.getRrule();
+        // 单次事件无法用年度循环表达，交由 getOneOffDays 返回
+        if (!rrule) {
+            return null;
+        }
+        const parts: string[] = rrule.split(';');
+        for (let i: number = 0; i < parts.length; i++) {
+            const p: number = parts[i].indexOf('=');
+            rule[parts[i].substring(0, p).toUpperCase()] = parts[i].substring(p + 1);
+        }
+        if (rule['FREQ'] !== 'YEARLY') {
+            return null;
+        }
+        const month: number = rule['BYMONTH'] ? parseInt(rule['BYMONTH'], 10) : start.getMonth();
+        const monthDay: string = rule['BYMONTHDAY'] || '';
+        const byDay: string = rule['BYDAY'] || '';
+        if (byDay) {
+            const m: RegExpExecArray | null = /^(-?\d)([A-Z]{2})$/.exec(byDay);
+            if (!m) {
+                return null;
+            }
+            const weeks: string[] = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+            return Event.builder().name(event.getName())
+                .solarWeek(month, parseInt(m[1], 10), weeks.indexOf(m[2]))
+                .startYear(start.getYear()).build();
+        }
+        const day: number = monthDay ? parseInt(monthDay.split(',')[0], 10) : start.getDay();
+        if (day < 1 || day > 31) {
+            return null;
+        }
+        return Event.builder().name(event.getName()).solarDay(month, day, 0).startYear(start.getYear()).build();
+    }
+
+    /**
+     * 无法表达为循环事件者，返回其起始日
+     */
+    getOneOffDays(): SolarDay[] {
+        const l: SolarDay[] = [];
+        for (let i: number = 0; i < this.events.length; i++) {
+            if (!this.events[i].getRrule()) {
+                l.push(this.events[i].getStart());
+            }
+        }
+        return l;
+    }
+
+    /**
+     * 无法转换为 tyme 事件者（非年度循环或循环规则不受支持）
+     */
+    getUnsupported(): IcsEvent[] {
+        const l: IcsEvent[] = [];
+        for (let i: number = 0; i < this.events.length; i++) {
+            if (!this.toTymeEvent(this.events[i])) {
+                l.push(this.events[i]);
+            }
+        }
+        return l;
     }
 }

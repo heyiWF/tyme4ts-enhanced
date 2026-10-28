@@ -1,7 +1,7 @@
 {
-  "name": "tyme4ts",
-  "version": "1.5.4",
-  "description": "Tyme是一个非常强大的日历工具库，可以看作 Lunar 的升级版，拥有更优的设计和扩展性，支持公历、农历、藏历、回历、星座、干支、生肖、节气、月相、法定假日等。",
+  "name": "tyme4ts-enhanced",
+  "version": "1.6.0",
+  "description": "面向通胜（老黄历）场景的 TypeScript 历法引擎：农历、干支、节气、神煞、宜忌、择日、神诞、解梦、九宫飞星、多地区节假日与 ICS 订阅转换，零依赖、易移植。",
   "main": "./dist/lib/index.cjs",
   "module": "./dist/lib/index.mjs",
   "types": "./dist/lib/index.d.ts",
@@ -17,29 +17,43 @@
     "build": "unbuild",
     "test": "mocha -r ts-node/register --config=.mocharc.json",
     "release": "npm run test && npm publish",
+    "docs": "npm run build && node -e \"require('fs').copyFileSync('dist/lib/index.mjs','docs/tyme.mjs')\"",
     "js": "unbuild && node build-js.js"
   },
-  "homepage": "https://github.com/6tail/tyme4ts",
+  "homepage": "https://github.com/heyiWF/tyme4ts-enhanced",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/6tail/tyme4ts.git"
+    "url": "git+https://github.com/heyiWF/tyme4ts-enhanced.git"
   },
   "keywords": [
     "公历",
     "农历",
-    "藏历",
-    "回历",
-    "儒略日",
-    "星座",
+    "黄历",
+    "通胜",
+    "老黄历",
     "干支",
     "节气",
-    "月相",
-    "法定假日"
+    "神煞",
+    "宜忌",
+    "择日",
+    "月将",
+    "九宫飞星",
+    "二十八宿",
+    "神诞",
+    "周公解梦",
+    "节假日",
+    "ics",
+    "calendar",
+    "almanac",
+    "lunar"
   ],
   "author": "6tail <6tail@6tail.cn> (https://6tail.cn)",
+  "contributors": [
+    "heyiWF"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/6tail/tyme4ts/issues"
+    "url": "https://github.com/heyiWF/tyme4ts-enhanced/issues"
   },
   "devDependencies": {
     "@testdeck/mocha": "^0.3.3",
