@@ -1,6 +1,6 @@
 {
   "name": "tyme4ts-enhanced",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "面向通胜（老黄历）场景的 TypeScript 历法引擎：农历、干支、节气、神煞、宜忌、择日、神诞、解梦、九宫飞星、多地区节假日与 ICS 订阅转换，零依赖、易移植。",
   "main": "./dist/lib/index.cjs",
   "module": "./dist/lib/index.mjs",

@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-511%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-524%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -21,8 +21,8 @@
 | 神煞 | 吉神宜趋、凶神宜忌、建除十二神、二十八宿、黄黑道十二神、六曜、小六壬、彭祖百忌 | 《协纪辨方书》体系 |
 | 择日 | 宜忌、日冲煞、旬空、月破岁破、天赦日、四离四绝、月将、年命禄贵合、贵人时、时辰吉凶 | 协纪辨方书 + 通书 |
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
-| 民俗数据 | 周公解梦（988 条）、风水常识、出生取名（八字喜用 + 字库）、生肖流月运程 | 维基文库公有领域本、本项目整理 |
-| 节假日 | 中国大陆（2001–2026 公告数据 + 逐年导入）、中国港/澳/台、日本、韩国、越南、新加坡 | 政府公告与祝日法 |
+| 民俗数据 | 民俗节日（接神日、人日、天穿节、填仓节、中和节、寒食、春社秋社、天贶节、寒衣节、下元节、尾牙、祭灶等）、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
+| 节假日 | 26 个国家和地区（中国大陆及港/澳/台、日韩越、新马泰、美英加澳新、德法意西荷、巴墨俄南非、印度、菲律宾），含补假规则 | 政府公告、祝日法与银行假日表 |
 | 互操作 | ICS 订阅解析，年度循环事件转换为 tyme `Event` | iCalendar RFC 5545 |
 
 ---
@@ -133,7 +133,11 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
-支持的地区：`CN`、`HK`、`MO`、`TW`、`JP`、`KR`、`VN`、`SG`。规则类型包括公历月日、农历月日、某月第几个星期几、复活节偏移、节气日；日本自动计算振替休日与国民の休日。
+支持 26 个地区：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `US` `GB` `CA` `AU` `NZ` `DE` `FR` `IT` `ES` `NL` `BR` `MX` `RU` `ZA` `IN` `PH`。
+
+规则类型包括公历月日、农历月日、某月第几个星期几、复活节偏移、节气日，以及「节气后第几个某干日」（春社、秋社）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
+
+各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
 ```ts
 HolidayCalendar.of('JP').getHoliday(SolarDay.fromYmd(2025, 2, 24))!.getName(); // 振替休日
@@ -225,7 +229,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ```bash
 npm i
-npm test          # 511 项测试
+npm test          # 524 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs

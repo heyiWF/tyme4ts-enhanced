@@ -4,12 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tyme Enhanced · 通胜日历 · 开源黄历引擎</title>
-<meta name="description" content="以 TypeScript 实现的开源传统历法与通胜引擎，含农历、干支、节气、神煞、宜忌、择日、神诞、解梦、九宫飞星、节假日与 ICS 订阅转换。">
+<meta name="description" content="以 TypeScript 实现的开源传统历法与通胜引擎，含农历、干支、节气、神煞、宜忌、择日、神诞、解梦、九宫飞星、26 个地区节假日与 ICS 订阅转换。">
 <style>
 :root{
   --paper:#f6f4ec; --paper-2:#fffdf6; --ink:#1d2b22; --ink-2:#4a5b50; --ink-3:#7b8a80;
-  --green:#1f6b46; --green-2:#2e8b5c; --green-soft:#e6efe8;
-  --red:#b23a2f; --gold:#a8802f; --line:#dfdac9; --line-2:#eae5d5;
+  --green:#1f6b46; --green-2:#2e8b5c; --green-soft:#e8f0ea; --green-line:#cfe0d4;
+  --red:#b23a2f; --red-soft:#fbeceb; --gold:#a8802f;
+  --line:#e0dbc9; --line-2:#eee9da;
   --serif:"Songti SC","Source Han Serif SC","Noto Serif CJK SC",STSong,SimSun,serif;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
@@ -19,124 +20,154 @@ html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:var(--green);text-decoration:none}
 a:hover{text-decoration:underline}
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
 
-header.site{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fffdf6,#f6f4ec)}
-.site-inner{display:flex;align-items:center;gap:24px;padding:16px 0;flex-wrap:wrap}
+header.site{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:rgba(255,253,246,.93);backdrop-filter:blur(8px)}
+.site-inner{display:flex;align-items:center;gap:22px;padding:13px 0;flex-wrap:wrap}
 .brand{display:flex;align-items:baseline;gap:10px}
-.brand b{font-family:var(--serif);font-size:26px;letter-spacing:2px}
-.brand span{color:var(--ink-3);font-size:12px;letter-spacing:1px}
-nav.tabs{margin-left:auto;display:flex;gap:4px;background:var(--green-soft);padding:4px;border-radius:10px}
-nav.tabs button{border:0;background:transparent;color:var(--ink-2);padding:7px 16px;border-radius:7px;cursor:pointer;font-size:14px}
-nav.tabs button.on{background:#fff;color:var(--green);box-shadow:0 1px 2px rgba(0,0,0,.06);font-weight:600}
+.brand b{font-family:var(--serif);font-size:25px;letter-spacing:3px}
+.brand span{color:var(--ink-3);font-size:11px;letter-spacing:1.5px}
+nav.tabs{margin-left:auto;display:flex;gap:3px;background:var(--green-soft);padding:4px;border-radius:11px}
+nav.tabs button{border:0;background:transparent;color:var(--ink-2);padding:7px 15px;border-radius:8px;cursor:pointer;font-size:13.5px;font-family:inherit}
+nav.tabs button.on{background:#fff;color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.07);font-weight:600}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
 
-.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:18px 0 6px}
-.bar input[type=date]{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper-2);color:var(--ink)}
-.bar button{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper-2);cursor:pointer;color:var(--ink)}
+.bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:18px 0 4px}
+.bar input[type=date],.bar input[type=text],.bar select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper-2);color:var(--ink)}
+.bar button{font:inherit;font-size:14px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper-2);cursor:pointer;color:var(--ink)}
 .bar button:hover{border-color:var(--green);color:var(--green)}
 .bar .sp{flex:1}
-.bar select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper-2);color:var(--ink)}
+.bar .hint{font-size:12px;color:var(--ink-3);max-width:520px}
 
-.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:20px;margin:16px 0 22px}
-@media(max-width:820px){.hero{grid-template-columns:1fr}}
-.hero-main{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden}
-.hero-main:after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:var(--green-soft)}
-.daynum{font-family:var(--serif);font-size:96px;line-height:1;color:var(--green);position:relative;z-index:1}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin:14px 0 20px}
+@media(max-width:880px){.hero{grid-template-columns:1fr}}
+.hero-main{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px;position:relative;overflow:hidden}
+.hero-main:after{content:"";position:absolute;right:-50px;top:-50px;width:190px;height:190px;border-radius:50%;background:var(--green-soft)}
+.daynum{font-family:var(--serif);font-size:88px;line-height:.95;color:var(--green);position:relative;z-index:1}
 .daymeta{position:relative;z-index:1}
-.lunar-big{font-family:var(--serif);font-size:30px;margin:2px 0 6px}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.lunar-big{font-family:var(--serif);font-size:28px;margin:2px 0 5px}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
 .tag{font-size:12.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-2)}
 .tag.g{background:var(--green);border-color:var(--green);color:#fff}
-.tag.r{background:#fbeceb;border-color:#f0cfcb;color:var(--red)}
-.hero-side{display:flex;flex-direction:column;gap:12px}
-.side-card{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
-.side-card h4{margin:0 0 8px;font-size:12px;letter-spacing:2px;color:var(--ink-3);font-weight:600}
-.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:3px 0}
-.kv span:first-child{color:var(--ink-3)}
-.kv b{font-weight:600}
+.tag.r{background:var(--red-soft);border-color:#f0cfcb;color:var(--red)}
+.hero-side{display:flex;flex-direction:column;gap:11px}
+.side-card{background:var(--paper-2);border:1px solid var(--line);border-radius:15px;padding:14px 16px}
+.side-card h4{margin:0 0 7px;font-size:11.5px;letter-spacing:2px;color:var(--ink-3);font-weight:600}
+.note{font-size:12px;color:var(--ink-3);margin-top:7px;line-height:1.6}
 
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-bottom:28px}
-.card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-.card h3{margin:0 0 12px;font-size:13px;letter-spacing:2px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:8px}
-.card h3 em{font-style:normal;color:var(--ink-3);font-weight:400;letter-spacing:0;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:26px;align-items:start}
+.card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:15px 17px}
+.card h3{margin:0 0 11px;font-size:12.5px;letter-spacing:1.6px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:7px}
+.card h3 em{font-style:normal;color:var(--ink-3);font-weight:400;letter-spacing:0;font-size:11.5px}
 .c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}
-.c7{grid-column:span 7}.c8{grid-column:span 8}.c9{grid-column:span 9}.c12{grid-column:span 12}
-@media(max-width:980px){.c3,.c4,.c5,.c6,.c7,.c8,.c9{grid-column:span 12}}
+.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+@media(max-width:980px){.c3,.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
 
-.yiji{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.yiji .col{border-radius:12px;padding:12px 14px}
+.month{width:100%;border-collapse:collapse;table-layout:fixed}
+.month th{font-size:11.5px;color:var(--ink-3);font-weight:500;padding:4px 0;letter-spacing:1px}
+.month td{vertical-align:top;height:60px;border-top:1px solid var(--line-2);padding:3px 4px;cursor:pointer;position:relative}
+.month td:hover{background:#f3f7f4}
+.month td.out{opacity:.3}
+.month td.sel{background:var(--green-soft);box-shadow:inset 0 0 0 1px var(--green-line);border-radius:6px}
+.month .d{font-family:var(--serif);font-size:15.5px;line-height:1.1}
+.month .l{font-size:10.5px;color:var(--ink-3);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.month .h{font-size:9.5px;color:var(--red);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.month .f{font-size:9.5px;color:var(--green-2);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.month td.today .d{color:var(--red)}
+.month td.today:before{content:"";position:absolute;left:4px;top:4px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+
+.yiji{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.yiji .col{border-radius:11px;padding:11px 13px}
 .yiji .yi{background:var(--green-soft)}
-.yiji .ji{background:#fbeceb}
-.yiji h5{margin:0 0 8px;font-size:13px;letter-spacing:2px}
+.yiji .ji{background:var(--red-soft)}
+.yiji h5{margin:0 0 7px;font-size:12.5px;letter-spacing:2px}
 .yiji .yi h5{color:var(--green)}.yiji .ji h5{color:var(--red)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-size:13px;padding:2px 8px;border-radius:6px;background:#fff;border:1px solid rgba(0,0,0,.05)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:12.5px;padding:2px 8px;border-radius:6px;background:#fff;border:1px solid rgba(0,0,0,.05)}
+
+.hours{display:grid;grid-template-columns:repeat(12,1fr);gap:5px}
+@media(max-width:760px){.hours{grid-template-columns:repeat(6,1fr)}}
+.hour{border:1px solid var(--line);border-radius:9px;padding:7px 3px;text-align:center;background:#fff}
+.hour .n{font-family:var(--serif);font-size:15px}
+.hour .g{font-size:10.5px;color:var(--ink-3);margin-top:1px}
+.hour.j{background:var(--green-soft);border-color:var(--green-line)}
+.hour.j .g{color:var(--green)}
+.hour.x{background:var(--red-soft);border-color:#f0cfcb}
+.hour.x .g{color:var(--red)}
+.hour .m{font-size:9.5px;color:var(--gold);margin-top:1px;letter-spacing:1px;height:12px}
+
+.nine{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:220px;margin:0 auto}
+.nine div{border:1px solid var(--line);border-radius:7px;text-align:center;padding:9px 0;font-family:var(--serif);background:#fff;font-size:14.5px}
+.nine div.c{background:var(--green-soft);border-color:var(--green-line);color:var(--green);font-weight:700}
+
+.pos{display:grid;grid-template-columns:repeat(2,1fr);gap:5px 14px;font-size:13.5px}
+.pos div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line-2);padding:3px 0;gap:10px}
+.pos b{font-weight:600}
+
+.list{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.list .row{display:flex;gap:10px}
+.list .row b{font-weight:600;min-width:66px;color:var(--green)}
+.list .row span{color:var(--ink-2)}
+
+.zo{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+@media(max-width:760px){.zo{grid-template-columns:repeat(2,1fr)}}
+.zo div{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff;line-height:1.45}
+.zo b{display:block;font-size:13.5px;margin-bottom:2px}
+.zo .ji{background:#fdf6f5}
+.zo .ji b{color:var(--red)}
+
+.name-out{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.name-out span{background:var(--green-soft);border:1px solid var(--green-line);border-radius:8px;padding:5px 10px;font-family:var(--serif);font-size:16px;color:var(--green)}
+
+.doc h2{font-family:var(--serif);font-size:25px;margin:30px 0 10px;letter-spacing:1px}
+.doc h3{font-size:15.5px;margin:22px 0 8px;color:var(--green)}
+.doc p,.doc li{color:var(--ink-2);font-size:14px}
+.doc code{background:#eee9d8;padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:12.5px}
+pre{background:#1d2b22;color:#e8efe9;padding:15px 17px;border-radius:10px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65}
+pre .c{color:#8aa595}
+
+.searchbar{display:flex;gap:10px;align-items:center;margin:16px 0 6px;flex-wrap:wrap}
+.searchbar input{flex:1;min-width:220px;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper-2)}
+.searchbar .count{font-size:12.5px;color:var(--ink-3)}
+.field-group{margin:18px 0 6px}
+.field-group h3{position:sticky;top:58px;background:var(--paper);padding:6px 0;z-index:5}
+table.fields{width:100%;border-collapse:collapse;font-size:13px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+table.fields th{background:#f1efe4;text-align:left;padding:8px 10px;font-size:11.5px;letter-spacing:1px;color:var(--ink-3);font-weight:600}
+table.fields td{padding:8px 10px;border-top:1px solid var(--line-2);vertical-align:top}
+table.fields td:nth-child(1){width:132px;font-weight:600;color:var(--ink)}
+table.fields td:nth-child(2){width:43%;font-family:var(--mono);font-size:12px;color:var(--green)}
+table.fields td:nth-child(3){color:var(--ink-2)}
+table.fields tr:hover td{background:#fbfaf1}
+
+.regions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 8px}
+@media(max-width:980px){.regions{grid-template-columns:repeat(2,1fr)}}
+.region{background:var(--paper-2);border:1px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.15s}
+.region:hover{border-color:var(--green-line);transform:translateY(-1px)}
+.region.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
+.region b{font-size:14.5px;font-family:var(--serif)}
+.region span{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.4}
+
+.hol-list{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;font-size:13.5px;margin-top:8px}
+@media(max-width:760px){.hol-list{grid-template-columns:1fr}}
+.hol-list div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line-2);padding:4px 0;gap:10px}
+.hol-list b{font-weight:500;color:var(--ink-2)}
+.hol-list span{color:var(--ink-3);font-size:12.5px;white-space:nowrap}
 
 table.t{width:100%;border-collapse:collapse;font-size:13.5px}
 table.t td,table.t th{padding:6px 4px;border-bottom:1px dashed var(--line-2);text-align:left;vertical-align:top}
-table.t tr:last-child td{border-bottom:0}
 table.t th{color:var(--ink-3);font-weight:500;font-size:12px;letter-spacing:1px}
 
-.hours{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
-@media(max-width:700px){.hours{grid-template-columns:repeat(6,1fr)}}
-.hour{border:1px solid var(--line);border-radius:9px;padding:8px 4px;text-align:center;background:#fff}
-.hour .n{font-family:var(--serif);font-size:16px}
-.hour .g{font-size:11px;color:var(--ink-3);margin-top:2px}
-.hour.j{background:var(--green-soft);border-color:#cfe0d4}
-.hour.j .g{color:var(--green)}
-.hour.x{background:#fbeceb;border-color:#f0cfcb}
-.hour.x .g{color:var(--red)}
-.hour .m{font-size:10px;color:var(--gold);margin-top:2px;letter-spacing:1px}
-
-.nine{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:230px;margin:0 auto}
-.nine div{border:1px solid var(--line);border-radius:7px;text-align:center;padding:10px 0;font-family:var(--serif);background:#fff;font-size:15px}
-.nine div.c{background:var(--green-soft);border-color:#cfe0d4;color:var(--green);font-weight:700}
-
-.pos{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px;font-size:14px}
-.pos div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line-2);padding:3px 0}
-
-.list{display:flex;flex-direction:column;gap:7px;font-size:13.5px}
-.list .row{display:flex;gap:10px}
-.list .row b{font-weight:600;min-width:74px;color:var(--green)}
-.list .row span{color:var(--ink-2)}
-
-.zo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-@media(max-width:700px){.zo{grid-template-columns:repeat(2,1fr)}}
-.zo div{font-size:12.5px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff;line-height:1.45}
-.zo b{display:block;font-size:14px;margin-bottom:2px}
-.zo .ji b{color:var(--red)}
-.zo .ji{background:#fdf6f5}
-
-.name-out{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.name-out span{background:var(--green-soft);border:1px solid #cfe0d4;border-radius:8px;padding:5px 10px;font-family:var(--serif);font-size:16px;color:var(--green)}
-.name-detail{font-size:12.5px;color:var(--ink-3);margin-top:8px}
-
-.termbar{display:flex;flex-wrap:wrap;gap:6px}
-.termbar span{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 7px;background:#fff;color:var(--ink-2)}
-.termbar span.on{background:var(--green);color:#fff;border-color:var(--green)}
-
-.doc h2{font-family:var(--serif);font-size:26px;margin:34px 0 12px;letter-spacing:1px}
-.doc h3{font-size:16px;margin:22px 0 8px;color:var(--green)}
-.doc p,.doc li{color:var(--ink-2);font-size:14.5px}
-.doc code{background:#eee9d8;padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:13px}
-pre{background:#1d2b22;color:#e8efe9;padding:16px 18px;border-radius:10px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.6}
-pre .c{color:#8aa595}
-.api{border-top:1px solid var(--line);padding:10px 0}
-.api b{font-family:var(--mono);font-size:13.5px;color:var(--green)}
-.api p{margin:2px 0 0;font-size:13px}
-
-footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);font-size:13px}
+footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);font-size:12.5px}
 .hide{display:none}
-.note{font-size:12.5px;color:var(--ink-3);margin-top:8px}
 </style>
 </head>
 <body>
 <header class="site">
   <div class="wrap site-inner">
-    <div class="brand"><b>通胜</b><span>TYME ENHANCED · OPEN ALMANAC ENGINE</span></div>
+    <div class="brand"><b>通胜</b><span>TYME ENHANCED · OPEN ALMANAC</span></div>
     <nav class="tabs">
       <button class="on" data-page="almanac">黄历</button>
-      <button data-page="docs">文档</button>
+      <button data-page="fields">字段</button>
+      <button data-page="regions">地区</button>
       <button data-page="data">数据</button>
     </nav>
   </div>
@@ -150,16 +181,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);f
       <button id="next">后一日 →</button>
       <button id="today">今天</button>
       <span class="sp"></span>
-      <select id="region">
-        <option value="CN">中国大陆</option>
-        <option value="HK">中国香港</option>
-        <option value="MO">中国澳门</option>
-        <option value="TW">中国台湾</option>
-        <option value="JP">日本</option>
-        <option value="KR">韩国</option>
-        <option value="VN">越南</option>
-        <option value="SG">新加坡</option>
-      </select>
+      <select id="region"></select>
     </div>
 
     <div class="hero">
@@ -167,25 +189,30 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);f
         <div class="daynum" id="daynum">3</div>
         <div class="daymeta">
           <div class="lunar-big" id="lunar">农历三月初六</div>
-          <div id="meta" style="color:var(--ink-2);font-size:14px"></div>
+          <div id="meta" style="color:var(--ink-2);font-size:13.5px"></div>
           <div class="tags" id="tags"></div>
         </div>
       </div>
       <div class="hero-side">
         <div class="side-card">
           <h4>今日八字 · 四柱</h4>
-          <div id="bazi" style="font-family:var(--serif);font-size:22px;letter-spacing:3px"></div>
+          <div id="bazi" style="font-family:var(--serif);font-size:21px;letter-spacing:3px"></div>
           <div class="note" id="bazi-note"></div>
         </div>
         <div class="side-card">
-          <h4>节气</h4>
+          <h4>节气 · 物候</h4>
           <div id="terms" class="list"></div>
         </div>
       </div>
     </div>
 
     <div class="grid">
-      <div class="card c6">
+      <div class="card c7">
+        <h3>月历 <em>点击日期切换</em></h3>
+        <table class="month" id="month"></table>
+      </div>
+
+      <div class="card c5">
         <h3>宜忌 <em>协纪辨方书体系</em></h3>
         <div class="yiji">
           <div class="col yi"><h5>宜</h5><div class="chips" id="yi"></div></div>
@@ -199,22 +226,22 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);f
         <div id="ganzhi" class="list"></div>
       </div>
 
-      <div class="card c3">
-        <h3>吉神宜趋</h3>
+      <div class="card c5">
+        <h3>吉神宜趋 · 凶神宜忌</h3>
         <div class="chips" id="gods"></div>
       </div>
 
-      <div class="card c7">
-        <h3>十二时辰吉凶 <em>黄道黑道</em></h3>
-        <div class="hours" id="hours"></div>
-        <div class="note">朱字为贵人、日禄、六合；「吉」为黄道兼吉神，「中」为黄道，「凶」为黑道。</div>
-      </div>
-
-      <div class="card c5">
+      <div class="card c4">
         <h3>方位 <em>日干所定</em></h3>
         <div class="pos" id="pos"></div>
-        <h3 style="margin-top:16px">冲煞 · 胎神 · 月将</h3>
+        <h3 style="margin-top:14px">冲煞 · 胎神 · 月将</h3>
         <div class="pos" id="misc"></div>
+      </div>
+
+      <div class="card c8">
+        <h3>十二时辰吉凶 <em>黄道黑道</em></h3>
+        <div class="hours" id="hours"></div>
+        <div class="note">朱色字为贵人、日禄、六合；「吉」为黄道兼吉神，「中」为黄道，「凶」为黑道。</div>
       </div>
 
       <div class="card c4">
@@ -238,14 +265,15 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);f
         <div id="deity" class="list"></div>
       </div>
 
-      <div class="card c4">
+      <div class="card c6">
         <h3>节假日 <em>所选地区</em></h3>
         <div id="holiday" class="list"></div>
+        <div class="note" id="region-note"></div>
       </div>
 
-      <div class="card c4">
+      <div class="card c6">
         <h3>今日吉数 <em>河图数推演</em></h3>
-        <div id="numbers" style="font-family:var(--serif);font-size:26px;letter-spacing:6px;color:var(--green)"></div>
+        <div id="numbers" style="font-family:var(--serif);font-size:24px;letter-spacing:5px;color:var(--green)"></div>
         <div class="note">取日干、日支、纳音五行之河图数，轮流取足，非原版数值。</div>
       </div>
 
@@ -256,20 +284,20 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);f
 
       <div class="card c6">
         <h3>周公解梦 <em>维基文库公有领域本</em></h3>
-        <div id="dream" style="font-family:var(--serif);font-size:18px;line-height:1.9"></div>
+        <div id="dream" style="font-family:var(--serif);font-size:17px;line-height:1.9"></div>
         <div class="note" id="dream-note"></div>
       </div>
 
       <div class="card c6">
         <h3>风水常识</h3>
-        <div id="fengshui" style="font-family:var(--serif);font-size:16px;line-height:1.9"></div>
+        <div id="fengshui" style="font-family:var(--serif);font-size:15.5px;line-height:1.9"></div>
         <div class="note">逐日轮换的常识性说明，不作堪舆断验。</div>
       </div>
 
       <div class="card c12">
         <h3>出生取名 <em>依所选日午时八字，取喜用五行之字</em></h3>
         <div class="bar" style="padding:0">
-          <input id="surname" value="李" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;width:90px;background:#fff">
+          <input id="surname" value="李" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;width:92px;background:#fff">
           <select id="gender" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff">
             <option value="1">男</option><option value="0">女</option>
           </select>
@@ -277,83 +305,44 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);f
           <span id="balance" class="note" style="margin:0"></span>
         </div>
         <div class="name-out" id="names"></div>
-        <div class="name-detail" id="name-detail"></div>
+        <div class="note" id="name-detail"></div>
       </div>
     </div>
   </section>
 
-  <section id="page-docs" class="doc hide">
-    <h2>Tyme Enhanced</h2>
-    <p>以 TypeScript 编写的传统历法与通胜引擎。零运行时依赖、单文件产物、纯整数与字符串数据，便于逐行移植到 Kotlin、Swift、Go、Rust、Python 等语言。基础历法沿用 <a href="https://github.com/6tail/tyme4ts">6tail/tyme4ts</a>，其上补齐通胜所需的神煞、择日、民俗与节假日能力。</p>
-
-    <h3>安装</h3>
-<pre>npm i tyme4ts-enhanced
-
-<span class="c">// 或直接使用单文件 ES 模块</span>
-import {DayAlmanac} from './tyme.mjs';</pre>
-
-    <h3>一日通胜</h3>
+  <section id="page-fields" class="doc hide">
+    <h2>字段速查</h2>
+    <p>示例按当前所选日期实时计算。所有取法均可在 <code>DayAlmanac</code> 实例上直接调用，返回文化对象或基础类型。</p>
+    <div class="searchbar">
+      <input id="q" type="text" placeholder="搜索字段，如：冲煞、纳音、宜忌、九宫、节假日">
+      <span class="count" id="qcount"></span>
+    </div>
+    <div id="fields"></div>
+    <h2>最小示例</h2>
 <pre>import {DayAlmanac} from 'tyme4ts-enhanced';
 
 const a = DayAlmanac.fromYmd(2025, 4, 3);
+a.getClash().toString();           <span class="c">// 冲猴(丙申)煞北</span>
+a.getDutyAdvice().getRecommends(); <span class="c">// 筑堤、补垣、修屋、埋穴</span>
+a.getLifeRelation(1983).toString();<span class="c">// 癸命劫财，互禄，六合</span>
+a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
+  </section>
 
-a.getLunarDay();                 <span class="c">// 农历乙巳年三月初六</span>
-a.getDuty();                     <span class="c">// 闭</span>
-a.getClash().toString();         <span class="c">// 冲猴(丙申)煞北</span>
-a.getWuHouDay().getName();       <span class="c">// 青龙头</span>
-a.getDeityFestival().getName();  <span class="c">// 眼光娘娘等圣诞</span>
-a.getCombineZodiacNumbers().toString(); <span class="c">// 猪 07 19 31 43</span>
-a.getMonthGeneral().getName();   <span class="c">// 河魁</span>
-a.getLifeRelation(1983).toString(); <span class="c">// 癸命劫财，互禄，六合</span></pre>
-
-    <h3>核心概念</h3>
-    <ul>
-      <li><code>SolarDay</code> / <code>LunarDay</code> / <code>SixtyCycleDay</code>：公历、农历、干支三种视角的同一天，可互相转换。</li>
-      <li><code>DayAlmanac</code>：以一个公历日为基准的通胜聚合入口，一次取出全部栏目。</li>
-      <li><code>Culture</code> 体系：所有名物（神煞、方位、建除、星宿……）皆为可比较、可 <code>next()</code> 循环的文化对象。</li>
-      <li>数据表一律以字符串或整数数组编码，不依赖 JSON 文件与运行时资源。</li>
-    </ul>
-
-    <h3>API 概览</h3>
-    <div class="api"><b>DayAlmanac</b><p>通胜聚合：宜忌、神煞、冲煞、胎神、方位、时辰、九宫、择日、神诞、号码、解梦、风水、取名。</p></div>
-    <div class="api"><b>WuHouDay</b><p>诸葛武侯出行择日，三元将军值日，含吉凶与断语。</p></div>
-    <div class="api"><b>Clash</b><p>日冲煞，输出「冲猴(丙申)煞北」。</p></div>
-    <div class="api"><b>LifeRelation</b><p>年命与日辰：十神、互禄、进禄、贵人、六合、三合。</p></div>
-    <div class="api"><b>HourFortune</b><p>十二时辰黄道黑道，兼记贵人、日禄、六合。</p></div>
-    <div class="api"><b>NineStarChart / Palace</b><p>九宫飞星，洛书轨迹顺逆飞布。</p></div>
-    <div class="api"><b>ZodiacNumbers</b><p>生肖号码，含六合、三合与年肖三组。</p></div>
-    <div class="api"><b>MonthGeneral</b><p>十二月将，中气换将。</p></div>
-    <div class="api"><b>DeityFestival</b><p>《玉匣记》神明诞辰，农历月日索引。</p></div>
-    <div class="api"><b>DreamOracle</b><p>《周公解梦》公有领域文本，逐日一则。</p></div>
-    <div class="api"><b>Naming / ElementBalance</b><p>八字五行统计、身强身弱、喜用五行与双字名建议。</p></div>
-    <div class="api"><b>ZodiacFortune</b><p>生肖流月运程，依六合、三合、冲、刑、害、破断吉凶。</p></div>
-    <div class="api"><b>HolidayCalendar / HolidayRule</b><p>多地区节假日：公历、农历、第几个星期几、复活节、节气五类规则，可导入逐年公告数据。</p></div>
-    <div class="api"><b>IcsCalendar / IcsEvent</b><p>解析 iCalendar，将年度循环事件转为 tyme 的 <code>Event</code>。</p></div>
-    <div class="api"><b>Era</b><p>日本年号、佛历、民国、主体纪年换算。</p></div>
-
-    <h3>导入年度法定节假日</h3>
+  <section id="page-regions" class="doc hide">
+    <h2>国家与地区</h2>
+    <p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。</p>
+    <div class="regions" id="region-cards"></div>
+    <h3 id="region-title">法定节假日</h3>
+    <div class="note" id="region-desc"></div>
+    <div class="hol-list" id="region-list"></div>
+    <h3>追加数据</h3>
 <pre>import {HolidayCalendar} from 'tyme4ts-enhanced';
 
-const cn = HolidayCalendar.of('CN');   <span class="c">// 内置 2001–2026 年公告数据</span>
-cn.importJson(JSON.stringify({
-  region: 'CN',
-  days: [
-    {date: '2027-01-01', name: '元旦'},
-    {date: '2027-01-09', name: '补班', work: true}
-  ]
-}));
-cn.getDays(2027);</pre>
-
-    <h3>ICS 订阅转换</h3>
-<pre>import {IcsCalendar, EventManager} from 'tyme4ts-enhanced';
-
-const c = IcsCalendar.parse(icsText);
-c.toTymeEvents().forEach(e =&gt; EventManager.update(e.getName(), e));
-c.getOneOffDays();   <span class="c">// 单次事件，tyme 的循环事件无法表达</span>
-c.getUnsupported();  <span class="c">// 非年度循环者</span></pre>
-
-    <h3>准确性说明</h3>
-    <p>节气、朔望、农历月建依寿星天文历算法，节气时刻精度到秒（1900–2100 年与官方历书一致）。已知边界：<code>SolarTerm.getSolarDay()</code> 使用粗算值，1930 年前有 5 例节气日与精算结果跨日；回历为算术历，与观月历可能相差一日；宜忌、神煞各流派互有出入。</p>
+const c = HolidayCalendar.of('US');
+c.importJson(JSON.stringify({
+  region: 'US',
+  days: [{date: '2027-12-24', name: '圣诞前夕', work: false}]
+}));</pre>
   </section>
 
   <section id="page-data" class="doc hide">
@@ -365,90 +354,166 @@ c.getUnsupported();  <span class="c">// 非年度循环者</span></pre>
       <tr><td>宜忌、吉神宜趋、凶神宜忌</td><td>《协纪辨方书》体系，tyme 编码表</td><td>MIT</td></tr>
       <tr><td>神明诞辰</td><td>《玉匣记》三元五腊圣诞；维基文库本，经 nihaixia-app 整理</td><td>公有领域 / Apache-2.0</td></tr>
       <tr><td>周公解梦</td><td>维基文库《周公解夢》</td><td>公有领域</td></tr>
+      <tr><td>民俗节日、小众节令</td><td>通行历书；条目对照 6tail/lunar-typescript 整理</td><td>MIT / 传统文本</td></tr>
       <tr><td>诸葛武侯择日</td><td>《玉匣记》「选择逐年出行图」，与港台通胜一致</td><td>传统文本</td></tr>
-      <tr><td>十二建除宜忌、月将、天赦、四离四绝</td><td>《协纪辨方书》及通行通书</td><td>传统规则</td></tr>
-      <tr><td>法定节假日</td><td>国务院办公厅逐年通知（内置于 LegalHoliday）</td><td>公开信息</td></tr>
-      <tr><td>各地区节日</td><td>日本《国民の祝日に関する法律》、各地政府公告</td><td>公开信息</td></tr>
+      <tr><td>建除宜忌、月将、天赦、四离四绝、春社秋社</td><td>《协纪辨方书》《统天万年历》及通行通书</td><td>传统规则</td></tr>
+      <tr><td>法定节假日</td><td>国务院办公厅逐年通知；各国政府公告与祝日法</td><td>公开信息</td></tr>
       <tr><td>风水常识、生肖运程判词、字库字义</td><td>本项目整理</td><td>MIT</td></tr>
     </table>
     <h3>不收录</h3>
     <ul>
       <li>潮汐：需测站调和常数，与历法无关，且模型数据另有许可。</li>
       <li>原版「今日吉数」「吉祥生肖排名」：无公开算法，本库仅给出可复算的推演值。</li>
-      <li>出版社解梦、运程文案：属编辑内容，不在开源数据之列。</li>
+      <li>回历与观月历的逐日差异：本库为算术历，可能相差一日。</li>
     </ul>
   </section>
 </main>
 
-<footer><div class="wrap">Tyme Enhanced · MIT License · 历法基础来自 6tail/tyme4ts · 本站为静态演示，全部计算在浏览器本地完成</div></footer>
+<footer><div class="wrap">Tyme Enhanced · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
 
 <script type="module">
-import {DayAlmanac, SolarTerm, HolidayCalendar, Era, Naming, Gender} from './tyme.mjs';
+import {DayAlmanac, SolarDay, HolidayCalendar, Era, Naming, Gender, FolkFestival} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
-const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const ymd = (d) => d.getYear() + '-' + pad(d.getMonth()) + '-' + pad(d.getDay());
+const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'TW': '中国台湾',
+  'JP': '日本', 'KR': '韩国', 'VN': '越南', 'SG': '新加坡', 'MY': '马来西亚', 'TH': '泰国',
+  'US': '美国', 'GB': '英国', 'CA': '加拿大', 'AU': '澳大利亚', 'NZ': '新西兰',
+  'DE': '德国', 'FR': '法国', 'IT': '意大利', 'ES': '西班牙', 'NL': '荷兰',
+  'BR': '巴西', 'MX': '墨西哥', 'RU': '俄罗斯', 'ZA': '南非', 'IN': '印度', 'PH': '菲律宾'};
 
 let current = new Date();
 let region = 'CN';
 
+function todayStr() {
+  const t = new Date();
+  return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+}
+
+function syncDateInput() {
+  $('date').value = `${current.getFullYear()}-${pad(current.getMonth() + 1)}-${pad(current.getDate())}`;
+}
+
 function setToday() {
   const t = new Date();
   current = new Date(t.getFullYear(), t.getMonth(), t.getDate());
-  $('date').value = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+  syncDateInput();
   render();
 }
 
 function shift(n) {
   current = new Date(current.getFullYear(), current.getMonth(), current.getDate() + n);
-  $('date').value = `${current.getFullYear()}-${pad(current.getMonth() + 1)}-${pad(current.getDate())}`;
+  syncDateInput();
   render();
 }
 
-function terms(year) {
-  const l = [];
-  for (let i = 0; i < 24; i++) {
-    const t = SolarTerm.fromIndex(year, i);
-    l.push({name: t.getName(), day: t.getSolarDay(), index: i});
-  }
-  l.sort((a, b) => a.day.getCompareIndex() - b.day.getCompareIndex());
-  return l;
+function almanac() {
+  return DayAlmanac.fromYmd(current.getFullYear(), current.getMonth() + 1, current.getDate());
+}
+
+function initRegion() {
+  const regions = HolidayCalendar.getRegions();
+  $('region').innerHTML = regions.map((r) => `<option value="${r}">${CN[r] || r}</option>`).join('');
+  try {
+    const saved = localStorage.getItem('tyme.region');
+    if (saved && regions.indexOf(saved) > -1) region = saved;
+  } catch (e) { /* 隐私模式忽略 */ }
+  $('region').value = region;
 }
 
 function render() {
-  const y = current.getFullYear(), m = current.getMonth() + 1, d = current.getDate();
-  const a = DayAlmanac.fromYmd(y, m, d);
+  const a = almanac();
+  renderHero(a);
+  renderMonth(a);
+  renderCards(a);
+  renderNames(a);
+}
+
+function renderHero(a) {
   const sc = a.getSixtyCycleDay();
   const lunar = a.getLunarDay();
-
-  $('daynum').textContent = d;
+  const day = a.getSolarDay();
+  $('daynum').textContent = day.getDay();
   $('lunar').textContent = lunar.toString().replace('农历', '');
-  const week = ['日','一','二','三','四','五','六'][a.getSolarDay().getWeek().getIndex()];
-  const hijri = a.getSolarDay().getHijriDay();
-  const era = Era.of(a.getSolarDay());
-  $('meta').innerHTML = `${y} 年 ${m} 月 · 星期${week} · ${sc.getYear().getName()}年 ${sc.getMonth().getName()}月 ${sc.getSixtyCycle().getName()}日 · 农历${a.getLunarMonthSize()}月`;
+  const week = WEEK[day.getWeek().getIndex()];
+  const hijri = day.getHijriDay();
+  const era = Era.of(day);
+  $('meta').innerHTML = `${day.getYear()} 年 ${day.getMonth()} 月 · 星期${week} · ${sc.getYear().getName()}年 ${sc.getMonth().getName()}月 ${sc.getSixtyCycle().getName()}日 · 农历${a.getLunarMonthSize()}月`;
 
   const tags = [];
   tags.push(`<span class="tag g">${sc.getYear().getName()} ${sc.getMonth().getName()} ${sc.getSixtyCycle().getName()}</span>`);
   tags.push(`<span class="tag">${hijri.getYear()} ${hijri.getHijriMonth().getEnglishName()} ${hijri.getDay()}</span>`);
-  if (era) tags.push(`<span class="tag">${era.getName()}${era.getYearName(a.getSolarDay())}年</span>`);
-  const sf = a.getSolarDay().getFestival();
-  const lf = lunar.getFestival();
+  if (era) tags.push(`<span class="tag">${era.getName()}${era.getYearName(day)}年</span>`);
+  for (const n of a.getFestivalNames()) tags.push(`<span class="tag r">${esc(n)}</span>`);
   const df = a.getDeityFestival();
-  if (sf) tags.push(`<span class="tag r">${esc(sf.getName())}</span>`);
-  if (lf) tags.push(`<span class="tag r">${esc(lf.getName())}</span>`);
   if (df) tags.push(`<span class="tag">${esc(df.getName())}</span>`);
-  const hol = HolidayCalendar.of(region).getHoliday(a.getSolarDay());
+  const hol = HolidayCalendar.of(region).getHoliday(day);
   if (hol) tags.push(`<span class="tag ${hol.isWork() ? '' : 'g'}">${esc(hol.getName())}${hol.isWork() ? '（班）' : ''}</span>`);
   $('tags').innerHTML = tags.join('');
 
   $('bazi').textContent = [sc.getYear(), sc.getMonth(), sc.getSixtyCycle(), sc.getHours()[0].getSixtyCycle()].map((x) => x.getName()).join(' ');
   $('bazi-note').textContent = `年柱以立春为界 · 时柱取子时 · 纳音 ${sc.getSixtyCycle().getSound().getName()}`;
 
-  const tl = terms(y);
-  $('terms').innerHTML = tl.filter((t) => !t.day.isBefore(a.getSolarDay())).slice(0, 3)
-    .map((t) => `<div class="row"><b>${t.name}</b><span>${t.day.getMonth()}月${t.day.getDay()}日</span></div>`).join('');
+  const term = day.getTerm();
+  const next = term.next(1);
+  $('terms').innerHTML = [
+    ['节气', `${term.getName()} · 第 ${day.getTermDay().getDayIndex() + 1} 天`],
+    ['交节', term.getJulianDay().getSolarTime().toString().slice(-8)],
+    ['下一节气', `${next.getName()} ${next.getSolarDay().getMonth()}月${next.getSolarDay().getDay()}日`],
+    ['物候', day.getPhenology().getName()],
+  ].map(([k, v]) => `<div class="row"><b>${k}</b><span>${esc(v)}</span></div>`).join('');
 
+  $('region-note').textContent = HolidayCalendar.of(region).getNote();
+}
+
+function daysInMonth(y, m) {
+  return SolarDay.fromYmd(y, m, 1).getSolarMonth().getDayCount();
+}
+
+function renderMonth(a) {
+  const day = a.getSolarDay();
+  const y = day.getYear(), m = day.getMonth();
+  const first = SolarDay.fromYmd(y, m, 1);
+  const start = first.next(-first.getWeek().getIndex());
+  const hmap = {};
+  HolidayCalendar.of(region).getDays(y, true).forEach((h) => { hmap[h.getDay().toString()] = h; });
+  const today = todayStr();
+  const rows = ['<tr>' + WEEK.map((w) => `<th>${w}</th>`).join('') + '</tr>'];
+  const weeks = Math.ceil((first.getWeek().getIndex() + daysInMonth(y, m)) / 7);
+  for (let w = 0; w < weeks; w++) {
+    const cells = [];
+    for (let i = 0; i < 7; i++) {
+      const d = start.next(w * 7 + i);
+      const out = d.getMonth() !== m;
+      const lunar = d.getLunarDay();
+      const lunarText = lunar.getDay() === 1 ? lunar.getLunarMonth().getName() : lunar.getName();
+      const h = hmap[d.toString()];
+      const folk = FolkFestival.of(d).getName();
+      const cls = [out ? 'out' : '', d.toString() === day.toString() ? 'sel' : '', d.toString() === today ? 'today' : ''].join(' ');
+      cells.push(`<td class="${cls}" data-d="${ymd(d)}">`
+        + `<div class="d">${d.getDay()}</div><div class="l">${esc(lunarText)}</div>`
+        + (h ? `<div class="h">${esc(h.getName().replace('（补假）', '·补'))}</div>` : '')
+        + (!h && folk ? `<div class="f">${esc(folk.split('、')[0])}</div>` : '')
+        + '</td>');
+    }
+    rows.push('<tr>' + cells.join('') + '</tr>');
+  }
+  $('month').innerHTML = rows.join('');
+  $('month').querySelectorAll('td[data-d]').forEach((td) => {
+    td.onclick = () => {
+      const p = td.dataset.d.split('-').map(Number);
+      current = new Date(p[0], p[1] - 1, p[2]);
+      syncDateInput();
+      render();
+    };
+  });
+}
+
+function renderCards(a) {
+  const sc = a.getSixtyCycleDay();
   $('yi').innerHTML = sc.getRecommends().map((t) => `<span class="chip">${t.getName()}</span>`).join('') || '<span class="chip">诸事不宜</span>';
   $('ji').innerHTML = sc.getAvoids().map((t) => `<span class="chip">${t.getName()}</span>`).join('') || '<span class="chip">—</span>';
   const da = a.getDutyAdvice();
@@ -476,14 +541,14 @@ function render() {
     return `<div class="hour ${cls}"><div class="n">${h.getHour().getSixtyCycle().getEarthBranch().getName()}</div><div class="g">${h.getName()}</div><div class="m">${marks.join('')}</div></div>`;
   }).join('');
 
-  const pos = [
+  $('pos').innerHTML = [
     ['喜神', stem.getJoyDirection().getName()],
     ['财神', stem.getWealthDirection().getName()],
     ['福神', stem.getFortuneDirection().getName()],
     ['阳贵', stem.getYangDirection().getName()],
     ['阴贵', stem.getYinDirection().getName()],
-  ];
-  $('pos').innerHTML = pos.map(([k, v]) => `<div><span style="color:var(--ink-3)">${k}</span><b>${v}</b></div>`).join('');
+    ['贵人时', a.getNobleHours().map((h) => h.getSixtyCycle().getEarthBranch().getName()).join('、')],
+  ].map(([k, v]) => `<div><span style="color:var(--ink-3)">${k}</span><b>${esc(v)}</b></div>`).join('');
 
   const mg = a.getMonthGeneral();
   $('misc').innerHTML = [
@@ -491,40 +556,35 @@ function render() {
     ['胎神', sc.getFetusDay().getName()],
     ['月将', `${mg.getName()}（${mg.getEarthBranch().getName()}）`],
     ['旬空', a.getVoidBranches().map((b) => b.getName()).join('')],
+    ['四离四绝', a.isFourDeparture() ? '四离' : a.isFourSeverance() ? '四绝' : '—'],
   ].map(([k, v]) => `<div><span style="color:var(--ink-3)">${k}</span><b>${esc(v)}</b></div>`).join('');
 
   const chart = a.getDayNineStarChart();
   const stars = chart.getStars();
   const layout = [3, 8, 1, 2, 4, 6, 7, 0, 5];
-  $('nine').innerHTML = layout.map((idx) => {
-    const s = stars[idx];
-    const center = idx === 4 ? ' c' : '';
-    return `<div class="${center}">${s.getName()}${s.getColor()}</div>`;
-  }).join('');
+  $('nine').innerHTML = layout.map((idx) => `<div class="${idx === 4 ? 'c' : ''}">${stars[idx].getName()}${stars[idx].getColor()}</div>`).join('');
   $('nine-note').textContent = `中宫 ${chart.getCenterStar().getName()}${chart.getCenterStar().getColor()} · ${chart.isForward() ? '顺飞' : '逆飞'} · 洛书轨迹`;
 
   const wu = a.getWuHouDay();
-  $('wuhou').innerHTML = `<div style="font-family:var(--serif);font-size:26px;color:${wu.getLuck().getName() === '吉' ? 'var(--green)' : 'var(--red)'}">${wu.getName()}</div>
-    <div style="font-size:13px;color:var(--ink-3);margin:4px 0 8px">${wu.getYuan().getName()} · ${wu.getLuck().getName()}</div>
-    <div style="font-size:13.5px;color:var(--ink-2)">${wu.getDescription()}</div>`;
+  $('wuhou').innerHTML = `<div style="font-family:var(--serif);font-size:25px;color:${wu.getLuck().getName() === '吉' ? 'var(--green)' : 'var(--red)'}">${wu.getName()}</div>
+    <div style="font-size:12.5px;color:var(--ink-3);margin:3px 0 7px">${wu.getYuan().getName()} · ${wu.getLuck().getName()}</div>
+    <div style="font-size:13px;color:var(--ink-2)">${wu.getDescription()}</div>`;
 
-  const six = a.getCombineZodiacNumbers();
-  const tri = a.getTriangleZodiacNumbers();
   $('zodiac').innerHTML = [
     ['年肖', a.getYearZodiacNumbers().toString()],
-    ['六合', six.toString()],
-    ['三合', tri.map((z) => z.toString()).join('　')],
+    ['六合', a.getCombineZodiacNumbers().toString()],
+    ['三合', a.getTriangleZodiacNumbers().map((z) => z.toString()).join('　')],
   ].map(([k, v]) => `<div class="row"><b>${k}</b><span>${v}</span></div>`).join('');
 
+  const df = a.getDeityFestival();
   $('deity').innerHTML = df
     ? df.getNames().map((n) => `<div class="row"><b>${df.getMonth()}月${df.getDay()}日</b><span>${esc(n)}</span></div>`).join('')
     : '<span style="color:var(--ink-3);font-size:13px">今日无载</span>';
 
-  const cal = HolidayCalendar.of(region);
-  const days = cal.getDays(y).filter((h) => !h.getDay().isBefore(a.getSolarDay())).slice(0, 6);
+  const days = HolidayCalendar.of(region).getDays(a.getSolarDay().getYear()).filter((h) => !h.getDay().isBefore(a.getSolarDay())).slice(0, 6);
   $('holiday').innerHTML = days.length
     ? days.map((h) => `<div class="row"><b>${h.getDay().getMonth()}月${h.getDay().getDay()}日</b><span>${esc(h.getName())}</span></div>`).join('')
-    : '<span style="color:var(--ink-3);font-size:13px">本区规则未覆盖，或已过完</span>';
+    : '<span style="color:var(--ink-3);font-size:13px">本年已无更多假日</span>';
 
   $('numbers').textContent = a.getDailyNumbers().slice().sort((x, y) => x - y).map((n) => pad(n)).join(' ');
 
@@ -538,8 +598,6 @@ function render() {
   $('dream-note').textContent = `${dream.getCategory()} · 原文：${dream.getText()}`;
 
   $('fengshui').textContent = a.getFengShuiTip().getText();
-
-  renderNames(a);
 }
 
 function renderNames(a) {
@@ -553,25 +611,178 @@ function renderNames(a) {
   $('name-detail').textContent = l.length ? l[0].getGivenName() + '：' + l[0].getMeaning() : '';
 }
 
+const FIELDS = [
+  ['农历', '农历日', 'a.getLunarDay()', (a) => a.getLunarDay().toString()],
+  ['农历', '农历月大小', 'a.getLunarMonthSize()', (a) => a.getLunarMonthSize() + '月'],
+  ['农历', '农历月干支', 'a.getLunarDay().getLunarMonth().getSixtyCycle()', (a) => a.getLunarDay().getLunarMonth().getSixtyCycle().getName()],
+  ['农历', '是否闰月', 'a.getLunarDay().getLunarMonth().isLeap()', (a) => a.getLunarDay().getLunarMonth().isLeap() ? '是' : '否'],
+  ['农历', '星期', 'a.getSolarDay().getWeek()', (a) => '星期' + a.getSolarDay().getWeek().getName()],
+  ['农历', '节气', 'a.getSolarDay().getTerm()', (a) => a.getSolarDay().getTerm().getName()],
+  ['农历', '节气第几天', 'a.getSolarDay().getTermDay().getDayIndex()', (a) => '第 ' + (a.getSolarDay().getTermDay().getDayIndex() + 1) + ' 天'],
+  ['农历', '节气时刻', 'a.getSolarDay().getTerm().getJulianDay().getSolarTime()', (a) => a.getSolarDay().getTerm().getJulianDay().getSolarTime().toString()],
+  ['农历', '下一节气', 'a.getSolarDay().getTerm().next(1)', (a) => { const t = a.getSolarDay().getTerm().next(1); return t.getName() + ' ' + t.getSolarDay().getMonth() + '/' + t.getSolarDay().getDay(); }],
+  ['农历', '物候', 'a.getSolarDay().getPhenology()', (a) => a.getSolarDay().getPhenology().getName()],
+  ['农历', '月相', 'a.getSolarDay().getPhase()', (a) => a.getSolarDay().getPhase().getName()],
+  ['农历', '伊斯兰历', 'a.getSolarDay().getHijriDay()', (a) => a.getSolarDay().getHijriDay().toString()],
+  ['农历', '伊斯兰月名', 'a.getSolarDay().getHijriDay().getHijriMonth().getEnglishName()', (a) => a.getSolarDay().getHijriDay().getHijriMonth().getEnglishName()],
+  ['农历', '藏历', 'a.getSolarDay().getRabByungDay()', (a) => a.getSolarDay().getRabByungDay().toString()],
+  ['农历', '日本年号', 'Era.of(a.getSolarDay())', (a) => { const e = Era.of(a.getSolarDay()); return e ? e.getName() + e.getYearName(a.getSolarDay()) + '年' : '—'; }],
+  ['农历', '佛历', 'Era.getBuddhistYear(year)', (a) => String(Era.getBuddhistYear(a.getSolarDay().getYear()))],
+  ['农历', '民国纪年', 'Era.getMinguoYear(year)', (a) => String(Era.getMinguoYear(a.getSolarDay().getYear()))],
+
+  ['干支', '年干支', 'a.getSixtyCycleDay().getYear()', (a) => a.getSixtyCycleDay().getYear().getName()],
+  ['干支', '月干支', 'a.getSixtyCycleDay().getMonth()', (a) => a.getSixtyCycleDay().getMonth().getName()],
+  ['干支', '日干支', 'a.getSixtyCycleDay().getSixtyCycle()', (a) => a.getSixtyCycleDay().getSixtyCycle().getName()],
+  ['干支', '时干支', 'a.getSixtyCycleDay().getHours()[0].getSixtyCycle()', (a) => a.getSixtyCycleDay().getHours()[0].getSixtyCycle().getName()],
+  ['干支', '纳音', 'a.getSixtyCycleDay().getSixtyCycle().getSound()', (a) => a.getSixtyCycleDay().getSixtyCycle().getSound().getName()],
+  ['干支', '纳音五行', '...getSound().getElement()', (a) => a.getSixtyCycleDay().getSixtyCycle().getSound().getElement().getName()],
+  ['干支', '八字', 'a.getSixtyCycleDay().getHours()[0].getEightChar()', (a) => a.getSixtyCycleDay().getHours()[0].getEightChar().toString()],
+  ['干支', '旬空', 'a.getVoidBranches()', (a) => a.getVoidBranches().map((b) => b.getName()).join('')],
+  ['干支', '三合', '...getEarthBranch().getTriangle()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getTriangle().map((b) => b.getName()).join('')],
+  ['干支', '六合', '...getEarthBranch().getCombine()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getCombine().getName()],
+  ['干支', '相冲', '...getEarthBranch().getOpposite()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getOpposite().getName()],
+  ['干支', '相刑', '...getEarthBranch().getPunishments()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getPunishments().map((b) => b.getName()).join('')],
+  ['干支', '相破', '...getEarthBranch().getDestruction()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getDestruction().getName()],
+  ['干支', '禄', '...getHeavenStem().getProsperity()', (a) => a.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getProsperity().getName()],
+  ['干支', '天乙贵人', '...getHeavenStem().getNoble()', (a) => a.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getNoble().map((b) => b.getName()).join('')],
+  ['干支', '福神方位', '...getHeavenStem().getFortuneDirection()', (a) => a.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getFortuneDirection().getName()],
+
+  ['神煞', '宜', 'a.getSixtyCycleDay().getRecommends()', (a) => a.getSixtyCycleDay().getRecommends().map((t) => t.getName()).join(' ') || '诸事不宜'],
+  ['神煞', '忌', 'a.getSixtyCycleDay().getAvoids()', (a) => a.getSixtyCycleDay().getAvoids().map((t) => t.getName()).join(' ') || '—'],
+  ['神煞', '吉神宜趋', 'a.getSixtyCycleDay().getGods()', (a) => a.getSixtyCycleDay().getGods().filter((g) => g.getLuck().getName() === '吉').map((g) => g.getName()).join(' ')],
+  ['神煞', '凶神宜忌', 'a.getSixtyCycleDay().getGods()', (a) => a.getSixtyCycleDay().getGods().filter((g) => g.getLuck().getName() !== '吉').map((g) => g.getName()).join(' ')],
+  ['神煞', '建除十二神', 'a.getDuty()', (a) => a.getDuty().getName()],
+  ['神煞', '建除宜忌', 'a.getDutyAdvice()', (a) => a.getDutyAdvice().getRecommends() + ' / ' + a.getDutyAdvice().getAvoids()],
+  ['神煞', '值神（黄黑道）', 'a.getSixtyCycleDay().getTwelveStar()', (a) => a.getSixtyCycleDay().getTwelveStar().getName() + ' · ' + a.getSixtyCycleDay().getTwelveStar().getEcliptic().getName()],
+  ['神煞', '二十八宿', 'a.getSixtyCycleDay().getTwentyEightStar()', (a) => { const s = a.getSixtyCycleDay().getTwentyEightStar(); return s.getName() + '宿 ' + s.getAnimal().getName() + ' ' + s.getLuck().getName(); }],
+  ['神煞', '六曜', 'a.getLunarDay().getSixStar()', (a) => a.getLunarDay().getSixStar().getName()],
+  ['神煞', '小六壬', 'a.getLunarDay().getMinorRen()', (a) => a.getLunarDay().getMinorRen().getName()],
+  ['神煞', '彭祖百忌', 'a.getSixtyCycleDay().getSixtyCycle().getPengZu()', (a) => a.getSixtyCycleDay().getSixtyCycle().getPengZu().toString()],
+  ['神煞', '胎神', 'a.getSixtyCycleDay().getFetusDay()', (a) => a.getSixtyCycleDay().getFetusDay().getName()],
+
+  ['择日', '冲煞', 'a.getClash()', (a) => a.getClash().toString()],
+  ['择日', '月破', 'a.isMonthBreak()', (a) => a.isMonthBreak() ? '是' : '否'],
+  ['择日', '岁破', 'a.isYearBreak()', (a) => a.isYearBreak() ? '是' : '否'],
+  ['择日', '天赦日', 'a.isHeavenlyPardon()', (a) => a.isHeavenlyPardon() ? '是' : '否'],
+  ['择日', '四离', 'a.isFourDeparture()', (a) => a.isFourDeparture() ? '是' : '否'],
+  ['择日', '四绝', 'a.isFourSeverance()', (a) => a.isFourSeverance() ? '是' : '否'],
+  ['择日', '月将', 'a.getMonthGeneral()', (a) => a.getMonthGeneral().toString()],
+  ['择日', '年命十神', 'a.getLifeRelation(year)', (a) => a.getLifeRelation(1983).toString()],
+  ['择日', '贵人时', 'a.getNobleHours()', (a) => a.getNobleHours().map((h) => h.getSixtyCycle().getEarthBranch().getName()).join('、') || '—'],
+  ['择日', '吉时', 'a.getLuckyHours()', (a) => a.getLuckyHours().map((h) => h.getSixtyCycle().getEarthBranch().getName()).join('、')],
+  ['择日', '时辰吉凶', 'a.getHourFortunes()', (a) => a.getHourFortunes().map((h) => h.getHour().getSixtyCycle().getEarthBranch().getName() + h.getName()).join(' ')],
+  ['择日', '九星', 'a.getSixtyCycleDay().getNineStar()', (a) => a.getSixtyCycleDay().getNineStar().toString()],
+  ['择日', '九宫飞星', 'a.getDayNineStarChart()', (a) => a.getDayNineStarChart().toString().replace(/\n/g, ' / ')],
+  ['择日', '方位五神', 'getJoyDirection / getWealthDirection / getFortuneDirection', (a) => { const s = a.getSixtyCycleDay().getSixtyCycle().getHeavenStem(); return '喜' + s.getJoyDirection().getName() + ' 财' + s.getWealthDirection().getName() + ' 福' + s.getFortuneDirection().getName(); }],
+
+  ['民俗', '神明诞辰', 'a.getDeityFestival()', (a) => { const d = a.getDeityFestival(); return d ? d.getName() : '—'; }],
+  ['民俗', '民俗节日', 'a.getFolkFestivals()', (a) => a.getFolkFestivals().getName() || '—'],
+  ['民俗', '节日合集', 'a.getFestivalNames()', (a) => a.getFestivalNames().join('、') || '—'],
+  ['民俗', '诸葛武侯', 'a.getWuHouDay()', (a) => a.getWuHouDay().getYuan().getName() + ' ' + a.getWuHouDay().getName() + ' ' + a.getWuHouDay().getLuck().getName()],
+  ['民俗', '生肖号码', 'a.getCombineZodiacNumbers()', (a) => a.getCombineZodiacNumbers().toString()],
+  ['民俗', '今日吉数', 'a.getDailyNumbers()', (a) => a.getDailyNumbers().join(' ')],
+  ['民俗', '周公解梦', 'a.getDreamOracle()', (a) => a.getDreamOracle().toString()],
+  ['民俗', '风水常识', 'a.getFengShuiTip()', (a) => a.getFengShuiTip().getText()],
+  ['民俗', '生肖运程', 'a.getZodiacFortunes()', (a) => a.getZodiacFortunes()[0].toString()],
+  ['民俗', '取名', 'Naming.suggest(surname, eightChar, gender)', (a) => Naming.suggest('李', a.getSixtyCycleDay().getHours()[6].getEightChar(), Gender.MAN, 3).map((n) => n.getFullName()).join(' ')],
+  ['民俗', '节假日', 'HolidayCalendar.of(region).getHoliday(day)', (a) => { const h = HolidayCalendar.of(region).getHoliday(a.getSolarDay()); return h ? h.getName() : '—'; }],
+];
+
+function renderFields() {
+  const q = ($('q').value || '').trim().toLowerCase();
+  const order = [];
+  const groups = {};
+  let count = 0;
+  for (const f of FIELDS) {
+    if (q && (f[0] + f[1] + f[2]).toLowerCase().indexOf(q) < 0) continue;
+    if (!groups[f[0]]) { groups[f[0]] = []; order.push(f[0]); }
+    groups[f[0]].push(f);
+    count++;
+  }
+  const a = almanac();
+  let html = '';
+  for (const g of order) {
+    html += `<div class="field-group"><h3>${g}</h3><table class="fields"><tr><th>字段</th><th>取法</th><th>示例</th></tr>`;
+    for (const f of groups[g]) {
+      let sample = '—';
+      try { sample = String(f[3](a)); } catch (e) { sample = '—'; }
+      html += `<tr><td>${esc(f[1])}</td><td>${esc(f[2])}</td><td>${esc(sample)}</td></tr>`;
+    }
+    html += '</table></div>';
+  }
+  $('fields').innerHTML = html || '<p>没有匹配的字段。</p>';
+  $('qcount').textContent = count + ' 个字段';
+}
+
+function renderRegionCards() {
+  const list = HolidayCalendar.getRegions();
+  $('region-cards').innerHTML = list.map((r) => {
+    const c = HolidayCalendar.of(r);
+    return `<div class="region ${r === region ? 'on' : ''}" data-r="${r}"><b>${CN[r] || r}</b><span>${c.getDays(2026).length} 日 · ${esc(c.getNote().slice(0, 24))}…</span></div>`;
+  }).join('');
+  $('region-cards').querySelectorAll('.region').forEach((el) => {
+    el.onclick = () => {
+      region = el.dataset.r;
+      try { localStorage.setItem('tyme.region', region); } catch (e) { /* ignore */ }
+      $('region').value = region;
+      renderRegionCards();
+      renderRegionDetail();
+      render();
+    };
+  });
+}
+
+function renderRegionDetail() {
+  const c = HolidayCalendar.of(region);
+  $('region-title').textContent = (CN[region] || region) + ' · 法定节假日';
+  $('region-desc').textContent = c.getNote();
+  const list = c.getDays(current.getFullYear());
+  $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}</span></div>`).join('')
+    || '<div><b>本年暂无</b><span></span></div>';
+}
+
 $('prev').onclick = () => shift(-1);
 $('next').onclick = () => shift(1);
 $('today').onclick = setToday;
 $('date').onchange = (e) => {
-  const [y, m, d] = e.target.value.split('-').map(Number);
-  if (y) { current = new Date(y, m - 1, d); render(); }
+  const p = e.target.value.split('-').map(Number);
+  if (p[0]) { current = new Date(p[0], p[1] - 1, p[2]); render(); }
 };
-$('region').onchange = (e) => { region = e.target.value; render(); };
-$('genname').onclick = () => renderNames(DayAlmanac.fromYmd(current.getFullYear(), current.getMonth() + 1, current.getDate()));
+$('region').onchange = (e) => {
+  region = e.target.value;
+  try { localStorage.setItem('tyme.region', region); } catch (e2) { /* ignore */ }
+  render();
+};
+$('genname').onclick = () => renderNames(almanac());
+$('q').oninput = () => renderFields();
+
+const TABS = ['almanac', 'fields', 'regions', 'data'];
+
+function hashPage() {
+  const h = location.hash.replace('#', '');
+  return h.indexOf('tab-') === 0 ? h.slice(4) : '';
+}
+
+function activate(page, scroll) {
+  if (TABS.indexOf(page) < 0) page = 'almanac';
+  document.querySelectorAll('nav.tabs button').forEach((x) => x.classList.toggle('on', x.dataset.page === page));
+  TABS.forEach((p) => $('page-' + p).classList.toggle('hide', p !== page));
+  if (page === 'fields') renderFields();
+  if (page === 'regions') { renderRegionCards(); renderRegionDetail(); }
+  if (scroll) window.scrollTo({top: 0, behavior: 'smooth'});
+}
 
 document.querySelectorAll('nav.tabs button').forEach((b) => {
   b.onclick = () => {
-    document.querySelectorAll('nav.tabs button').forEach((x) => x.classList.remove('on'));
-    b.classList.add('on');
-    ['almanac', 'docs', 'data'].forEach((p) => $('page-' + p).classList.toggle('hide', p !== b.dataset.page));
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    location.hash = 'tab-' + b.dataset.page;
+    activate(b.dataset.page, true);
   };
 });
 
+window.addEventListener('hashchange', () => activate(hashPage(), true));
+
+initRegion();
+activate(hashPage(), false);
 setToday();
 </script>
 </body>

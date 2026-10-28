@@ -8715,6 +8715,33 @@ class DayAlmanac {
   getDreamOracle() {
     return DreamOracle.of(this.solarDay);
   }
+  /**
+   * 民俗节日
+   */
+  getFolkFestivals() {
+    return FolkFestival.of(this.solarDay);
+  }
+  /**
+   * 当日节日名（公历、农历、民俗），按名称去重
+   */
+  getFestivalNames() {
+    const l = [];
+    const solar = this.solarDay.getFestival();
+    if (solar) {
+      l.push(solar.getName());
+    }
+    const lunar = this.getLunarDay().getFestival();
+    if (lunar && l.indexOf(lunar.getName()) < 0) {
+      l.push(lunar.getName());
+    }
+    const folk = this.getFolkFestivals().getNames();
+    for (let i = 0; i < folk.length; i++) {
+      if (l.indexOf(folk[i]) < 0) {
+        l.push(folk[i]);
+      }
+    }
+    return l;
+  }
 }
 class LifeRelation extends AbstractCulture {
   birthYear;
@@ -9570,6 +9597,7 @@ var HolidayType = /* @__PURE__ */ ((HolidayType2) => {
   HolidayType2[HolidayType2["WEEK"] = 2] = "WEEK";
   HolidayType2[HolidayType2["EASTER"] = 3] = "EASTER";
   HolidayType2[HolidayType2["TERM"] = 4] = "TERM";
+  HolidayType2[HolidayType2["TERM_STEM"] = 5] = "TERM_STEM";
   return HolidayType2;
 })(HolidayType || {});
 class HolidayRule extends AbstractCulture {
@@ -9581,6 +9609,9 @@ class HolidayRule extends AbstractCulture {
   week;
   offset;
   termIndex;
+  stemIndex;
+  occurrence;
+  sundayShift;
   startYear;
   endYear;
   constructor(type, name) {
@@ -9593,15 +9624,22 @@ class HolidayRule extends AbstractCulture {
     this.week = 0;
     this.offset = 0;
     this.termIndex = 0;
+    this.stemIndex = 0;
+    this.occurrence = 1;
+    this.sundayShift = 0;
     this.startYear = 1;
     this.endYear = 9999;
   }
-  static solar(month, day, name, startYear = 1, endYear = 9999) {
+  /**
+   * @param sundayShift 逢周日平移天数，如荷兰国王节为 -1
+   */
+  static solar(month, day, name, startYear = 1, endYear = 9999, sundayShift = 0) {
     const o = new HolidayRule(0 /* SOLAR */, name);
     o.month = month;
     o.day = day;
     o.startYear = startYear;
     o.endYear = endYear;
+    o.sundayShift = sundayShift;
     return o;
   }
   static lunar(month, day, name, offset = 0) {
@@ -9635,6 +9673,17 @@ class HolidayRule extends AbstractCulture {
     return o;
   }
   /**
+   * 节气后第几个某干日，如立春后第五个戊日为春社
+   */
+  static termStem(termIndex, stemIndex, occurrence, name, startYear = 1) {
+    const o = new HolidayRule(5 /* TERM_STEM */, name);
+    o.termIndex = termIndex;
+    o.stemIndex = stemIndex;
+    o.occurrence = occurrence;
+    o.startYear = startYear;
+    return o;
+  }
+  /**
    * 复活节（西方教会），Anonymous Gregorian 算法
    */
   static getEasterDay(year) {
@@ -9654,6 +9703,12 @@ class HolidayRule extends AbstractCulture {
     const day = (h + l - 7 * m + 114) % 31 + 1;
     return SolarDay.fromYmd(year, month, day);
   }
+  /**
+   * 节气日，本年冬至属下一节气年
+   */
+  static getTermDay(year, termIndex) {
+    return SolarTerm.fromIndex(termIndex === 0 ? year + 1 : year, termIndex).getSolarDay();
+  }
   getName() {
     return this.name;
   }
@@ -9665,16 +9720,27 @@ class HolidayRule extends AbstractCulture {
       return null;
     }
     switch (this.type) {
-      case 0 /* SOLAR */:
-        return SolarDay.fromYmd(year, this.month, this.day).next(this.offset);
+      case 0 /* SOLAR */: {
+        const d = SolarDay.fromYmd(year, this.month, this.day);
+        return this.sundayShift !== 0 && d.getWeek().getIndex() === 0 ? d.next(this.sundayShift) : d;
+      }
       case 1 /* LUNAR */:
         return LunarDay.fromYmd(year, this.month, this.day).getSolarDay().next(this.offset);
       case 4 /* TERM */:
-        return SolarTerm.fromIndex(this.termIndex === 0 ? year + 1 : year, this.termIndex).getSolarDay().next(this.offset);
+        return HolidayRule.getTermDay(year, this.termIndex).next(this.offset);
       case 3 /* EASTER */:
         return HolidayRule.getEasterDay(year).next(this.offset);
       case 2 /* WEEK */:
         return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+      case 5 /* TERM_STEM */: {
+        const start = HolidayRule.getTermDay(year, this.termIndex);
+        const stem = start.getLunarDay().getSixtyCycle().getHeavenStem().getIndex();
+        let offset = (this.stemIndex - stem + 10) % 10;
+        if (offset === 0) {
+          offset = 10;
+        }
+        return start.next(offset + 10 * (this.occurrence - 1));
+      }
     }
     return null;
   }
@@ -9719,47 +9785,110 @@ class HolidayCalendar {
   rules;
   data;
   substitute;
-  constructor(region, rules, substitute) {
+  observed;
+  note;
+  constructor(region, rules, note, observed = 0, substitute = false) {
     this.region = region;
     this.rules = rules;
     this.data = {};
     this.substitute = substitute;
+    this.observed = observed;
+    this.note = note;
   }
   static of(region) {
     const r = region.toUpperCase();
     switch (r) {
-      case "CN": {
-        const c = new HolidayCalendar(r, HolidayCalendar.chinaRules(), false);
-        const days = LegalHoliday.getDays();
-        for (let i = 0; i < days.length; i++) {
-          const d = days[i];
-          c.data[d.getDay().toString()] = new Holiday(d.getDay(), d.getName(), d.isWork());
-        }
-        return c;
-      }
+      case "CN":
+        return HolidayCalendar.china();
       case "HK":
-        return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), false);
+        return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), "\u516C\u4F17\u5047\u671F\uFF0C\u519C\u5386\u4E0E\u590D\u6D3B\u8282\u4E3A\u4E3B\uFF1B\u4E2A\u522B\u5E74\u5EA6\u8C03\u6574\u4EE5\u653F\u5E9C\u516C\u544A\u4E3A\u51C6\u3002");
       case "MO":
-        return new HolidayCalendar(r, HolidayCalendar.macaoRules(), false);
+        return new HolidayCalendar(r, HolidayCalendar.macaoRules(), "\u516C\u4F17\u5047\u671F\uFF0C\u542B\u51AC\u81F3\u4E0E\u8FFD\u601D\u8282\u3002");
       case "TW":
-        return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), false);
+        return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), "\u7EAA\u5FF5\u65E5\u4E0E\u6C11\u4FD7\u8282\u65E5\uFF1B\u8C03\u4F11\u4EE5\u884C\u653F\u9662\u516C\u544A\u4E3A\u51C6\u3002");
       case "JP":
-        return new HolidayCalendar(r, HolidayCalendar.japanRules(), true);
+        return new HolidayCalendar(r, HolidayCalendar.japanRules(), "\u56FD\u6C11\u306E\u795D\u65E5\uFF0C\u542B\u632F\u66FF\u4F11\u65E5\u4E0E\u56FD\u6C11\u306E\u4F11\u65E5\uFF1B2020\u30012021 \u5E74\u5965\u8FD0\u8C03\u6574\u672A\u5355\u5217\u3002", 0, true);
       case "KR":
-        return new HolidayCalendar(r, HolidayCalendar.koreaRules(), false);
+        return new HolidayCalendar(r, HolidayCalendar.koreaRules(), "\u6CD5\u5B9A\u516C\u4F11\u65E5\u6838\u5FC3\uFF1B\u66FF\u4EE3\u516C\u4F11\u65E5\u4E0E\u4E34\u65F6\u516C\u4F11\u65E5\u4EE5\u653F\u5E9C\u516C\u544A\u4E3A\u51C6\u3002");
       case "VN":
-        return new HolidayCalendar(r, HolidayCalendar.vietnamRules(), false);
+        return new HolidayCalendar(r, HolidayCalendar.vietnamRules(), "\u6CD5\u5B9A\u8282\u65E5\uFF1B\u6625\u8282\u8FDE\u4F11\u4EE5\u5F53\u5E74\u516C\u544A\u4E3A\u51C6\u3002");
       case "SG":
-        return new HolidayCalendar(r, HolidayCalendar.singaporeRules(), false);
+        return new HolidayCalendar(r, HolidayCalendar.singaporeRules(), "\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF0C\u542B\u8036\u7A23\u53D7\u96BE\u65E5\uFF1B\u5F00\u658B\u8282\u3001\u54C8\u829D\u8282\u3001\u5C60\u5996\u8282\u4F9D\u89C2\u6708\u4E0E\u5370\u5EA6\u5386\u516C\u5E03\u3002", 2);
+      case "MY":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules(), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF1B\u5DDE\u5047\u65E5\u4E0E\u56DE\u5386\u3001\u5370\u5EA6\u5386\u8282\u65E5\u4EE5\u516C\u544A\u4E3A\u51C6\u3002");
+      case "TH":
+        return new HolidayCalendar(r, HolidayCalendar.thailandRules(), "\u516C\u5386\u56FA\u5B9A\u8282\u65E5\uFF1B\u4F5B\u5386\u658B\u6212\u65E5\u4F9D\u6CF0\u5386\u516C\u5E03\u3002");
+      case "US":
+        return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules(), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5468\u516D\u524D\u79FB\u3001\u5468\u65E5\u540E\u79FB\u4E4B\u8865\u5047\u3002", 1);
+      case "GB":
+        return new HolidayCalendar(r, HolidayCalendar.britainRules(), "\u82F1\u683C\u5170\u53CA\u5A01\u5C14\u58EB\u94F6\u884C\u5047\u65E5\uFF0C\u542B\u987A\u5EF6\u8865\u5047\uFF1B\u82CF\u683C\u5170\u3001\u5317\u7231\u5C14\u5170\u53E6\u6709\u5DEE\u5F02\u3002", 3);
+      case "CA":
+        return new HolidayCalendar(r, HolidayCalendar.canadaRules(), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u987A\u5EF6\u8865\u5047\uFF1B\u7701\u5047\u53E6\u6709\u5DEE\u5F02\u3002", 3);
+      case "AU":
+        return new HolidayCalendar(r, HolidayCalendar.australiaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u987A\u5EF6\u8865\u5047\uFF1B\u56FD\u738B\u8BDE\u8FB0\u4E0E\u52B3\u52A8\u8282\u5404\u5DDE\u4E0D\u540C\u3002", 3);
+      case "NZ":
+        return new HolidayCalendar(r, HolidayCalendar.newZealandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5468\u4E00\u8865\u5047\uFF1B\u9A6C\u5854\u91CC\u57FA\u65E5\u4E3A\u9010\u5E74\u516C\u5E03\u3002", 3);
+      case "DE":
+        return new HolidayCalendar(r, HolidayCalendar.germanyRules(), "\u5168\u5FB7\u7EDF\u4E00\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5404\u5DDE\u53E6\u6709\u5B97\u6559\u8282\u65E5\u3002");
+      case "FR":
+        return new HolidayCalendar(r, HolidayCalendar.franceRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u963F\u5C14\u8428\u65AF-\u6469\u6CFD\u5C14\u53E6\u6709\u5B97\u6559\u8282\u65E5\u3002");
+      case "IT":
+        return new HolidayCalendar(r, HolidayCalendar.italyRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5730\u65B9\u4E3B\u4FDD\u5723\u4EBA\u8282\u53E6\u8BA1\u3002");
+      case "ES":
+        return new HolidayCalendar(r, HolidayCalendar.spainRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u81EA\u6CBB\u533A\u53E6\u6709\u8282\u65E5\u3002");
+      case "NL":
+        return new HolidayCalendar(r, HolidayCalendar.netherlandsRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u56FD\u738B\u8282\u9022\u5468\u65E5\u63D0\u524D\u4E00\u65E5\u3002");
+      case "BR":
+        return new HolidayCalendar(r, HolidayCalendar.brazilRules(), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\uFF1B\u72C2\u6B22\u8282\u4E0E\u5DDE\u8282\u53E6\u8BA1\u3002");
+      case "MX":
+        return new HolidayCalendar(r, HolidayCalendar.mexicoRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u90E8\u5206\u8282\u65E5\u6309\u5468\u4E00\u8C03\u6574\u3002");
+      case "RU":
+        return new HolidayCalendar(r, HolidayCalendar.russiaRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u65B0\u5E74\u5047\u671F\u4E3A\u4E00\u6708\u4E00\u65E5\u81F3\u516B\u65E5\u3002");
+      case "ZA":
+        return new HolidayCalendar(r, HolidayCalendar.southAfricaRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF0C\u5468\u65E5\u987A\u5EF6\u81F3\u5468\u4E00\u3002", 2);
+      case "IN":
+        return new HolidayCalendar(r, HolidayCalendar.indiaRules(), "\u4EC5\u5217\u5168\u56FD\u6027\u8282\u65E5\uFF1B\u5404\u90A6\u4E0E\u5B97\u6559\u8282\u65E5\u53E6\u8BA1\u3002");
+      case "PH":
+        return new HolidayCalendar(r, HolidayCalendar.philippinesRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF1B\u5B97\u6559\u8282\u65E5\u4EE5\u516C\u544A\u4E3A\u51C6\u3002");
       default:
         throw new Error(`illegal region: ${region}`);
     }
   }
   static getRegions() {
-    return ["CN", "HK", "MO", "TW", "JP", "KR", "VN", "SG"];
-  }
-  static chinaRules() {
     return [
+      "CN",
+      "HK",
+      "MO",
+      "TW",
+      "JP",
+      "KR",
+      "VN",
+      "SG",
+      "MY",
+      "TH",
+      "US",
+      "GB",
+      "CA",
+      "AU",
+      "NZ",
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BR",
+      "MX",
+      "RU",
+      "ZA",
+      "IN",
+      "PH"
+    ];
+  }
+  /**
+   * 中国大陆：内置 2001 年起国务院公告数据
+   */
+  static china() {
+    const c = new HolidayCalendar("CN", [
       HolidayRule.solar(1, 1, "\u5143\u65E6"),
       HolidayRule.lunar(1, 1, "\u6625\u8282"),
       HolidayRule.term(7, "\u6E05\u660E\u8282"),
@@ -9767,7 +9896,20 @@ class HolidayCalendar {
       HolidayRule.lunar(5, 5, "\u7AEF\u5348\u8282"),
       HolidayRule.lunar(8, 15, "\u4E2D\u79CB\u8282"),
       HolidayRule.solar(10, 1, "\u56FD\u5E86\u8282")
-    ];
+    ], "\u6CD5\u5B9A\u8282\u5047\u65E5\u4E0E\u8C03\u4F11\u4EE5\u56FD\u52A1\u9662\u529E\u516C\u5385\u9010\u5E74\u901A\u77E5\u4E3A\u51C6\uFF0C\u5DF2\u5185\u7F6E\u516C\u544A\u6570\u636E\uFF0C\u53EF\u6309\u5E74\u8FFD\u52A0\u3002");
+    const days = HolidayCalendar.getLegalHolidays();
+    for (let i = 0; i < days.length; i++) {
+      const d = days[i];
+      c.data[d.getDay().toString()] = new Holiday(d.getDay(), d.getName(), d.isWork());
+    }
+    return c;
+  }
+  static LEGAL_CACHE = null;
+  static getLegalHolidays() {
+    if (!HolidayCalendar.LEGAL_CACHE) {
+      HolidayCalendar.LEGAL_CACHE = LegalHoliday.getDays();
+    }
+    return HolidayCalendar.LEGAL_CACHE;
   }
   static hongKongRules() {
     return [
@@ -9787,7 +9929,7 @@ class HolidayCalendar {
       HolidayRule.solar(10, 1, "\u56FD\u5E86\u65E5"),
       HolidayRule.lunar(9, 9, "\u91CD\u9633\u8282"),
       HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
-      HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u540E\u7B2C\u4E00\u4E2A\u5468\u65E5")
+      HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
     ];
   }
   static macaoRules() {
@@ -9883,10 +10025,260 @@ class HolidayCalendar {
       HolidayRule.solar(1, 1, "\u5143\u65E6"),
       HolidayRule.lunar(1, 1, "\u519C\u5386\u65B0\u5E74"),
       HolidayRule.lunar(1, 2, "\u519C\u5386\u65B0\u5E74"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
       HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
       HolidayRule.lunar(4, 15, "\u536B\u585E\u8282"),
       HolidayRule.solar(8, 9, "\u56FD\u5E86\u65E5"),
       HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static malaysiaRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.lunar(1, 1, "\u519C\u5386\u65B0\u5E74"),
+      HolidayRule.lunar(1, 2, "\u519C\u5386\u65B0\u5E74"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.lunar(4, 15, "\u536B\u585E\u8282"),
+      HolidayRule.week(6, 1, 1, "\u56FD\u5BB6\u5143\u9996\u8BDE\u8FB0"),
+      HolidayRule.solar(8, 31, "\u56FD\u5E86\u65E5"),
+      HolidayRule.solar(9, 16, "\u9A6C\u6765\u897F\u4E9A\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static thailandRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(4, 6, "\u5374\u514B\u91CC\u738B\u671D\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(4, 13, "\u5B8B\u5E72\u8282"),
+      HolidayRule.solar(4, 14, "\u5B8B\u5E72\u8282"),
+      HolidayRule.solar(4, 15, "\u5B8B\u5E72\u8282"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(5, 4, "\u52A0\u5195\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(6, 3, "\u738B\u540E\u8BDE\u8FB0"),
+      HolidayRule.solar(7, 28, "\u56FD\u738B\u8BDE\u8FB0"),
+      HolidayRule.solar(8, 12, "\u6BCD\u4EB2\u8282"),
+      HolidayRule.solar(10, 13, "\u5148\u738B\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(10, 23, "\u6731\u62C9\u9686\u529F\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(12, 5, "\u7236\u4EB2\u8282"),
+      HolidayRule.solar(12, 10, "\u5BAA\u6CD5\u65E5"),
+      HolidayRule.solar(12, 31, "\u9664\u5915")
+    ];
+  }
+  static unitedStatesRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.week(1, 3, 1, "\u9A6C\u4E01\xB7\u8DEF\u5FB7\xB7\u91D1\u7EAA\u5FF5\u65E5", 1986),
+      HolidayRule.week(2, 3, 1, "\u534E\u76DB\u987F\u8BDE\u8FB0"),
+      HolidayRule.week(5, -1, 1, "\u9635\u4EA1\u5C06\u58EB\u7EAA\u5FF5\u65E5", 1971),
+      HolidayRule.solar(6, 19, "\u516D\u6708\u8282", 2021),
+      HolidayRule.solar(7, 4, "\u72EC\u7ACB\u65E5"),
+      HolidayRule.week(9, 1, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.week(10, 2, 1, "\u54E5\u4F26\u5E03\u65E5", 1971),
+      HolidayRule.solar(11, 11, "\u9000\u4F0D\u519B\u4EBA\u8282"),
+      HolidayRule.week(11, 4, 4, "\u611F\u6069\u8282"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static britainRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.week(5, 1, 1, "\u4E94\u6708\u521D\u94F6\u884C\u5047\u65E5"),
+      HolidayRule.week(5, -1, 1, "\u6625\u5B63\u94F6\u884C\u5047\u65E5"),
+      HolidayRule.week(8, -1, 1, "\u590F\u5B63\u94F6\u884C\u5047\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u8282\u793C\u65E5")
+    ];
+  }
+  static canadaRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.solar(7, 1, "\u52A0\u62FF\u5927\u65E5"),
+      HolidayRule.week(9, 1, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(9, 30, "\u5168\u56FD\u771F\u76F8\u4E0E\u548C\u89E3\u65E5", 2021),
+      HolidayRule.week(10, 2, 1, "\u611F\u6069\u8282"),
+      HolidayRule.solar(11, 11, "\u56FD\u6B87\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u8282\u793C\u65E5")
+    ];
+  }
+  static australiaRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(1, 26, "\u6FB3\u5927\u5229\u4E9A\u65E5"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(4, 25, "\u6FB3\u65B0\u519B\u56E2\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u8282\u793C\u65E5")
+    ];
+  }
+  static newZealandRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(1, 2, "\u5143\u65E6\u6B21\u65E5"),
+      HolidayRule.solar(2, 6, "\u6000\u5510\u4F0A\u65E5"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(4, 25, "\u6FB3\u65B0\u519B\u56E2\u65E5"),
+      HolidayRule.week(6, 1, 1, "\u56FD\u738B\u8BDE\u8FB0"),
+      HolidayRule.week(10, 4, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u8282\u793C\u65E5")
+    ];
+  }
+  static germanyRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+      HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(10, 3, "\u5FB7\u56FD\u7EDF\u4E00\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+    ];
+  }
+  static franceRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(5, 8, "\u80DC\u5229\u7EAA\u5FF5\u65E5"),
+      HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+      HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(7, 14, "\u56FD\u5E86\u65E5"),
+      HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+      HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+      HolidayRule.solar(11, 11, "\u505C\u6218\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static italyRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(4, 25, "\u89E3\u653E\u65E5"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(6, 2, "\u5171\u548C\u56FD\u65E5"),
+      HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+      HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+      HolidayRule.solar(12, 8, "\u5723\u6BCD\u65E0\u539F\u7F6A\u8282"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u5723\u53F2\u8482\u82AC\u65E5")
+    ];
+  }
+  static spainRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+      HolidayRule.solar(10, 12, "\u56FD\u5E86\u65E5"),
+      HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+      HolidayRule.solar(12, 6, "\u5BAA\u6CD5\u65E5"),
+      HolidayRule.solar(12, 8, "\u5723\u6BCD\u65E0\u539F\u7F6A\u8282"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static netherlandsRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.easter(0, "\u590D\u6D3B\u8282\u661F\u671F\u65E5"),
+      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(4, 27, "\u56FD\u738B\u8282", 2014, 9999, -1),
+      HolidayRule.solar(5, 5, "\u89E3\u653E\u65E5"),
+      HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+      HolidayRule.easter(49, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u65E5"),
+      HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+    ];
+  }
+  static brazilRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.solar(4, 21, "\u8482\u62C9\u767B\u7279\u65AF\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(9, 7, "\u72EC\u7ACB\u65E5"),
+      HolidayRule.solar(10, 12, "\u5723\u6BCD\u963F\u5E15\u96F7\u897F\u8FBE\u8282"),
+      HolidayRule.solar(11, 2, "\u4EA1\u4EBA\u8282"),
+      HolidayRule.solar(11, 15, "\u5171\u548C\u56FD\u5BA3\u8A00\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static mexicoRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.week(2, 1, 1, "\u5BAA\u6CD5\u65E5"),
+      HolidayRule.week(3, 3, 1, "\u534E\u96F7\u65AF\u8BDE\u8FB0"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(9, 16, "\u72EC\u7ACB\u65E5"),
+      HolidayRule.week(11, 3, 1, "\u9769\u547D\u7EAA\u5FF5\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+    ];
+  }
+  static russiaRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(1, 2, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(1, 3, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(1, 4, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(1, 5, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(1, 6, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(1, 7, "\u4E1C\u6B63\u6559\u5723\u8BDE\u8282"),
+      HolidayRule.solar(1, 8, "\u65B0\u5E74\u5047\u671F"),
+      HolidayRule.solar(2, 23, "\u7956\u56FD\u4FDD\u536B\u8005\u65E5"),
+      HolidayRule.solar(3, 8, "\u5987\u5973\u8282"),
+      HolidayRule.solar(5, 1, "\u6625\u5929\u4E0E\u52B3\u52A8\u8282"),
+      HolidayRule.solar(5, 9, "\u80DC\u5229\u65E5"),
+      HolidayRule.solar(6, 12, "\u4FC4\u7F57\u65AF\u65E5"),
+      HolidayRule.solar(11, 4, "\u6C11\u65CF\u56E2\u7ED3\u65E5")
+    ];
+  }
+  static southAfricaRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(3, 21, "\u4EBA\u6743\u65E5"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.easter(1, "\u5BB6\u5EAD\u65E5"),
+      HolidayRule.solar(4, 27, "\u81EA\u7531\u65E5"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(6, 16, "\u9752\u5E74\u8282"),
+      HolidayRule.solar(8, 9, "\u5987\u5973\u8282"),
+      HolidayRule.solar(9, 24, "\u9057\u4EA7\u65E5"),
+      HolidayRule.solar(12, 16, "\u548C\u89E3\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 26, "\u5584\u610F\u8282")
+    ];
+  }
+  static indiaRules() {
+    return [
+      HolidayRule.solar(1, 26, "\u5171\u548C\u56FD\u65E5"),
+      HolidayRule.solar(8, 15, "\u72EC\u7ACB\u65E5"),
+      HolidayRule.solar(10, 2, "\u7518\u5730\u8BDE\u8FB0")
+    ];
+  }
+  static philippinesRules() {
+    return [
+      HolidayRule.solar(1, 1, "\u5143\u65E6"),
+      HolidayRule.solar(4, 9, "\u5DF4\u4E39\u65E5"),
+      HolidayRule.easter(-3, "\u6FEF\u8DB3\u8282"),
+      HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+      HolidayRule.easter(-1, "\u9ED1\u8272\u661F\u671F\u516D"),
+      HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+      HolidayRule.solar(6, 12, "\u72EC\u7ACB\u65E5"),
+      HolidayRule.solar(8, 21, "\u5C3C\u8BFA\xB7\u963F\u57FA\u8BFA\u65E5"),
+      HolidayRule.week(8, -1, 1, "\u82F1\u96C4\u8282"),
+      HolidayRule.solar(11, 30, "\u535A\u5C3C\u6CD5\u897F\u5965\u65E5"),
+      HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+      HolidayRule.solar(12, 30, "\u9ECE\u5239\u7EAA\u5FF5\u65E5")
     ];
   }
   getRegion() {
@@ -9894,6 +10286,12 @@ class HolidayCalendar {
   }
   getRules() {
     return this.rules;
+  }
+  /**
+   * 覆盖范围说明
+   */
+  getNote() {
+    return this.note;
   }
   /**
    * 导入节假日数据，返回导入条数
@@ -9933,22 +10331,47 @@ class HolidayCalendar {
    */
   getDays(year, includeWork = false) {
     const map = {};
+    const dataKeys = {};
     for (const k in this.data) {
       if (this.data[k].getDay().getYear() === year) {
         map[k] = this.data[k];
+        dataKeys[k] = true;
       }
     }
     for (let i = 0; i < this.rules.length; i++) {
       const d = this.rules[i].getDay(year);
-      if (d && !map[HolidayCalendar.getKey(d)]) {
-        map[HolidayCalendar.getKey(d)] = new Holiday(d, this.rules[i].getName());
+      if (!d) {
+        continue;
+      }
+      const key = HolidayCalendar.getKey(d);
+      const old = map[key];
+      const name = this.rules[i].getName();
+      if (!old) {
+        map[key] = new Holiday(d, name);
+      } else if (!dataKeys[key] && !old.isWork() && old.getName().indexOf(name) < 0) {
+        map[key] = new Holiday(d, old.getName() + "\u3001" + name);
       }
     }
     if (this.substitute) {
-      this.applySubstitutes(year, map);
+      this.applyJapaneseSubstitutes(year, map);
+    }
+    if (this.observed === 1) {
+      const nextNewYear = SolarDay.fromYmd(year + 1, 1, 1);
+      if (nextNewYear.getWeek().getIndex() === 6) {
+        const eve = nextNewYear.next(-1);
+        if (!map[HolidayCalendar.getKey(eve)]) {
+          map[HolidayCalendar.getKey(eve)] = new Holiday(eve, "\u5143\u65E6\uFF08\u8865\u5047\uFF09");
+        }
+      }
+    }
+    if (this.observed !== 0) {
+      this.applyObserved(year, map);
     }
     const l = [];
     for (const k in map) {
+      if (map[k].getDay().getYear() !== year) {
+        continue;
+      }
       if (includeWork || !map[k].isWork()) {
         l.push(map[k]);
       }
@@ -9957,9 +10380,54 @@ class HolidayCalendar {
     return l;
   }
   /**
+   * 顺延至下一个非假日
+   */
+  static nextFree(map, day) {
+    let d = day;
+    while (map[HolidayCalendar.getKey(d)]) {
+      d = d.next(1);
+    }
+    return d;
+  }
+  /**
+   * 补假：美国周六前移、周日后移；其余为顺延至下一工作日
+   */
+  applyObserved(year, map) {
+    const list = [];
+    for (const k in map) {
+      if (!map[k].isWork()) {
+        list.push(map[k]);
+      }
+    }
+    list.sort((a, b) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
+    for (let i = 0; i < list.length; i++) {
+      const h = list[i];
+      const w = h.getDay().getWeek().getIndex();
+      let target = null;
+      if (this.observed === 1) {
+        if (w === 6) {
+          target = h.getDay().next(-1);
+        } else if (w === 0) {
+          target = h.getDay().next(1);
+        }
+      } else if (this.observed === 2) {
+        if (w === 0) {
+          target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+        }
+      } else if (this.observed === 3) {
+        if (w === 0 || w === 6) {
+          target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+        }
+      }
+      if (target && !map[HolidayCalendar.getKey(target)]) {
+        map[HolidayCalendar.getKey(target)] = new Holiday(target, h.getName() + "\uFF08\u8865\u5047\uFF09");
+      }
+    }
+  }
+  /**
    * 日本振替休日与国民の休日
    */
-  applySubstitutes(year, map) {
+  applyJapaneseSubstitutes(year, map) {
     const days = [];
     let d = SolarDay.fromYmd(year, 1, 1);
     const end = SolarDay.fromYmd(year, 12, 31);
@@ -9977,10 +10445,7 @@ class HolidayCalendar {
     for (let i = 0; i < days.length; i++) {
       const cur = days[i];
       if (isHoliday(cur) && cur.getWeek().getIndex() === 0) {
-        let next = cur.next(1);
-        while (isHoliday(next)) {
-          next = next.next(1);
-        }
+        const next = HolidayCalendar.nextFree(map, cur.next(1));
         map[HolidayCalendar.getKey(next)] = new Holiday(next, "\u632F\u66FF\u4F11\u65E5");
       }
     }
@@ -9994,6 +10459,121 @@ class HolidayCalendar {
       }
     }
     return null;
+  }
+}
+class FolkFestival extends AbstractCulture {
+  solarDay;
+  names;
+  /**
+   * 农历月日
+   */
+  static LUNAR = {
+    "1-4": ["\u63A5\u795E\u65E5"],
+    "1-5": ["\u9694\u5F00\u65E5"],
+    "1-7": ["\u4EBA\u65E5"],
+    "1-8": ["\u8C37\u65E5", "\u987A\u661F\u8282"],
+    "1-9": ["\u5929\u65E5"],
+    "1-10": ["\u5730\u65E5"],
+    "1-20": ["\u5929\u7A7F\u8282"],
+    "1-25": ["\u586B\u4ED3\u8282"],
+    "1-30": ["\u6B63\u6708\u6666"],
+    "2-1": ["\u4E2D\u548C\u8282"],
+    "5-20": ["\u5206\u9F99\u8282"],
+    "5-25": ["\u4F1A\u9F99\u8282"],
+    "6-6": ["\u5929\u8D36\u8282"],
+    "6-24": ["\u89C2\u83B2\u8282"],
+    "6-25": ["\u4E94\u8C37\u6BCD\u8282"],
+    "7-22": ["\u8D22\u795E\u8282"],
+    "7-29": ["\u5730\u85CF\u8282"],
+    "8-1": ["\u5929\u7078\u65E5"],
+    "10-1": ["\u5BD2\u8863\u8282"],
+    "10-10": ["\u5341\u6210\u8282"],
+    "10-15": ["\u4E0B\u5143\u8282"],
+    "12-7": ["\u9A71\u50A9\u65E5"],
+    "12-16": ["\u5C3E\u7259"],
+    "12-23": ["\u5C0F\u5E74\uFF08\u5317\u65B9\uFF09"],
+    "12-24": ["\u796D\u7076\u65E5"]
+  };
+  /**
+   * 公历月日，已见于公历节日表者不再重复
+   */
+  static SOLAR = {
+    "2-14": ["\u60C5\u4EBA\u8282"],
+    "3-15": ["\u6D88\u8D39\u8005\u6743\u76CA\u65E5"],
+    "4-1": ["\u611A\u4EBA\u8282"],
+    "10-31": ["\u4E07\u5723\u591C"],
+    "11-1": ["\u4E07\u5723\u8282"],
+    "12-24": ["\u5E73\u5B89\u591C"],
+    "12-25": ["\u5723\u8BDE\u8282"]
+  };
+  /**
+   * 某月第几个星期几，-1 表示最后一个
+   */
+  static WEEK_RULES = [
+    HolidayRule.week(3, -1, 1, "\u5168\u56FD\u4E2D\u5C0F\u5B66\u751F\u5B89\u5168\u6559\u80B2\u65E5"),
+    HolidayRule.week(5, 2, 0, "\u6BCD\u4EB2\u8282"),
+    HolidayRule.week(5, 3, 0, "\u5168\u56FD\u52A9\u6B8B\u65E5"),
+    HolidayRule.week(6, 3, 0, "\u7236\u4EB2\u8282"),
+    HolidayRule.week(9, 3, 6, "\u5168\u6C11\u56FD\u9632\u6559\u80B2\u65E5"),
+    HolidayRule.week(10, 1, 1, "\u4E16\u754C\u4F4F\u623F\u65E5"),
+    HolidayRule.week(11, 4, 4, "\u611F\u6069\u8282")
+  ];
+  /**
+   * 节气日偏移
+   */
+  static TERM_RULES = [
+    HolidayRule.term(7, "\u5BD2\u98DF\u8282", -1)
+  ];
+  /**
+   * 节气后第几个某干日
+   */
+  static TERM_STEM_RULES = [
+    HolidayRule.termStem(3, 4, 5, "\u6625\u793E"),
+    HolidayRule.termStem(15, 4, 5, "\u79CB\u793E")
+  ];
+  constructor(solarDay, names) {
+    super();
+    this.solarDay = solarDay;
+    this.names = names;
+  }
+  static of(solarDay) {
+    const names = [];
+    const lunar = solarDay.getLunarDay();
+    const year = solarDay.getYear();
+    FolkFestival.append(names, FolkFestival.LUNAR[Math.abs(lunar.getMonth()) + "-" + lunar.getDay()]);
+    FolkFestival.append(names, FolkFestival.SOLAR[solarDay.getMonth() + "-" + solarDay.getDay()]);
+    FolkFestival.appendByRules(names, FolkFestival.WEEK_RULES, solarDay, year);
+    FolkFestival.appendByRules(names, FolkFestival.TERM_RULES, solarDay, year);
+    FolkFestival.appendByRules(names, FolkFestival.TERM_STEM_RULES, solarDay, year);
+    return new FolkFestival(solarDay, names);
+  }
+  static appendByRules(target, rules, solarDay, year) {
+    for (let i = 0; i < rules.length; i++) {
+      const d = rules[i].getDay(year);
+      if (d && d.equals(solarDay)) {
+        target.push(rules[i].getName());
+      }
+    }
+  }
+  static append(target, source) {
+    if (!source) {
+      return;
+    }
+    for (let i = 0; i < source.length; i++) {
+      target.push(source[i]);
+    }
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getNames() {
+    return this.names;
+  }
+  getName() {
+    return this.names.join("\u3001");
+  }
+  toString() {
+    return this.getName();
   }
 }
 class IcsEvent extends AbstractCulture {
@@ -10162,4 +10742,4 @@ class IcsCalendar {
   }
 }
 
-export { AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, Beast, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, Fortune, Gender, God, HeavenStem, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, JulianDay, KitchenGodSteed, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, Taboo, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, TwelveStar, Twenty, TwentyEightStar, Week, WeekUnit, WuHouDay, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone };
+export { AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, Beast, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, Gender, God, HeavenStem, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, JulianDay, KitchenGodSteed, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, Taboo, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, TwelveStar, Twenty, TwentyEightStar, Week, WeekUnit, WuHouDay, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone };

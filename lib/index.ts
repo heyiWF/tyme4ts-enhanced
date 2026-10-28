@@ -7291,6 +7291,35 @@ export class DayAlmanac {
     getDreamOracle(): DreamOracle {
         return DreamOracle.of(this.solarDay);
     }
+
+    /**
+     * 民俗节日
+     */
+    getFolkFestivals(): FolkFestival {
+        return FolkFestival.of(this.solarDay);
+    }
+
+    /**
+     * 当日节日名（公历、农历、民俗），按名称去重
+     */
+    getFestivalNames(): string[] {
+        const l: string[] = [];
+        const solar: SolarFestival | null = this.solarDay.getFestival();
+        if (solar) {
+            l.push(solar.getName());
+        }
+        const lunar: LunarFestival | null = this.getLunarDay().getFestival();
+        if (lunar && l.indexOf(lunar.getName()) < 0) {
+            l.push(lunar.getName());
+        }
+        const folk: string[] = this.getFolkFestivals().getNames();
+        for (let i: number = 0; i < folk.length; i++) {
+            if (l.indexOf(folk[i]) < 0) {
+                l.push(folk[i]);
+            }
+        }
+        return l;
+    }
 }
 
 
@@ -8281,13 +8310,14 @@ export enum HolidayType {
     LUNAR = 1,
     WEEK = 2,
     EASTER = 3,
-    TERM = 4
+    TERM = 4,
+    TERM_STEM = 5
 }
 
 /**
  * 节日规则
  *
- * 支持公历月日、农历月日、某月第几个星期几、复活节偏移、节气日五类；
+ * 支持公历月日、农历月日、某月第几个星期几、复活节偏移、节气日、节气后第几个某干日六类；
  * 起止年份用于处理古今异名、异地异日之节日。
  */
 export class HolidayRule extends AbstractCulture {
@@ -8299,6 +8329,9 @@ export class HolidayRule extends AbstractCulture {
     protected week: number;
     protected offset: number;
     protected termIndex: number;
+    protected stemIndex: number;
+    protected occurrence: number;
+    protected sundayShift: number;
     protected startYear: number;
     protected endYear: number;
 
@@ -8312,16 +8345,23 @@ export class HolidayRule extends AbstractCulture {
         this.week = 0;
         this.offset = 0;
         this.termIndex = 0;
+        this.stemIndex = 0;
+        this.occurrence = 1;
+        this.sundayShift = 0;
         this.startYear = 1;
         this.endYear = 9999;
     }
 
-    static solar(month: number, day: number, name: string, startYear: number = 1, endYear: number = 9999): HolidayRule {
+    /**
+     * @param sundayShift 逢周日平移天数，如荷兰国王节为 -1
+     */
+    static solar(month: number, day: number, name: string, startYear: number = 1, endYear: number = 9999, sundayShift: number = 0): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.SOLAR, name);
         o.month = month;
         o.day = day;
         o.startYear = startYear;
         o.endYear = endYear;
+        o.sundayShift = sundayShift;
         return o;
     }
 
@@ -8360,6 +8400,18 @@ export class HolidayRule extends AbstractCulture {
     }
 
     /**
+     * 节气后第几个某干日，如立春后第五个戊日为春社
+     */
+    static termStem(termIndex: number, stemIndex: number, occurrence: number, name: string, startYear: number = 1): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.TERM_STEM, name);
+        o.termIndex = termIndex;
+        o.stemIndex = stemIndex;
+        o.occurrence = occurrence;
+        o.startYear = startYear;
+        return o;
+    }
+
+    /**
      * 复活节（西方教会），Anonymous Gregorian 算法
      */
     static getEasterDay(year: number): SolarDay {
@@ -8380,6 +8432,13 @@ export class HolidayRule extends AbstractCulture {
         return SolarDay.fromYmd(year, month, day);
     }
 
+    /**
+     * 节气日，本年冬至属下一节气年
+     */
+    static getTermDay(year: number, termIndex: number): SolarDay {
+        return SolarTerm.fromIndex(termIndex === 0 ? year + 1 : year, termIndex).getSolarDay();
+    }
+
     getName(): string {
         return this.name;
     }
@@ -8393,17 +8452,28 @@ export class HolidayRule extends AbstractCulture {
             return null;
         }
         switch (this.type) {
-            case HolidayType.SOLAR:
-                return SolarDay.fromYmd(year, this.month, this.day).next(this.offset);
+            case HolidayType.SOLAR: {
+                const d: SolarDay = SolarDay.fromYmd(year, this.month, this.day);
+                return this.sundayShift !== 0 && d.getWeek().getIndex() === 0 ? d.next(this.sundayShift) : d;
+            }
             case HolidayType.LUNAR:
                 return LunarDay.fromYmd(year, this.month, this.day).getSolarDay().next(this.offset);
             case HolidayType.TERM:
-                // 节气以冬至为首，本年冬至属下一节气年
-                return SolarTerm.fromIndex(this.termIndex === 0 ? year + 1 : year, this.termIndex).getSolarDay().next(this.offset);
+                return HolidayRule.getTermDay(year, this.termIndex).next(this.offset);
             case HolidayType.EASTER:
                 return HolidayRule.getEasterDay(year).next(this.offset);
             case HolidayType.WEEK:
                 return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+            case HolidayType.TERM_STEM: {
+                const start: SolarDay = HolidayRule.getTermDay(year, this.termIndex);
+                const stem: number = start.getLunarDay().getSixtyCycle().getHeavenStem().getIndex();
+                // 「立春后第五个戊日」不含节气当日，故同日须再进十辰
+                let offset: number = (this.stemIndex - stem + 10) % 10;
+                if (offset === 0) {
+                    offset = 10;
+                }
+                return start.next(offset + 10 * (this.occurrence - 1));
+            }
         }
         return null;
     }
@@ -8459,57 +8529,97 @@ export class Holiday extends AbstractCulture {
  *
  * 以规则推算为主，另可导入逐年公布的法定节假日与调休数据。
  * 中国大陆的调休安排需国务院逐年公布，故以数据导入为准；其余地区同理。
+ * 补假规则：美国为周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；
+ * 日本、南非、新加坡为周日顺延；其余地区不自动补假。
  */
 export class HolidayCalendar {
     protected region: string;
     protected rules: HolidayRule[];
     protected data: { [date: string]: Holiday };
     protected substitute: boolean;
+    protected observed: number;
+    protected note: string;
 
-    protected constructor(region: string, rules: HolidayRule[], substitute: boolean) {
+    protected constructor(region: string, rules: HolidayRule[], note: string, observed: number = 0, substitute: boolean = false) {
         this.region = region;
         this.rules = rules;
         this.data = {};
         this.substitute = substitute;
+        this.observed = observed;
+        this.note = note;
     }
 
     static of(region: string): HolidayCalendar {
         const r: string = region.toUpperCase();
         switch (r) {
-            case 'CN': {
-                const c: HolidayCalendar = new HolidayCalendar(r, HolidayCalendar.chinaRules(), false);
-                const days: LegalHoliday[] = LegalHoliday.getDays();
-                for (let i: number = 0; i < days.length; i++) {
-                    const d: LegalHoliday = days[i];
-                    c.data[d.getDay().toString()] = new Holiday(d.getDay(), d.getName(), d.isWork());
-                }
-                return c;
-            }
+            case 'CN':
+                return HolidayCalendar.china();
             case 'HK':
-                return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), false);
+                return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), '公众假期，农历与复活节为主；个别年度调整以政府公告为准。');
             case 'MO':
-                return new HolidayCalendar(r, HolidayCalendar.macaoRules(), false);
+                return new HolidayCalendar(r, HolidayCalendar.macaoRules(), '公众假期，含冬至与追思节。');
             case 'TW':
-                return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), false);
+                return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), '纪念日与民俗节日；调休以行政院公告为准。');
             case 'JP':
-                return new HolidayCalendar(r, HolidayCalendar.japanRules(), true);
+                return new HolidayCalendar(r, HolidayCalendar.japanRules(), '国民の祝日，含振替休日与国民の休日；2020、2021 年奥运调整未单列。', 0, true);
             case 'KR':
-                return new HolidayCalendar(r, HolidayCalendar.koreaRules(), false);
+                return new HolidayCalendar(r, HolidayCalendar.koreaRules(), '法定公休日核心；替代公休日与临时公休日以政府公告为准。');
             case 'VN':
-                return new HolidayCalendar(r, HolidayCalendar.vietnamRules(), false);
+                return new HolidayCalendar(r, HolidayCalendar.vietnamRules(), '法定节日；春节连休以当年公告为准。');
             case 'SG':
-                return new HolidayCalendar(r, HolidayCalendar.singaporeRules(), false);
+                return new HolidayCalendar(r, HolidayCalendar.singaporeRules(), '法定假日核心，含耶稣受难日；开斋节、哈芝节、屠妖节依观月与印度历公布。', 2);
+            case 'MY':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules(), '联邦法定假日核心；州假日与回历、印度历节日以公告为准。');
+            case 'TH':
+                return new HolidayCalendar(r, HolidayCalendar.thailandRules(), '公历固定节日；佛历斋戒日依泰历公布。');
+            case 'US':
+                return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules(), '联邦法定假日，含周六前移、周日后移之补假。', 1);
+            case 'GB':
+                return new HolidayCalendar(r, HolidayCalendar.britainRules(), '英格兰及威尔士银行假日，含顺延补假；苏格兰、北爱尔兰另有差异。', 3);
+            case 'CA':
+                return new HolidayCalendar(r, HolidayCalendar.canadaRules(), '联邦法定假日，含顺延补假；省假另有差异。', 3);
+            case 'AU':
+                return new HolidayCalendar(r, HolidayCalendar.australiaRules(), '全国法定假日，含顺延补假；国王诞辰与劳动节各州不同。', 3);
+            case 'NZ':
+                return new HolidayCalendar(r, HolidayCalendar.newZealandRules(), '全国法定假日，含周一补假；马塔里基日为逐年公布。', 3);
+            case 'DE':
+                return new HolidayCalendar(r, HolidayCalendar.germanyRules(), '全德统一法定假日；各州另有宗教节日。');
+            case 'FR':
+                return new HolidayCalendar(r, HolidayCalendar.franceRules(), '全国法定假日；阿尔萨斯-摩泽尔另有宗教节日。');
+            case 'IT':
+                return new HolidayCalendar(r, HolidayCalendar.italyRules(), '全国法定假日；地方主保圣人节另计。');
+            case 'ES':
+                return new HolidayCalendar(r, HolidayCalendar.spainRules(), '全国法定假日；自治区另有节日。');
+            case 'NL':
+                return new HolidayCalendar(r, HolidayCalendar.netherlandsRules(), '全国法定假日；国王节逢周日提前一日。');
+            case 'BR':
+                return new HolidayCalendar(r, HolidayCalendar.brazilRules(), '联邦法定假日；狂欢节与州节另计。');
+            case 'MX':
+                return new HolidayCalendar(r, HolidayCalendar.mexicoRules(), '全国法定假日；部分节日按周一调整。');
+            case 'RU':
+                return new HolidayCalendar(r, HolidayCalendar.russiaRules(), '法定假日；新年假期为一月一日至八日。');
+            case 'ZA':
+                return new HolidayCalendar(r, HolidayCalendar.southAfricaRules(), '法定假日，周日顺延至周一。', 2);
+            case 'IN':
+                return new HolidayCalendar(r, HolidayCalendar.indiaRules(), '仅列全国性节日；各邦与宗教节日另计。');
+            case 'PH':
+                return new HolidayCalendar(r, HolidayCalendar.philippinesRules(), '全国法定假日核心；宗教节日以公告为准。');
             default:
                 throw new Error(`illegal region: ${region}`);
         }
     }
 
     static getRegions(): string[] {
-        return ['CN', 'HK', 'MO', 'TW', 'JP', 'KR', 'VN', 'SG'];
+        return ['CN', 'HK', 'MO', 'TW', 'JP', 'KR', 'VN', 'SG', 'MY', 'TH',
+            'US', 'GB', 'CA', 'AU', 'NZ', 'DE', 'FR', 'IT', 'ES', 'NL',
+            'BR', 'MX', 'RU', 'ZA', 'IN', 'PH'];
     }
 
-    protected static chinaRules(): HolidayRule[] {
-        return [
+    /**
+     * 中国大陆：内置 2001 年起国务院公告数据
+     */
+    protected static china(): HolidayCalendar {
+        const c: HolidayCalendar = new HolidayCalendar('CN', [
             HolidayRule.solar(1, 1, '元旦'),
             HolidayRule.lunar(1, 1, '春节'),
             HolidayRule.term(7, '清明节'),
@@ -8517,7 +8627,22 @@ export class HolidayCalendar {
             HolidayRule.lunar(5, 5, '端午节'),
             HolidayRule.lunar(8, 15, '中秋节'),
             HolidayRule.solar(10, 1, '国庆节'),
-        ];
+        ], '法定节假日与调休以国务院办公厅逐年通知为准，已内置公告数据，可按年追加。');
+        const days: LegalHoliday[] = HolidayCalendar.getLegalHolidays();
+        for (let i: number = 0; i < days.length; i++) {
+            const d: LegalHoliday = days[i];
+            c.data[d.getDay().toString()] = new Holiday(d.getDay(), d.getName(), d.isWork());
+        }
+        return c;
+    }
+
+    protected static LEGAL_CACHE: LegalHoliday[] | null = null;
+
+    protected static getLegalHolidays(): LegalHoliday[] {
+        if (!HolidayCalendar.LEGAL_CACHE) {
+            HolidayCalendar.LEGAL_CACHE = LegalHoliday.getDays();
+        }
+        return HolidayCalendar.LEGAL_CACHE;
     }
 
     protected static hongKongRules(): HolidayRule[] {
@@ -8538,7 +8663,7 @@ export class HolidayCalendar {
             HolidayRule.solar(10, 1, '国庆日'),
             HolidayRule.lunar(9, 9, '重阳节'),
             HolidayRule.solar(12, 25, '圣诞节'),
-            HolidayRule.solar(12, 26, '圣诞节后第一个周日'),
+            HolidayRule.solar(12, 26, '圣诞节次日'),
         ];
     }
 
@@ -8640,10 +8765,278 @@ export class HolidayCalendar {
             HolidayRule.solar(1, 1, '元旦'),
             HolidayRule.lunar(1, 1, '农历新年'),
             HolidayRule.lunar(1, 2, '农历新年'),
+            HolidayRule.easter(-2, '耶稣受难日'),
             HolidayRule.solar(5, 1, '劳动节'),
             HolidayRule.lunar(4, 15, '卫塞节'),
             HolidayRule.solar(8, 9, '国庆日'),
             HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static malaysiaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.lunar(1, 1, '农历新年'),
+            HolidayRule.lunar(1, 2, '农历新年'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.lunar(4, 15, '卫塞节'),
+            HolidayRule.week(6, 1, 1, '国家元首诞辰'),
+            HolidayRule.solar(8, 31, '国庆日'),
+            HolidayRule.solar(9, 16, '马来西亚日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static thailandRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(4, 6, '却克里王朝纪念日'),
+            HolidayRule.solar(4, 13, '宋干节'),
+            HolidayRule.solar(4, 14, '宋干节'),
+            HolidayRule.solar(4, 15, '宋干节'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(5, 4, '加冕纪念日'),
+            HolidayRule.solar(6, 3, '王后诞辰'),
+            HolidayRule.solar(7, 28, '国王诞辰'),
+            HolidayRule.solar(8, 12, '母亲节'),
+            HolidayRule.solar(10, 13, '先王纪念日'),
+            HolidayRule.solar(10, 23, '朱拉隆功纪念日'),
+            HolidayRule.solar(12, 5, '父亲节'),
+            HolidayRule.solar(12, 10, '宪法日'),
+            HolidayRule.solar(12, 31, '除夕'),
+        ];
+    }
+
+    protected static unitedStatesRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.week(1, 3, 1, '马丁·路德·金纪念日', 1986),
+            HolidayRule.week(2, 3, 1, '华盛顿诞辰'),
+            HolidayRule.week(5, -1, 1, '阵亡将士纪念日', 1971),
+            HolidayRule.solar(6, 19, '六月节', 2021),
+            HolidayRule.solar(7, 4, '独立日'),
+            HolidayRule.week(9, 1, 1, '劳动节'),
+            HolidayRule.week(10, 2, 1, '哥伦布日', 1971),
+            HolidayRule.solar(11, 11, '退伍军人节'),
+            HolidayRule.week(11, 4, 4, '感恩节'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static britainRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.week(5, 1, 1, '五月初银行假日'),
+            HolidayRule.week(5, -1, 1, '春季银行假日'),
+            HolidayRule.week(8, -1, 1, '夏季银行假日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '节礼日'),
+        ];
+    }
+
+    protected static canadaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.solar(7, 1, '加拿大日'),
+            HolidayRule.week(9, 1, 1, '劳动节'),
+            HolidayRule.solar(9, 30, '全国真相与和解日', 2021),
+            HolidayRule.week(10, 2, 1, '感恩节'),
+            HolidayRule.solar(11, 11, '国殇纪念日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '节礼日'),
+        ];
+    }
+
+    protected static australiaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(1, 26, '澳大利亚日'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(4, 25, '澳新军团日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '节礼日'),
+        ];
+    }
+
+    protected static newZealandRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(1, 2, '元旦次日'),
+            HolidayRule.solar(2, 6, '怀唐伊日'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(4, 25, '澳新军团日'),
+            HolidayRule.week(6, 1, 1, '国王诞辰'),
+            HolidayRule.week(10, 4, 1, '劳动节'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '节礼日'),
+        ];
+    }
+
+    protected static germanyRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.easter(39, '耶稣升天节'),
+            HolidayRule.easter(50, '圣灵降临节星期一'),
+            HolidayRule.solar(10, 3, '德国统一日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '圣诞节次日'),
+        ];
+    }
+
+    protected static franceRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(5, 8, '胜利纪念日'),
+            HolidayRule.easter(39, '耶稣升天节'),
+            HolidayRule.easter(50, '圣灵降临节星期一'),
+            HolidayRule.solar(7, 14, '国庆日'),
+            HolidayRule.solar(8, 15, '圣母升天节'),
+            HolidayRule.solar(11, 1, '诸圣节'),
+            HolidayRule.solar(11, 11, '停战纪念日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static italyRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(1, 6, '主显节'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(4, 25, '解放日'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(6, 2, '共和国日'),
+            HolidayRule.solar(8, 15, '圣母升天节'),
+            HolidayRule.solar(11, 1, '诸圣节'),
+            HolidayRule.solar(12, 8, '圣母无原罪节'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '圣史蒂芬日'),
+        ];
+    }
+
+    protected static spainRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(1, 6, '主显节'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(8, 15, '圣母升天节'),
+            HolidayRule.solar(10, 12, '国庆日'),
+            HolidayRule.solar(11, 1, '诸圣节'),
+            HolidayRule.solar(12, 6, '宪法日'),
+            HolidayRule.solar(12, 8, '圣母无原罪节'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static netherlandsRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.easter(0, '复活节星期日'),
+            HolidayRule.easter(1, '复活节星期一'),
+            HolidayRule.solar(4, 27, '国王节', 2014, 9999, -1),
+            HolidayRule.solar(5, 5, '解放日'),
+            HolidayRule.easter(39, '耶稣升天节'),
+            HolidayRule.easter(49, '圣灵降临节星期日'),
+            HolidayRule.easter(50, '圣灵降临节星期一'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '圣诞节次日'),
+        ];
+    }
+
+    protected static brazilRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.solar(4, 21, '蒂拉登特斯纪念日'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(9, 7, '独立日'),
+            HolidayRule.solar(10, 12, '圣母阿帕雷西达节'),
+            HolidayRule.solar(11, 2, '亡人节'),
+            HolidayRule.solar(11, 15, '共和国宣言日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static mexicoRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.week(2, 1, 1, '宪法日'),
+            HolidayRule.week(3, 3, 1, '华雷斯诞辰'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(9, 16, '独立日'),
+            HolidayRule.week(11, 3, 1, '革命纪念日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+        ];
+    }
+
+    protected static russiaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '新年假期'),
+            HolidayRule.solar(1, 2, '新年假期'),
+            HolidayRule.solar(1, 3, '新年假期'),
+            HolidayRule.solar(1, 4, '新年假期'),
+            HolidayRule.solar(1, 5, '新年假期'),
+            HolidayRule.solar(1, 6, '新年假期'),
+            HolidayRule.solar(1, 7, '东正教圣诞节'),
+            HolidayRule.solar(1, 8, '新年假期'),
+            HolidayRule.solar(2, 23, '祖国保卫者日'),
+            HolidayRule.solar(3, 8, '妇女节'),
+            HolidayRule.solar(5, 1, '春天与劳动节'),
+            HolidayRule.solar(5, 9, '胜利日'),
+            HolidayRule.solar(6, 12, '俄罗斯日'),
+            HolidayRule.solar(11, 4, '民族团结日'),
+        ];
+    }
+
+    protected static southAfricaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(3, 21, '人权日'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(1, '家庭日'),
+            HolidayRule.solar(4, 27, '自由日'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(6, 16, '青年节'),
+            HolidayRule.solar(8, 9, '妇女节'),
+            HolidayRule.solar(9, 24, '遗产日'),
+            HolidayRule.solar(12, 16, '和解日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 26, '善意节'),
+        ];
+    }
+
+    protected static indiaRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 26, '共和国日'),
+            HolidayRule.solar(8, 15, '独立日'),
+            HolidayRule.solar(10, 2, '甘地诞辰'),
+        ];
+    }
+
+    protected static philippinesRules(): HolidayRule[] {
+        return [
+            HolidayRule.solar(1, 1, '元旦'),
+            HolidayRule.solar(4, 9, '巴丹日'),
+            HolidayRule.easter(-3, '濯足节'),
+            HolidayRule.easter(-2, '耶稣受难日'),
+            HolidayRule.easter(-1, '黑色星期六'),
+            HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(6, 12, '独立日'),
+            HolidayRule.solar(8, 21, '尼诺·阿基诺日'),
+            HolidayRule.week(8, -1, 1, '英雄节'),
+            HolidayRule.solar(11, 30, '博尼法西奥日'),
+            HolidayRule.solar(12, 25, '圣诞节'),
+            HolidayRule.solar(12, 30, '黎刹纪念日'),
         ];
     }
 
@@ -8653,6 +9046,13 @@ export class HolidayCalendar {
 
     getRules(): HolidayRule[] {
         return this.rules;
+    }
+
+    /**
+     * 覆盖范围说明
+     */
+    getNote(): string {
+        return this.note;
     }
 
     /**
@@ -8696,22 +9096,48 @@ export class HolidayCalendar {
      */
     getDays(year: number, includeWork: boolean = false): Holiday[] {
         const map: { [key: string]: Holiday } = {};
+        const dataKeys: { [key: string]: boolean } = {};
         for (const k in this.data) {
             if (this.data[k].getDay().getYear() === year) {
                 map[k] = this.data[k];
+                dataKeys[k] = true;
             }
         }
         for (let i: number = 0; i < this.rules.length; i++) {
             const d: SolarDay | null = this.rules[i].getDay(year);
-            if (d && !map[HolidayCalendar.getKey(d)]) {
-                map[HolidayCalendar.getKey(d)] = new Holiday(d, this.rules[i].getName());
+            if (!d) {
+                continue;
+            }
+            const key: string = HolidayCalendar.getKey(d);
+            const old: Holiday = map[key];
+            const name: string = this.rules[i].getName();
+            if (!old) {
+                map[key] = new Holiday(d, name);
+            } else if (!dataKeys[key] && !old.isWork() && old.getName().indexOf(name) < 0) {
+                map[key] = new Holiday(d, old.getName() + '、' + name);
             }
         }
         if (this.substitute) {
-            this.applySubstitutes(year, map);
+            this.applyJapaneseSubstitutes(year, map);
+        }
+        if (this.observed === 1) {
+            // 次年元旦逢周六，美国补假定于本年十二月三十一日
+            const nextNewYear: SolarDay = SolarDay.fromYmd(year + 1, 1, 1);
+            if (nextNewYear.getWeek().getIndex() === 6) {
+                const eve: SolarDay = nextNewYear.next(-1);
+                if (!map[HolidayCalendar.getKey(eve)]) {
+                    map[HolidayCalendar.getKey(eve)] = new Holiday(eve, '元旦（补假）');
+                }
+            }
+        }
+        if (this.observed !== 0) {
+            this.applyObserved(year, map);
         }
         const l: Holiday[] = [];
         for (const k in map) {
+            if (map[k].getDay().getYear() !== year) {
+                continue;
+            }
             if (includeWork || !map[k].isWork()) {
                 l.push(map[k]);
             }
@@ -8721,9 +9147,56 @@ export class HolidayCalendar {
     }
 
     /**
+     * 顺延至下一个非假日
+     */
+    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay): SolarDay {
+        let d: SolarDay = day;
+        while (map[HolidayCalendar.getKey(d)]) {
+            d = d.next(1);
+        }
+        return d;
+    }
+
+    /**
+     * 补假：美国周六前移、周日后移；其余为顺延至下一工作日
+     */
+    protected applyObserved(year: number, map: { [key: string]: Holiday }): void {
+        const list: Holiday[] = [];
+        for (const k in map) {
+            if (!map[k].isWork()) {
+                list.push(map[k]);
+            }
+        }
+        list.sort((a: Holiday, b: Holiday) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
+        for (let i: number = 0; i < list.length; i++) {
+            const h: Holiday = list[i];
+            const w: number = h.getDay().getWeek().getIndex();
+            let target: SolarDay | null = null;
+            if (this.observed === 1) {
+                if (w === 6) {
+                    target = h.getDay().next(-1);
+                } else if (w === 0) {
+                    target = h.getDay().next(1);
+                }
+            } else if (this.observed === 2) {
+                if (w === 0) {
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+                }
+            } else if (this.observed === 3) {
+                if (w === 0 || w === 6) {
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+                }
+            }
+            if (target && !map[HolidayCalendar.getKey(target)]) {
+                map[HolidayCalendar.getKey(target)] = new Holiday(target, h.getName() + '（补假）');
+            }
+        }
+    }
+
+    /**
      * 日本振替休日与国民の休日
      */
-    protected applySubstitutes(year: number, map: { [key: string]: Holiday }): void {
+    protected applyJapaneseSubstitutes(year: number, map: { [key: string]: Holiday }): void {
         const days: SolarDay[] = [];
         let d: SolarDay = SolarDay.fromYmd(year, 1, 1);
         const end: SolarDay = SolarDay.fromYmd(year, 12, 31);
@@ -8741,10 +9214,7 @@ export class HolidayCalendar {
         for (let i: number = 0; i < days.length; i++) {
             const cur: SolarDay = days[i];
             if (isHoliday(cur) && cur.getWeek().getIndex() === 0) {
-                let next: SolarDay = cur.next(1);
-                while (isHoliday(next)) {
-                    next = next.next(1);
-                }
+                const next: SolarDay = HolidayCalendar.nextFree(map, cur.next(1));
                 map[HolidayCalendar.getKey(next)] = new Holiday(next, '振替休日');
             }
         }
@@ -8759,6 +9229,142 @@ export class HolidayCalendar {
             }
         }
         return null;
+    }
+}
+
+/**
+ * 民俗节日
+ *
+ * 收录不放假而见于通书、年节志的传统与公历节日：接神日、人日、天穿节、填仓节、中和节、
+ * 寒食节、春社秋社、天贶节、观莲节、财神节、寒衣节、下元节、尾牙、祭灶等，
+ * 以及情人节、万圣夜、感恩节、母亲节、父亲节等。日期规则取自通行历书。
+ */
+export class FolkFestival extends AbstractCulture {
+    protected solarDay: SolarDay;
+    protected names: string[];
+
+    /**
+     * 农历月日
+     */
+    protected static LUNAR: { [key: string]: string[] } = {
+        '1-4': ['接神日'],
+        '1-5': ['隔开日'],
+        '1-7': ['人日'],
+        '1-8': ['谷日', '顺星节'],
+        '1-9': ['天日'],
+        '1-10': ['地日'],
+        '1-20': ['天穿节'],
+        '1-25': ['填仓节'],
+        '1-30': ['正月晦'],
+        '2-1': ['中和节'],
+        '5-20': ['分龙节'],
+        '5-25': ['会龙节'],
+        '6-6': ['天贶节'],
+        '6-24': ['观莲节'],
+        '6-25': ['五谷母节'],
+        '7-22': ['财神节'],
+        '7-29': ['地藏节'],
+        '8-1': ['天灸日'],
+        '10-1': ['寒衣节'],
+        '10-10': ['十成节'],
+        '10-15': ['下元节'],
+        '12-7': ['驱傩日'],
+        '12-16': ['尾牙'],
+        '12-23': ['小年（北方）'],
+        '12-24': ['祭灶日'],
+    };
+
+    /**
+     * 公历月日，已见于公历节日表者不再重复
+     */
+    protected static SOLAR: { [key: string]: string[] } = {
+        '2-14': ['情人节'],
+        '3-15': ['消费者权益日'],
+        '4-1': ['愚人节'],
+        '10-31': ['万圣夜'],
+        '11-1': ['万圣节'],
+        '12-24': ['平安夜'],
+        '12-25': ['圣诞节'],
+    };
+
+    /**
+     * 某月第几个星期几，-1 表示最后一个
+     */
+    protected static WEEK_RULES: HolidayRule[] = [
+        HolidayRule.week(3, -1, 1, '全国中小学生安全教育日'),
+        HolidayRule.week(5, 2, 0, '母亲节'),
+        HolidayRule.week(5, 3, 0, '全国助残日'),
+        HolidayRule.week(6, 3, 0, '父亲节'),
+        HolidayRule.week(9, 3, 6, '全民国防教育日'),
+        HolidayRule.week(10, 1, 1, '世界住房日'),
+        HolidayRule.week(11, 4, 4, '感恩节'),
+    ];
+
+    /**
+     * 节气日偏移
+     */
+    protected static TERM_RULES: HolidayRule[] = [
+        HolidayRule.term(7, '寒食节', -1),
+    ];
+
+    /**
+     * 节气后第几个某干日
+     */
+    protected static TERM_STEM_RULES: HolidayRule[] = [
+        HolidayRule.termStem(3, 4, 5, '春社'),
+        HolidayRule.termStem(15, 4, 5, '秋社'),
+    ];
+
+    protected constructor(solarDay: SolarDay, names: string[]) {
+        super();
+        this.solarDay = solarDay;
+        this.names = names;
+    }
+
+    static of(solarDay: SolarDay): FolkFestival {
+        const names: string[] = [];
+        const lunar: LunarDay = solarDay.getLunarDay();
+        const year: number = solarDay.getYear();
+        FolkFestival.append(names, FolkFestival.LUNAR[Math.abs(lunar.getMonth()) + '-' + lunar.getDay()]);
+        FolkFestival.append(names, FolkFestival.SOLAR[solarDay.getMonth() + '-' + solarDay.getDay()]);
+        FolkFestival.appendByRules(names, FolkFestival.WEEK_RULES, solarDay, year);
+        FolkFestival.appendByRules(names, FolkFestival.TERM_RULES, solarDay, year);
+        FolkFestival.appendByRules(names, FolkFestival.TERM_STEM_RULES, solarDay, year);
+        return new FolkFestival(solarDay, names);
+    }
+
+    protected static appendByRules(target: string[], rules: HolidayRule[], solarDay: SolarDay, year: number): void {
+        for (let i: number = 0; i < rules.length; i++) {
+            const d: SolarDay | null = rules[i].getDay(year);
+            if (d && d.equals(solarDay)) {
+                target.push(rules[i].getName());
+            }
+        }
+    }
+
+    protected static append(target: string[], source: string[] | undefined): void {
+        if (!source) {
+            return;
+        }
+        for (let i: number = 0; i < source.length; i++) {
+            target.push(source[i]);
+        }
+    }
+
+    getSolarDay(): SolarDay {
+        return this.solarDay;
+    }
+
+    getNames(): string[] {
+        return this.names;
+    }
+
+    getName(): string {
+        return this.names.join('、');
+    }
+
+    toString(): string {
+        return this.getName();
     }
 }
 
