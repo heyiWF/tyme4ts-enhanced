@@ -4,7 +4,7 @@
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
  * 覆盖 CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、ID-2026、ID-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027，另有马来西亚 13 个州级增补文件。
  */
-export const VERSION = "1.12.0";
+export const VERSION = "1.13.0";
 
 export const DATASETS = [
  {

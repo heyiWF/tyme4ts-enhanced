@@ -6,6 +6,7 @@ import {BUDDHIST_OTHER} from './data-buddhist';
 import {TAOIST} from './data-taoist';
 import {AnniversaryFestival} from './anniversary';
 import {HebrewFestival, IndianFestival} from './foreign';
+import {IslamicFestival} from './islamic';
 import {BuddhistFestival} from './buddhist';
 import {DeityFestival, FolkFestival} from './lunar';
 import {TaoistFestival} from './taoist';
@@ -109,6 +110,10 @@ export class Festivals extends AbstractCulture {
             const indian: FestivalEntry[] = IndianFestival.of(solarDay).getEntries();
             for (let i: number = 0; i < indian.length; i++) {
                 raw.push(indian[i]);
+            }
+            const islamic: FestivalEntry[] = IslamicFestival.of(solarDay).getEntries();
+            for (let i: number = 0; i < islamic.length; i++) {
+                raw.push(islamic[i]);
             }
         }
 

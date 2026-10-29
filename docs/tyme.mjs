@@ -13393,6 +13393,80 @@ class AnniversaryFestival extends AbstractCulture {
   }
 }
 
+class IslamicFestival extends AbstractCulture {
+  solarDay;
+  entries;
+  /**
+   * month 回历月，day 日，name 名称，days 持续天数，note 备注
+   */
+  static RULES = [
+    { month: 1, day: 1, name: "\u4F0A\u65AF\u5170\u65B0\u5E74", days: 1, note: "\u7A46\u54C8\u5170\u59C6\u6708\u9996\u65E5" },
+    { month: 1, day: 9, name: "\u5854\u82CF\u963F\u65E5", days: 1, note: "\u963F\u8212\u62C9\u524D\u591C\uFF0C\u4EC0\u53F6\u6D3E" },
+    { month: 1, day: 10, name: "\u963F\u8212\u62C9\u65E5", days: 1, note: "\u4FAF\u8D5B\u56E0\u6B89\u96BE\u65E5" },
+    { month: 2, day: 20, name: "\u963F\u5C14\u5DF4\u56E0", days: 1, note: "\u56DB\u5341\u65E5\u796D\uFF0C\u4EC0\u53F6\u6D3E" },
+    { month: 2, day: 28, name: "\u5148\u77E5\u4E0E\u54C8\u6851\u5FCC\u65E5", days: 1, note: "\u4EC0\u53F6\u6D3E" },
+    { month: 3, day: 12, name: "\u5723\u7EAA", days: 1, note: "\u5148\u77E5\u8BDE\u8FB0\uFF0C\u900A\u5C3C\u6D3E" },
+    { month: 3, day: 17, name: "\u5723\u7EAA", days: 1, note: "\u5148\u77E5\u8BDE\u8FB0\uFF0C\u4EC0\u53F6\u6D3E" },
+    { month: 7, day: 27, name: "\u767B\u9704\u8282", days: 1, note: "\u591C\u884C\u767B\u9704" },
+    { month: 8, day: 15, name: "\u767D\u62C9\u7279\u591C", days: 1, note: "\u820D\u5C14\u90A6\u6708\u5341\u4E94\u591C" },
+    { month: 9, day: 1, name: "\u658B\u6708\u9996\u65E5", days: 1, note: "\u83B1\u9EA6\u4E39\u6708\u9996\u65E5" },
+    { month: 9, day: 21, name: "\u963F\u91CC\u6B89\u96BE\u65E5", days: 1, note: "\u4EC0\u53F6\u6D3E" },
+    { month: 9, day: 27, name: "\u76D6\u5FB7\u5C14\u591C", days: 1, note: "\u658B\u6708\u7B2C\u5EFF\u4E03\u591C" },
+    { month: 10, day: 1, name: "\u5F00\u658B\u8282", days: 3, note: "\u95EA\u74E6\u9C81\u6708\u9996\u65E5" },
+    { month: 10, day: 25, name: "\u8428\u8FEA\u514B\u6B89\u96BE\u65E5", days: 1, note: "\u4EC0\u53F6\u6D3E" },
+    { month: 12, day: 9, name: "\u963F\u62C9\u6CD5\u7279\u65E5", days: 1, note: "\u671D\u89D0\u6B63\u65E5" },
+    { month: 12, day: 10, name: "\u53E4\u5C14\u90A6\u8282", days: 4, note: "\u5BB0\u7272\u8282" },
+    { month: 12, day: 18, name: "\u76D6\u8FEA\u5C14\u8282", days: 1, note: "\u4EC0\u53F6\u6D3E" }
+  ];
+  constructor(solarDay, entries) {
+    super();
+    this.solarDay = solarDay;
+    this.entries = entries;
+  }
+  /**
+   * 连续节日的名称：首日原名，其后为「次日」「第三日」「第四日」
+   */
+  static dayName(name, index) {
+    if (index === 0) {
+      return name;
+    }
+    if (index === 1) {
+      return name + "\u6B21\u65E5";
+    }
+    return name + "\u7B2C" + ["", "", "\u4E09", "\u56DB", "\u4E94"][index] + "\u65E5";
+  }
+  static of(solarDay) {
+    const entries = [];
+    const h = solarDay.getHijriDay();
+    for (let i = 0; i < IslamicFestival.RULES.length; i++) {
+      const r = IslamicFestival.RULES[i];
+      for (let k = 0; k < r.days; k++) {
+        if (h.getMonth() === r.month && h.getDay() === r.day + k) {
+          entries.push(new FestivalEntry(
+            IslamicFestival.dayName(r.name, k),
+            FestivalCategory.FOREIGN,
+            "islamic",
+            k === 0 ? r.note : ""
+          ));
+        }
+      }
+    }
+    return new IslamicFestival(solarDay, entries);
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getNames() {
+    return this.entries.map((e) => e.getName());
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  toString() {
+    return this.getName();
+  }
+}
+
 var VegetarianType = /* @__PURE__ */ ((VegetarianType2) => {
   VegetarianType2[VegetarianType2["GUANYIN"] = 0] = "GUANYIN";
   VegetarianType2[VegetarianType2["SHIZHAI"] = 1] = "SHIZHAI";
@@ -14199,6 +14273,10 @@ class Festivals extends AbstractCulture {
       const indian = IndianFestival.of(solarDay).getEntries();
       for (let i = 0; i < indian.length; i++) {
         raw.push(indian[i]);
+      }
+      const islamic = IslamicFestival.of(solarDay).getEntries();
+      for (let i = 0; i < islamic.length; i++) {
+        raw.push(islamic[i]);
       }
     }
     const termDay = solarDay.getTermDay();
@@ -15872,4 +15950,4 @@ class DayAlmanac {
   }
 }
 
-export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };
+export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, IslamicFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };

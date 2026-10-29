@@ -1234,7 +1234,7 @@ function renderData() {
     ['公历纪念日', String(stat.anniversary || 0), '国际日与中国行业性纪念日'],
     ['节假日地区', String(regions.length), '含 ' + stateCount + ' 个州省子地区'],
     ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 ' + coverage + '%，其余须逐年公告'],
-    ['单元测试', '602', '历法、择日、节日、节假日、ICS、取名'],
+    ['单元测试', '606', '历法、择日、节日、节假日、ICS、取名'],
     ['数据比对', '7 张表', '与 6tail 上游逐键逐值一致'],
   ];
   const stateDays = DATASETS.filter((d) => typeof d.year !== 'number').reduce((n, d) => n + d.days.length, 0);
@@ -1329,6 +1329,7 @@ const CHECKS = [
     ['Makar Sankranti 2025', '2025年1月14日', () => findSankranti(2025, 9).toString()],
     ['东正教复活节 2025', '2025年4月20日', () => HolidayRule.getOrthodoxEasterDay(2025).toString()],
     ['东正教复活节 2024', '2024年5月5日', () => HolidayRule.getOrthodoxEasterDay(2024).toString()],
+    ['2025-03-31 伊斯兰开斋节', '开斋节', () => A(2025, 3, 31).getFestivals(true).getByCategory(7).map((e) => e.getName()).join('、')],
     ['波斯历 1405 诺鲁孜', '2026年3月21日', () => PersianDay.getNowruz(1405).toString()],
     ['波斯历 1403 闰年', '是', () => PersianDay.isLeapYear(1403) ? '是' : '否'],
     ['伊朗 2026 伊斯兰革命日', '2/11 伊斯兰革命纪念日', () => dayNames(HolidayCalendar.of('IR').getDays(2026).filter((h) => h.getName() === '伊斯兰革命纪念日'))],

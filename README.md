@@ -264,9 +264,17 @@ Festivals.getStat();
 | 神诞 | `DeityFestival` | 125 键 | 《玉匣记》三元五腊圣诞 |
 | 希伯来 | `HebrewFestival` | 16 条规则 | 含独立日、阵亡将士纪念日、大屠杀纪念日的顺延 |
 | 印度 | `IndianFestival` | 2024–2027 官方日期 | 其余年份不臆造 |
+| 伊斯兰 | `IslamicFestival` | 17 条规则 | 开斋、古尔邦、阿舒拉、塔苏阿、圣纪（逊尼 12 日 / 什叶 17 日）、登霄、白拉特、盖德尔等 |
 | 节气 | `SolarTermDay` | 24 | 与「清明」等传统节日自动去重 |
 
 同名条目按「法定 > 传统 > 民俗 > 宗教 > 节气 > 纪念 > 国际」保留一条，出处合并到 `getSource()`；「眼光娘娘圣诞」与「眼光娘娘等圣诞」这类同神异写按归一化名称合并。
+
+希伯来、印度、伊斯兰三类外历节日默认不并入，需 `getFestivals(true)` 才出现，避免中文通胜场景被无关条目淹没。伊斯兰节日按算术回历推算，与观月可能差一日；**法定节假日请用 `HolidayCalendar`**——沙特、阿联酋用乌姆库拉历，土耳其用 Diyanet 历，埃及等国按年公告，三者口径不同，不要混用。
+
+```ts
+IslamicFestival.of(SolarDay.fromYmd(2025, 6, 7)).getNames();   // ['古尔邦节']
+IslamicFestival.of(SolarDay.fromYmd(2025, 7, 6)).getNames();   // ['阿舒拉日']
+```
 
 ```ts
 // 五历对照

@@ -20,6 +20,7 @@ export * from './festival/data-lunar-folk';
 export * from './festival/data-buddhist';
 export * from './festival/data-taoist';
 export * from './festival/anniversary';
+export * from './festival/islamic';
 export * from './festival/buddhist';
 export * from './festival/taoist';
 export * from './festival/lunar';
