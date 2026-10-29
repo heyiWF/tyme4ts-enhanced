@@ -54,8 +54,8 @@ nav.tabs button.on{background:#fff;color:var(--green);box-shadow:0 1px 3px rgba(
 .side-card h4{margin:0 0 7px;font-size:11.5px;letter-spacing:2px;color:var(--ink-3);font-weight:600}
 .note{font-size:12px;color:var(--ink-3);margin-top:7px;line-height:1.6}
 
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:26px;align-items:start}
-.card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:15px 17px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:26px;align-items:stretch}
+.card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:15px 17px;height:100%;box-sizing:border-box}
 .card h3{margin:0 0 11px;font-size:12.5px;letter-spacing:1.6px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:7px}
 .card h3 em{font-style:normal;color:var(--ink-3);font-weight:400;letter-spacing:0;font-size:11.5px}
 .c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}
@@ -75,14 +75,18 @@ nav.tabs button.on{background:#fff;color:var(--green);box-shadow:0 1px 3px rgba(
 .month td.today .d{color:var(--red)}
 .month td.today:before{content:"";position:absolute;left:4px;top:4px;width:5px;height:5px;border-radius:50%;background:var(--red)}
 
-.yiji{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.yiji .col{border-radius:11px;padding:11px 13px}
+.yiji{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.yiji .col{border-radius:11px;padding:11px 13px;align-self:start;height:auto}
 .yiji .yi{background:var(--green-soft)}
 .yiji .ji{background:var(--red-soft)}
 .yiji h5{margin:0 0 7px;font-size:12.5px;letter-spacing:2px}
 .yiji .yi h5{color:var(--green)}.yiji .ji h5{color:var(--red)}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
-.chip{font-size:12.5px;padding:2px 8px;border-radius:6px;background:#fff;border:1px solid rgba(0,0,0,.05)}
+.chip{font-size:12.5px;padding:2px 8px;border-radius:6px;background:#fff;border:1px solid rgba(0,0,0,.05);display:inline-flex;align-items:center}
+.chip .help{width:12px;height:12px;font-size:9px;margin-left:4px;border-color:rgba(0,0,0,.14)}
+.nums-map{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--ink-3);margin:6px 0 4px}
+.nums-map b{color:var(--ink);font-weight:600}
+.nums-map .all{flex-basis:100%;color:var(--ink-3);opacity:.8}
 
 .hours{display:grid;grid-template-columns:repeat(12,1fr);gap:5px}
 @media(max-width:760px){.hours{grid-template-columns:repeat(6,1fr)}}
@@ -333,6 +337,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
       <div class="card c6">
         <h3>今日吉数 <em>河图数推演</em></h3>
         <div id="numbers" style="font-family:var(--serif);font-size:24px;letter-spacing:5px;color:var(--green)"></div>
+        <div id="numbers-map" class="nums-map"></div>
         <div class="note">取日干、日支、纳音五行之河图数，轮流取足，非原版数值。</div>
       </div>
 
@@ -680,8 +685,9 @@ function renderMonth(a) {
 
 function renderCards(a) {
   const sc = a.getSixtyCycleDay();
-  $('yi').innerHTML = sc.getRecommends().map((t) => `<span class="chip">${t.getName()}</span>`).join('') || '<span class="chip">诸事不宜</span>';
-  $('ji').innerHTML = sc.getAvoids().map((t) => `<span class="chip">${t.getName()}</span>`).join('') || '<span class="chip">—</span>';
+  const chip = (name) => `<span class="chip">${esc(name)}${AYI_HELP[name] ? `<span class="help" data-k="${esc(name)}">?</span>` : ''}</span>`;
+  $('yi').innerHTML = sc.getRecommends().map((t) => chip(t.getName())).join('') || chip('诸事不宜');
+  $('ji').innerHTML = sc.getAvoids().map((t) => chip(t.getName())).join('') || '<span class="chip">—</span>';
   const da = a.getDutyAdvice();
   $('duty').textContent = `十二建：${da.getName()}日 · ${da.getDescription()}`;
 
@@ -760,6 +766,16 @@ function renderCards(a) {
   }
 
   $('numbers').textContent = a.getDailyNumbers().slice().sort((x, y) => x - y).map((n) => pad(n)).join(' ');
+  const pairs = ['3·8', '2·7', '5·10', '4·9', '1·6'];   // 木 火 土 金 水
+  const branch = sc.getSixtyCycle().getEarthBranch();
+  const parts = [
+    ['日干', stem.getName() + stem.getElement().getName(), stem.getElement().getIndex()],
+    ['日支', branch.getName() + branch.getElement().getName(), branch.getElement().getIndex()],
+    ['纳音', sound.getName(), sound.getElement().getIndex()],
+  ];
+  $('numbers-map').innerHTML = parts.map(([k, v, i]) =>
+    `<span>${k} ${esc(v)} <b>${pairs[i]}</b></span>`).join('') +
+    '<span class="all">河图数：水 1·6　火 2·7　木 3·8　金 4·9　土 5·10</span>';
 
   $('zodiac-fortune').innerHTML = a.getZodiacFortunes().map((z) => {
     const bad = z.getLuck().getName() !== '吉';
@@ -1079,6 +1095,150 @@ const HELP_GROUP = {
   '外历': ['外历', '希伯来、印度、伊斯兰等非中国历法。', '各历法原始规则'],
 };
 
+/* ---------- 宜忌事项科普 ---------- */
+const AYI_HELP = {
+  '祭祀': ['祭祀', '祭拜祖先与神明，设供行礼。', '《协纪辨方书》'],
+  '祈福': ['祈福', '向神明祈求福佑平安。', '《协纪辨方书》'],
+  '求嗣': ['求嗣', '祈求子嗣。', '《协纪辨方书》'],
+  '开光': ['开光', '为新塑神像或法器举行启用仪式。', '《协纪辨方书》'],
+  '塑绘': ['塑绘', '塑造或绘制神像。', '《协纪辨方书》'],
+  '齐醮': ['齐醮', '道教设坛祭祷，同「斋醮」。', '《协纪辨方书》'],
+  '斋醮': ['斋醮', '道教设坛诵经、礼忏祈福。', '《协纪辨方书》'],
+  '沐浴': ['沐浴', '沐浴洁身，多在斋戒祭神之前。', '《协纪辨方书》'],
+  '酬神': ['酬神', '还愿、答谢神明。', '《协纪辨方书》'],
+  '造庙': ['造庙', '新建庙宇。', '《协纪辨方书》'],
+  '祀灶': ['祀灶', '祭灶神。', '《协纪辨方书》'],
+  '焚香': ['焚香', '焚香供奉神明。', '《协纪辨方书》'],
+  '谢土': ['谢土', '工程完工后祭谢土地神。', '《协纪辨方书》'],
+  '出火': ['出火', '将神位或祖先牌位请出、迁移香火。', '《协纪辨方书》'],
+  '雕刻': ['雕刻', '雕刻神像、牌匾。', '《协纪辨方书》'],
+  '嫁娶': ['嫁娶', '举行婚礼、迎娶过门。', '《协纪辨方书》'],
+  '订婚': ['订婚', '缔结婚约。', '《协纪辨方书》'],
+  '纳采': ['纳采', '六礼之首，男方向女方送聘礼。', '《协纪辨方书》'],
+  '问名': ['问名', '六礼之一，问女方姓名与生辰。', '《协纪辨方书》'],
+  '纳婿': ['纳婿', '招婿入赘。', '《协纪辨方书》'],
+  '归宁': ['归宁', '已婚女子回娘家省亲。', '《协纪辨方书》'],
+  '安床': ['安床', '安置新床，多在婚前。', '《协纪辨方书》'],
+  '合帐': ['合帐', '缝制并悬挂婚床帐幔。', '《协纪辨方书》'],
+  '冠笄': ['冠笄', '男子加冠、女子及笄的成年礼。', '《协纪辨方书》'],
+  '订盟': ['订盟', '缔结盟约，亦指订婚。', '《协纪辨方书》'],
+  '进人口': ['进人口', '收养子女或接纳新成员入门。', '《协纪辨方书》'],
+  '裁衣': ['裁衣', '裁剪衣料、缝制衣服。', '《协纪辨方书》'],
+  '挽面': ['挽面', '用线绞除面部汗毛，婚俗美容。', '《协纪辨方书》'],
+  '开容': ['开容', '开脸美容，与挽面同类。', '《协纪辨方书》'],
+  '修坟': ['修坟', '修缮坟墓。', '《协纪辨方书》'],
+  '启钻': ['启钻', '开启墓穴，用于迁葬或合葬。', '《协纪辨方书》'],
+  '破土': ['破土', '阴宅动土开挖。', '《协纪辨方书》'],
+  '安葬': ['安葬', '下葬。', '《协纪辨方书》'],
+  '立碑': ['立碑', '竖立墓碑。', '《协纪辨方书》'],
+  '成服': ['成服', '丧礼中换上孝服。', '《协纪辨方书》'],
+  '除服': ['除服', '丧期结束，脱去孝服。', '《协纪辨方书》'],
+  '开生坟': ['开生坟', '生前预筑坟墓。', '《协纪辨方书》'],
+  '合寿木': ['合寿木', '制作寿材。', '《协纪辨方书》'],
+  '入殓': ['入殓', '将遗体移入棺中。', '《协纪辨方书》'],
+  '移柩': ['移柩', '迁移灵柩。', '《协纪辨方书》'],
+  '普渡': ['普渡', '中元普度孤魂。', '《协纪辨方书》'],
+  '入宅': ['入宅', '迁入新居。', '《协纪辨方书》'],
+  '安香': ['安香', '安设香火与神位。', '《协纪辨方书》'],
+  '安门': ['安门', '安装门户。', '《协纪辨方书》'],
+  '修造': ['修造', '修缮房屋。', '《协纪辨方书》'],
+  '起基': ['起基', '建筑动土筑基。', '《协纪辨方书》'],
+  '动土': ['动土', '挖土施工。', '《协纪辨方书》'],
+  '上梁': ['上梁', '安装屋梁。', '《协纪辨方书》'],
+  '竖柱': ['竖柱', '竖立屋柱。', '《协纪辨方书》'],
+  '开井开池': ['开井开池', '挖井、开凿水池。', '《协纪辨方书》'],
+  '作陂放水': ['作陂放水', '修筑蓄水陂塘、放水灌溉。', '《协纪辨方书》'],
+  '拆卸': ['拆卸', '拆除房屋。', '《协纪辨方书》'],
+  '破屋': ['破屋', '拆除旧屋。', '《协纪辨方书》'],
+  '坏垣': ['坏垣', '拆毁墙垣。', '《协纪辨方书》'],
+  '补垣': ['补垣', '修补墙垣。', '《协纪辨方书》'],
+  '伐木做梁': ['伐木做梁', '伐木制作屋梁。', '《协纪辨方书》'],
+  '作灶': ['作灶', '砌筑炉灶。', '《协纪辨方书》'],
+  '解除': ['解除', '禳解灾厄、清扫不祥。', '《协纪辨方书》'],
+  '开柱眼': ['开柱眼', '在柱上开凿榫眼。', '《协纪辨方书》'],
+  '穿屏扇架': ['穿屏扇架', '制作屏风与门扇框架。', '《协纪辨方书》'],
+  '盖屋合脊': ['盖屋合脊', '盖瓦并合拢屋脊。', '《协纪辨方书》'],
+  '开厕': ['开厕', '新建厕所。', '《协纪辨方书》'],
+  '造仓': ['造仓', '建造仓库。', '《协纪辨方书》'],
+  '塞穴': ['塞穴', '堵塞洞穴、鼠洞。', '《协纪辨方书》'],
+  '平治道涂': ['平治道涂', '修整道路。', '《协纪辨方书》'],
+  '造桥': ['造桥', '修建桥梁。', '《协纪辨方书》'],
+  '作厕': ['作厕', '建造厕所。', '《协纪辨方书》'],
+  '筑堤': ['筑堤', '修筑堤坝。', '《协纪辨方书》'],
+  '开池': ['开池', '开凿池塘。', '《协纪辨方书》'],
+  '伐木': ['伐木', '砍伐树木。', '《协纪辨方书》'],
+  '开渠': ['开渠', '开凿水渠。', '《协纪辨方书》'],
+  '掘井': ['掘井', '挖井取水。', '《协纪辨方书》'],
+  '扫舍': ['扫舍', '打扫房舍。', '《协纪辨方书》'],
+  '放水': ['放水', '放水入田或池塘。', '《协纪辨方书》'],
+  '造屋': ['造屋', '建造房屋。', '《协纪辨方书》'],
+  '合脊': ['合脊', '屋脊合拢。', '《协纪辨方书》'],
+  '造畜稠': ['造畜稠', '建造牲畜棚圈。', '《协纪辨方书》'],
+  '修门': ['修门', '修理门户。', '《协纪辨方书》'],
+  '定磉': ['定磉', '安放柱础。', '《协纪辨方书》'],
+  '作梁': ['作梁', '制作屋梁。', '《协纪辨方书》'],
+  '修饰垣墙': ['修饰垣墙', '粉刷修补墙壁。', '《协纪辨方书》'],
+  '架马': ['架马', '搭设木工脚手架。', '《协纪辨方书》'],
+  '开市': ['开市', '商店开张营业。', '《协纪辨方书》'],
+  '挂匾': ['挂匾', '悬挂招牌匾额。', '《协纪辨方书》'],
+  '纳财': ['纳财', '收取财货、进账。', '《协纪辨方书》'],
+  '求财': ['求财', '谋求财利。', '《协纪辨方书》'],
+  '开仓': ['开仓', '打开粮仓出货。', '《协纪辨方书》'],
+  '买车': ['买车', '购置车辆。', '《协纪辨方书》'],
+  '置产': ['置产', '购置产业。', '《协纪辨方书》'],
+  '雇佣': ['雇佣', '雇请工人。', '《协纪辨方书》'],
+  '出货财': ['出货财', '出售货物、支出财货。', '《协纪辨方书》'],
+  '安机械': ['安机械', '安装机器设备。', '《协纪辨方书》'],
+  '造车器': ['造车器', '制造车辆与器具。', '《协纪辨方书》'],
+  '经络': ['经络', '织布、纺织。', '《协纪辨方书》'],
+  '酝酿': ['酝酿', '酿酒、制酱。', '《协纪辨方书》'],
+  '作染': ['作染', '染布。', '《协纪辨方书》'],
+  '鼓铸': ['鼓铸', '冶炼铸造。', '《协纪辨方书》'],
+  '造船': ['造船', '建造船只。', '《协纪辨方书》'],
+  '割蜜': ['割蜜', '割取蜂蜜。', '《协纪辨方书》'],
+  '栽种': ['栽种', '种植作物花木。', '《协纪辨方书》'],
+  '取渔': ['取渔', '捕鱼。', '《协纪辨方书》'],
+  '结网': ['结网', '编织渔网。', '《协纪辨方书》'],
+  '牧养': ['牧养', '放牧饲养牲畜。', '《协纪辨方书》'],
+  '安碓磑': ['安碓磑', '安装舂米、磨面设备。', '《协纪辨方书》'],
+  '习艺': ['习艺', '学习技艺。', '《协纪辨方书》'],
+  '入学': ['入学', '入学拜师。', '《协纪辨方书》'],
+  '理发': ['理发', '修剪头发。', '《协纪辨方书》'],
+  '探病': ['探病', '探望病人。', '《协纪辨方书》'],
+  '见贵': ['见贵', '拜见贵人、上级。', '《协纪辨方书》'],
+  '乘船': ['乘船', '乘船出行。', '《协纪辨方书》'],
+  '渡水': ['渡水', '渡河涉水。', '《协纪辨方书》'],
+  '针灸': ['针灸', '施行针灸治疗。', '《协纪辨方书》'],
+  '出行': ['出行', '外出远行。', '《协纪辨方书》'],
+  '移徙': ['移徙', '搬家迁移。', '《协纪辨方书》'],
+  '分居': ['分居', '分家、分居。', '《协纪辨方书》'],
+  '剃头': ['剃头', '剃发，多指婴儿剃胎发或出家。', '《协纪辨方书》'],
+  '整手足甲': ['整手足甲', '修剪手足指甲。', '《协纪辨方书》'],
+  '纳畜': ['纳畜', '买进牲畜。', '《协纪辨方书》'],
+  '捕捉': ['捕捉', '捕猎、捕捉。', '《协纪辨方书》'],
+  '畋猎': ['畋猎', '打猎。', '《协纪辨方书》'],
+  '教牛马': ['教牛马', '训练牛马。', '《协纪辨方书》'],
+  '会亲友': ['会亲友', '聚会亲友。', '《协纪辨方书》'],
+  '赴任': ['赴任', '上任就职。', '《协纪辨方书》'],
+  '求医': ['求医', '延医诊治。', '《协纪辨方书》'],
+  '治病': ['治病', '治疗疾病。', '《协纪辨方书》'],
+  '词讼': ['词讼', '诉讼打官司。', '《协纪辨方书》'],
+  '起基动土': ['起基动土', '建筑开工。', '《协纪辨方书》'],
+  '破屋坏垣': ['破屋坏垣', '拆屋毁墙。', '《协纪辨方书》'],
+  '盖屋': ['盖屋', '建造房屋。', '《协纪辨方书》'],
+  '造仓库': ['造仓库', '建造仓库。', '《协纪辨方书》'],
+  '交易': ['交易', '买卖交易。', '《协纪辨方书》'],
+  '立券': ['立券', '立契约文书。', '《协纪辨方书》'],
+  '安机': ['安机', '安装机器。', '《协纪辨方书》'],
+  '会友': ['会友', '会晤朋友。', '《协纪辨方书》'],
+  '求医疗病': ['求医疗病', '延医诊治疾病。', '《协纪辨方书》'],
+  '诸事不宜': ['诸事不宜', '当日诸事皆不宜。', '《协纪辨方书》'],
+  '馀事勿取': ['馀事勿取', '除所列宜事外，其余不宜。', '《协纪辨方书》'],
+  '行丧': ['行丧', '办理丧事。', '《协纪辨方书》'],
+  '断蚁': ['断蚁', '灭除蚁患。', '《协纪辨方书》'],
+  '归岫': ['归岫', '放归山野，多指放生。', '《协纪辨方书》'],
+};
+
 /* ---------- 历法科普 ---------- */
 const CAL_HELP = {
   '公历': ['公历', '格里高利历，四年一闰、百年不闰、四百年再闰，年平均 365.2425 日。', '教皇格里高利十三世 1582 年颁行'],
@@ -1094,6 +1254,7 @@ const CAL_HELP = {
 function helpOf(key, group) {
   if (HELP[key]) return HELP[key];
   if (CAL_HELP[key]) return CAL_HELP[key];
+  if (AYI_HELP[key]) return AYI_HELP[key];
   if (HELP_GROUP[group]) return HELP_GROUP[group];
   return [key, '按对应历法或规则推算。', '详见 docs/PORTING.md'];
 }
