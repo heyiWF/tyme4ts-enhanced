@@ -4,6 +4,7 @@ import {HijriDay, LunarDay, SolarDay, SolarMonth, SolarTerm} from '../calendar/c
 import {HebrewDay} from '../calendar/hebrew';
 import {UmmAlQuraDay} from '../calendar/ummalqura';
 import {DiyanetDay} from '../calendar/diyanet';
+import {PersianDay} from '../calendar/persian';
 
 export enum HolidayType {
     SOLAR = 0,
@@ -18,7 +19,8 @@ export enum HolidayType {
     WEEK_AFTER = 9,
     TABLE = 10,
     UMM_AL_QURA = 11,
-    DIYANET = 12
+    DIYANET = 12,
+    PERSIAN = 13
 }
 
 /**
@@ -140,6 +142,17 @@ export class HolidayRule extends AbstractCulture {
      */
     static diyanet(month: number, day: number, name: string, offset: number = 0): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.DIYANET, name);
+        o.month = month;
+        o.day = day;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * 波斯历（伊朗历），年首按德黑兰春分正午判据
+     */
+    static persian(month: number, day: number, name: string, offset: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.PERSIAN, name);
         o.month = month;
         o.day = day;
         o.offset = offset;
@@ -332,6 +345,20 @@ export class HolidayRule extends AbstractCulture {
                         continue;
                     }
                     const d: SolarDay = DiyanetDay.fromYmd(hy, this.month, this.day).getSolarDay();
+                    if (d.getYear() === year) {
+                        return d.next(this.offset);
+                    }
+                }
+                return null;
+            }
+            case HolidayType.PERSIAN: {
+                const estimate: number = year - 621;
+                for (let i: number = -1; i <= 1; i++) {
+                    const py: number = estimate + i;
+                    if (this.day > PersianDay.getMonthDays(py, this.month)) {
+                        continue;
+                    }
+                    const d: SolarDay = PersianDay.fromYmd(py, this.month, this.day).getSolarDay();
                     if (d.getYear() === year) {
                         return d.next(this.offset);
                     }

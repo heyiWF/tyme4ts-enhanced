@@ -10472,6 +10472,148 @@ class DiyanetDay extends AbstractCulture {
   }
 }
 
+const VERNAL_EQUINOX = 6;
+const BEIJING_OFFSET = 8 / 24;
+const TEHRAN_OFFSET = 3.5 / 24;
+class PersianDay extends AbstractCulture {
+  static NAMES = [
+    "\u6CD5\u5C14\u74E6\u4E01\u6708",
+    "\u5965\u5C14\u8FEA\u8D1D\u8D6B\u4EC0\u7279\u6708",
+    "\u970D\u5C14\u5FB7\u5FB7\u6708",
+    "\u63D0\u5C14\u6708",
+    "\u83AB\u5C14\u8FBE\u5FB7\u6708",
+    "\u6C99\u8D6B\u91CC\u74E6\u5C14\u6708",
+    "\u6885\u8D6B\u5C14\u6708",
+    "\u963F\u73ED\u6708",
+    "\u963F\u624E\u5C14\u6708",
+    "\u5FB7\u4F0A\u6708",
+    "\u5DF4\u8D6B\u66FC\u6708",
+    "\u57C3\u65AF\u51E1\u5FB7\u6708"
+  ];
+  /**
+   * 年首缓存，键为波斯历年
+   */
+  static START_CACHE = {};
+  year;
+  month;
+  day;
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  /**
+   * 该波斯历年的诺鲁孜（1 月 1 日）
+   */
+  static getNowruz(year) {
+    const cached = PersianDay.START_CACHE[year];
+    if (cached) {
+      return cached;
+    }
+    const term = SolarTerm.fromIndex(year + 621, VERNAL_EQUINOX);
+    const tehranJd = term.getJulianDay().getDay() - BEIJING_OFFSET + TEHRAN_OFFSET;
+    const jdn = Math.floor(tehranJd + 0.5);
+    const noonFraction = tehranJd + 0.5 - jdn;
+    const date = JulianDay.fromJulianDay(jdn - 0.5).getSolarDay();
+    const start = noonFraction < 0.5 ? date : date.next(1);
+    PersianDay.START_CACHE[year] = start;
+    return start;
+  }
+  /**
+   * 该年总天数
+   */
+  static getYearDays(year) {
+    return PersianDay.getNowruz(year + 1).subtract(PersianDay.getNowruz(year));
+  }
+  /**
+   * 是否闰年
+   */
+  static isLeapYear(year) {
+    return PersianDay.getYearDays(year) === 366;
+  }
+  /**
+   * 该月天数
+   */
+  static getMonthDays(year, month) {
+    if (month <= 6) {
+      return 31;
+    }
+    if (month <= 11) {
+      return 30;
+    }
+    return PersianDay.isLeapYear(year) ? 30 : 29;
+  }
+  static fromYmd(year, month, day) {
+    const y = PersianDay.numeric(year, "persian year");
+    const m = PersianDay.numeric(month, "persian month");
+    const d = PersianDay.numeric(day, "persian day");
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal persian month: ${m}`);
+    }
+    if (d < 1 || d > PersianDay.getMonthDays(y, m)) {
+      throw new Error(`illegal persian day: ${y}-${m}-${d}`);
+    }
+    return new PersianDay(y, m, d);
+  }
+  /**
+   * 由公历日反查
+   */
+  static fromSolarDay(solarDay) {
+    let year = solarDay.getYear() - 621;
+    if (solarDay.isBefore(PersianDay.getNowruz(year))) {
+      year -= 1;
+    } else if (!solarDay.isBefore(PersianDay.getNowruz(year + 1))) {
+      year += 1;
+    }
+    let rest = solarDay.subtract(PersianDay.getNowruz(year));
+    let month = 1;
+    while (month <= 12) {
+      const days = PersianDay.getMonthDays(year, month);
+      if (rest < days) {
+        break;
+      }
+      rest -= days;
+      month++;
+    }
+    return new PersianDay(year, month, rest + 1);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return PersianDay.NAMES[this.month - 1];
+  }
+  getName() {
+    return this.day + "\u65E5";
+  }
+  getSolarDay() {
+    let rest = this.day - 1;
+    for (let m = 1; m < this.month; m++) {
+      rest += PersianDay.getMonthDays(this.year, m);
+    }
+    return PersianDay.getNowruz(this.year).next(rest);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getDayCount() {
+    return PersianDay.getMonthDays(this.year, this.month);
+  }
+  isLeapYear() {
+    return PersianDay.isLeapYear(this.year);
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
 class IcsEvent extends AbstractCulture {
   summary;
   start;
@@ -10658,6 +10800,7 @@ var HolidayType = /* @__PURE__ */ ((HolidayType2) => {
   HolidayType2[HolidayType2["TABLE"] = 10] = "TABLE";
   HolidayType2[HolidayType2["UMM_AL_QURA"] = 11] = "UMM_AL_QURA";
   HolidayType2[HolidayType2["DIYANET"] = 12] = "DIYANET";
+  HolidayType2[HolidayType2["PERSIAN"] = 13] = "PERSIAN";
   return HolidayType2;
 })(HolidayType || {});
 class HolidayRule extends AbstractCulture {
@@ -10764,6 +10907,16 @@ class HolidayRule extends AbstractCulture {
    */
   static diyanet(month, day, name, offset = 0) {
     const o = new HolidayRule(12 /* DIYANET */, name);
+    o.month = month;
+    o.day = day;
+    o.offset = offset;
+    return o;
+  }
+  /**
+   * 波斯历（伊朗历），年首按德黑兰春分正午判据
+   */
+  static persian(month, day, name, offset = 0) {
+    const o = new HolidayRule(13 /* PERSIAN */, name);
     o.month = month;
     o.day = day;
     o.offset = offset;
@@ -10945,6 +11098,20 @@ class HolidayRule extends AbstractCulture {
             continue;
           }
           const d = DiyanetDay.fromYmd(hy, this.month, this.day).getSolarDay();
+          if (d.getYear() === year) {
+            return d.next(this.offset);
+          }
+        }
+        return null;
+      }
+      case 13 /* PERSIAN */: {
+        const estimate = year - 621;
+        for (let i = -1; i <= 1; i++) {
+          const py = estimate + i;
+          if (this.day > PersianDay.getMonthDays(py, this.month)) {
+            continue;
+          }
+          const d = PersianDay.fromYmd(py, this.month, this.day).getSolarDay();
           if (d.getYear() === year) {
             return d.next(this.offset);
           }
@@ -11309,6 +11476,20 @@ function indonesiaRules() {
     HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
     HolidayRule.hijri(1, 1, "\u4F0A\u65AF\u5170\u65B0\u5E74"),
     HolidayRule.hijri(3, 12, "\u5723\u7EAA")
+  ];
+}
+function iranRules() {
+  return [
+    HolidayRule.persian(1, 1, "\u8BFA\u9C81\u5B5C\u8282"),
+    HolidayRule.persian(1, 2, "\u8BFA\u9C81\u5B5C\u8282\u6B21\u65E5"),
+    HolidayRule.persian(1, 3, "\u8BFA\u9C81\u5B5C\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.persian(1, 4, "\u8BFA\u9C81\u5B5C\u8282\u7B2C\u56DB\u65E5"),
+    HolidayRule.persian(1, 12, "\u4F0A\u65AF\u5170\u5171\u548C\u56FD\u65E5"),
+    HolidayRule.persian(1, 13, "\u81EA\u7136\u65E5"),
+    HolidayRule.persian(3, 14, "\u970D\u6885\u5C3C\u901D\u4E16\u65E5"),
+    HolidayRule.persian(3, 15, "\u5341\u4E94\u65E5\u8D77\u4E49\u7EAA\u5FF5\u65E5"),
+    HolidayRule.persian(11, 22, "\u4F0A\u65AF\u5170\u9769\u547D\u7EAA\u5FF5\u65E5"),
+    HolidayRule.persian(12, 29, "\u77F3\u6CB9\u56FD\u6709\u5316\u65E5")
   ];
 }
 function egyptRules() {
@@ -11694,6 +11875,8 @@ class HolidayCalendar {
         return new HolidayCalendar(r, ukraineRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u8FD1\u5E74\u8282\u65E5\u8C03\u6574\u9891\u7E41\uFF0C\u4EE5\u5B98\u65B9\u516C\u544A\u4E3A\u51C6\u3002");
       case "TR":
         return new HolidayCalendar(r, turkeyRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5F00\u658B\u8282\u3001\u53E4\u5C14\u90A6\u8282\u6309\u5B97\u6559\u4E8B\u52A1\u5C40\uFF08Diyanet\uFF09\u5386\u63A8\u7B97\uFF0C\u4EE5\u65B0\u6708\u5728\u5B89\u5361\u62C9\u65E5\u6CA1\u65F6\u9AD8\u4E8E\u5730\u5E73\u7EBF\u4E3A\u6708\u9996\u5224\u636E\uFF1B\u8282\u524D\u4E00\u65E5\u4E0B\u5348\u534A\u65E5\u5047\u672A\u8BA1\u5165\u3002");
+      case "IR":
+        return new HolidayCalendar(r, iranRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u8BFA\u9C81\u5B5C\u7B49\u6CE2\u65AF\u5386\u8282\u65E5\u6309\u5FB7\u9ED1\u5170\u6625\u5206\u6B63\u5348\u5224\u636E\u63A8\u7B97\uFF0C\u5B97\u6559\u8282\u65E5\u4EE5\u4F0A\u6717\u89C2\u6708\u516C\u544A\u4E3A\u51C6\uFF0C\u672A\u6536\u5F55\uFF0C\u53EF\u7528 importJson \u8FFD\u52A0\u3002");
       case "ID":
         return new HolidayCalendar(r, indonesiaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF1B\u9759\u5C45\u65E5\u3001\u536B\u585E\u8282\u4F9D\u5DF4\u5398\u5386\u4E0E\u4F5B\u5386\uFF0C\u6309\u5E74\u516C\u5E03\u3002");
       case "EG":
@@ -11801,6 +11984,7 @@ class HolidayCalendar {
       "UA",
       "TR",
       "ID",
+      "IR",
       "EG",
       "SA",
       "AE",
@@ -15688,4 +15872,4 @@ class DayAlmanac {
   }
 }
 
-export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };
+export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };

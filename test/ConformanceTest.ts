@@ -2,7 +2,7 @@ import {suite, test} from '@testdeck/mocha';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {
-    DayAlmanac, DiyanetDay, HebrewDay, HolidayCalendar, IndianDay, SolarDay, Tithi, UmmAlQuraDay,
+    DayAlmanac, DiyanetDay, HebrewDay, HolidayCalendar, IndianDay, PersianDay, SolarDay, Tithi, UmmAlQuraDay,
 } from '../lib';
 import {equal} from 'assert';
 
@@ -27,6 +27,7 @@ interface IRow {
     hebrew: string;
     ummAlQura: string;
     diyanet: string;
+    persian: string;
     tithi: number;
     indianMonth: string;
     cnHoliday: string;
@@ -95,6 +96,7 @@ class ConformanceTest {
             equal(HebrewDay.fromSolarDay(day).toString(), r.hebrew, where + ' 希伯来历');
             equal(UmmAlQuraDay.inRange(day) ? UmmAlQuraDay.fromSolarDay(day).toString() : '', r.ummAlQura, where + ' 乌姆库拉历');
             equal(DiyanetDay.fromSolarDay(day).toString(), r.diyanet, where + ' Diyanet 历');
+            equal(PersianDay.fromSolarDay(day).toString(), r.persian, where + ' 波斯历');
             equal(Tithi.getTithi(day, 6), r.tithi, where + ' tithi');
             equal(IndianDay.fromSolarDay(day).getMonthName(), r.indianMonth, where + ' 印度月名');
         }

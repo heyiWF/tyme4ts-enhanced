@@ -82,7 +82,7 @@ class HolidayRegionTest {
     test7(): void {
         // 全部地区均可按年推算，且说明非空
         const regions: string[] = HolidayCalendar.getRegions();
-        equal(regions.length, 75);
+        equal(regions.length, 76);
         for (let i: number = 0; i < regions.length; i++) {
             const c: HolidayCalendar = HolidayCalendar.of(regions[i]);
             ok(c.getNote().length > 0);

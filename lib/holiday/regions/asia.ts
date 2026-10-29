@@ -25,6 +25,25 @@ export function indonesiaRules(): HolidayRule[] {
     ];
 }
 
+/**
+ * 伊朗：波斯历节日按德黑兰春分判据推算，日期精确；
+ * 宗教节日（阿舒拉、开斋节等）以伊朗观月公告为准，未纳入规则，可按年导入。
+ */
+export function iranRules(): HolidayRule[] {
+    return [
+        HolidayRule.persian(1, 1, '诺鲁孜节'),
+        HolidayRule.persian(1, 2, '诺鲁孜节次日'),
+        HolidayRule.persian(1, 3, '诺鲁孜节第三日'),
+        HolidayRule.persian(1, 4, '诺鲁孜节第四日'),
+        HolidayRule.persian(1, 12, '伊斯兰共和国日'),
+        HolidayRule.persian(1, 13, '自然日'),
+        HolidayRule.persian(3, 14, '霍梅尼逝世日'),
+        HolidayRule.persian(3, 15, '十五日起义纪念日'),
+        HolidayRule.persian(11, 22, '伊斯兰革命纪念日'),
+        HolidayRule.persian(12, 29, '石油国有化日'),
+    ];
+}
+
 export function egyptRules(): HolidayRule[] {
     return [
         HolidayRule.solar(1, 7, '科普特圣诞节'),

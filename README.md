@@ -16,14 +16,14 @@
 
 | 分类 | 能力 | 依据 |
 | --- | --- | --- |
-| 历法 | 公历、农历（含闰月）、藏历、回历、希伯来历、印度阴阳历（tithi）、**乌姆库拉历**、**土耳其 Diyanet 历**、儒略日、星座、月相、七十二候 | 寿星天文历算法、molad 算术历、KACST 月首表、安卡拉日没判据 |
+| 历法 | 公历、农历（含闰月）、藏历、回历、希伯来历、印度阴阳历（tithi）、**乌姆库拉历**、**土耳其 Diyanet 历**、**波斯历（伊朗历）**、儒略日、星座、月相、七十二候 | 寿星天文历算法、molad 算术历、KACST 月首表、安卡拉日没判据、德黑兰春分正午判据 |
 | 干支 | 年月日时四柱、纳音、十神、藏干、人元司令、胎元、命宫、大运流年 | 子平术通行规则 |
 | 神煞 | 吉神宜趋、凶神宜忌、建除十二神、二十八宿、黄黑道十二神、六曜、小六壬、彭祖百忌 | 《协纪辨方书》体系 |
 | 择日 | 宜忌、日冲煞、旬空、月破岁破、天赦日、四离四绝、月将、年命禄贵合、贵人时、时辰吉凶 | 协纪辨方书 + 通书 |
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
 | 节日 | 八类来源统一聚合：法定、传统、民俗、公历纪念日与国际日、佛历、道历、节气、外历；共 **480+ 条名称**，同神异写自动归并 | 6tail/lunar-typescript、维基文库、政府公告 |
 | 民俗数据 | 民俗节日、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
-| 节假日 | **75 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区、中国广西），覆盖欧亚美非 40 国；支持公历、农历、伊斯兰历、希伯来历、东正教复活节五类规则、11 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
+| 节假日 | **76 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区、中国广西），覆盖欧亚美非 41 国；支持公历、农历、伊斯兰历、希伯来历、波斯历、东正教复活节六类规则、14 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
 | 互操作 | ICS 订阅解析（年度循环事件转 tyme `Event`）与节假日 ICS 导出 | iCalendar RFC 5545 |
 
 ---
@@ -138,9 +138,9 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
-支持 75 个地区代码：
+支持 76 个地区代码：
 
-- 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID`
+- 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID` `IR`
 - 欧洲：`GB` `DE` `FR` `IT` `ES` `NL` `RU` `PL` `SE` `NO` `DK` `FI` `IS` `IE` `PT` `CH` `AT` `BE` `CZ` `HU` `GR` `CY` `RO` `UA` `TR`
 - 美洲：`US` `CA` `BR` `MX`
 - 大洋洲与非洲：`AU` `NZ` `ZA` `EG` `NG` `KE` `SA` `AE`
@@ -152,7 +152,7 @@ cn.importJson(JSON.stringify({
 
 伊斯兰节日按算术历推算，观月国家可能相差一日，可用 `importJson` 覆盖；土耳其改用 Diyanet 历（见第六节），沙特、阿联酋改用乌姆库拉历。
 
-规则类型共 13 种：公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历、伊斯兰算术历、乌姆库拉历、Diyanet 历、逐年表（`table`）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
+规则类型共 14 种：公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历、伊斯兰算术历、乌姆库拉历、Diyanet 历、波斯历、逐年表（`table`）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
@@ -211,7 +211,30 @@ Diyanet 核对记录：2015–2027 年开斋节、古尔邦节共 26 个官方�
 
 ---
 
-## 七、节日体系：八类来源与统一去重
+## 七、波斯历：以德黑兰正午定年首
+
+伊朗与阿富汗的官方历法不是回历，而是波斯历（Solar Hijri）。它没有固定的闰年公式，年首由天文判定：
+
+- 取当年春分（北半球昼夜等长）的精确时刻；
+- 换算为德黑兰地方时（UTC+3:30，52.5°E 子午线）；
+- **春分在正午之前**，当日即 1 月 1 日（诺鲁孜）；**在正午之后**，次日为新年。
+
+因此相邻两个年首相差 366 日即为闰年，闰年落在哪一年由天文决定，不是「四年一闰」。本库直接调用春分精算，不套用 33 年 8 闰的近似公式——两者在 1404 年（2025）正好差一天，而伊朗官方采用天文结果。
+
+```ts
+PersianDay.getNowruz(1405).toString();                              // 2026年3月21日
+PersianDay.fromYmd(1405, 1, 1).getSolarDay().toString();             // 2026年3月21日
+PersianDay.fromSolarDay(SolarDay.fromYmd(2026, 10, 29)).toString();  // 1405年阿班月7日
+PersianDay.isLeapYear(1408);                                        // true
+```
+
+月长固定：前六个月 31 日，七至十一月 30 日，十二月平年 29 日、闰年 30 日。已用伊朗官方公布的 1401–1411 年诺鲁孜日期（2022–2032）逐条核对，11 个年首全部吻合。
+
+伊朗地区 `IR` 的 10 个法定假日全部落在波斯历上（诺鲁孜四日、伊斯兰共和国日、自然日、霍梅尼逝世日、十五日起义纪念日、伊斯兰革命纪念日、石油国有化日），日期精确。阿舒拉、开斋节等宗教节日以伊朗观月公告为准，各年可能差一日，故未纳入规则，可用 `importJson` 按年追加——这与土耳其改用 Diyanet 历的理由相同：宁可少列，不猜。
+
+---
+
+## 八、节日体系：八类来源与统一去重
 
 ```ts
 import {Festivals, DayAlmanac, HebrewDay, IndianDay, Tithi} from 'tyme4ts-enhanced';
@@ -261,7 +284,7 @@ npm run build && npm run audit:holidays
 
 ---
 
-## 八、ICS 订阅转换
+## 九、ICS 订阅转换
 
 ```ts
 import {IcsCalendar, EventManager} from 'tyme4ts-enhanced';
@@ -284,7 +307,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 九、准确性：以公开黄历逐项校验
+## 十、准确性：以公开黄历逐项校验
 
 测试以 2025-04-03（乙巳年三月初六，壬寅日）为基准，与多家公开发布的黄历逐项对照，全部一致：
 
@@ -313,7 +336,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十、年份范围
+## 十一、年份范围
 
 | 能力 | 范围 |
 | --- | --- |
@@ -325,9 +348,9 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十一、移植到其他语言
+## 十二、移植到其他语言
 
-`data/conformance.json` 给出 **252 个日期 × 25 个字段**的固定输出（1900–2100，含基准日、闰月、闰年、世纪交界样本）。移植版读入该文件逐条比对即可验收，不必读 TypeScript 源码：
+`data/conformance.json` 给出 **252 个日期 × 26 个字段**的固定输出（1900–2100，含基准日、闰月、闰年、世纪交界样本）。移植版读入该文件逐条比对即可验收，不必读 TypeScript 源码：
 
 ```bash
 npm run build && npm run gen:conformance   # 重新生成向量
@@ -345,7 +368,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ---
 
-## 十二、与 tyme4ts 的关系
+## 十三、与 tyme4ts 的关系
 
 - 100% 保留上游公开 API，可直接替换 `tyme4ts`；
 - 新增二十余个类：`DayAlmanac`、`WuHouDay`、`Clash`、`LifeRelation`、`HourFortune`、`NineStarChart`、`Palace`、`ZodiacNumbers`、`MonthGeneral`、`DeityFestival`、`DreamOracle`、`FengShuiTip`、`Naming`、`ElementBalance`、`ZodiacFortune`、`HolidayCalendar`、`HolidayRule`、`IcsCalendar`、`Era` 等；
@@ -353,7 +376,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ---
 
-## 十三、开发
+## 十四、开发
 
 ```bash
 npm i
@@ -365,6 +388,6 @@ npm run docs      # 构建并同步 docs/tyme.mjs
 
 数据勘误请附出处（古籍版本、政府公告或公开黄历截图），本库优先采纳可复核的来源。
 
-## 十四、许可与致谢
+## 十五、许可与致谢
 
 MIT。历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本；公历纪念日、农历民俗、佛历因果犯忌、道历诸神圣诞四张表由 `scripts/gen-festival-data.py` 从 [6tail/lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）源码解析生成，并由 `npm run verify:festivals` 逐条比对。

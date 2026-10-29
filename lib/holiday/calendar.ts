@@ -6,7 +6,7 @@ import {
     greeceRules, hungaryRules, icelandRules, irelandRules, norwayRules, polandRules,
     portugalRules, romaniaRules, swedenRules, switzerlandRules, turkeyRules, ukraineRules,
 } from './regions/europe';
-import {egyptRules, indonesiaRules, kenyaRules, nigeriaRules, saudiRules, uaeRules} from './regions/asia';
+import {egyptRules, indonesiaRules, iranRules, kenyaRules, nigeriaRules, saudiRules, uaeRules} from './regions/asia';
 import {
     bavariaExtra, californiaExtra, cataloniaExtra, newSouthWalesExtra,
     newYorkExtra, ontarioExtra, scotlandExtra, texasExtra,
@@ -199,6 +199,8 @@ export class HolidayCalendar {
                 return new HolidayCalendar(r, ukraineRules(), '法定假日；近年节日调整频繁，以官方公告为准。');
             case 'TR':
                 return new HolidayCalendar(r, turkeyRules(), '法定假日；开斋节、古尔邦节按宗教事务局（Diyanet）历推算，以新月在安卡拉日没时高于地平线为月首判据；节前一日下午半日假未计入。');
+            case 'IR':
+                return new HolidayCalendar(r, iranRules(), '法定假日；诺鲁孜等波斯历节日按德黑兰春分正午判据推算，宗教节日以伊朗观月公告为准，未收录，可用 importJson 追加。');
             case 'ID':
                 return new HolidayCalendar(r, indonesiaRules(), '全国法定假日核心；静居日、卫塞节依巴厘历与佛历，按年公布。');
             case 'EG':
@@ -266,7 +268,7 @@ export class HolidayCalendar {
             'BR', 'MX', 'RU', 'ZA', 'IN', 'PH',
             'PL', 'SE', 'NO', 'DK', 'FI', 'IS', 'IE', 'PT', 'CH', 'AT',
             'BE', 'CZ', 'HU', 'GR', 'CY', 'RO', 'UA', 'TR',
-            'ID', 'EG', 'SA', 'AE', 'NG', 'KE',
+            'ID', 'IR', 'EG', 'SA', 'AE', 'NG', 'KE',
             'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT',
             'MY-JHR', 'MY-KDH', 'MY-KTN', 'MY-MLK', 'MY-NSN', 'MY-PHG', 'MY-PNG',
             'MY-PRK', 'MY-PLS', 'MY-SBH', 'MY-SWK', 'MY-SGR', 'MY-TRG', 'MY-KUL',
