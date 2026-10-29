@@ -12,7 +12,7 @@ class HolidayDataFilesTest {
     test0(): void {
         // 逐年公告文件均可解析并导入
         const files: string[] = readdirSync(HolidayDataFilesTest.DIR).filter((f: string) => f.slice(-5) === '.json').sort();
-        equal(files.length, 28);
+        equal(files.length, 29);
         for (let i: number = 0; i < files.length; i++) {
             const text: string = readFileSync(join(HolidayDataFilesTest.DIR, files[i]), 'utf8');
             const o: {
@@ -62,5 +62,12 @@ class HolidayDataFilesTest {
         equal(id27.getHoliday(SolarDay.fromYmd(2027, 1, 5))!.getName(), '先知登霄日');
         equal(id27.getHoliday(SolarDay.fromYmd(2027, 12, 26))!.getName(), '先知登霄日');
         equal(id27.getDays(2027).length, 18);
+        // 埃及 2026：官方把四个固定节日顺延到周四，公告文件按实际放假日录入
+        const eg: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'EG-2026.json'), 'utf8'));
+        equal(eg.getDays(2026).length, 21);
+        equal(eg.getHoliday(SolarDay.fromYmd(2026, 1, 29))!.getName(), '一月二十五日革命与警察节');
+        equal(eg.getHoliday(SolarDay.fromYmd(2026, 1, 25)), null);
+        equal(eg.getHoliday(SolarDay.fromYmd(2026, 5, 7))!.getName(), '劳动节');
+        equal(eg.getHoliday(SolarDay.fromYmd(2026, 5, 1)), null);
     }
 }
