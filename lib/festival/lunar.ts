@@ -1,47 +1,33 @@
 import {AbstractCulture} from '../core/base';
 import {LunarDay, LunarMonth, SolarDay} from '../calendar/core';
 import {HolidayRule} from '../holiday/rule';
+import {LUNAR_FOLK} from './data-lunar-folk';
 
 /**
  * 民俗节日
  *
- * 收录不放假而见于通书、年节志的传统与公历节日：接神日、人日、天穿节、填仓节、中和节、
- * 寒食节、春社秋社、天贶节、观莲节、财神节、寒衣节、下元节、尾牙、祭灶等，
- * 以及情人节、万圣夜、感恩节、母亲节、父亲节等。日期规则取自通行历书。
+ * 收录不放假而见于通书、年节志的传统与公历节日。
+ *
+ * 农历条目取自 6tail/lunar-typescript 的 LunarUtil.OTHER_FESTIVAL（27 个日期键），
+ * 另补上游未收的小年、浴佛节、晒经节三条，见 LUNAR_EXTRA。
+ * 公历、周、节气、干支四类规则为本项目整理。
+ *
+ * 闰月不过节：与 LunarFestival、DeityFestival 口径一致。
  */
 export class FolkFestival extends AbstractCulture {
     protected solarDay: SolarDay;
     protected names: string[];
 
     /**
-     * 农历月日
+     * 上游未收的补充条目，逐条说明依据：
+     * - 12-23 小年（北方）：祭灶前一日，北方以腊月廿三为小年
+     * - 4-8 浴佛节：佛诞日浴佛，民间亦称龙华会
+     * - 6-6 晒经节：六月六曝晒经书衣物的旧俗，与天贶节同日
      */
-    protected static LUNAR: { [key: string]: string[] } = {
-        '1-4': ['接神日'],
-        '1-5': ['隔开日'],
-        '1-7': ['人日'],
-        '1-8': ['谷日', '顺星节'],
-        '1-9': ['天日'],
-        '1-10': ['地日'],
-        '1-20': ['天穿节'],
-        '1-25': ['填仓节'],
-        '1-30': ['正月晦'],
-        '2-1': ['中和节'],
-        '5-20': ['分龙节'],
-        '5-25': ['会龙节'],
-        '6-6': ['天贶节'],
-        '6-24': ['观莲节'],
-        '6-25': ['五谷母节'],
-        '7-22': ['财神节'],
-        '7-29': ['地藏节'],
-        '8-1': ['天灸日'],
-        '10-1': ['寒衣节'],
-        '10-10': ['十成节'],
-        '10-15': ['下元节'],
-        '12-7': ['驱傩日'],
-        '12-16': ['尾牙'],
+    protected static LUNAR_EXTRA: { [key: string]: string[] } = {
         '12-23': ['小年（北方）'],
-        '12-24': ['祭灶日'],
+        '4-8': ['浴佛节'],
+        '6-6': ['晒经节'],
     };
 
     /**
@@ -75,6 +61,8 @@ export class FolkFestival extends AbstractCulture {
      */
     protected static TERM_RULES: HolidayRule[] = [
         HolidayRule.term(7, '寒食节', -1),
+        // 国务院 2018 年 6 月 21 日批复，自 2018 年起每年秋分
+        HolidayRule.term(18, '中国农民丰收节'),
     ];
 
     /**
@@ -84,6 +72,11 @@ export class FolkFestival extends AbstractCulture {
         HolidayRule.termStem(3, 4, 5, '春社'),
         HolidayRule.termStem(15, 4, 5, '秋社'),
     ];
+
+    /**
+     * 规则日期按年缓存，值为「月-日」，避免逐日重复推算
+     */
+    protected static DATE_CACHE: { [key: string]: string } = {};
 
     protected constructor(solarDay: SolarDay, names: string[]) {
         super();
@@ -95,18 +88,17 @@ export class FolkFestival extends AbstractCulture {
         const names: string[] = [];
         const lunar: LunarDay = lunarDay || solarDay.getLunarDay();
         const year: number = solarDay.getYear();
-        FolkFestival.append(names, FolkFestival.LUNAR[Math.abs(lunar.getMonth()) + '-' + lunar.getDay()]);
+        if (lunar.getMonth() > 0) {
+            const key: string = lunar.getMonth() + '-' + lunar.getDay();
+            FolkFestival.append(names, LUNAR_FOLK[key]);
+            FolkFestival.append(names, FolkFestival.LUNAR_EXTRA[key]);
+        }
         FolkFestival.append(names, FolkFestival.SOLAR[solarDay.getMonth() + '-' + solarDay.getDay()]);
         FolkFestival.appendByRules(names, FolkFestival.WEEK_RULES, solarDay, year, 'w');
         FolkFestival.appendByRules(names, FolkFestival.TERM_RULES, solarDay, year, 't');
         FolkFestival.appendByRules(names, FolkFestival.TERM_STEM_RULES, solarDay, year, 's');
         return new FolkFestival(solarDay, names);
     }
-
-    /**
-     * 规则日期按年缓存，值为「月-日」，避免逐日重复推算
-     */
-    protected static DATE_CACHE: { [key: string]: string } = {};
 
     protected static appendByRules(target: string[], rules: HolidayRule[], solarDay: SolarDay, year: number, prefix: string): void {
         const md: string = solarDay.getMonth() + '-' + solarDay.getDay();
@@ -118,7 +110,7 @@ export class FolkFestival extends AbstractCulture {
                 value = d ? d.getMonth() + '-' + d.getDay() : '';
                 FolkFestival.DATE_CACHE[key] = value;
             }
-            if (value === md) {
+            if (value === md && target.indexOf(rules[i].getName()) < 0) {
                 target.push(rules[i].getName());
             }
         }
@@ -129,7 +121,9 @@ export class FolkFestival extends AbstractCulture {
             return;
         }
         for (let i: number = 0; i < source.length; i++) {
-            target.push(source[i]);
+            if (target.indexOf(source[i]) < 0) {
+                target.push(source[i]);
+            }
         }
     }
 
@@ -145,11 +139,23 @@ export class FolkFestival extends AbstractCulture {
         return this.names.join('、');
     }
 
+    /**
+     * 农历日期键数，用于完整性校验
+     */
+    static getLunarSize(): number {
+        let n: number = Object.keys(LUNAR_FOLK).length;
+        for (const k in FolkFestival.LUNAR_EXTRA) {
+            if (!LUNAR_FOLK[k]) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     toString(): string {
         return this.getName();
     }
 }
-
 /**
  * 神明诞辰
  *
@@ -196,6 +202,13 @@ export class DeityFestival extends AbstractCulture {
 
     toString(): string {
         return `${LunarMonth.NAMES[this.month - 1]}${LunarDay.NAMES[this.day - 1]} ${this.getName()}`;
+    }
+
+    /**
+     * 月日键数，用于完整性校验
+     */
+    static getSize(): number {
+        return Object.keys(DeityFestival.DATA).length;
     }
 
     protected static DATA: { [key: string]: string[] } = {

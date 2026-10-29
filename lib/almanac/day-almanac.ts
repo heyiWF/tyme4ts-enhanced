@@ -1,6 +1,7 @@
 import {Duty, EarthBranch, SixtyCycle, Zodiac} from './basic';
-import {LunarDay, LunarFestival, MonthGeneral, SixtyCycleDay, SixtyCycleHour, SolarDay, SolarFestival, SolarTermDay} from '../calendar/core';
+import {LunarDay, MonthGeneral, SixtyCycleDay, SixtyCycleHour, SolarDay, SolarTermDay} from '../calendar/core';
 import {DeityFestival, FolkFestival} from '../festival/lunar';
+import {Festivals} from '../festival/catalog';
 import {Clash, DailyNumbers, DutyAdvice, HourFortune, LifeRelation, NineStarChart, WuHouDay, ZodiacFortune, ZodiacNumbers} from './extra';
 import {DreamOracle, FengShuiTip} from '../text/folk';
 
@@ -307,22 +308,17 @@ export class DayAlmanac {
     /**
      * 当日节日名（公历、农历、民俗），按名称去重
      */
+    /**
+     * 当日节日聚合，含法定、传统、民俗、纪念、宗教、节气
+     */
+    getFestivals(): Festivals {
+        return Festivals.of(this.solarDay);
+    }
+
+    /**
+     * 当日节日名，按分类排序并去重
+     */
     getFestivalNames(): string[] {
-        const l: string[] = [];
-        const solar: SolarFestival | null = this.solarDay.getFestival();
-        if (solar) {
-            l.push(solar.getName());
-        }
-        const lunar: LunarFestival | null = this.getLunarDay().getFestival();
-        if (lunar && l.indexOf(lunar.getName()) < 0) {
-            l.push(lunar.getName());
-        }
-        const folk: string[] = this.getFolkFestivals().getNames();
-        for (let i: number = 0; i < folk.length; i++) {
-            if (l.indexOf(folk[i]) < 0) {
-                l.push(folk[i]);
-            }
-        }
-        return l;
+        return this.getFestivals().getNames();
     }
 }

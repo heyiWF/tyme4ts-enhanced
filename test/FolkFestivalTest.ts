@@ -57,7 +57,8 @@ class FolkFestivalTest {
     test4(): void {
         // 合并后的节日名：腊八为农历节日，寒食为民俗节日
         const a: DayAlmanac = DayAlmanac.fromYmd(2025, 4, 3);
-        deepEqual(a.getFestivalNames(), ['寒食节']);
+        // 民俗在前，宗教次之；「眼光娘娘等圣诞」与「眼光娘娘圣诞」已按归一化合并
+        deepEqual(a.getFestivalNames(), ['寒食节', '眼光娘娘圣诞', '雷斋日']);
         ok(DayAlmanac.fromYmd(2025, 1, 7).getFestivalNames().indexOf('腊八节') > -1);
     }
 }

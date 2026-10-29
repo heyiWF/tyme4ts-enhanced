@@ -52,6 +52,7 @@ export class HolidayCalendar {
     protected substitute: boolean;
     protected observed: number;
     protected note: string;
+    protected cache: { [key: string]: Holiday[] } = {};
 
     protected constructor(region: string, rules: HolidayRule[], note: string, observed: number = 0, substitute: boolean = false) {
         this.region = region;
@@ -586,6 +587,7 @@ export class HolidayCalendar {
             this.data[d.toString()] = new Holiday(d, item.name, item.work === true);
             n++;
         }
+        this.cache = {};
         return n;
     }
 
@@ -608,6 +610,11 @@ export class HolidayCalendar {
      * 一年节假日，含规则推算与导入数据，按日期排序
      */
     getDays(year: number, includeWork: boolean = false): Holiday[] {
+        const cacheKey: string = year + (includeWork ? '-w' : '');
+        const hit: Holiday[] | undefined = this.cache[cacheKey];
+        if (hit) {
+            return hit.slice();
+        }
         const map: { [key: string]: Holiday } = {};
         const dataKeys: { [key: string]: boolean } = {};
         for (const k in this.data) {
@@ -656,7 +663,8 @@ export class HolidayCalendar {
             }
         }
         l.sort((a: Holiday, b: Holiday) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
-        return l;
+        this.cache[cacheKey] = l;
+        return l.slice();
     }
 
     /**
