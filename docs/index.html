@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tyme Enhanced · 通胜日历 · 开源黄历引擎</title>
-<meta name="description" content="以 TypeScript 实现的开源传统历法与通胜引擎，含农历、干支、节气、神煞、宜忌、择日、神诞、解梦、九宫飞星、26 个地区节假日与 ICS 订阅转换。">
+<title>Tyme Enhanced · 多历法与通胜知识库</title>
+<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、76 个地区节假日、传统通胜、API 字段与实时校验。">
+<link rel="icon" href="./wiki-icon.svg" type="image/svg+xml">
 <style>
 :root{
   --paper:#f6f4ec; --paper-2:#fffdf6; --ink:#1d2b22; --ink-2:#4a5b50; --ink-3:#7b8a80;
@@ -218,19 +219,23 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
   .hero-main,.side-card{margin-bottom:10px}
 }
 </style>
+<link rel="stylesheet" href="./wiki.css">
 </head>
 <body>
 <header class="site">
   <div class="wrap site-inner">
-    <div class="brand"><b>通胜</b><span>TYME ENHANCED · OPEN ALMANAC</span></div>
-    <nav class="tabs">
-      <button class="on" data-page="almanac">黄历</button>
-      <button data-page="fields">字段</button>
-      <button data-page="festivals">节日</button>
-      <button data-page="regions">地区</button>
-      <button data-page="calendars">历法</button>
-      <button data-page="check">校验</button>
-      <button data-page="data">数据</button>
+    <div class="brand">
+      <img src="./wiki-icon.svg" alt="" width="45" height="45">
+      <div><b>Tyme Enhanced</b><span>历法 · 节日 · 通胜知识库</span></div>
+    </div>
+    <nav class="tabs" aria-label="知识库栏目">
+      <button class="on" data-page="almanac"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>黄历</button>
+      <button data-page="fields"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>字段</button>
+      <button data-page="festivals"><svg viewBox="0 0 24 24"><path d="M12 3l2.1 5.2L20 9l-4.4 3.8.4 5.7-4-3-4 3 .4-5.7L4 9l5.9-.8z"/></svg>节日</button>
+      <button data-page="regions"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18"/></svg>地区</button>
+      <button data-page="calendars"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(30 12 12)"/></svg>历法</button>
+      <button data-page="check"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.7-3.3 7.7-8 9-4.7-1.3-8-4.3-8-9V6z"/><path d="M8 12l2.5 2.5L16 9"/></svg>校验</button>
+      <button data-page="data"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>数据</button>
     </nav>
   </div>
 </header>
@@ -249,6 +254,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
 
     <div class="hero">
       <div class="hero-main">
+        <span class="hero-kicker">每日历书 · DAILY ALMANAC</span>
         <div class="daynum" id="daynum">3</div>
         <div class="daymeta">
           <div class="lunar-big" id="lunar">农历三月初六</div>
@@ -257,132 +263,141 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
         </div>
       </div>
       <div class="hero-side">
-        <div class="side-card">
+        <div class="side-card tone-indigo">
           <h4>今日八字 · 四柱</h4>
           <div id="bazi" style="font-family:var(--serif);font-size:21px;letter-spacing:3px"></div>
           <div class="note" id="bazi-note"></div>
         </div>
-        <div class="side-card">
+        <div class="side-card tone-gold">
           <h4>节气 · 物候</h4>
           <div id="terms" class="list"></div>
         </div>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="card c7">
-        <h3>月历 <em>点击日期切换</em></h3>
-        <table class="month" id="month"></table>
-      </div>
-
-      <div class="card c5">
-        <h3>宜忌 <em>协纪辨方书体系</em></h3>
-        <div class="yiji">
-          <div class="col yi"><h5>宜</h5><div class="chips" id="yi"></div></div>
-          <div class="col ji"><h5>忌</h5><div class="chips" id="ji"></div></div>
+    <section class="module-section" style="--section-color:var(--green)">
+      <div class="section-heading"><span class="section-index">01</span><div><h2>日历与宜忌</h2><p>先看日期，再看当日宜忌与吉数</p></div></div>
+      <div class="grid">
+        <div class="card c7 tone-jade">
+          <h3>月历 <em>点击日期切换</em></h3>
+          <table class="month" id="month"></table>
         </div>
-        <div class="note" id="duty"></div>
-      </div>
-
-      <div class="card c3">
-        <h3>干支五行</h3>
-        <div id="ganzhi" class="list"></div>
-      </div>
-
-      <div class="card c5">
-        <h3>吉神宜趋 · 凶神宜忌</h3>
-        <div class="chips" id="gods"></div>
-      </div>
-
-      <div class="card c4">
-        <h3>方位 <em>日干所定</em></h3>
-        <div class="pos" id="pos"></div>
-        <h3 style="margin-top:14px">冲煞 · 胎神 · 月将</h3>
-        <div class="pos" id="misc"></div>
-      </div>
-
-      <div class="card c8">
-        <h3>十二时辰吉凶 <em>黄道黑道</em></h3>
-        <div class="hours" id="hours"></div>
-        <div class="note">朱色字为贵人、日禄、六合；「吉」为黄道兼吉神，「中」为黄道，「凶」为黑道。</div>
-      </div>
-
-      <div class="card c4">
-        <h3>九宫飞星 <em>日家</em></h3>
-        <div class="nine" id="nine"></div>
-        <div class="note" id="nine-note"></div>
-      </div>
-
-      <div class="card c4">
-        <h3>诸葛武侯择日</h3>
-        <div id="wuhou"></div>
-      </div>
-
-      <div class="card c4">
-        <h3>生肖号码 <em>港澳通胜栏目</em></h3>
-        <div id="zodiac" class="list"></div>
-      </div>
-
-      <div class="card c4">
-        <h3>神明诞辰 <em>玉匣记</em></h3>
-        <div id="deity" class="list"></div>
-      </div>
-
-      <div class="card c6">
-        <h3>节假日 <em>所选地区</em></h3>
-        <div id="holiday" class="list"></div>
-        <div class="note" id="region-note"></div>
-      </div>
-
-      <div class="card c6">
-        <h3>今日吉数 <em>河图数推演</em></h3>
-        <div id="numbers" style="font-family:var(--serif);font-size:24px;letter-spacing:5px;color:var(--green)"></div>
-        <div id="numbers-map" class="nums-map"></div>
-        <div class="note">取日干、日支、纳音五行之河图数，轮流取足，非原版数值。</div>
-      </div>
-
-      <div class="card c12">
-        <h3>生肖流月运程 <em>以流月地支与生肖关系断吉凶</em></h3>
-        <div class="zo" id="zodiac-fortune"></div>
-      </div>
-
-      <div class="card c6">
-        <h3>周公解梦 <em>维基文库公有领域本</em></h3>
-        <div id="dream" style="font-family:var(--serif);font-size:17px;line-height:1.9"></div>
-        <div class="note" id="dream-note"></div>
-      </div>
-
-      <div class="card c6">
-        <h3>风水常识</h3>
-        <div id="fengshui" style="font-family:var(--serif);font-size:15.5px;line-height:1.9"></div>
-        <div class="note">逐日轮换的常识性说明，不作堪舆断验。</div>
-      </div>
-
-      <div class="card c12">
-        <h3>出生取名 <em>依所选日午时八字，取喜用五行之字</em></h3>
-        <div class="bar" style="padding:0">
-          <input id="surname" value="李" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;width:92px;background:#fff">
-          <select id="gender" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff">
-            <option value="1">男</option><option value="0">女</option>
-          </select>
-          <button id="genname">生成</button>
-          <span id="balance" class="note" style="margin:0"></span>
+        <div class="stack c5">
+          <div class="card tone-red">
+            <h3>宜忌 <em>协纪辨方书体系</em></h3>
+            <div class="yiji">
+              <div class="col yi"><h5>宜</h5><div class="chips" id="yi"></div></div>
+              <div class="col ji"><h5>忌</h5><div class="chips" id="ji"></div></div>
+            </div>
+            <div class="note" id="duty"></div>
+          </div>
+          <div class="card tone-gold">
+            <h3>今日吉数 <em>河图数推演</em></h3>
+            <div id="numbers"></div>
+            <div id="numbers-map" class="nums-map"></div>
+            <div class="note">取日干、日支、纳音五行之河图数，轮流取足，非原版数值。</div>
+          </div>
         </div>
-        <div class="name-out" id="names"></div>
-        <div class="note" id="name-detail"></div>
       </div>
-    </div>
+    </section>
+
+    <section class="module-section" style="--section-color:var(--indigo)">
+      <div class="section-heading"><span class="section-index">02</span><div><h2>干支与择时</h2><p>神煞、方位、时辰与九宫的完整对照</p></div></div>
+      <div class="grid">
+        <div class="card c4 tone-indigo">
+          <h3>干支五行</h3>
+          <div id="ganzhi" class="list"></div>
+        </div>
+        <div class="card c4 tone-jade">
+          <h3>吉神宜趋 · 凶神宜忌</h3>
+          <div class="chips" id="gods"></div>
+        </div>
+        <div class="card c4 tone-violet">
+          <h3>九宫飞星 <em>日家</em></h3>
+          <div class="nine" id="nine"></div>
+          <div class="note" id="nine-note"></div>
+        </div>
+        <div class="card c5 tone-cyan">
+          <h3>方位 <em>日干所定</em></h3>
+          <div class="pos" id="pos"></div>
+          <h3 style="margin-top:16px">冲煞 · 胎神 · 月将</h3>
+          <div class="pos" id="misc"></div>
+        </div>
+        <div class="stack c7">
+          <div class="card tone-indigo">
+            <h3>十二时辰吉凶 <em>黄道黑道</em></h3>
+            <div class="hours" id="hours"></div>
+            <div class="note">朱色字为贵人、日禄、六合；「吉」为黄道兼吉神，「中」为黄道，「凶」为黑道。</div>
+          </div>
+          <div class="card tone-gold">
+            <h3>诸葛武侯择日</h3>
+            <div id="wuhou"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="module-section" style="--section-color:var(--gold)">
+      <div class="section-heading"><span class="section-index">03</span><div><h2>民俗与生活</h2><p>地域假日、传统民俗与每日生活工具</p></div></div>
+      <div class="grid">
+        <div class="stack c4">
+          <div class="card tone-gold">
+            <h3>生肖号码 <em>港澳通胜栏目</em></h3>
+            <div id="zodiac" class="list"></div>
+          </div>
+          <div class="card tone-red">
+            <h3>神明诞辰 <em>玉匣记</em></h3>
+            <div id="deity" class="list"></div>
+          </div>
+        </div>
+        <div class="card c8 tone-cyan">
+          <h3>节假日 <em>所选地区</em></h3>
+          <div id="holiday" class="list"></div>
+          <div class="note" id="region-note"></div>
+        </div>
+        <div class="card c6 tone-violet">
+          <h3>周公解梦 <em>维基文库公有领域本</em></h3>
+          <div id="dream"></div>
+          <div class="note" id="dream-note"></div>
+        </div>
+        <div class="card c6 tone-jade">
+          <h3>风水常识</h3>
+          <div id="fengshui"></div>
+          <div class="note">逐日轮换的常识性说明，不作堪舆断验。</div>
+        </div>
+        <div class="card c12 tone-red">
+          <h3>生肖流月运程 <em>以流月地支与生肖关系断吉凶</em></h3>
+          <div class="zo" id="zodiac-fortune"></div>
+        </div>
+        <div class="card c12 tone-violet">
+          <h3>出生取名 <em>依所选日午时八字，取喜用五行之字</em></h3>
+          <div class="bar">
+            <input id="surname" value="李" aria-label="姓氏" style="width:92px">
+            <select id="gender" aria-label="性别">
+              <option value="1">男</option><option value="0">女</option>
+            </select>
+            <button id="genname">生成</button>
+            <span id="balance" class="note" style="margin:0"></span>
+          </div>
+          <div class="name-out" id="names"></div>
+          <div class="note" id="name-detail"></div>
+        </div>
+      </div>
+    </section>
   </section>
 
   <section id="page-fields" class="doc hide">
-    <h2>字段速查</h2>
-    <p>示例按当前所选日期实时计算。所有取法均可在 <code>DayAlmanac</code> 实例上直接调用，返回文化对象或基础类型。</p>
+    <div class="page-heading tone-indigo">
+      <div><span class="eyebrow">API REFERENCE</span><h2>字段速查</h2><p>示例按当前所选日期实时计算。所有取法均可在 <code>DayAlmanac</code> 实例上直接调用，返回文化对象或基础类型。</p></div>
+      <span class="page-badge">96 字段</span>
+    </div>
     <div class="searchbar">
       <input id="q" type="text" placeholder="搜索字段，如：冲煞、纳音、宜忌、九宫、节假日">
       <span class="count" id="qcount"></span>
     </div>
     <div id="fields"></div>
-    <h2>最小示例</h2>
+    <div class="content-panel">
+      <h2>最小示例</h2>
 <pre>import {DayAlmanac} from 'tyme4ts-enhanced';
 
 const a = DayAlmanac.fromYmd(2025, 4, 3);
@@ -390,17 +405,23 @@ a.getClash().toString();           <span class="c">// 冲猴(丙申)煞北</span
 a.getDutyAdvice().getRecommends(); <span class="c">// 筑堤、补垣、修屋、埋穴</span>
 a.getLifeRelation(1983).toString();<span class="c">// 癸命劫财，互禄，六合</span>
 a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
+    </div>
   </section>
 
   <section id="page-regions" class="doc hide">
-    <h2>国家与地区</h2>
-    <p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页已自动载入 <code>data/holidays/</code> 中的新马泰公告数据（2025–2027），即该方式的实例。</p>
+    <div class="page-heading tone-cyan">
+      <div><span class="eyebrow">REGIONAL CALENDARS</span><h2>国家与地区</h2><p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页已自动载入 <code>data/holidays/</code> 中的新马泰公告数据（2025–2027）。</p></div>
+      <span class="page-badge">76 地区</span>
+    </div>
     <div class="regions" id="region-cards"></div>
-    <h3 id="region-title">法定节假日</h3>
-    <div class="note" id="region-desc"></div>
-    <div class="hol-list" id="region-list"></div>
-    <div class="note" id="region-audit"></div>
-    <h3>追加数据</h3>
+    <div class="content-panel">
+      <h3 id="region-title">法定节假日</h3>
+      <div class="note" id="region-desc"></div>
+      <div class="hol-list" id="region-list"></div>
+      <div class="note" id="region-audit"></div>
+    </div>
+    <div class="content-panel">
+      <h3>追加数据</h3>
 <pre>import {HolidayCalendar} from 'tyme4ts-enhanced';
 
 const c = HolidayCalendar.of('US');
@@ -411,11 +432,14 @@ c.importJson(JSON.stringify({
 
 <span class="c">// 反向导出为 iCalendar，可订阅或再解析</span>
 const ics = c.toIcs(2025);</pre>
+    </div>
   </section>
 
   <section id="page-festivals" class="doc hide">
-    <h2>节日总览</h2>
-    <p>按年列出八类节日：法定、传统、民俗、纪念、国际、宗教、节气、外历。点击某日查看备注与出处。</p>
+    <div class="page-heading tone-red">
+      <div><span class="eyebrow">FESTIVAL CATALOG</span><h2>节日总览</h2><p>按年列出八类节日：法定、传统、民俗、纪念、国际、宗教、节气、外历。点击某日查看备注与出处。</p></div>
+      <span class="page-badge">8 类来源</span>
+    </div>
     <div class="searchbar">
       <input id="fy" type="number" value="2025" min="1900" max="2100" style="width:90px">
       <input id="fq" placeholder="搜索节日名或备注">
@@ -428,13 +452,16 @@ const ics = c.toIcs(2025);</pre>
   </section>
 
   <section id="page-calendars" class="doc hide">
-    <h2>历法对照</h2>
-    <p>同一公历日期在八种历法中的表示。回历为算术历，与观月结果可能相差一日；乌姆库拉历按 KACST 月首表逐月取值，是沙特、阿联酋的官方民用历；Diyanet 历按「新月在安卡拉日没时高于地平线」计算，是土耳其的官方口径；波斯历年首按德黑兰春分正午判据推算；印度历的 tithi 以印度标准时间 06:00 计算。</p>
+    <div class="page-heading tone-indigo">
+      <div><span class="eyebrow">CALENDAR COMPARISON</span><h2>历法对照</h2><p>同一公历日期在八种历法中的表示。回历为算术历，与观月结果可能相差一日；乌姆库拉历按 KACST 月首表逐月取值，是沙特、阿联酋的官方民用历；Diyanet 历按「新月在安卡拉日没时高于地平线」计算，是土耳其的官方口径；波斯历年首按德黑兰春分正午判据推算；印度历的 tithi 以印度标准时间 06:00 计算。</p></div>
+      <span class="page-badge">8 套历法</span>
+    </div>
     <div class="searchbar"><input type="date" id="cdate"><span class="count">选择日期查看对照</span></div>
-    <table class="checks" id="cal-table"></table>
-    <div class="note" id="cal-fest"></div>
-    <h3>各历法口径与已知边界</h3>
-    <table class="checks spec">
+    <div class="content-panel">
+      <table class="checks" id="cal-table"></table>
+      <div class="note" id="cal-fest"></div>
+      <h3 style="margin-top:20px">各历法口径与已知边界</h3>
+      <table class="checks spec">
       <tr><th>历法</th><th>判据</th><th>已验证范围</th><th>已知边界</th></tr>
       <tr><td>公历</td><td>格里高利历，四年一闰、百年不闰、四百年再闰</td><td>1582 年起</td><td>—</td></tr>
       <tr><td>农历</td><td>朔望月定月，无中气之月置闰，节气按太阳黄经</td><td>1900–2100</td><td>与紫金山天文台历书在少数历史年份差一日，源于时区口径</td></tr>
@@ -444,40 +471,51 @@ const ics = c.toIcs(2025);</pre>
       <tr><td>波斯历</td><td>春分在德黑兰正午之前则当日为岁首</td><td>1401–1411 年</td><td>11 个诺鲁孜全部吻合；33 年 8 闰的算术近似在 1404 年差一日，本库不用</td></tr>
       <tr><td>希伯来历</td><td>molad 定月首 + 四条 dehiyyot</td><td>全区间</td><td>只实现 9 个法定节日与 3 个纪念日</td></tr>
       <tr><td>印度历</td><td>恒星黄道定月，tithi 为日月黄经差 12° 的 1/30</td><td>全区间</td><td>部分节日按夜分或午分判定，与日出判定差一分</td></tr>
-    </table>
+      </table>
+    </div>
   </section>
 
   <section id="page-check" class="doc hide">
-    <h2>实时校验</h2>
-    <p>下列断言在浏览器内实时计算，与公开发布的黄历、政府公告逐项比对。任一不符即标红。</p>
+    <div class="page-heading tone-jade">
+      <div><span class="eyebrow">LIVE VERIFICATION</span><h2>实时校验</h2><p>下列断言在浏览器内实时计算，与公开发布的黄历、政府公告逐项比对。任一不符即标红。</p></div>
+      <span class="page-badge">实时断言</span>
+    </div>
     <div class="searchbar"><span class="count" id="check-summary"></span></div>
     <div id="checks"></div>
-    <h3>口径说明</h3>
-    <ul>
-      <li>基准日为 2025-04-03（乙巳年三月初六，壬寅日），对照多家公开黄历。</li>
-      <li>社日对照《统天万年历》「立春后五戊为春社，立秋后五戊为秋社」及公开社日表。</li>
-      <li>美国补假对照 OPM 与 FederalPay 公布的 2027 年补假安排。</li>
-      <li>英国银行假日对照 GOV.UK 公布的英格兰及威尔士 2025 年列表。</li>
-    </ul>
+    <div class="content-panel">
+      <h3>口径说明</h3>
+      <ul>
+        <li>基准日为 2025-04-03（乙巳年三月初六，壬寅日），对照多家公开黄历。</li>
+        <li>社日对照《统天万年历》「立春后五戊为春社，立秋后五戊为秋社」及公开社日表。</li>
+        <li>美国补假对照 OPM 与 FederalPay 公布的 2027 年补假安排。</li>
+        <li>英国银行假日对照 GOV.UK 公布的英格兰及威尔士 2025 年列表。</li>
+      </ul>
+    </div>
   </section>
 
   <section id="page-data" class="doc hide">
-    <h2>数据来源与许可</h2>
-    <p>本项目只收录可考、可再分发的内容。凡无公开算法的栏目（原版吉数、三级时辰吉凶、出版社运程文案），一律标注为「推演」，不与原版数值混同。</p>
+    <div class="page-heading tone-gold">
+      <div><span class="eyebrow">DATA &amp; LICENSE</span><h2>数据来源与许可</h2><p>本项目只收录可考、可再分发的内容。凡无公开算法的栏目（原版吉数、三级时辰吉凶、出版社运程文案），一律标注为「推演」，不与原版数值混同。</p></div>
+      <span class="page-badge">可复核</span>
+    </div>
 
     <div class="stats" id="data-stats"></div>
 
-    <h3>数据管线</h3>
-    <p>节日与节假日数据不是手抄的，而是「上游源码 → 生成 → 逐条比对」三步：</p>
-    <table class="t">
-      <tr><th>步骤</th><th>命令</th><th>作用</th></tr>
-      <tr><td>生成</td><td><code>npm run gen:festivals</code></td><td>解析 6tail/lunar-typescript 的 SolarUtil / LunarUtil / FotoUtil / TaoUtil，产出四张 TS 数据表与 JSON 快照</td></tr>
-      <tr><td>比对</td><td><code>npm run verify:festivals</code></td><td>把生成表与快照逐键逐值比对，缺失或差异即失败</td></tr>
-      <tr><td>审计</td><td><code>npm run audit:holidays</code></td><td>公告日与规则推算逐日比对，算出覆盖率并列出「规则多算」项</td></tr>
-      <tr><td>向量</td><td><code>npm run gen:conformance</code></td><td>生成 252 日 × 26 字段的跨语言验收向量，并由测试反向校验</td></tr>
-    </table>
-    <p class="note" id="audit-note"></p>
-    <table class="t">
+    <div class="content-panel">
+      <h3>数据管线</h3>
+      <p>节日与节假日数据不是手抄的，而是「上游源码 → 生成 → 逐条比对」三步：</p>
+      <table class="t">
+        <tr><th>步骤</th><th>命令</th><th>作用</th></tr>
+        <tr><td>生成</td><td><code>npm run gen:festivals</code></td><td>解析 6tail/lunar-typescript 的 SolarUtil / LunarUtil / FotoUtil / TaoUtil，产出四张 TS 数据表与 JSON 快照</td></tr>
+        <tr><td>比对</td><td><code>npm run verify:festivals</code></td><td>把生成表与快照逐键逐值比对，缺失或差异即失败</td></tr>
+        <tr><td>审计</td><td><code>npm run audit:holidays</code></td><td>公告日与规则推算逐日比对，算出覆盖率并列出「规则多算」项</td></tr>
+        <tr><td>向量</td><td><code>npm run gen:conformance</code></td><td>生成 252 日 × 26 字段的跨语言验收向量，并由测试反向校验</td></tr>
+      </table>
+      <p class="note" id="audit-note"></p>
+    </div>
+    <div class="content-panel">
+      <h3>内容来源</h3>
+      <table class="t">
       <tr><th>内容</th><th>来源</th><th>许可 / 性质</th></tr>
       <tr><td>公历、农历、干支、节气、藏历、回历</td><td>6tail/tyme4ts；节气引自许剑伟《寿星天文历》</td><td>MIT</td></tr>
       <tr><td>宜忌、吉神宜趋、凶神宜忌</td><td>《协纪辨方书》体系，tyme 编码表</td><td>MIT</td></tr>
@@ -488,13 +526,16 @@ const ics = c.toIcs(2025);</pre>
       <tr><td>建除宜忌、月将、天赦、四离四绝、春社秋社</td><td>《协纪辨方书》《统天万年历》及通行通书</td><td>传统规则</td></tr>
       <tr><td>法定节假日</td><td>国务院办公厅逐年通知；各国政府公告与祝日法</td><td>公开信息</td></tr>
       <tr><td>风水常识、生肖运程判词、字库字义</td><td>本项目整理</td><td>MIT</td></tr>
-    </table>
-    <h3>不收录</h3>
-    <ul>
-      <li>潮汐：需测站调和常数，与历法无关，且模型数据另有许可。</li>
-      <li>原版「今日吉数」「吉祥生肖排名」：无公开算法，本库仅给出可复算的推演值。</li>
-      <li>回历与观月历的逐日差异：本库为算术历，可能相差一日。</li>
-    </ul>
+      </table>
+    </div>
+    <div class="content-panel">
+      <h3>不收录</h3>
+      <ul>
+        <li>潮汐：需测站调和常数，与历法无关，且模型数据另有许可。</li>
+        <li>原版「今日吉数」「吉祥生肖排名」：无公开算法，本库仅给出可复算的推演值。</li>
+        <li>回历与观月历的逐日差异：本库为算术历，可能相差一日。</li>
+      </ul>
+    </div>
   </section>
 </main>
 
@@ -702,7 +743,11 @@ function renderCards(a) {
     ['九星', `${sc.getNineStar().getName()}${sc.getNineStar().getColor()}`],
   ].map(([k, v]) => `<div class="row"><b>${k}</b><span>${esc(v)}</span></div>`).join('');
 
-  $('gods').innerHTML = sc.getGods().map((g) => `<span class="chip" style="color:${g.getLuck().getName() === '吉' ? 'var(--green)' : 'var(--red)'}">${g.getName()}</span>`).join('');
+  const gods = sc.getGods();
+  $('gods').innerHTML = `<div class="god-list">` + gods.map((g) => {
+    const good = g.getLuck().getName() === '吉';
+    return `<div class="god-row ${good ? 'good' : 'bad'}"><b>${esc(g.getName())}</b><span>${good ? '吉神' : '凶神'}</span></div>`;
+  }).join('') + `</div><div class="note">今日神煞共 ${gods.length} 位，其中吉 ${gods.filter((g) => g.getLuck().getName() === '吉').length} 位。</div>`;
 
   $('hours').innerHTML = a.getHourFortunes().map((h) => {
     const cls = h.getName() === '吉' ? 'j' : h.getName() === '凶' ? 'x' : '';
