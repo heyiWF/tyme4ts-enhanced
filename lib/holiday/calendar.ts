@@ -11,6 +11,11 @@ import {
     bavariaExtra, californiaExtra, cataloniaExtra, newSouthWalesExtra,
     newYorkExtra, ontarioExtra, scotlandExtra, texasExtra,
 } from './regions/subregions';
+import {
+    federalTerritoryExtra, johorExtra, kedahExtra, kelantanExtra, melakaExtra,
+    negeriSembilanExtra, pahangExtra, penangExtra, perakExtra, perlisExtra,
+    sabahExtra, sarawakExtra, selangorExtra, terengganuExtra,
+} from './regions/malaysia';
 
 /**
  * 节假日
@@ -208,6 +213,34 @@ export class HolidayCalendar {
                 return new HolidayCalendar(r, HolidayCalendar.canadaRules().concat(ontarioExtra()), '加拿大联邦假日 + 安大略省家庭日与公民假日。', 3);
             case 'ES-CT':
                 return new HolidayCalendar(r, HolidayCalendar.spainRules().concat(cataloniaExtra()), '西班牙全国假日 + 加泰罗尼亚圣约翰节、加泰罗尼亚日、圣斯蒂芬节。');
+            case 'MY-JHR':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(johorExtra()), '柔佛州：联邦假日 + 州苏丹诞辰、已故苏丹忌日；州回历节日与大宝森节按年公告。', 2);
+            case 'MY-KDH':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(kedahExtra()), '吉打州：联邦假日 + 苏丹诞辰；周末为周五周六，不作周日顺延。');
+            case 'MY-KTN':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(kelantanExtra()), '吉兰丹州：联邦假日 + 苏丹诞辰两日；周末为周五周六，不作周日顺延。');
+            case 'MY-MLK':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(melakaExtra()), '马六甲州：联邦假日 + 独立宣言日、世界遗产城日、州元首诞辰。', 2);
+            case 'MY-NSN':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(negeriSembilanExtra()), '森美兰州：联邦假日 + 严端诞辰。', 2);
+            case 'MY-PHG':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(pahangExtra()), '彭亨州：联邦假日 + 苏丹艾哈迈德沙忌日、苏丹诞辰。', 2);
+            case 'MY-PNG':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(penangExtra()), '槟城州：联邦假日 + 乔治市世界遗产日、州元首诞辰。', 2);
+            case 'MY-PRK':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(perakExtra()), '霹雳州：联邦假日 + 苏丹诞辰。', 2);
+            case 'MY-PLS':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(perlisExtra()), '玻璃市州：联邦假日 + 拉惹诞辰。', 2);
+            case 'MY-SBH':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(sabahExtra()), '沙巴州：联邦假日 + 州元首诞辰、耶稣受难日、丰收节、平安夜。', 2);
+            case 'MY-SWK':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(sarawakExtra()), '砂拉越州：联邦假日 + 耶稣受难日、达雅节、砂拉越日、州元首诞辰。', 2);
+            case 'MY-SGR':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(selangorExtra()), '雪兰莪州：联邦假日 + 苏丹诞辰。', 2);
+            case 'MY-TRG':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(terengganuExtra()), '登嘉楼州：联邦假日 + 苏丹登基纪念日、苏丹诞辰；周末为周五周六，不作周日顺延。');
+            case 'MY-KUL':
+                return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(federalTerritoryExtra()), '联邦直辖区（吉隆坡、布城、纳闽）：联邦假日 + 联邦直辖区日。', 2);
             default:
                 throw new Error(`illegal region: ${region}`);
         }
@@ -220,7 +253,9 @@ export class HolidayCalendar {
             'PL', 'SE', 'NO', 'DK', 'FI', 'IS', 'IE', 'PT', 'CH', 'AT',
             'BE', 'CZ', 'HU', 'GR', 'CY', 'RO', 'UA', 'TR',
             'ID', 'EG', 'SA', 'AE', 'NG', 'KE',
-            'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT'];
+            'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT',
+            'MY-JHR', 'MY-KDH', 'MY-KTN', 'MY-MLK', 'MY-NSN', 'MY-PHG', 'MY-PNG',
+            'MY-PRK', 'MY-PLS', 'MY-SBH', 'MY-SWK', 'MY-SGR', 'MY-TRG', 'MY-KUL'];
     }
 
     /**

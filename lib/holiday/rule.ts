@@ -13,7 +13,8 @@ export enum HolidayType {
     HEBREW = 6,
     HIJRI = 7,
     ORTHODOX_EASTER = 8,
-    WEEK_AFTER = 9
+    WEEK_AFTER = 9,
+    TABLE = 10
 }
 
 /**
@@ -41,6 +42,10 @@ export class HolidayRule extends AbstractCulture {
     protected sundayShift: number;
     protected startYear: number;
     protected endYear: number;
+    /**
+     * 逐年表，键为公历年，值为「月-日」
+     */
+    protected table: { [year: number]: string };
 
     protected constructor(type: HolidayType, name: string) {
         super();
@@ -57,6 +62,18 @@ export class HolidayRule extends AbstractCulture {
         this.sundayShift = 0;
         this.startYear = 1;
         this.endYear = 9999;
+        this.table = {};
+    }
+
+    /**
+     * 逐年表规则，用于无法用周期公式表达、只能逐年公布的节日
+     *
+     * @param dates 键为公历年，值为「月-日」，如 {2026: '7-21'}
+     */
+    static table(name: string, dates: { [year: number]: string }): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.TABLE, name);
+        o.table = dates;
+        return o;
     }
 
     /**
@@ -216,6 +233,14 @@ export class HolidayRule extends AbstractCulture {
                 return HolidayRule.getEasterDay(year).next(this.offset);
             case HolidayType.WEEK:
                 return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+            case HolidayType.TABLE: {
+                const md: string = this.table[year];
+                if (!md) {
+                    return null;
+                }
+                const parts: string[] = md.split('-');
+                return SolarDay.fromYmd(year, parseInt(parts[0], 10), parseInt(parts[1], 10));
+            }
             case HolidayType.WEEK_AFTER: {
                 const start: SolarDay = SolarDay.fromYmd(year, this.month, this.day);
                 return start.next(start.getWeek().stepsTo(this.week));

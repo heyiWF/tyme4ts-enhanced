@@ -145,6 +145,8 @@ table.fields tr:hover td{background:#fbfaf1}
 .region.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
 .region b{font-size:14.5px;font-family:var(--serif)}
 .region span{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.4}
+.region b .help{display:inline-flex;margin:0 0 0 5px;vertical-align:1px}
+#region-title .help{margin-left:7px}
 
 .hol-list{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;font-size:13.5px;margin-top:8px}
 @media(max-width:760px){.hol-list{grid-template-columns:1fr}}
@@ -378,7 +380,7 @@ a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
 
   <section id="page-regions" class="doc hide">
     <h2>国家与地区</h2>
-    <p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。</p>
+    <p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页已自动载入 <code>data/holidays/</code> 中的新马泰公告数据（2025–2027），即该方式的实例。</p>
     <div class="regions" id="region-cards"></div>
     <h3 id="region-title">法定节假日</h3>
     <div class="note" id="region-desc"></div>
@@ -459,6 +461,7 @@ const ics = c.toIcs(2025);</pre>
 <footer><div class="wrap">Tyme Enhanced · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
 
 <script type="module">
+import {DATASETS} from './holidays-data.js';
 import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -478,7 +481,12 @@ const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'T
   'AE': '阿联酋', 'NG': '尼日利亚', 'KE': '肯尼亚',
   'US-CA': '美国·加州', 'US-NY': '美国·纽约州', 'US-TX': '美国·得州',
   'DE-BY': '德国·巴伐利亚', 'GB-SCT': '英国·苏格兰', 'AU-NSW': '澳大利亚·新南威尔士',
-  'CA-ON': '加拿大·安大略', 'ES-CT': '西班牙·加泰罗尼亚'};
+  'CA-ON': '加拿大·安大略', 'ES-CT': '西班牙·加泰罗尼亚',
+  'MY-JHR': '马来西亚·柔佛', 'MY-KDH': '马来西亚·吉打', 'MY-KTN': '马来西亚·吉兰丹',
+  'MY-MLK': '马来西亚·马六甲', 'MY-NSN': '马来西亚·森美兰', 'MY-PHG': '马来西亚·彭亨',
+  'MY-PNG': '马来西亚·槟城', 'MY-PRK': '马来西亚·霹雳', 'MY-PLS': '马来西亚·玻璃市',
+  'MY-SBH': '马来西亚·沙巴', 'MY-SWK': '马来西亚·砂拉越', 'MY-SGR': '马来西亚·雪兰莪',
+  'MY-TRG': '马来西亚·登嘉楼', 'MY-KUL': '马来西亚·联邦直辖区'};
 
 let current = new Date();
 let region = 'CN';
@@ -507,6 +515,18 @@ function shift(n) {
 
 function almanac() {
   return DayAlmanac.fromYmd(current.getFullYear(), current.getMonth() + 1, current.getDate());
+}
+
+/**
+ * 导入逐年公告数据，演示 importJson 的接入方式
+ * 规则算不出的节日（回历、印历、临时公休）只能这样逐年补充
+ */
+function loadDatasets() {
+  for (const d of DATASETS) {
+    try {
+      HolidayCalendar.of(d.region).importJson(JSON.stringify(d));
+    } catch (e) { /* 单个文件损坏不影响其他 */ }
+  }
 }
 
 function initRegion() {
@@ -913,6 +933,82 @@ const HELP = {
   '回历': ['回历', '算术历日期，观月国家可能差一日。', '伊斯兰算术历'],
 };
 
+/* 各地区法定依据，仅为「依据」一栏；覆盖范围取 HolidayCalendar.getNote() */
+const REGION_BASIS = {
+  'CN': '国务院办公厅逐年发布的节假日安排通知',
+  'HK': '《公众假期条例》（第 149 章）',
+  'MO': '澳门《劳动关系法》与公众假期批示',
+  'TW': '《纪念日及节日实施办法》，内政部公告',
+  'JP': '《国民の祝日に関する法律》，含振替休日与国民の休日',
+  'KR': '《勤劳者祝日相关法律》，含替代公休日',
+  'VN': '《劳动法典》第 112 条',
+  'SG': '《假日法》（Holidays Act），人力部逐年公布',
+  'MY': '《1951 年假期法令》，州假由各州宪报公布',
+  'TH': '泰国内阁年度公休日决议',
+  'US': '5 U.S.C. 6103 联邦法定假日',
+  'GB': '《银行与金融交易法 1971》',
+  'CA': '《联邦法定假日法》，各省另有雇佣标准法',
+  'AU': '各州《公共假日法》，全国基准见 Fair Work Act',
+  'NZ': '《假日法 2003》（Holidays Act 2003）',
+  'DE': '各州《节假日法》，全国统一 9 天',
+  'FR': '《劳动法典》第 L3133-1 条',
+  'IT': '总统令与全国集体劳动协议',
+  'ES': '《劳动者 statute》第 37 条与自治区日历',
+  'NL': '《一般假期法》与皇家 decree',
+  'BR': '联邦法 662/1949、10.607/2002 等',
+  'MX': '《联邦劳动法》第 74 条',
+  'RU': '《俄罗斯联邦劳动法典》第 112 条，含调休',
+  'ZA': '《公共假日法 36 of 1994》',
+  'IN': '中央与各邦分别公告，无统一联邦假日法',
+  'PH': '《行政法典》与共和国法案（如 RA 9849）',
+  'PL': '《法定假日法》（Ustawa o dniach wolnych od pracy）',
+  'SE': '《公共假日法》（Lag om allmänna helgdagar）',
+  'NO': '《节假日法》（Lov om helligdager）',
+  'DK': '《商店营业法》所附节假日表',
+  'FI': '《教会法》与政府令',
+  'IS': '《公共假日法》',
+  'IE': '《组织工作时间法 1997》',
+  'PT': '《劳动法典》第 234 条',
+  'CH': '联邦宪法与各州法，仅列联邦假日',
+  'AT': '《休息时间法》（Arbeitsruhegesetz）',
+  'BE': '《劳动法》与皇家法令',
+  'CZ': '法 245/2000 Sb.',
+  'HU': '《劳动法典》（2012 年第 I 法）',
+  'GR': '部颁法令，复活节按东正教历',
+  'CY': '《公共假日法》',
+  'RO': '《劳动法典》第 139 条',
+  'UA': '《劳动法典》第 73 条',
+  'TR': '法 2429 与内阁决议',
+  'ID': '三部委联合决定书（SKB）',
+  'EG': '内阁决议',
+  'SA': '内阁决议，周末为周五周六',
+  'AE': '内阁决议 27/2020',
+  'NG': '《公共假日法》',
+  'KE': '《公共假日法》Cap 110',
+  'US-CA': '联邦假日 + 加州《教育法典》与州法',
+  'US-NY': '联邦假日 + 纽约州劳动法',
+  'US-TX': '联邦假日 + 得州政府法典',
+  'DE-BY': '全德假日 + 巴伐利亚州《节假日法》',
+  'GB-SCT': '苏格兰银行假日，依《银行与金融交易法 1971》',
+  'AU-NSW': '新南威尔士州《公共假日法 2010》',
+  'CA-ON': '安大略省《雇佣标准法 2000》',
+  'ES-CT': '西班牙全国 + 加泰罗尼亚自治区日历',
+  'MY-JHR': '《1951 年假期法令》 + 柔佛州宪报',
+  'MY-KDH': '《1951 年假期法令》 + 吉打州宪报（周末周五周六）',
+  'MY-KTN': '《1951 年假期法令》 + 吉兰丹州宪报（周末周五周六）',
+  'MY-MLK': '《1951 年假期法令》 + 马六甲州宪报',
+  'MY-NSN': '《1951 年假期法令》 + 森美兰州宪报',
+  'MY-PHG': '《1951 年假期法令》 + 彭亨州宪报',
+  'MY-PNG': '《1951 年假期法令》 + 槟城州宪报',
+  'MY-PRK': '《1951 年假期法令》 + 霹雳州宪报',
+  'MY-PLS': '《1951 年假期法令》 + 玻璃市州宪报',
+  'MY-SBH': '《1951 年假期法令》 + 沙巴州政府公休表',
+  'MY-SWK': '《1951 年假期法令》 + 砂拉越州宪报',
+  'MY-SGR': '《1951 年假期法令》 + 雪兰莪州宪报',
+  'MY-TRG': '《1951 年假期法令》 + 登嘉楼州宪报（周末周五周六）',
+  'MY-KUL': '《1951 年假期法令》 + 联邦直辖区公告',
+};
+
 const HELP_GROUP = {
   '农历': ['农历', '以朔望月定月、太阳黄经定节气，属阴阳合历。', 'GB/T 33661-2017'],
   '干支': ['干支', '十天干配十二地支，六十甲子循环纪年月日时。', '干支纪法'],
@@ -929,10 +1025,15 @@ function helpOf(key, group) {
   return [key, '按对应历法或规则推算。', '详见 docs/PORTING.md'];
 }
 
+function helpOfRegion(code) {
+  const c = HolidayCalendar.of(code);
+  return [CN[code] || code, c.getNote(), REGION_BASIS[code] || '该国或地区政府年度公告'];
+}
+
 function showTip(el, key, group) {
   const tip = $('tip');
-  const h = helpOf(key, group);
-  tip.innerHTML = `<b>${esc(h[0])}</b><dl><dt>用途</dt><dd>${esc(h[1])}</dd><dt>依据</dt><dd>${esc(h[2])}</dd></dl>`;
+  const h = el.dataset && el.dataset.r ? helpOfRegion(el.dataset.r) : helpOf(key, group);
+  tip.innerHTML = `<b>${esc(h[0])}</b><dl><dt>${el.dataset && el.dataset.r ? '覆盖范围' : '用途'}</dt><dd>${esc(h[1])}</dd><dt>依据</dt><dd>${esc(h[2])}</dd></dl>`;
   const r = el.getBoundingClientRect();
   tip.style.display = 'block';
   const w = tip.offsetWidth;
@@ -1004,10 +1105,11 @@ function renderRegionCards() {
   const list = HolidayCalendar.getRegions();
   $('region-cards').innerHTML = list.map((r) => {
     const c = HolidayCalendar.of(r);
-    return `<div class="region ${r === region ? 'on' : ''}" data-r="${r}"><b>${CN[r] || r}</b><span>${c.getDays(2026).length} 日 · ${esc(c.getNote().slice(0, 24))}…</span></div>`;
+    return `<div class="region ${r === region ? 'on' : ''}" data-r="${r}"><b>${CN[r] || r}<span class="help" data-r="${r}">?</span></b><span>${c.getDays(2026).length} 日 · ${esc(c.getNote().slice(0, 24))}…</span></div>`;
   }).join('');
   $('region-cards').querySelectorAll('.region').forEach((el) => {
-    el.onclick = () => {
+    el.onclick = (ev) => {
+      if (ev && ev.target && ev.target.classList && ev.target.classList.contains('help')) return;
       region = el.dataset.r;
       try { localStorage.setItem('tyme.region', region); } catch (e) { /* ignore */ }
       $('region').value = region;
@@ -1020,7 +1122,7 @@ function renderRegionCards() {
 
 function renderRegionDetail() {
   const c = HolidayCalendar.of(region);
-  $('region-title').textContent = (CN[region] || region) + ' · 法定节假日';
+  $('region-title').innerHTML = (CN[region] || region) + ' · 法定节假日<span class="help" data-r="' + region + '">?</span>';
   $('region-desc').textContent = c.getNote();
   const list = c.getDays(current.getFullYear());
   $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}</span></div>`).join('')
@@ -1086,7 +1188,15 @@ const CHECKS = [
     ['韩国 2025 佛诞与儿童节', '5/5 佛诞节、儿童节', () => dayNames(HolidayCalendar.of('KR').getDays(2025).filter((h) => h.getDay().getMonth() === 5 && h.getDay().getDay() === 5))],
     ['荷兰 2025 国王节', '4/26 国王节', () => dayNames(HolidayCalendar.of('NL').getDays(2025).filter((h) => h.getName() === '国王节'))],
     ['南非 2025 自由日补假', '4/28 自由日（补假）', () => dayNames(HolidayCalendar.of('ZA').getDays(2025).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('自由日') === 0))],
-    ['地区总数', '58', () => String(HolidayCalendar.getRegions().length)],
+    ['地区总数', '72', () => String(HolidayCalendar.getRegions().length)],
+    ['马来西亚州级代码', '14', () => String(HolidayCalendar.getRegions().filter((x) => x.indexOf('MY-') === 0).length)],
+    ['柔佛 2025 苏丹诞辰补假', '3/24 苏丹诞辰（补假）', () => dayNames(HolidayCalendar.of('MY-JHR').getDays(2025).filter((h) => h.getName() === '苏丹诞辰（补假）'))],
+    ['吉打 2026 苏丹诞辰', '6/21 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-KDH').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
+    ['沙巴 2026 州元首诞辰', '3/30 州元首诞辰', () => dayNames(HolidayCalendar.of('MY-SBH').getDays(2026).filter((h) => h.getName() === '州元首诞辰'))],
+    ['砂拉越 2026 州元首诞辰', '10/10 州元首诞辰', () => dayNames(HolidayCalendar.of('MY-SWK').getDays(2026).filter((h) => h.getName() === '州元首诞辰'))],
+    ['霹雳 2026 苏丹诞辰', '11/6 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-PRK').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
+    ['槟城 2026 州元首诞辰', '7/11 州元首诞辰', () => dayNames(HolidayCalendar.of('MY-PNG').getDays(2026).filter((h) => h.getName() === '州元首诞辰'))],
+    ['彭亨 2026 苏丹诞辰', '7/31 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-PHG').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
   ]],
   ['节日与历法', [
     ['2025-04-03 节日', '寒食节、眼光娘娘圣诞、雷斋日', () => A(2025, 4, 3).getFestivals().getNames().join('、')],
@@ -1292,6 +1402,7 @@ document.querySelectorAll('nav.tabs button').forEach((b) => {
 
 window.addEventListener('hashchange', () => activate(hashPage(), true));
 
+loadDatasets();
 initRegion();
 activate(hashPage(), false);
 setToday();

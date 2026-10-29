@@ -1,6 +1,6 @@
 {
   "name": "tyme4ts-enhanced",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "description": "面向通胜（老黄历）场景的 TypeScript 历法引擎：农历、干支、节气、神煞、宜忌、择日、神诞、解梦、九宫飞星、多地区节假日与 ICS 订阅转换，零依赖、易移植。",
   "main": "./dist/lib/index.cjs",
   "module": "./dist/lib/index.mjs",
@@ -17,7 +17,7 @@
     "build": "unbuild",
     "test": "mocha -r ts-node/register --config=.mocharc.json",
     "release": "npm run test && npm publish",
-    "docs": "npm run build && node -e \"require('fs').copyFileSync('dist/lib/index.mjs','docs/tyme.mjs')\"",
+    "docs": "npm run build && node -e \"require('fs').copyFileSync('dist/lib/index.mjs','docs/tyme.mjs')\" && node scripts/build-docs-data.mjs",
     "js": "unbuild && node build-js.js",
     "gen:festivals": "python scripts/gen-festival-data.py",
     "verify:festivals": "node scripts/verify-festivals.mjs"

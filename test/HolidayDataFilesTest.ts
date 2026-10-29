@@ -12,7 +12,7 @@ class HolidayDataFilesTest {
     test0(): void {
         // 逐年公告文件均可解析并导入
         const files: string[] = readdirSync(HolidayDataFilesTest.DIR).filter((f: string) => f.slice(-5) === '.json').sort();
-        equal(files.length, 8);
+        equal(files.length, 9);
         for (let i: number = 0; i < files.length; i++) {
             const text: string = readFileSync(join(HolidayDataFilesTest.DIR, files[i]), 'utf8');
             const o: { region: string, year: number, days: { date: string, name: string }[] } = JSON.parse(text);

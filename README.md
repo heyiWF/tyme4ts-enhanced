@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-557%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-566%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -23,7 +23,7 @@
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
 | 节日 | 八类来源统一聚合：法定、传统、民俗、公历纪念日与国际日、佛历、道历、节气、外历；共 **480+ 条名称**，同神异写自动归并 | 6tail/lunar-typescript、维基文库、政府公告 |
 | 民俗数据 | 民俗节日、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
-| 节假日 | **58 个地区代码**（含 8 个子地区），覆盖欧亚美非 40 国；支持公历、农历、伊斯兰历、希伯来历、东正教复活节五类规则与三种补假模式 | 政府公告、祝日法与银行假日表 |
+| 节假日 | **72 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区），覆盖欧亚美非 40 国；支持公历、农历、伊斯兰历、希伯来历、东正教复活节五类规则、11 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
 | 互操作 | ICS 订阅解析（年度循环事件转 tyme `Event`）与节假日 ICS 导出 | iCalendar RFC 5545 |
 
 ---
@@ -138,21 +138,24 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
-支持 58 个地区代码：
+支持 72 个地区代码：
 
 - 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID`
 - 欧洲：`GB` `DE` `FR` `IT` `ES` `NL` `RU` `PL` `SE` `NO` `DK` `FI` `IS` `IE` `PT` `CH` `AT` `BE` `CZ` `HU` `GR` `CY` `RO` `UA` `TR`
 - 美洲：`US` `CA` `BR` `MX`
 - 大洋洲与非洲：`AU` `NZ` `ZA` `EG` `NG` `KE` `SA` `AE`
 - 子地区：`US-CA` `US-NY` `US-TX` `DE-BY` `GB-SCT` `AU-NSW` `CA-ON` `ES-CT`
+- 马来西亚州级：`MY-JHR` `MY-KDH` `MY-KTN` `MY-MLK` `MY-NSN` `MY-PHG` `MY-PNG` `MY-PRK` `MY-PLS` `MY-SBH` `MY-SWK` `MY-SGR` `MY-TRG` `MY-KUL`
+
+马来西亚州级日历在联邦假日之上叠加州苏丹或州元首诞辰、州庆、丰收节与达雅节等。这些日期分三类实现：固定月日（如柔佛 3 月 23 日）、某月第几个星期几（如槟城州元首诞辰为七月第二个周六、霹雳苏丹诞辰为十一月第一个周五、彭亨为七月最后一个周五）、以及「某日后的第一个周日」（吉打苏丹诞辰为 6 月 18 日后的第一个周日）。已故苏丹忌日等无固定公式者用 `HolidayRule.table()` 逐年列表，表外年份返回 `null`，不臆造。吉打、吉兰丹、登嘉楼的周末为周五周六，因此不作周日顺延。
 
 伊斯兰节日按算术历推算，观月国家可能相差一日，可用 `importJson` 覆盖。
 
-规则类型包括公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历与伊斯兰历。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
+规则类型共 11 种：公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历、伊斯兰历、逐年表（`table`）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-新加坡、马来西亚、泰国只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)：
+新加坡、马来西亚、泰国只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)（新加坡与马来西亚 2025–2027、泰国 2025–2027，共 9 个文件）：
 
 ```ts
 import {readFileSync} from 'node:fs';
@@ -290,7 +293,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ```bash
 npm i
-npm test          # 557 项测试
+npm test          # 566 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs

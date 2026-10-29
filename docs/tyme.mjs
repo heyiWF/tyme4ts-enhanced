@@ -8514,6 +8514,7 @@ var HolidayType = /* @__PURE__ */ ((HolidayType2) => {
   HolidayType2[HolidayType2["HIJRI"] = 7] = "HIJRI";
   HolidayType2[HolidayType2["ORTHODOX_EASTER"] = 8] = "ORTHODOX_EASTER";
   HolidayType2[HolidayType2["WEEK_AFTER"] = 9] = "WEEK_AFTER";
+  HolidayType2[HolidayType2["TABLE"] = 10] = "TABLE";
   return HolidayType2;
 })(HolidayType || {});
 class HolidayRule extends AbstractCulture {
@@ -8534,6 +8535,10 @@ class HolidayRule extends AbstractCulture {
   sundayShift;
   startYear;
   endYear;
+  /**
+   * 逐年表，键为公历年，值为「月-日」
+   */
+  table;
   constructor(type, name) {
     super();
     this.type = type;
@@ -8549,6 +8554,17 @@ class HolidayRule extends AbstractCulture {
     this.sundayShift = 0;
     this.startYear = 1;
     this.endYear = 9999;
+    this.table = {};
+  }
+  /**
+   * 逐年表规则，用于无法用周期公式表达、只能逐年公布的节日
+   *
+   * @param dates 键为公历年，值为「月-日」，如 {2026: '7-21'}
+   */
+  static table(name, dates) {
+    const o = new HolidayRule(10 /* TABLE */, name);
+    o.table = dates;
+    return o;
   }
   /**
    * @param sundayShift 逢周日平移天数，如荷兰国王节为 -1
@@ -8693,6 +8709,14 @@ class HolidayRule extends AbstractCulture {
         return HolidayRule.getEasterDay(year).next(this.offset);
       case 2 /* WEEK */:
         return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+      case 10 /* TABLE */: {
+        const md = this.table[year];
+        if (!md) {
+          return null;
+        }
+        const parts = md.split("-");
+        return SolarDay.fromYmd(year, parseInt(parts[0], 10), parseInt(parts[1], 10));
+      }
       case 9 /* WEEK_AFTER */: {
         const start = SolarDay.fromYmd(year, this.month, this.day);
         return start.next(start.getWeek().stepsTo(this.week));
@@ -9223,6 +9247,99 @@ function cataloniaExtra() {
   ];
 }
 
+function johorExtra() {
+  return [
+    HolidayRule.solar(3, 23, "\u82CF\u4E39\u8BDE\u8FB0"),
+    // 已故苏丹伊斯干达忌日，按回历七月廿七日，此处用逐年公布日期
+    HolidayRule.table("\u5DF2\u6545\u82CF\u4E39\u4F0A\u65AF\u5E72\u8FBE\u5FCC\u65E5", { 2025: "7-31", 2026: "7-21" })
+  ];
+}
+function kedahExtra() {
+  return [
+    // 苏丹诞辰为 6 月 18 日，逢非周日则顺延至其后第一个周日
+    HolidayRule.weekAfter(6, 18, 0, "\u82CF\u4E39\u8BDE\u8FB0")
+  ];
+}
+function kelantanExtra() {
+  return [
+    HolidayRule.solar(9, 29, "\u82CF\u4E39\u8BDE\u8FB0"),
+    HolidayRule.solar(9, 30, "\u82CF\u4E39\u8BDE\u8FB0\u6B21\u65E5")
+  ];
+}
+function melakaExtra() {
+  return [
+    HolidayRule.solar(2, 20, "\u72EC\u7ACB\u5BA3\u8A00\u65E5"),
+    // 马六甲于 2008 年 4 月 15 日列入世界遗产名录
+    HolidayRule.solar(4, 15, "\u4E16\u754C\u9057\u4EA7\u57CE\u65E5"),
+    HolidayRule.solar(8, 24, "\u5DDE\u5143\u9996\u8BDE\u8FB0")
+  ];
+}
+function negeriSembilanExtra() {
+  return [
+    HolidayRule.solar(1, 14, "\u4E25\u7AEF\u8BDE\u8FB0")
+  ];
+}
+function pahangExtra() {
+  return [
+    // 苏丹艾哈迈德沙忌日，固定 5 月 22 日
+    HolidayRule.solar(5, 22, "\u82CF\u4E39\u827E\u54C8\u8FC8\u5FB7\u6C99\u5FCC\u65E5"),
+    // 苏丹诞辰为 7 月最后一个周五
+    HolidayRule.week(7, -1, 5, "\u82CF\u4E39\u8BDE\u8FB0")
+  ];
+}
+function penangExtra() {
+  return [
+    // 乔治市与马六甲于 2008 年 7 月 7 日列入世界遗产名录
+    HolidayRule.solar(7, 7, "\u4E54\u6CBB\u5E02\u4E16\u754C\u9057\u4EA7\u65E5"),
+    HolidayRule.week(7, 2, 6, "\u5DDE\u5143\u9996\u8BDE\u8FB0")
+  ];
+}
+function perakExtra() {
+  return [
+    // 苏丹诞辰为 11 月第一个周五
+    HolidayRule.week(11, 1, 5, "\u82CF\u4E39\u8BDE\u8FB0")
+  ];
+}
+function perlisExtra() {
+  return [
+    HolidayRule.solar(5, 17, "\u62C9\u60F9\u8BDE\u8FB0")
+  ];
+}
+function sabahExtra() {
+  return [
+    HolidayRule.solar(3, 30, "\u5DDE\u5143\u9996\u8BDE\u8FB0"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.solar(5, 30, "\u4E30\u6536\u8282"),
+    HolidayRule.solar(5, 31, "\u4E30\u6536\u8282\u6B21\u65E5"),
+    HolidayRule.solar(12, 24, "\u5E73\u5B89\u591C")
+  ];
+}
+function sarawakExtra() {
+  return [
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.solar(6, 1, "\u8FBE\u96C5\u8282"),
+    HolidayRule.solar(6, 2, "\u8FBE\u96C5\u8282\u6B21\u65E5"),
+    HolidayRule.solar(7, 22, "\u7802\u62C9\u8D8A\u65E5"),
+    HolidayRule.week(10, 2, 6, "\u5DDE\u5143\u9996\u8BDE\u8FB0")
+  ];
+}
+function selangorExtra() {
+  return [
+    HolidayRule.solar(12, 11, "\u82CF\u4E39\u8BDE\u8FB0")
+  ];
+}
+function terengganuExtra() {
+  return [
+    HolidayRule.solar(3, 4, "\u82CF\u4E39\u767B\u57FA\u7EAA\u5FF5\u65E5"),
+    HolidayRule.solar(4, 26, "\u82CF\u4E39\u8BDE\u8FB0")
+  ];
+}
+function federalTerritoryExtra() {
+  return [
+    HolidayRule.solar(2, 1, "\u8054\u90A6\u76F4\u8F96\u533A\u65E5")
+  ];
+}
+
 class Holiday extends AbstractCulture {
   day;
   name;
@@ -9398,6 +9515,34 @@ class HolidayCalendar {
         return new HolidayCalendar(r, HolidayCalendar.canadaRules().concat(ontarioExtra()), "\u52A0\u62FF\u5927\u8054\u90A6\u5047\u65E5 + \u5B89\u5927\u7565\u7701\u5BB6\u5EAD\u65E5\u4E0E\u516C\u6C11\u5047\u65E5\u3002", 3);
       case "ES-CT":
         return new HolidayCalendar(r, HolidayCalendar.spainRules().concat(cataloniaExtra()), "\u897F\u73ED\u7259\u5168\u56FD\u5047\u65E5 + \u52A0\u6CF0\u7F57\u5C3C\u4E9A\u5723\u7EA6\u7FF0\u8282\u3001\u52A0\u6CF0\u7F57\u5C3C\u4E9A\u65E5\u3001\u5723\u65AF\u8482\u82AC\u8282\u3002");
+      case "MY-JHR":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(johorExtra()), "\u67D4\u4F5B\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u5DDE\u82CF\u4E39\u8BDE\u8FB0\u3001\u5DF2\u6545\u82CF\u4E39\u5FCC\u65E5\uFF1B\u5DDE\u56DE\u5386\u8282\u65E5\u4E0E\u5927\u5B9D\u68EE\u8282\u6309\u5E74\u516C\u544A\u3002", 2);
+      case "MY-KDH":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(kedahExtra()), "\u5409\u6253\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u82CF\u4E39\u8BDE\u8FB0\uFF1B\u5468\u672B\u4E3A\u5468\u4E94\u5468\u516D\uFF0C\u4E0D\u4F5C\u5468\u65E5\u987A\u5EF6\u3002");
+      case "MY-KTN":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(kelantanExtra()), "\u5409\u5170\u4E39\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u82CF\u4E39\u8BDE\u8FB0\u4E24\u65E5\uFF1B\u5468\u672B\u4E3A\u5468\u4E94\u5468\u516D\uFF0C\u4E0D\u4F5C\u5468\u65E5\u987A\u5EF6\u3002");
+      case "MY-MLK":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(melakaExtra()), "\u9A6C\u516D\u7532\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u72EC\u7ACB\u5BA3\u8A00\u65E5\u3001\u4E16\u754C\u9057\u4EA7\u57CE\u65E5\u3001\u5DDE\u5143\u9996\u8BDE\u8FB0\u3002", 2);
+      case "MY-NSN":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(negeriSembilanExtra()), "\u68EE\u7F8E\u5170\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u4E25\u7AEF\u8BDE\u8FB0\u3002", 2);
+      case "MY-PHG":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(pahangExtra()), "\u5F6D\u4EA8\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u82CF\u4E39\u827E\u54C8\u8FC8\u5FB7\u6C99\u5FCC\u65E5\u3001\u82CF\u4E39\u8BDE\u8FB0\u3002", 2);
+      case "MY-PNG":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(penangExtra()), "\u69DF\u57CE\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u4E54\u6CBB\u5E02\u4E16\u754C\u9057\u4EA7\u65E5\u3001\u5DDE\u5143\u9996\u8BDE\u8FB0\u3002", 2);
+      case "MY-PRK":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(perakExtra()), "\u9739\u96F3\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u82CF\u4E39\u8BDE\u8FB0\u3002", 2);
+      case "MY-PLS":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(perlisExtra()), "\u73BB\u7483\u5E02\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u62C9\u60F9\u8BDE\u8FB0\u3002", 2);
+      case "MY-SBH":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(sabahExtra()), "\u6C99\u5DF4\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u5DDE\u5143\u9996\u8BDE\u8FB0\u3001\u8036\u7A23\u53D7\u96BE\u65E5\u3001\u4E30\u6536\u8282\u3001\u5E73\u5B89\u591C\u3002", 2);
+      case "MY-SWK":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(sarawakExtra()), "\u7802\u62C9\u8D8A\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u8036\u7A23\u53D7\u96BE\u65E5\u3001\u8FBE\u96C5\u8282\u3001\u7802\u62C9\u8D8A\u65E5\u3001\u5DDE\u5143\u9996\u8BDE\u8FB0\u3002", 2);
+      case "MY-SGR":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(selangorExtra()), "\u96EA\u5170\u83AA\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u82CF\u4E39\u8BDE\u8FB0\u3002", 2);
+      case "MY-TRG":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(terengganuExtra()), "\u767B\u5609\u697C\u5DDE\uFF1A\u8054\u90A6\u5047\u65E5 + \u82CF\u4E39\u767B\u57FA\u7EAA\u5FF5\u65E5\u3001\u82CF\u4E39\u8BDE\u8FB0\uFF1B\u5468\u672B\u4E3A\u5468\u4E94\u5468\u516D\uFF0C\u4E0D\u4F5C\u5468\u65E5\u987A\u5EF6\u3002");
+      case "MY-KUL":
+        return new HolidayCalendar(r, HolidayCalendar.malaysiaRules().concat(federalTerritoryExtra()), "\u8054\u90A6\u76F4\u8F96\u533A\uFF08\u5409\u9686\u5761\u3001\u5E03\u57CE\u3001\u7EB3\u95FD\uFF09\uFF1A\u8054\u90A6\u5047\u65E5 + \u8054\u90A6\u76F4\u8F96\u533A\u65E5\u3002", 2);
       default:
         throw new Error(`illegal region: ${region}`);
     }
@@ -9461,7 +9606,21 @@ class HolidayCalendar {
       "GB-SCT",
       "AU-NSW",
       "CA-ON",
-      "ES-CT"
+      "ES-CT",
+      "MY-JHR",
+      "MY-KDH",
+      "MY-KTN",
+      "MY-MLK",
+      "MY-NSN",
+      "MY-PHG",
+      "MY-PNG",
+      "MY-PRK",
+      "MY-PLS",
+      "MY-SBH",
+      "MY-SWK",
+      "MY-SGR",
+      "MY-TRG",
+      "MY-KUL"
     ];
   }
   /**
