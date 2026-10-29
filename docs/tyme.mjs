@@ -186,35 +186,6 @@ class AbstractYear extends YearUnit {
     return `${this.year}\u5E74`;
   }
 }
-class AbstractTraditionalYear extends AbstractYear {
-  constructor(year) {
-    super(year);
-  }
-  /**
-   * 干支
-   */
-  getSixtyCycle() {
-    return SixtyCycle.fromIndex(this.year - 4);
-  }
-  /**
-   * 运
-   */
-  getTwenty() {
-    return Twenty.fromIndex(Math.floor((this.year - 1864) / 20));
-  }
-  /**
-   * 九星
-   */
-  getNineStar() {
-    return NineStar.fromIndex(63 + this.getTwenty().getSixty().getIndex() * 3 - this.getSixtyCycle().getIndex());
-  }
-  /**
-   * 太岁方位
-   */
-  getJupiterDirection() {
-    return Direction.fromIndex([0, 7, 7, 2, 3, 3, 8, 1, 1, 6, 0, 0][this.getSixtyCycle().getEarthBranch().getIndex()]);
-  }
-}
 class AbstractMonth extends MonthUnit {
   constructor(year, month) {
     super(year, month);
@@ -405,6 +376,43 @@ class LoopTyme extends AbstractTyme {
     return d1 <= Math.abs(d2) ? d1 : d2;
   }
 }
+class Week extends LoopTyme {
+  static NAMES = ["\u65E5", "\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D"];
+  constructor(indexOrName) {
+    super(Week.NAMES, indexOrName);
+  }
+  static fromIndex(index) {
+    return new Week(Week.numeric(index, "week index"));
+  }
+  static fromName(name) {
+    return new Week(name);
+  }
+  next(n) {
+    return Week.fromIndex(this.nextIndex(n));
+  }
+  getSevenStar() {
+    return SevenStar.fromIndex(this.index);
+  }
+}
+class SevenStar extends LoopTyme {
+  static NAMES = ["\u65E5", "\u6708", "\u706B", "\u6C34", "\u6728", "\u91D1", "\u571F"];
+  constructor(indexOrName) {
+    super(SevenStar.NAMES, indexOrName);
+  }
+  static fromIndex(index) {
+    return new SevenStar(SevenStar.numeric(index, "seven star index"));
+  }
+  static fromName(name) {
+    return new SevenStar(name);
+  }
+  next(n) {
+    return SevenStar.fromIndex(this.nextIndex(n));
+  }
+  getWeek() {
+    return Week.fromIndex(this.index);
+  }
+}
+
 class Animal extends LoopTyme {
   static NAMES = ["\u86DF", "\u9F99", "\u8C89", "\u5154", "\u72D0", "\u864E", "\u8C79", "\u736C", "\u725B", "\u8760", "\u9F20", "\u71D5", "\u732A", "\u735D", "\u72FC", "\u72D7", "\u5F58", "\u9E21", "\u4E4C", "\u7334", "\u733F", "\u72B4", "\u7F8A", "\u7350", "\u9A6C", "\u9E7F", "\u86C7", "\u8693"];
   constructor(indexOrName) {
@@ -451,42 +459,6 @@ class TwentyEightStar extends LoopTyme {
   }
   getLuck() {
     return Luck.fromIndex([0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0][this.index]);
-  }
-}
-class SevenStar extends LoopTyme {
-  static NAMES = ["\u65E5", "\u6708", "\u706B", "\u6C34", "\u6728", "\u91D1", "\u571F"];
-  constructor(indexOrName) {
-    super(SevenStar.NAMES, indexOrName);
-  }
-  static fromIndex(index) {
-    return new SevenStar(SevenStar.numeric(index, "seven star index"));
-  }
-  static fromName(name) {
-    return new SevenStar(name);
-  }
-  next(n) {
-    return SevenStar.fromIndex(this.nextIndex(n));
-  }
-  getWeek() {
-    return Week.fromIndex(this.index);
-  }
-}
-class Week extends LoopTyme {
-  static NAMES = ["\u65E5", "\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D"];
-  constructor(indexOrName) {
-    super(Week.NAMES, indexOrName);
-  }
-  static fromIndex(index) {
-    return new Week(Week.numeric(index, "week index"));
-  }
-  static fromName(name) {
-    return new Week(name);
-  }
-  next(n) {
-    return Week.fromIndex(this.nextIndex(n));
-  }
-  getSevenStar() {
-    return SevenStar.fromIndex(this.index);
   }
 }
 class Land extends LoopTyme {
@@ -689,73 +661,6 @@ class God extends LoopTyme {
     return l;
   }
 }
-class Phase extends LoopTyme {
-  static NAMES = ["\u65B0\u6708", "\u86FE\u7709\u6708", "\u4E0A\u5F26\u6708", "\u76C8\u51F8\u6708", "\u6EE1\u6708", "\u4E8F\u51F8\u6708", "\u4E0B\u5F26\u6708", "\u6B8B\u6708"];
-  lunarYear;
-  lunarMonth;
-  constructor(lunarYear, lunarMonth, indexOrName) {
-    super(Phase.NAMES, indexOrName);
-    if (typeof indexOrName === "number") {
-      const m = LunarMonth.fromYm(lunarYear, lunarMonth).next(~~(indexOrName / this.getSize()));
-      this.lunarYear = m.getYear();
-      this.lunarMonth = m.getMonthValue();
-    } else {
-      this.lunarYear = Phase.numeric(lunarYear, "lunar year");
-      this.lunarMonth = Phase.numeric(lunarMonth, "lunar month");
-    }
-  }
-  static fromIndex(lunarYear, lunarMonth, index) {
-    return new Phase(lunarYear, lunarMonth, Phase.numeric(index, "phase index"));
-  }
-  static fromName(lunarYear, lunarMonth, name) {
-    return new Phase(lunarYear, lunarMonth, name);
-  }
-  next(n) {
-    const size = this.getSize();
-    let i = this.getIndex() + n;
-    if (i < 0) {
-      i -= size;
-    }
-    i = ~~(i / size);
-    let m = LunarMonth.fromYm(this.lunarYear, this.lunarMonth);
-    if (i != 0) {
-      m = m.next(i);
-    }
-    return Phase.fromIndex(m.getYear(), m.getMonthValue(), this.nextIndex(n));
-  }
-  getStartSolarTime() {
-    const n = Math.floor((this.lunarYear - 2e3) * 365.2422 / 29.53058886);
-    let i = 0;
-    const jd = JulianDay.J2000 + ShouXingUtil.ONE_THIRD;
-    const d = LunarDay.fromYmd(this.lunarYear, this.lunarMonth, 1).getSolarDay();
-    while (true) {
-      const t2 = ShouXingUtil.msaLonT((n + i) * ShouXingUtil.PI_2) * 36525;
-      if (!JulianDay.fromJulianDay(jd + t2 - ShouXingUtil.dtT(t2)).getSolarDay().isBefore(d)) {
-        break;
-      }
-      i++;
-    }
-    const r = [0, 90, 180, 270];
-    const t = ShouXingUtil.msaLonT((n + i + r[~~(this.getIndex() / 2)] / 360) * ShouXingUtil.PI_2) * 36525;
-    return JulianDay.fromJulianDay(jd + t - ShouXingUtil.dtT(t)).getSolarTime();
-  }
-  getSolarTime() {
-    const t = this.getStartSolarTime();
-    return this.getIndex() % 2 === 1 ? t.next(1) : t;
-  }
-  getSolarDay() {
-    const d = this.getStartSolarTime().getSolarDay();
-    return this.getIndex() % 2 === 1 ? d.next(1) : d;
-  }
-}
-class PhaseDay extends AbstractCultureDay {
-  constructor(phase, dayIndex) {
-    super(phase, dayIndex);
-  }
-  getPhase() {
-    return this.culture;
-  }
-}
 class Sixty extends LoopTyme {
   static NAMES = ["\u4E0A\u5143", "\u4E2D\u5143", "\u4E0B\u5143"];
   constructor(indexOrName) {
@@ -945,7 +850,7 @@ class EarthBranch extends LoopTyme {
     return Element.fromIndex([4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4][this.index]);
   }
   getYinYang() {
-    return this.index % 2 === 0 ? 1 /* YANG */ : 0 /* YIN */;
+    return this.index % 2 === 0 ? YinYang.YANG : YinYang.YIN;
   }
   getHideHeavenStemMain() {
     return HeavenStem.fromIndex([9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8][this.index]);
@@ -960,14 +865,14 @@ class EarthBranch extends LoopTyme {
   }
   getHideHeavenStems() {
     const l = [];
-    l.push(new HideHeavenStem(this.getHideHeavenStemMain(), 2 /* MAIN */));
+    l.push(new HideHeavenStem(this.getHideHeavenStemMain(), HideHeavenStemType.MAIN));
     let o = this.getHideHeavenStemMiddle();
     if (o) {
-      l.push(new HideHeavenStem(o, 1 /* MIDDLE */));
+      l.push(new HideHeavenStem(o, HideHeavenStemType.MIDDLE));
     }
     o = this.getHideHeavenStemResidual();
     if (o) {
-      l.push(new HideHeavenStem(o, 0 /* RESIDUAL */));
+      l.push(new HideHeavenStem(o, HideHeavenStemType.RESIDUAL));
     }
     return l;
   }
@@ -1066,7 +971,7 @@ class HeavenStem extends LoopTyme {
     return Element.fromIndex(~~(this.index / 2));
   }
   getYinYang() {
-    return this.index % 2 === 0 ? 1 /* YANG */ : 0 /* YIN */;
+    return this.index % 2 === 0 ? YinYang.YANG : YinYang.YIN;
   }
   getTenStar(target) {
     const targetIndex = target.getIndex();
@@ -1122,7 +1027,7 @@ class HeavenStem extends LoopTyme {
   }
   getTerrain(earthBranch) {
     const earthBranchIndex = earthBranch.getIndex();
-    return Terrain.fromIndex([1, 6, 10, 9, 10, 9, 7, 0, 4, 3][this.index] + (1 /* YANG */ === this.getYinYang() ? earthBranchIndex : -earthBranchIndex));
+    return Terrain.fromIndex([1, 6, 10, 9, 10, 9, 7, 0, 4, 3][this.index] + (YinYang.YANG === this.getYinYang() ? earthBranchIndex : -earthBranchIndex));
   }
   getCombine() {
     return this.next(5);
@@ -1308,127 +1213,33 @@ class SixtyCycle extends LoopTyme {
     return l;
   }
 }
-class Dog extends LoopTyme {
-  static NAMES = ["\u521D\u4F0F", "\u4E2D\u4F0F", "\u672B\u4F0F"];
-  constructor(indexOrName) {
-    super(Dog.NAMES, indexOrName);
+class AbstractTraditionalYear extends AbstractYear {
+  constructor(year) {
+    super(year);
   }
-  static fromIndex(index) {
-    return new Dog(Dog.numeric(index, "dog index"));
+  /**
+   * 干支
+   */
+  getSixtyCycle() {
+    return SixtyCycle.fromIndex(this.year - 4);
   }
-  static fromName(name) {
-    return new Dog(name);
+  /**
+   * 运
+   */
+  getTwenty() {
+    return Twenty.fromIndex(Math.floor((this.year - 1864) / 20));
   }
-  next(n) {
-    return Dog.fromIndex(this.nextIndex(n));
+  /**
+   * 九星
+   */
+  getNineStar() {
+    return NineStar.fromIndex(63 + this.getTwenty().getSixty().getIndex() * 3 - this.getSixtyCycle().getIndex());
   }
-}
-class DogDay extends AbstractCultureDay {
-  constructor(dog, dayIndex) {
-    super(dog, dayIndex);
-  }
-  getDog() {
-    return this.culture;
-  }
-}
-class PlumRain extends LoopTyme {
-  static NAMES = ["\u5165\u6885", "\u51FA\u6885"];
-  constructor(indexOrName) {
-    super(PlumRain.NAMES, indexOrName);
-  }
-  static fromIndex(index) {
-    return new PlumRain(PlumRain.numeric(index, "plum rain index"));
-  }
-  static fromName(name) {
-    return new PlumRain(name);
-  }
-  next(n) {
-    return PlumRain.fromIndex(this.nextIndex(n));
-  }
-}
-class PlumRainDay extends AbstractCultureDay {
-  constructor(plumRain, dayIndex) {
-    super(plumRain, dayIndex);
-  }
-  getPlumRain() {
-    return this.culture;
-  }
-  toString() {
-    return this.getPlumRain().getIndex() === 0 ? super.toString() : this.culture.getName();
-  }
-}
-class FetusHeavenStem extends LoopTyme {
-  static NAMES = ["\u95E8", "\u7893\u78E8", "\u53A8\u7076", "\u4ED3\u5E93", "\u623F\u5E8A"];
-  constructor(index) {
-    super(FetusHeavenStem.NAMES, index);
-  }
-  next(n) {
-    return new FetusHeavenStem(this.nextIndex(n));
-  }
-}
-class FetusEarthBranch extends LoopTyme {
-  static NAMES = ["\u7893", "\u5395", "\u7089", "\u95E8", "\u6816", "\u5E8A"];
-  constructor(index) {
-    super(FetusEarthBranch.NAMES, index);
-  }
-  next(n) {
-    return new FetusEarthBranch(this.nextIndex(n));
-  }
-}
-class FetusDay extends AbstractCulture {
-  fetusHeavenStem;
-  fetusEarthBranch;
-  side;
-  direction;
-  constructor(sixtyCycle) {
-    super();
-    this.fetusHeavenStem = new FetusHeavenStem(sixtyCycle.getHeavenStem().getIndex() % 5);
-    this.fetusEarthBranch = new FetusEarthBranch(sixtyCycle.getEarthBranch().getIndex() % 6);
-    const index = [3, 3, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, -9, -9, -9, -9, -9, -5, -5, -1, -1, -1, -3, -7, -7, -7, -7, -5, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 3, 3, 3, 3][sixtyCycle.getIndex()];
-    this.side = index < 0 ? 0 /* IN */ : 1 /* OUT */;
-    this.direction = Direction.fromIndex(index);
-  }
-  static fromLunarDay(lunarDay) {
-    return new FetusDay(lunarDay.getSixtyCycle());
-  }
-  static fromSixtyCycleDay(sixtyCycleDay) {
-    return new FetusDay(sixtyCycleDay.getSixtyCycle());
-  }
-  getName() {
-    let s = this.fetusHeavenStem.getName() + this.fetusEarthBranch.getName();
-    if ("\u95E8\u95E8" === s) {
-      s = "\u5360\u5927\u95E8";
-    } else if ("\u7893\u78E8\u7893" === s) {
-      s = "\u5360\u7893\u78E8";
-    } else if ("\u623F\u5E8A\u5E8A" === s) {
-      s = "\u5360\u623F\u5E8A";
-    } else if (s.indexOf("\u95E8") === 0) {
-      s = "\u5360" + s;
-    }
-    s += " ";
-    if (0 /* IN */ === this.side) {
-      s += "\u623F\u5185";
-    } else {
-      s += "\u5916";
-    }
-    const directionName = this.direction.getName();
-    if (1 /* OUT */ === this.side && "\u5317\u5357\u897F\u4E1C".indexOf(directionName) > -1) {
-      s += "\u6B63";
-    }
-    s += directionName;
-    return s;
-  }
-  getSide() {
-    return this.side;
-  }
-  getDirection() {
-    return this.direction;
-  }
-  getFetusHeavenStem() {
-    return this.fetusHeavenStem;
-  }
-  getFetusEarthBranch() {
-    return this.fetusEarthBranch;
+  /**
+   * 太岁方位
+   */
+  getJupiterDirection() {
+    return Direction.fromIndex([0, 7, 7, 2, 3, 3, 8, 1, 1, 6, 0, 0][this.getSixtyCycle().getEarthBranch().getIndex()]);
   }
 }
 class Nine extends LoopTyme {
@@ -1444,87 +1255,6 @@ class Nine extends LoopTyme {
   }
   next(n) {
     return Nine.fromIndex(this.nextIndex(n));
-  }
-}
-class NineDay extends AbstractCultureDay {
-  constructor(nine, dayIndex) {
-    super(nine, dayIndex);
-  }
-  getNine() {
-    return this.culture;
-  }
-}
-class Phenology extends LoopTyme {
-  static NAMES = ["\u86AF\u8693\u7ED3", "\u9E8B\u89D2\u89E3", "\u6C34\u6CC9\u52A8", "\u96C1\u5317\u4E61", "\u9E4A\u59CB\u5DE2", "\u96C9\u59CB\u96CA", "\u9E21\u59CB\u4E73", "\u5F81\u9E1F\u5389\u75BE", "\u6C34\u6CFD\u8179\u575A", "\u4E1C\u98CE\u89E3\u51BB", "\u86F0\u866B\u59CB\u632F", "\u9C7C\u965F\u8D1F\u51B0", "\u736D\u796D\u9C7C", "\u5019\u96C1\u5317", "\u8349\u6728\u840C\u52A8", "\u6843\u59CB\u534E", "\u4ED3\u5E9A\u9E23", "\u9E70\u5316\u4E3A\u9E20", "\u7384\u9E1F\u81F3", "\u96F7\u4E43\u53D1\u58F0", "\u59CB\u7535", "\u6850\u59CB\u534E", "\u7530\u9F20\u5316\u4E3A\u9D3D", "\u8679\u59CB\u89C1", "\u840D\u59CB\u751F", "\u9E23\u9E20\u62C2\u5176\u7FBD", "\u6234\u80DC\u964D\u4E8E\u6851", "\u877C\u8748\u9E23", "\u86AF\u8693\u51FA", "\u738B\u74DC\u751F", "\u82E6\u83DC\u79C0", "\u9761\u8349\u6B7B", "\u9EA6\u79CB\u81F3", "\u87B3\u8782\u751F", "\u9D59\u59CB\u9E23", "\u53CD\u820C\u65E0\u58F0", "\u9E7F\u89D2\u89E3", "\u8729\u59CB\u9E23", "\u534A\u590F\u751F", "\u6E29\u98CE\u81F3", "\u87CB\u87C0\u5C45\u58C1", "\u9E70\u59CB\u631A", "\u8150\u8349\u4E3A\u8424", "\u571F\u6DA6\u6EBD\u6691", "\u5927\u96E8\u884C\u65F6", "\u51C9\u98CE\u81F3", "\u767D\u9732\u964D", "\u5BD2\u8749\u9E23", "\u9E70\u4E43\u796D\u9E1F", "\u5929\u5730\u59CB\u8083", "\u79BE\u4E43\u767B", "\u9E3F\u96C1\u6765", "\u7384\u9E1F\u5F52", "\u7FA4\u9E1F\u517B\u7F9E", "\u96F7\u59CB\u6536\u58F0", "\u86F0\u866B\u576F\u6237", "\u6C34\u59CB\u6DB8", "\u9E3F\u96C1\u6765\u5BBE", "\u96C0\u5165\u5927\u6C34\u4E3A\u86E4", "\u83CA\u6709\u9EC4\u82B1", "\u8C7A\u4E43\u796D\u517D", "\u8349\u6728\u9EC4\u843D", "\u86F0\u866B\u54B8\u4FEF", "\u6C34\u59CB\u51B0", "\u5730\u59CB\u51BB", "\u96C9\u5165\u5927\u6C34\u4E3A\u8703", "\u8679\u85CF\u4E0D\u89C1", "\u5929\u6C14\u4E0A\u5347\u5730\u6C14\u4E0B\u964D", "\u95ED\u585E\u800C\u6210\u51AC", "\u9E56\u9D20\u4E0D\u9E23", "\u864E\u59CB\u4EA4", "\u8354\u633A\u51FA"];
-  year;
-  constructor(year, indexOrName) {
-    super(Phenology.NAMES, indexOrName);
-    const y = Phenology.numeric(year, "phenology year");
-    if (typeof indexOrName === "number") {
-      const size = this.getSize();
-      this.year = ~~((y * size + indexOrName) / size);
-    } else {
-      this.year = y;
-    }
-  }
-  static fromIndex(year, index) {
-    return new Phenology(year, Phenology.numeric(index, "phenology index"));
-  }
-  static fromName(year, name) {
-    return new Phenology(year, name);
-  }
-  next(n) {
-    const size = this.getSize();
-    const i = this.getIndex() + n;
-    return Phenology.fromIndex(~~((this.year * size + i) / size), this.indexOf(i, size));
-  }
-  getYear() {
-    return this.year;
-  }
-  getThreePhenology() {
-    return ThreePhenology.fromIndex(this.index % 3);
-  }
-  getJulianDay() {
-    const t = ShouXingUtil.saLonT((this.year - 2e3 + (this.getIndex() - 18) * 5 / 360 + 1) * 2 * Math.PI);
-    return JulianDay.fromJulianDay(t * 36525 + JulianDay.J2000 + 8 / 24 - ShouXingUtil.dtT(t * 36525));
-  }
-}
-class ThreePhenology extends LoopTyme {
-  static NAMES = ["\u521D\u5019", "\u4E8C\u5019", "\u4E09\u5019"];
-  constructor(indexOrName) {
-    super(ThreePhenology.NAMES, indexOrName);
-  }
-  static fromIndex(index) {
-    return new ThreePhenology(ThreePhenology.numeric(index, "three phenology index"));
-  }
-  static fromName(name) {
-    return new ThreePhenology(name);
-  }
-  next(n) {
-    return ThreePhenology.fromIndex(this.nextIndex(n));
-  }
-}
-class Dipper extends LoopTyme {
-  static NAMES = ["\u5929\u67A2", "\u5929\u7487", "\u5929\u7391", "\u5929\u6743", "\u7389\u8861", "\u5F00\u9633", "\u6447\u5149", "\u6D1E\u660E", "\u9690\u5143"];
-  constructor(indexOrName) {
-    super(Dipper.NAMES, indexOrName);
-  }
-  static fromIndex(index) {
-    return new Dipper(Dipper.numeric(index, "dipper index"));
-  }
-  static fromName(name) {
-    return new Dipper(name);
-  }
-  next(n) {
-    return Dipper.fromIndex(this.nextIndex(n));
-  }
-}
-class PhenologyDay extends AbstractCultureDay {
-  constructor(phenology, dayIndex) {
-    super(phenology, dayIndex);
-  }
-  getPhenology() {
-    return this.culture;
   }
 }
 class NineStar extends LoopTyme {
@@ -1558,22 +1288,19 @@ class NineStar extends LoopTyme {
     return this.getName() + this.getColor() + this.getElement();
   }
 }
-class TwelveStar extends LoopTyme {
-  static NAMES = ["\u9752\u9F99", "\u660E\u5802", "\u5929\u5211", "\u6731\u96C0", "\u91D1\u532E", "\u5929\u5FB7", "\u767D\u864E", "\u7389\u5802", "\u5929\u7262", "\u7384\u6B66", "\u53F8\u547D", "\u52FE\u9648"];
+class Dipper extends LoopTyme {
+  static NAMES = ["\u5929\u67A2", "\u5929\u7487", "\u5929\u7391", "\u5929\u6743", "\u7389\u8861", "\u5F00\u9633", "\u6447\u5149", "\u6D1E\u660E", "\u9690\u5143"];
   constructor(indexOrName) {
-    super(TwelveStar.NAMES, indexOrName);
+    super(Dipper.NAMES, indexOrName);
   }
   static fromIndex(index) {
-    return new TwelveStar(TwelveStar.numeric(index, "twelve star index"));
+    return new Dipper(Dipper.numeric(index, "dipper index"));
   }
   static fromName(name) {
-    return new TwelveStar(name);
+    return new Dipper(name);
   }
   next(n) {
-    return TwelveStar.fromIndex(this.nextIndex(n));
-  }
-  getEcliptic() {
-    return Ecliptic.fromIndex([0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1][this.index]);
+    return Dipper.fromIndex(this.nextIndex(n));
   }
 }
 class Ecliptic extends LoopTyme {
@@ -1594,856 +1321,105 @@ class Ecliptic extends LoopTyme {
     return Luck.fromIndex(this.index);
   }
 }
-class LunarYear extends AbstractTraditionalYear {
-  static isInit = false;
-  static LEAP = [];
-  static init() {
-    if (LunarYear.isInit) {
-      return;
-    }
-    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_@";
-    const months = [
-      "080b0r0j0j0j0C0j0j0C0j0j0j0C0j0C0j0C0F0j0V0V0V0u0j0j0C0j0j0j0j0V0C0j1v0u0C0V1v0C0b080u110u0C0j0C1v9K1v2z0j1vmZbl1veN3s1v0V0C2S1v0V0C2S2o0C0j1Z1c2S1v0j1c0j2z1v0j1c0j392H0b2_2S0C0V0j1c0j2z0C0C0j0j1c0j0N250j0C0j0b081n080b0C0C0C1c0j0N",
-      "0r1v1c1v0V0V0F0V0j0C0j0C0j0V0j0u1O0j0C0V0j0j0j0V0b080u0r0u080b0j0j0C0V0C0V0j0b080V0u080b0j0j0u0j1v0u080b1c0j080b0j0V0j0j0V0C0N1v0j1c0j0j1v2g1v420j1c0j2z1v0j1v5Q9z1v4l0j1vfn1v420j9z4l1v1v2S1c0j1v2S3s1v0V0C2S1v1v2S1c0j1v2S2_0b0j2_2z0j1c0j",
-      "0z0j0j0j0C0j0j0C0j0j0j0C0j0C0j0j0j0j0m0j0C0j0j0C0j0j0j0j0b0V0j0j0C0j0j0j0j0V0j0j0j0V0b0V0V0C0V0C0j0j0b080u110u0V0C0j0N0j0b080b080b0j0r0b0r0b0j0j0j0j0C0j0b0r0C0j0b0j0C0C0j0j0j0j0j0j0j0j0j0b110j0b0j0j0j0C0j0C0j0j0j0j0b080b080b0V080b080b0j0j0j0j0j0j0V0j0j0u1v0j0j0j0C0j0j0j0V0C0N1c0j0C0C0j0j0j1n080b0j0V0C0j0C0C2g0j1c0j0j1v2g1v0j0j1v7N0j1c0j3L0j0j1v5Q1Z5Q1v4lfn1v420j1v5Q1Z5Q1v4l1v2z1v",
-      "0H140r0N0r140r0u0r0V171c11140C0j0u110j0u0j1v0j0C0j0j0j0b080V0u080b0C1v0j0j0j0C0j0b080V0j0j0b080b0j0j0j0j0b080b0C080j0b080b0j0j0j0j0j0j0b080j0b080C0b080b080b080b0j0j0j0j080b0j0C0j0j0j0b0j0j080C0b0j0j0j0j0j0j0b08080b0j0C0j0j0j0b0j0j0K0b0j0C0j0j0j0b080b080j0C0b0j080b080b0j0j0j0j080b0j0b0r0j0j0j0b0j0C0r0b0j0j0j0j0j0j0j0b080j0b0r0C0j0b0j0j0j0r0b0j0C0j0j0j0u0r0b0C0j080b0j0j0j0j0j0j0j1c0j0b0j0j0j0C0j0j0j0j0j0j0j0b080j1c0u0j0j0j0C0j1c0j0u0j1c0j0j0j0j0j0j0j0j1c0j0u1v0j0j0V0j0j2g0j0j0j0C1v0C1G0j0j0V0C1Z1O0j0V0j0j2g1v0j0j0V0C2g5x1v4l1v421O7N0V0C4l1v2S1c0j1v2S2_",
-      "050b080C0j0j0j0C0j0j0C0j0j0j0C0j0C0j0C030j0j0j0j0j0j0j0j0j0C0j0b080u0V080b0j0j0V0j0j0j0j0j0j0j0j0j0V0N0j0C0C0j0j0j0j0j0j0j0j1c0j0u0j1v0j0j0j0j0j0b080b080j0j0j0b080b080b080b080b0j0j0j080b0j0b080j0j0j0j0b080b0j0j0r0b080b0b080j0j0j0j0b080b080j0b080j0b080b080b080b080b0j0j0r0b0j0b080j0j0j0j0b080b0j0j0C080b0b080j0j0j0j0j0j0j0b080u080j0j0b0j0j0j0C0j0b080j0j0j0j0b080b080b080b0C080b080b080b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0b080j0j0C0b080b080j0b0j0j0C080b0j0j0j0j0j0j0b0j0j080C0b0j080b0j0j0j0j0j0j0j0C0j0j0j0b0j0j0C080b0j0j0j0j0j0j0b080b080b0K0b080b080b0j0j0j0j0j0j0j0C0j0j0u0j0j0V0j080b0j0C0j0j0j0b0j0r0C0b0j0j0j0j0j0j0j0j0j0C0j0b080b080b0j0C0C0j0C0j0j0j0u110u0j0j0j0j0j0j0j0j0C0j0j0u0j1c0j0j0j0j0j0j0j0j0V0C0u0j0C0C0V0C1Z0j0j0j0C0j0j0j1v0u0j1c0j0j0j0C0j0j2g0j1c1v0C1Z0V0j4l0j0V0j0j2g0j1v0j1v2S1c7N1v",
-      "0w0j1c0j0V0j0j0V0V0V0j0m0V0j0C1c140j0j0j0C0V0C0j1v0j0N0j0C0j0j0j0V0j0j1v0N0j0j0V0j0j0j0j0j0j080b0j0j0j0j0j0j0j080b0j0C0j0j0j0b0j0j080u080b0j0j0j0j0j0j0b080b080b080C0b0j080b080b0j0j0j0j080b0j0C0j0j0j0b0j0j080u080b0j0j0j0j0j0j0b080b080b080b0r0b0j080b080b0j0j0j0j080b0j0b0r0j0j0b080b0j0j080b0j080b0j080b080b0j0j0j0j0j0b080b0r0C0b080b0j0j0j0j080b0b080b080j0j0j0b080b080b080b0j0j0j0j080b0j0b080j0j0j0j0b080b0j0j0r0b080b0j0j0j0j0j0b080b080j0b0r0b080j0b080b0j0j0j0j080b0j0b080j0j0j0j0b080b0j080b0r0b0j080b080b0j0j0j0j0j0b080b0r0C0b080b0j0j0j0j0j0j0b080j0j0j0b080b080b080b0j0j0j0r0b0j0b080j0j0j0j0b080b0r0b0r0b0j080b080b0j0j0j0j0j0j0b0r0j0j0j0b0j0j0j0j080b0j0b080j0j0j0j0b080b080b0j0r0b0j080b0j0j0j0j0j0j0j0b0r0C0b0j0j0j0j0j0j0j080b0j0C0j0j0j0b0j0C0r0b0j0j0j0j0j0j0b080b080u0r0b0j080b0j0j0j0j0j0j0j0b0r0C0u0j0j0j0C0j080b0j0C0j0j0j0u110b0j0j0j0j0j0j0j0j0j0C0j0b080b0j0j0C0C0j0C0j0j0j0b0j1c0j080b0j0j0j0j0j0j0V0j0j0u0j1c0j0j0j0C0j0j2g0j0j0j0C0j0j0V0j0b080b1c0C0V0j0j2g0j0j0V0j0j1c0j1Z0j0j0C0C0j1v",
-      "160j0j0V0j1c0j0C0j0C0j1f0j0V0C0j0j0C0j0j0j1G080b080u0V080b0j0j0V0j1v0j0u0j1c0j0j0j0C0j0j0j0C0C0j1D0b0j080b0j0j0j0j0C0j0b0r0C0j0b0j0C0C0j0j0j0j0j0j0j0j0j0b0r0b0r0j0b0j0j0j0C0j0b0r0j0j0j0b080b080j0b0C0j080b080b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0b080j0j0j0j0b080b080j0b0C0r0j0b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0j0j0j0C0j0j0b080b0j0j0C080b0j0j0j0j0j0j0b080b080b080C0b080b080b080b0j0j0j0j0j0b080C0j0j0b080b0j0j0C080b0j0j0j0j0j0j0b080j0b0C080j0j0b0j0j0j0j0j0j0b080j0b080C0b080b080b080b0j0j0j0j080b0j0C0j0j0b080b0j0j0C080b0j0j0j0j0j0j0b080j0b080u080j0j0b0j0j0j0j0j0j0b080C0j0j0b080b0j0j0C0j0j080b0j0j0j0j0j0b080b0C0r0b080b0j0j0j0j0j0j0b080j0b080u080b080b080b0j0j0j0C0j0b080j0j0j0j0b0j0j0j0C0j0j080b0j0j0j0j0j0b080b0C0r0b080b0j0j0j0j0j0j0b080j0b0r0b080b080b080b0j0j0j0r0b0j0b0r0j0j0j0b0j0j0j0r0b0j080b0j0j0j0j0j0j0j0b0r0C0b0j0j0j0j0j0j0j0b080j0C0u080b080b0j0j0j0r0b0j0C0C0j0b0j110b0j080b0j0j0j0j0j0j0u0r0C0b0j0j0j0j0j0j0j0j0j0C0j0j0j0b0j1c0j0C0j0j0j0b0j0814080b080b0j0j0j0j0j0j1c0j0u0j0j0V0j0j0j0j0j0j0j0u110u0j0j0j",
-      "020b0r0C0j0j0j0C0j0j0V0j0j0j0j0j0C0j1f0j0C0j0V1G0j0j0j0j0V0C0j0C1v0u0j0j0j0V0j0j0C0j0j0j1v0N0C0V0j0j0j0K0C250b0C0V0j0j0V0j0j2g0C0V0j0j0C0j0j0b081v0N0j0j0V0V0j0j0u0j1c0j080b0j0j0j0j0j0j0V0j0j0u0j0j0V0j0j0j0C0j0b080b080V0b0j080b0j0j0j0j0j0j0j0b0r0C0j0b0j0j0j0C0j080b0j0j0j0j0j0j0u0r0C0u0j0j0j0j0j0j0b080j0C0j0b080b080b0j0C0j080b0j0j0j0j0j0j0b080b110b0j0j0j0j0j0j0j0j0j0b0r0j0j0j0b0j0j0j0r0b0j0b080j0j0j0j0b080b080b080b0r0b0j080b080b0j0j0j0j0j0j0b0r0C0b080b0j0j0j0j080b0j0b080j0j0j0j0b080b080b0j0j0j0r0b0j0j0j0j0j0j0b080b0j080C0b0j080b080b0j0j0j0j080b0j0b0r0C0b080b0j0j0j0j080b0j0j0j0j0j0b080b080b080b0j0j080b0r0b0j0j0j0j0j0j0b0j0j080C0b0j080b080b0j0j0j0j0j0b080C0j0j0b080b0j0j0C0j0b080j0j0j0j0b080b080b080b0C0C080b0j0j0j0j0j0j0b0C0C080b080b080b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0b080j0b080j0j0b080b080b080b0C0r0b0j0j0j0j0j0j0b080b0r0b0r0b0j080b080b0j0j0j0j0j0j0b0r0C0j0b0j0j0j0j0j0j0b080j0C0j0b080j0b0j0j0K0b0j0C0j0j0j0b080b0j0K0b0j080b0j0j0j0j0j0j0V0j0j0b0j0j0j0C0j0j0j0j",
-      "0l0C0K0N0r0N0j0r1G0V0m0j0V1c0C0j0j0j0j1O0N110u0j0j0j0C0j0j0V0C0j0u110u0j0j0j0C0j0j0j0C0C0j250j1c2S1v1v0j5x2g0j1c0j0j1c2z0j1c0j0j1c0j0N1v0V0C1v0C0b0C0V0j0j0C0j0C1v0u0j0C0C0j0j0j0C0j0j0j0u110u0j0j0j0C0j0C0C0C0b080b0j0C0j080b0j0C0j0j0j0u110u0j0j0j0C0j0j0j0C0j0j0j0u0C0r0u0j0j0j0j0j0j0b0r0b0V080b080b0j0C0j0j0j0V0j0j0b0j0j0j0C0j0j0j0j0j0j0j0b080j0b0C0r0j0b0j0j0j0C0j0b0r0b0r0j0b080b080b0j0C0j0j0j0j0j0j0j0j0b0j0C0r0b0j0j0j0j0j0j0b080b080j0b0r0b0r0j0b0j0j0j0j080b0j0b0r0j0j0j0b080b080b0j0j0j0j080b0j0j0j0j0j0j0b0j0j0j0r0b0j0j0j0j0j0j0b080b080b080b0r0C0b080b0j0j0j0j0j0b080b0r0C0b080b080b080b0j0j0j0j080b0j0C0j0j0j0b0j0j0C080b0j0j0j0j0j0j0b080j0b0C080j0j0b0j0j0j0j0j0j0b0r0b080j0j0b080b080b0j0j0j0j0j0j0b080j0j0j0j0b0j0j0j0r0b0j0b080j0j0j0j0j0b080b080b0C0r0b0j0j0j0j0j0j0b080b080j0C0b0j080b080b0j0j0j0j0j0j",
-      "0a0j0j0j0j0C0j0j0C0j0C0C0j0j0j0j0j0j0j0m0C0j0j0j0j0u080j0j0j1n0j0j0j0j0C0j0j0j0V0j0j0j1c0u0j0C0V0j0j0V0j0j1v0N0C0V2o1v1O2S2o141v0j1v4l0j1c0j1v2S2o0C0u1v0j0C0C2S1v0j1c0j0j1v0N251c0j1v0b1c1v1n1v0j0j0V0j0j1v0N1v0C0V0j0j1v0b0C0j0j0V1c0j0u0j1c0j0j0j0j0j0j0j0j1c0j0u0j0j0V0j0j0j0j0j0j0b080u110u0j0j0j0j0j0j1c0j0b0j080b0j0C0j0j0j0V0j0j0u0C0V0j0j0j0C0j0b080j1c0j0b0j0j0j0C0j0C0j0j0j0b080b080b0j0C0j080b0j0j0j0j0j0j0j0b0C0r0u0j0j0j0j0j0j0b080j0b0r0C0j0b0j0j0j0r0b0j0b0r0j0j0j0b080b080b0j0r0b0j080b0j0j0j0j0j0j0b0j0r0C0b0j0j0j0j0j0j0b080j0j0C0j0j0b080b0j0j0j0j0j0j0j0j0j0j0b080b080b080b0C0j0j080b0j0j0j0j0j0j0b0j0j0C080b0j0j0j0j0j0j0j0j0b0C080j0j0b0j0j0j0j0j",
-      "0n0Q0j1c14010q0V1c171k0u0r140V0j0j1c0C0N1O0j0V0j0j0j1c0j0u110u0C0j0C0V0C0j0j0b671v0j1v5Q1O2S2o2S1v4l1v0j1v2S2o0C1Z0j0C0C1O141v0j1c0j2z1O0j0V0j0j1v0b2H390j1c0j0V0C2z0j1c0j1v2g0C0V0j1O0b0j0j0V0C1c0j0u0j1c0j0j0j0j0j0j0j0j1c0N0j0j0V0j0j0C0j0j0b081v0u0j0j0j0C0j1c0N0j0j0C0j0j0j0C0j0j0j0u0C0r0u0j0j0j0C0j0b080j1c0j0b0j0C0C0j0C0C0j0b080b080u0C0j080b0j0C0j0j0j0u110u0j0j0j0j0j0j0j0j0C0C0j0b0j0j0j0C0j0C0C0j0b080b080b0j0C0j080b0j0C0j0j0j0b0j110b0j0j0j0j0j",
-      "0B0j0V0j0j0C0j0j0j0C0j0C0j0j0C0j0m0j0j0j0j0C0j0C0j0j0u0j1c0j0j0C0C0j0j0j0j0j0j0j0j0u110N0j0j0V0C0V0j0b081n080b0CrU1O5e2SbX2_1Z0V2o141v0j0C0C0j2z1v0j1c0j7N1O420j1c0j1v2S1c0j1v2S2_0b0j0V0j0j1v0N1v0j0j1c0j1v140j0V0j0j0C0C0b080u1v0C0V0u110u0j0j0j0C0j0j0j0C0C0N0C0V0j0j0C0j0j0b080u110u0C0j0C0u0r0C0u080b0j0j0C0j0j0j"
-    ];
-    for (let i = 0; i < 12; i++) {
-      let n = 0;
-      const m = months[i];
-      const size = ~~(m.length / 2);
-      const l = [];
-      for (let y = 0; y < size; y++) {
-        const z = y * 2;
-        let t = 0;
-        let c = 1;
-        for (let x = 1; x > -1; x--) {
-          t += c * chars.indexOf(m.charAt(z + x));
-          c *= 64;
-        }
-        n += t;
-        l.push(n);
-      }
-      LunarYear.LEAP.push(l);
-    }
-    LunarYear.isInit = true;
-  }
-  constructor(year) {
-    LunarYear.init();
-    const y = LunarYear.numeric(year, "lunar year");
-    LunarYear.validate(y);
-    super(y);
-  }
-  static validate(year) {
-    LunarYear.validateRange(year, -1, 9999, "lunar year");
-  }
-  static fromYear(year) {
-    return new LunarYear(year);
-  }
-  getDayCount() {
-    let n = 0;
-    const months = this.getMonths();
-    for (let i = 0, j = months.length; i < j; i++) {
-      n += months[i].getDayCount();
-    }
-    return n;
-  }
-  getName() {
-    return `\u519C\u5386${this.getSixtyCycle().getName()}\u5E74`;
-  }
-  next(n) {
-    return LunarYear.fromYear(this.year + n);
-  }
-  getLeapMonth() {
-    if (this.year === -1) {
-      return 11;
-    }
-    for (let i = 0, j = LunarYear.LEAP.length; i < j; i++) {
-      if (LunarYear.LEAP[i].indexOf(this.year) > -1) {
-        return i + 1;
-      }
-    }
-    return 0;
-  }
-  getFirstMonth() {
-    return LunarMonth.fromYm(this.year, 1);
-  }
-  getMonths() {
-    const l = [];
-    const leapMonth = this.getLeapMonth();
-    for (let i = 1; i < 13; i++) {
-      l.push(LunarMonth.fromYm(this.year, i));
-      if (i === leapMonth) {
-        l.push(LunarMonth.fromYm(this.year, -i));
-      }
-    }
-    return l;
-  }
-  getKitchenGodSteed() {
-    return KitchenGodSteed.fromLunarYear(this.year);
-  }
-}
-class LunarSeason extends LoopTyme {
-  static NAMES = ["\u5B5F\u6625", "\u4EF2\u6625", "\u5B63\u6625", "\u5B5F\u590F", "\u4EF2\u590F", "\u5B63\u590F", "\u5B5F\u79CB", "\u4EF2\u79CB", "\u5B63\u79CB", "\u5B5F\u51AC", "\u4EF2\u51AC", "\u5B63\u51AC"];
+class TwelveStar extends LoopTyme {
+  static NAMES = ["\u9752\u9F99", "\u660E\u5802", "\u5929\u5211", "\u6731\u96C0", "\u91D1\u532E", "\u5929\u5FB7", "\u767D\u864E", "\u7389\u5802", "\u5929\u7262", "\u7384\u6B66", "\u53F8\u547D", "\u52FE\u9648"];
   constructor(indexOrName) {
-    super(LunarSeason.NAMES, indexOrName);
+    super(TwelveStar.NAMES, indexOrName);
   }
   static fromIndex(index) {
-    return new LunarSeason(LunarSeason.numeric(index, "lunar season index"));
+    return new TwelveStar(TwelveStar.numeric(index, "twelve star index"));
   }
   static fromName(name) {
-    return new LunarSeason(name);
+    return new TwelveStar(name);
   }
   next(n) {
-    return LunarSeason.fromIndex(this.nextIndex(n));
+    return TwelveStar.fromIndex(this.nextIndex(n));
+  }
+  getEcliptic() {
+    return Ecliptic.fromIndex([0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1][this.index]);
   }
 }
-class FetusMonth extends LoopTyme {
-  static NAMES = ["\u5360\u623F\u5E8A", "\u5360\u6237\u7A97", "\u5360\u95E8\u5802", "\u5360\u53A8\u7076", "\u5360\u623F\u5E8A", "\u5360\u5E8A\u4ED3", "\u5360\u7893\u78E8", "\u5360\u5395\u6237", "\u5360\u95E8\u623F", "\u5360\u623F\u5E8A", "\u5360\u7076\u7089", "\u5360\u623F\u5E8A"];
+class ThreePhenology extends LoopTyme {
+  static NAMES = ["\u521D\u5019", "\u4E8C\u5019", "\u4E09\u5019"];
   constructor(indexOrName) {
-    super(FetusMonth.NAMES, indexOrName);
+    super(ThreePhenology.NAMES, indexOrName);
   }
-  static fromLunarMonth(lunarMonth) {
-    return lunarMonth.isLeap() ? null : new FetusMonth(lunarMonth.getMonth() - 1);
+  static fromIndex(index) {
+    return new ThreePhenology(ThreePhenology.numeric(index, "three phenology index"));
+  }
+  static fromName(name) {
+    return new ThreePhenology(name);
   }
   next(n) {
-    return new FetusMonth(this.nextIndex(n));
+    return ThreePhenology.fromIndex(this.nextIndex(n));
   }
 }
-class LunarMonth extends AbstractLeapMonth {
-  static NAMES = ["\u6B63\u6708", "\u4E8C\u6708", "\u4E09\u6708", "\u56DB\u6708", "\u4E94\u6708", "\u516D\u6708", "\u4E03\u6708", "\u516B\u6708", "\u4E5D\u6708", "\u5341\u6708", "\u5341\u4E00\u6708", "\u5341\u4E8C\u6708"];
-  static NEW_MOON_CACHE = [];
-  constructor(year, month) {
-    const y = LunarMonth.numeric(year, "lunar year");
-    const m = LunarMonth.numeric(month, "lunar month");
-    LunarMonth.validate(y, m);
-    super(y, m);
-  }
-  static validate(year, month) {
-    if (month === 0 || month > 12 || month < -12) {
-      throw new Error(`illegal lunar month: ${month}`);
+
+class Phase extends LoopTyme {
+  static NAMES = ["\u65B0\u6708", "\u86FE\u7709\u6708", "\u4E0A\u5F26\u6708", "\u76C8\u51F8\u6708", "\u6EE1\u6708", "\u4E8F\u51F8\u6708", "\u4E0B\u5F26\u6708", "\u6B8B\u6708"];
+  lunarYear;
+  lunarMonth;
+  constructor(lunarYear, lunarMonth, indexOrName) {
+    super(Phase.NAMES, indexOrName);
+    if (typeof indexOrName === "number") {
+      const m = LunarMonth.fromYm(lunarYear, lunarMonth).next(~~(indexOrName / this.getSize()));
+      this.lunarYear = m.getYear();
+      this.lunarMonth = m.getMonthValue();
+    } else {
+      this.lunarYear = Phase.numeric(lunarYear, "lunar year");
+      this.lunarMonth = Phase.numeric(lunarMonth, "lunar month");
     }
-    if (month < 0 && -month != LunarYear.fromYear(year).getLeapMonth()) {
-      throw new Error(`illegal leap month ${-month} in lunar year ${year}`);
-    }
   }
-  static fromYm(year, month) {
-    return new LunarMonth(year, month);
+  static fromIndex(lunarYear, lunarMonth, index) {
+    return new Phase(lunarYear, lunarMonth, Phase.numeric(index, "phase index"));
   }
-  getNewMoon() {
-    const m = this.getIndexInYear();
-    const y = this.year;
-    let months = LunarMonth.NEW_MOON_CACHE[y];
-    if (!months) {
-      months = Array(13).fill(NaN);
-      LunarMonth.NEW_MOON_CACHE[y] = months;
+  static fromName(lunarYear, lunarMonth, name) {
+    return new Phase(lunarYear, lunarMonth, name);
+  }
+  next(n) {
+    const size = this.getSize();
+    let i = this.getIndex() + n;
+    if (i < 0) {
+      i -= size;
     }
-    let v = months[m];
-    if (Number.isNaN(v)) {
-      const dongZhiJd = SolarTerm.fromIndex(y, 0).getCursoryJulianDay();
-      let w = ShouXingUtil.calcShuo(dongZhiJd);
-      if (w > dongZhiJd) {
-        w -= 29.53;
+    i = ~~(i / size);
+    let m = LunarMonth.fromYm(this.lunarYear, this.lunarMonth);
+    if (i != 0) {
+      m = m.next(i);
+    }
+    return Phase.fromIndex(m.getYear(), m.getMonthValue(), this.nextIndex(n));
+  }
+  getStartSolarTime() {
+    const n = Math.floor((this.lunarYear - 2e3) * 365.2422 / 29.53058886);
+    let i = 0;
+    const jd = JulianDay.J2000 + ShouXingUtil.ONE_THIRD;
+    const d = LunarDay.fromYmd(this.lunarYear, this.lunarMonth, 1).getSolarDay();
+    while (true) {
+      const t2 = ShouXingUtil.msaLonT((n + i) * ShouXingUtil.PI_2) * 36525;
+      if (!JulianDay.fromJulianDay(jd + t2 - ShouXingUtil.dtT(t2)).getSolarDay().isBefore(d)) {
+        break;
       }
-      let offset = 2;
-      if (y > 8 && y < 24) {
-        offset = 1;
-      } else if (LunarYear.fromYear(y - 1).getLeapMonth() > 10 && y != 239 && y != 240) {
-        offset = 3;
-      }
-      v = w + 29.5306 * (offset + m);
-      months[m] = v;
+      i++;
     }
-    return v;
+    const r = [0, 90, 180, 270];
+    const t = ShouXingUtil.msaLonT((n + i + r[~~(this.getIndex() / 2)] / 360) * ShouXingUtil.PI_2) * 36525;
+    return JulianDay.fromJulianDay(jd + t - ShouXingUtil.dtT(t)).getSolarTime();
   }
-  getLunarYear() {
-    return LunarYear.fromYear(this.year);
+  getSolarTime() {
+    const t = this.getStartSolarTime();
+    return this.getIndex() % 2 === 1 ? t.next(1) : t;
   }
-  getAbstractYear() {
-    return this.getLunarYear();
-  }
-  getDayCount() {
-    const w = this.getNewMoon();
-    return ~~(ShouXingUtil.calcShuo(w + 29.5306) - ShouXingUtil.calcShuo(w));
-  }
-  getSeason() {
-    return LunarSeason.fromIndex(this.getMonth() - 1);
-  }
-  getFirstJulianDay() {
-    return JulianDay.fromJulianDay(JulianDay.J2000 + ShouXingUtil.calcShuo(this.getNewMoon()));
-  }
-  getName() {
-    return (this.leap ? "\u95F0" : "") + LunarMonth.NAMES[this.getMonth() - 1];
-  }
-  next(n) {
-    const m = super.next(n);
-    return LunarMonth.fromYm(m.getYear(), m.getMonthValue());
-  }
-  getDays() {
-    const m = this.getMonthValue();
-    const l = [];
-    for (let i = 1, j = this.getDayCount(); i <= j; i++) {
-      l.push(LunarDay.fromYmd(this.year, m, i));
-    }
-    return l;
-  }
-  getFirstDay() {
-    return LunarDay.fromYmd(this.year, this.getMonthValue(), 1);
-  }
-  getWeeks(start) {
-    const m = this.getMonthValue();
-    const l = [];
-    for (let i = 0, j = this.getWeekCount(start); i < j; i++) {
-      l.push(LunarWeek.fromYm(this.year, m, i, start));
-    }
-    return l;
-  }
-  getSixtyCycle() {
-    return SixtyCycle.fromIndex(this.year * 12 + this.month - 47);
-  }
-  getNineStar() {
-    let index = this.getSixtyCycle().getEarthBranch().getIndex();
-    if (index < 2) {
-      index += 3;
-    }
-    return NineStar.fromIndex(27 - this.getLunarYear().getSixtyCycle().getEarthBranch().getIndex() % 3 * 3 - index);
-  }
-  getJupiterDirection() {
-    const sixtyCycle = this.getSixtyCycle();
-    const n = [7, -1, 1, 3][sixtyCycle.getEarthBranch().next(-2).getIndex() % 4];
-    return n !== -1 ? Direction.fromIndex(n) : sixtyCycle.getHeavenStem().getDirection();
-  }
-  getFetus() {
-    return FetusMonth.fromLunarMonth(this);
-  }
-  getMinorRen() {
-    return MinorRen.fromIndex((this.month - 1) % 6);
+  getSolarDay() {
+    const d = this.getStartSolarTime().getSolarDay();
+    return this.getIndex() % 2 === 1 ? d.next(1) : d;
   }
 }
-class LunarWeek extends AbstractWeek {
-  constructor(year, month, index, start) {
-    const y = SolarWeek.numeric(year, "lunar year");
-    const m = SolarWeek.numeric(month, "lunar month");
-    const i = SolarWeek.numeric(index, "lunar week index");
-    const s = SolarWeek.numeric(start, "week index");
-    LunarWeek.validate(y, m, i, s);
-    super(y, m, i, s);
-  }
-  static validate(year, month, index, start) {
-    WeekUnit.validate(year, month, index, start);
-    const m = LunarMonth.fromYm(year, month);
-    if (index >= m.getWeekCount(start)) {
-      throw new Error(`illegal lunar week index: ${index} in month: ${m}`);
-    }
-  }
-  static fromYm(year, month, index, start) {
-    return new LunarWeek(year, month, index, start);
-  }
-  getLunarMonth() {
-    return LunarMonth.fromYm(this.year, this.month);
-  }
-  getAbstractMonth() {
-    return this.getLunarMonth();
-  }
-  getName() {
-    return WeekUnit.NAMES[this.index];
-  }
-  next(n) {
-    const w = super.next(n);
-    return LunarWeek.fromYm(w.getYear(), w.getMonth(), w.getIndex(), this.start);
-  }
-  getFirstDay() {
-    const firstDay = LunarDay.fromYmd(this.year, this.month, 1);
-    return firstDay.next(this.index * 7 - this.indexOf(firstDay.getWeek().getIndex() - this.start, 7));
-  }
-  getDays() {
-    const l = [];
-    const d = this.getFirstDay();
-    l.push(d);
-    for (let i = 1; i < 7; i++) {
-      l.push(d.next(i));
-    }
-    return l;
-  }
-  equals(o) {
-    return o && o.getFirstDay().equals(this.getFirstDay());
-  }
-}
-class LunarDay extends AbstractDay {
-  static NAMES = ["\u521D\u4E00", "\u521D\u4E8C", "\u521D\u4E09", "\u521D\u56DB", "\u521D\u4E94", "\u521D\u516D", "\u521D\u4E03", "\u521D\u516B", "\u521D\u4E5D", "\u521D\u5341", "\u5341\u4E00", "\u5341\u4E8C", "\u5341\u4E09", "\u5341\u56DB", "\u5341\u4E94", "\u5341\u516D", "\u5341\u4E03", "\u5341\u516B", "\u5341\u4E5D", "\u4E8C\u5341", "\u5EFF\u4E00", "\u5EFF\u4E8C", "\u5EFF\u4E09", "\u5EFF\u56DB", "\u5EFF\u4E94", "\u5EFF\u516D", "\u5EFF\u4E03", "\u5EFF\u516B", "\u5EFF\u4E5D", "\u4E09\u5341"];
-  constructor(year, month, day) {
-    const y = LunarDay.numeric(year, "lunar year");
-    const m = LunarDay.numeric(month, "lunar month");
-    const d = LunarDay.numeric(day, "lunar day");
-    LunarDay.validate(y, m, d);
-    super(y, m, d);
-  }
-  static validate(year, month, day) {
-    if (day < 1) {
-      throw new Error(`illegal day ${day}`);
-    }
-    const m = LunarMonth.fromYm(year, month);
-    if (day > m.getDayCount()) {
-      throw new Error(`illegal day ${day} in ${m}`);
-    }
-  }
-  static fromYmd(year, month, day) {
-    return new LunarDay(year, month, day);
-  }
-  getLunarMonth() {
-    return LunarMonth.fromYm(this.year, this.month);
-  }
-  getName() {
-    return LunarDay.NAMES[this.day - 1];
-  }
-  toString() {
-    return this.getLunarMonth().toString() + this.getName();
-  }
-  next(n) {
-    return this.getSolarDay().next(n).getLunarDay();
-  }
-  isBefore(target) {
-    return this.getCompareIndex() < target.getCompareIndex();
-  }
-  isAfter(target) {
-    return this.getCompareIndex() > target.getCompareIndex();
-  }
-  getWeek() {
-    return this.getSolarDay().getWeek();
-  }
-  /**
-   * @deprecated
-   */
-  getYearSixtyCycle() {
-    return this.getSixtyCycleDay().getYear();
-  }
-  /**
-   * @deprecated
-   */
-  getMonthSixtyCycle() {
-    return this.getSixtyCycleDay().getMonth();
-  }
-  getSixtyCycle() {
-    return SixtyCycle.fromIndex(~~this.getLunarMonth().getFirstJulianDay().next(this.day - 12).getDay());
-  }
-  getDuty() {
-    return this.getSixtyCycleDay().getDuty();
-  }
-  getTwelveStar() {
-    return this.getSixtyCycleDay().getTwelveStar();
-  }
-  getNineStar() {
-    return this.getSolarDay().getNineStar();
-  }
-  getJupiterDirection() {
-    const index = this.getSixtyCycle().getIndex();
-    return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : this.getLunarMonth().getLunarYear().getJupiterDirection();
-  }
-  getFetusDay() {
-    return FetusDay.fromLunarDay(this);
-  }
-  getPhaseDay() {
-    const today = this.getSolarDay();
-    const m = this.getLunarMonth().next(1);
-    let p = Phase.fromIndex(m.getYear(), m.getMonthValue(), 0);
-    let d = p.getSolarDay();
-    while (d.isAfter(today)) {
-      p = p.next(-1);
-      d = p.getSolarDay();
-    }
-    return new PhaseDay(p, today.subtract(d));
+class PhaseDay extends AbstractCultureDay {
+  constructor(phase, dayIndex) {
+    super(phase, dayIndex);
   }
   getPhase() {
-    return this.getPhaseDay().getPhase();
-  }
-  getSolarDay() {
-    return this.getLunarMonth().getFirstJulianDay().next(this.day - 1).getSolarDay();
-  }
-  getSixtyCycleDay() {
-    return this.getSolarDay().getSixtyCycleDay();
-  }
-  getTwentyEightStar() {
-    return TwentyEightStar.fromIndex([10, 18, 26, 6, 14, 22, 2][this.getSolarDay().getWeek().getIndex()]).next(-7 * this.getSixtyCycle().getEarthBranch().getIndex());
-  }
-  getFestival() {
-    return LunarFestival.fromYmd(this.year, this.month, this.day);
-  }
-  getSixStar() {
-    return SixStar.fromIndex((Math.abs(this.month) + this.day - 2) % 6);
-  }
-  getGods() {
-    return this.getSixtyCycleDay().getGods();
-  }
-  getRecommends() {
-    return this.getSixtyCycleDay().getRecommends();
-  }
-  getAvoids() {
-    return this.getSixtyCycleDay().getAvoids();
-  }
-  getHours() {
-    const l = [];
-    l.push(LunarHour.fromYmdHms(this.year, this.month, this.day, 0, 0, 0));
-    for (let i = 0; i < 24; i += 2) {
-      l.push(LunarHour.fromYmdHms(this.year, this.month, this.day, i + 1, 0, 0));
-    }
-    return l;
-  }
-  getMinorRen() {
-    return this.getLunarMonth().getMinorRen().next(this.day - 1);
-  }
-  getThreePillars() {
-    return this.getSixtyCycleDay().getThreePillars();
-  }
-}
-class SixtyCycleYear extends AbstractTraditionalYear {
-  constructor(year) {
-    const y = SixtyCycleYear.numeric(year, "sixty cycle year");
-    SixtyCycleYear.validateRange(y, -1, 9999, "sixty cycle year");
-    super(y);
-  }
-  static fromYear(year) {
-    return new SixtyCycleYear(year);
-  }
-  getName() {
-    return `${this.getSixtyCycle().getName()}\u5E74`;
-  }
-  next(n) {
-    return SixtyCycleYear.fromYear(this.year + n);
-  }
-  getFirstMonth() {
-    return new SixtyCycleMonth(this, SixtyCycle.fromIndex(this.year * 12 - 46));
-  }
-  getMonths() {
-    const l = [];
-    const m = this.getFirstMonth();
-    l.push(m);
-    for (let i = 1; i < 12; i++) {
-      l.push(m.next(i));
-    }
-    return l;
-  }
-}
-class SixtyCycleMonth extends AbstractTyme {
-  year;
-  month;
-  constructor(year, month) {
-    super();
-    this.year = year;
-    this.month = month;
-  }
-  static fromIndex(year, index) {
-    return SixtyCycleYear.fromYear(year).getFirstMonth().next(SixtyCycleMonth.numeric(index, "index"));
-  }
-  getSixtyCycleYear() {
-    return this.year;
-  }
-  getYear() {
-    return this.year.getSixtyCycle();
-  }
-  getIndexInYear() {
-    return this.month.getEarthBranch().next(-2).getIndex();
-  }
-  getName() {
-    return this.month.getName() + "\u6708";
-  }
-  toString() {
-    return this.year.toString() + this.getName();
-  }
-  next(n) {
-    return new SixtyCycleMonth(SixtyCycleYear.fromYear(Math.floor((this.year.getYear() * 12 + this.getIndexInYear() + n) / 12)), this.month.next(n));
-  }
-  getFirstDay() {
-    return SixtyCycleDay.fromSolarDay(SolarTerm.fromIndex(this.year.getYear(), 3 + this.getIndexInYear() * 2).getSolarDay());
-  }
-  getDays() {
-    const l = [];
-    let d = this.getFirstDay();
-    while (d.getSixtyCycleMonth().equals(this)) {
-      l.push(d);
-      d = d.next(1);
-    }
-    return l;
-  }
-  getSixtyCycle() {
-    return this.month;
-  }
-  getNineStar() {
-    let index = this.getSixtyCycle().getEarthBranch().getIndex();
-    if (index < 2) {
-      index += 3;
-    }
-    return NineStar.fromIndex(27 - this.year.getSixtyCycle().getEarthBranch().getIndex() % 3 * 3 - index);
-  }
-  getJupiterDirection() {
-    const sixtyCycle = this.getSixtyCycle();
-    const n = [7, -1, 1, 3][sixtyCycle.getEarthBranch().next(-2).getIndex() % 4];
-    return n === -1 ? sixtyCycle.getHeavenStem().getDirection() : Direction.fromIndex(n);
-  }
-}
-class SixtyCycleDay extends AbstractTyme {
-  solarDay;
-  month;
-  day;
-  constructor(solarDay, month, day) {
-    super();
-    this.solarDay = solarDay;
-    this.month = month;
-    this.day = day;
-  }
-  static fromSolarDay(solarDay) {
-    const term = solarDay.getTerm();
-    const index = term.getIndex();
-    const offset = index < 3 ? index === 0 ? -2 : -1 : Math.floor((index - 3) / 2);
-    const month = SixtyCycleYear.fromYear(term.getYear()).getFirstMonth().next(offset);
-    return new SixtyCycleDay(solarDay, month, SixtyCycle.fromIndex(solarDay.subtract(SolarDay.fromYmd(2e3, 1, 7))));
-  }
-  getSolarDay() {
-    return this.solarDay;
-  }
-  getSixtyCycleMonth() {
-    return this.month;
-  }
-  getYear() {
-    return this.month.getYear();
-  }
-  getMonth() {
-    return this.month.getSixtyCycle();
-  }
-  getSixtyCycle() {
-    return this.day;
-  }
-  getName() {
-    return this.day.getName() + "\u65E5";
-  }
-  toString() {
-    return this.month.toString() + this.getName();
-  }
-  next(n) {
-    return SixtyCycleDay.fromSolarDay(this.solarDay.next(n));
-  }
-  getDuty() {
-    return Duty.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() - this.getMonth().getEarthBranch().getIndex());
-  }
-  getTwelveStar() {
-    return TwelveStar.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() + (8 - this.getMonth().getEarthBranch().getIndex() % 6) * 2);
-  }
-  getNineStar() {
-    return this.solarDay.getNineStar();
-  }
-  getJupiterDirection() {
-    const index = this.getSixtyCycle().getIndex();
-    return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : this.month.getSixtyCycleYear().getJupiterDirection();
-  }
-  getFetusDay() {
-    return FetusDay.fromSixtyCycleDay(this);
-  }
-  getTwentyEightStar() {
-    return TwentyEightStar.fromIndex([10, 18, 26, 6, 14, 22, 2][this.solarDay.getWeek().getIndex()]).next(-7 * this.day.getEarthBranch().getIndex());
-  }
-  getGods() {
-    return God.getDayGods(this.getMonth(), this.day);
-  }
-  getRecommends() {
-    return Taboo.getDayRecommends(this.getMonth(), this.day);
-  }
-  getAvoids() {
-    return Taboo.getDayAvoids(this.getMonth(), this.day);
-  }
-  getHours() {
-    const l = [];
-    const d = this.solarDay.next(-1);
-    let h = SixtyCycleHour.fromSolarTime(SolarTime.fromYmdHms(d.getYear(), d.getMonth(), d.getDay(), 23, 0, 0));
-    l.push(h);
-    for (let i = 0; i < 11; i++) {
-      h = h.next(7200);
-      l.push(h);
-    }
-    return l;
-  }
-  getThreePillars() {
-    return new ThreePillars(this.getYear(), this.getMonth(), this.getSixtyCycle());
-  }
-}
-class SixtyCycleHour extends AbstractTyme {
-  static SPRING_CACHE = {};
-  solarTime;
-  day;
-  hour;
-  /**
-   * 立春时刻，按年缓存，避免逐时重复精算
-   */
-  static getSpringSolarTime(year) {
-    let t = SixtyCycleHour.SPRING_CACHE[year];
-    if (!t) {
-      t = SolarTerm.fromIndex(year, 3).getJulianDay().getSolarTime();
-      SixtyCycleHour.SPRING_CACHE[year] = t;
-    }
-    return t;
-  }
-  constructor(solarTime) {
-    super();
-    const solarYear = solarTime.getYear();
-    const springSolarTime = SixtyCycleHour.getSpringSolarTime(solarYear);
-    const lunarHour = solarTime.getLunarHour();
-    const lunarDay = lunarHour.getLunarDay();
-    let lunarYear = lunarDay.getLunarMonth().getLunarYear();
-    if (lunarYear.getYear() === solarYear) {
-      if (solarTime.isBefore(springSolarTime)) {
-        lunarYear = lunarYear.next(-1);
-      }
-    } else if (lunarYear.getYear() < solarYear) {
-      if (!solarTime.isBefore(springSolarTime)) {
-        lunarYear = lunarYear.next(1);
-      }
-    }
-    const term = solarTime.getTerm();
-    let index = term.getIndex() - 3;
-    if (index < 0 && term.getJulianDay().getSolarTime().isAfter(springSolarTime)) {
-      index += 24;
-    }
-    const d = lunarDay.getSixtyCycle();
-    this.solarTime = solarTime;
-    this.day = new SixtyCycleDay(solarTime.getSolarDay(), new SixtyCycleMonth(SixtyCycleYear.fromYear(lunarYear.getYear()), LunarMonth.fromYm(solarYear, 1).getSixtyCycle().next(~~Math.floor(index * 0.5))), solarTime.getHour() < 23 ? d : d.next(1));
-    this.hour = lunarHour.getSixtyCycle();
-  }
-  static fromSolarTime(solarTime) {
-    return new SixtyCycleHour(solarTime);
-  }
-  getYear() {
-    return this.day.getYear();
-  }
-  getMonth() {
-    return this.day.getMonth();
-  }
-  getDay() {
-    return this.day.getSixtyCycle();
-  }
-  getSixtyCycle() {
-    return this.hour;
-  }
-  getSixtyCycleDay() {
-    return this.day;
-  }
-  getSolarTime() {
-    return this.solarTime;
-  }
-  getName() {
-    return this.hour.getName() + "\u65F6";
-  }
-  toString() {
-    return `${this.day}${this.getName()}`;
-  }
-  getIndexInDay() {
-    const h = this.solarTime.getHour();
-    return h === 23 ? 0 : ~~((h + 1) / 2);
-  }
-  next(n) {
-    return SixtyCycleHour.fromSolarTime(this.solarTime.next(n));
-  }
-  getTwelveStar() {
-    return TwelveStar.fromIndex(this.hour.getEarthBranch().getIndex() + (8 - this.getDay().getEarthBranch().getIndex() % 6) * 2);
-  }
-  getNineStar() {
-    const solar = this.solarTime.getSolarDay();
-    const dongZhi = SolarTerm.fromIndex(solar.getYear(), 0);
-    const earthBranchIndex = this.getIndexInDay() % 12;
-    let index = [8, 5, 2][this.getDay().getEarthBranch().getIndex() % 3];
-    if (!solar.isBefore(dongZhi.getJulianDay().getSolarDay()) && solar.isBefore(dongZhi.next(12).getJulianDay().getSolarDay())) {
-      index = 8 + earthBranchIndex - index;
-    } else {
-      index -= earthBranchIndex;
-    }
-    return NineStar.fromIndex(index);
-  }
-  getEightChar() {
-    return new EightChar(this.getYear(), this.getMonth(), this.getDay(), this.hour);
-  }
-  getRecommends() {
-    return Taboo.getHourRecommends(this.getDay(), this.hour);
-  }
-  getAvoids() {
-    return Taboo.getHourAvoids(this.getDay(), this.hour);
-  }
-}
-class ThreePillars extends AbstractCulture {
-  year;
-  month;
-  day;
-  constructor(year, month, day) {
-    super();
-    this.year = year instanceof SixtyCycle ? year : SixtyCycle.fromName(year);
-    this.month = month instanceof SixtyCycle ? month : SixtyCycle.fromName(month);
-    this.day = day instanceof SixtyCycle ? day : SixtyCycle.fromName(day);
-  }
-  getYear() {
-    return this.year;
-  }
-  getMonth() {
-    return this.month;
-  }
-  getDay() {
-    return this.day;
-  }
-  getName() {
-    return `${this.year} ${this.month} ${this.day}`;
-  }
-  getSolarDays(startYear, endYear) {
-    const l = [];
-    let m = this.month.getEarthBranch().next(-2).getIndex();
-    if (!HeavenStem.fromIndex((this.year.getHeavenStem().getIndex() + 1) * 2 + m).equals(this.month.getHeavenStem())) {
-      return l;
-    }
-    let y = this.year.next(-57).getIndex() + 1;
-    m *= 2;
-    const baseYear = startYear - 1;
-    if (baseYear > y) {
-      y += 60 * ~~Math.ceil((baseYear - y) / 60);
-    }
-    while (y <= endYear) {
-      let term = SolarTerm.fromIndex(y, 3);
-      if (m > 0) {
-        term = term.next(m);
-      }
-      let solarDay = term.getSolarDay();
-      if (solarDay.getYear() >= startYear) {
-        const d = this.day.next(-solarDay.getLunarDay().getSixtyCycle().getIndex()).getIndex();
-        if (d > 0) {
-          solarDay = solarDay.next(d);
-        }
-        if (solarDay.getSixtyCycleDay().getThreePillars().equals(this)) {
-          l.push(solarDay);
-        }
-      }
-      y += 60;
-    }
-    return l;
-  }
-}
-class DefaultEightCharProvider {
-  getEightChar(hour) {
-    return hour.getSixtyCycleHour().getEightChar();
-  }
-}
-class LunarSect2EightCharProvider {
-  getEightChar(hour) {
-    const h = hour.getSixtyCycleHour();
-    return new EightChar(h.getYear(), h.getMonth(), hour.getLunarDay().getSixtyCycle(), h.getSixtyCycle());
-  }
-}
-class LunarHour extends SecondUnit {
-  static provider = new DefaultEightCharProvider();
-  constructor(year, month, day, hour, minute, second) {
-    const y = LunarHour.numeric(year, "lunar year");
-    const m = LunarHour.numeric(month, "lunar month");
-    const d = LunarHour.numeric(day, "lunar day");
-    const h = LunarHour.numeric(hour, "hour");
-    const n = LunarHour.numeric(minute, "minute");
-    const s = LunarHour.numeric(second, "second");
-    LunarHour.validate(y, m, d, h, n, s);
-    super(y, m, d, h, n, s);
-  }
-  static validate(year, month, day, hour, minute, second) {
-    SecondUnit.validate(year, month, day, hour, minute, second);
-    LunarDay.validate(year, month, day);
-  }
-  static fromYmdHms(year, month, day, hour, minute, second) {
-    return new LunarHour(year, month, day, hour, minute, second);
-  }
-  getLunarDay() {
-    return LunarDay.fromYmd(this.year, this.month, this.day);
-  }
-  getName() {
-    return EarthBranch.fromIndex(this.getIndexInDay()).getName() + "\u65F6";
-  }
-  toString() {
-    return `${this.getLunarDay()}${this.getSixtyCycle().getName()}\u65F6`;
-  }
-  getIndexInDay() {
-    return ~~((this.hour + 1) / 2);
-  }
-  next(n) {
-    if (n === 0) {
-      return LunarHour.fromYmdHms(this.year, this.month, this.day, this.hour, this.minute, this.second);
-    }
-    const h = this.hour + n * 2;
-    const d = this.getLunarDay().next(Math.floor(h / 24));
-    return LunarHour.fromYmdHms(d.getYear(), d.getMonth(), d.getDay(), this.indexOf(h, 24), this.minute, this.second);
-  }
-  isBefore(target) {
-    return this.getCompareIndex() < target.getCompareIndex();
-  }
-  isAfter(target) {
-    return this.getCompareIndex() > target.getCompareIndex();
-  }
-  /**
-   * @deprecated
-   */
-  getYearSixtyCycle() {
-    return this.getSixtyCycleHour().getYear();
-  }
-  /**
-   * @deprecated
-   */
-  getMonthSixtyCycle() {
-    return this.getSixtyCycleHour().getMonth();
-  }
-  /**
-   * @deprecated
-   */
-  getDaySixtyCycle() {
-    return this.getSixtyCycleHour().getDay();
-  }
-  getSixtyCycle() {
-    let e = this.getIndexInDay();
-    let h = this.getLunarDay().getSixtyCycle().getHeavenStem();
-    if (this.hour >= 23) {
-      h = h.next(1);
-      e = 0;
-    }
-    return SixtyCycle.fromIndex(h.getIndex() * 12 + e);
-  }
-  getTwelveStar() {
-    return TwelveStar.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() + (8 - this.getSixtyCycleHour().getDay().getEarthBranch().getIndex() % 6) * 2);
-  }
-  getNineStar() {
-    const d = this.getLunarDay();
-    const solar = d.getSolarDay();
-    const dongZhi = SolarTerm.fromIndex(solar.getYear(), 0);
-    const earthBranchIndex = this.getIndexInDay() % 12;
-    let index = [8, 5, 2][d.getSixtyCycle().getEarthBranch().getIndex() % 3];
-    if (!solar.isBefore(dongZhi.getJulianDay().getSolarDay()) && solar.isBefore(dongZhi.next(12).getJulianDay().getSolarDay())) {
-      index = 8 + earthBranchIndex - index;
-    } else {
-      index -= earthBranchIndex;
-    }
-    return NineStar.fromIndex(index);
-  }
-  getSolarTime() {
-    const d = this.getLunarDay().getSolarDay();
-    return SolarTime.fromYmdHms(d.getYear(), d.getMonth(), d.getDay(), this.hour, this.minute, this.second);
-  }
-  getSixtyCycleHour() {
-    return this.getSolarTime().getSixtyCycleHour();
-  }
-  getEightChar() {
-    return LunarHour.provider.getEightChar(this);
-  }
-  getRecommends() {
-    return Taboo.getHourRecommends(this.getSixtyCycleHour().getDay(), this.getSixtyCycle());
-  }
-  getAvoids() {
-    return Taboo.getHourAvoids(this.getSixtyCycleHour().getDay(), this.getSixtyCycle());
-  }
-  getMinorRen() {
-    return this.getLunarDay().getMinorRen().next(this.getIndexInDay());
+    return this.culture;
   }
 }
 class JulianDay extends AbstractTyme {
@@ -6281,11 +5257,11 @@ class SolarDay extends AbstractDay {
     }
     let type;
     if (typeIndex === 0) {
-      type = 0 /* RESIDUAL */;
+      type = HideHeavenStemType.RESIDUAL;
     } else if (typeIndex === 1) {
-      type = 1 /* MIDDLE */;
+      type = HideHeavenStemType.MIDDLE;
     } else {
-      type = 2 /* MAIN */;
+      type = HideHeavenStemType.MAIN;
     }
     return new HideHeavenStemDay(new HideHeavenStem(heavenStemIndex, type), dayIndex);
   }
@@ -6455,6 +5431,40 @@ class SolarTime extends SecondUnit {
       p = p.next(-1);
     }
     return p;
+  }
+}
+class MonthGeneral extends LoopTyme {
+  static NAMES = ["\u795E\u540E", "\u5927\u5409", "\u529F\u66F9", "\u592A\u51B2", "\u5929\u7F61", "\u592A\u4E59", "\u80DC\u5149", "\u5C0F\u5409", "\u4F20\u9001", "\u4ECE\u9B41", "\u6CB3\u9B41", "\u767B\u660E"];
+  constructor(indexOrName) {
+    super(MonthGeneral.NAMES, indexOrName);
+  }
+  static fromIndex(index) {
+    return new MonthGeneral(MonthGeneral.numeric(index, "month general index"));
+  }
+  static fromName(name) {
+    return new MonthGeneral(name);
+  }
+  static fromSolarDay(solarDay) {
+    const termIndex = solarDay.getTerm().getIndex();
+    return MonthGeneral.fromIndex(11 - ~~(((termIndex < 4 ? termIndex + 24 : termIndex) - 4) / 2));
+  }
+  next(n) {
+    return MonthGeneral.fromIndex(this.nextIndex(n));
+  }
+  /**
+   * 月将地支
+   */
+  getEarthBranch() {
+    return EarthBranch.fromIndex(this.index);
+  }
+  /**
+   * 起始中气在当年的索引（0 为冬至）
+   */
+  getStartTermIndex() {
+    return (4 + (11 - this.index) * 2) % 24;
+  }
+  toString() {
+    return `${this.getName()}\uFF08${this.getEarthBranch().getName()}\uFF09`;
   }
 }
 class LegalHoliday extends AbstractTyme {
@@ -6643,12 +5653,12 @@ class LunarFestival extends AbstractFestival {
     const e = AbstractFestival.buildEvent(LunarFestival.NAMES, LunarFestival.DATA, i);
     if (e) {
       switch (e.getType()) {
-        case 2 /* LUNAR_DAY */:
+        case EventType.LUNAR_DAY:
           const m = e.getMonth(y);
           const d = LunarDay.fromYmd(m.getYear(), m.getMonth(), e.getValue(3));
           const offset = e.getValue(5);
           return new LunarFestival(i, e, offset === 0 ? d : d.next(offset));
-        case 3 /* TERM_DAY */:
+        case EventType.TERM_DAY:
           return new LunarFestival(i, e, SolarTerm.fromIndex(y, e.getValue(2)).getSolarDay().getLunarDay());
       }
     }
@@ -6660,7 +5670,7 @@ class LunarFestival extends AbstractFestival {
       const start = i * 8;
       const e = new Event(LunarFestival.NAMES[i], "@" + LunarFestival.DATA.substring(start, start + 8));
       switch (e.getType()) {
-        case 2 /* LUNAR_DAY */:
+        case EventType.LUNAR_DAY:
           const offset = e.getValue(5);
           if (offset === 0) {
             if (d.getMonth() === e.getValue(2) && d.getDay() === e.getValue(3)) {
@@ -6674,7 +5684,7 @@ class LunarFestival extends AbstractFestival {
             }
           }
           break;
-        case 3 /* TERM_DAY */:
+        case EventType.TERM_DAY:
           const term = d.getSolarDay().getTermDay();
           if (term.getDayIndex() === 0 && term.getSolarTerm().getIndex() === e.getValue(2) % 24) {
             return new LunarFestival(i, e, d);
@@ -6694,6 +5704,846 @@ class LunarFestival extends AbstractFestival {
     const size = LunarFestival.NAMES.length;
     const i = this.index + n;
     return LunarFestival.fromIndex(~~((this.day.getYear() * size + i) / size), this.indexOf(i, size));
+  }
+}
+class LunarYear extends AbstractTraditionalYear {
+  static isInit = false;
+  static LEAP = [];
+  static init() {
+    if (LunarYear.isInit) {
+      return;
+    }
+    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_@";
+    const months = [
+      "080b0r0j0j0j0C0j0j0C0j0j0j0C0j0C0j0C0F0j0V0V0V0u0j0j0C0j0j0j0j0V0C0j1v0u0C0V1v0C0b080u110u0C0j0C1v9K1v2z0j1vmZbl1veN3s1v0V0C2S1v0V0C2S2o0C0j1Z1c2S1v0j1c0j2z1v0j1c0j392H0b2_2S0C0V0j1c0j2z0C0C0j0j1c0j0N250j0C0j0b081n080b0C0C0C1c0j0N",
+      "0r1v1c1v0V0V0F0V0j0C0j0C0j0V0j0u1O0j0C0V0j0j0j0V0b080u0r0u080b0j0j0C0V0C0V0j0b080V0u080b0j0j0u0j1v0u080b1c0j080b0j0V0j0j0V0C0N1v0j1c0j0j1v2g1v420j1c0j2z1v0j1v5Q9z1v4l0j1vfn1v420j9z4l1v1v2S1c0j1v2S3s1v0V0C2S1v1v2S1c0j1v2S2_0b0j2_2z0j1c0j",
+      "0z0j0j0j0C0j0j0C0j0j0j0C0j0C0j0j0j0j0m0j0C0j0j0C0j0j0j0j0b0V0j0j0C0j0j0j0j0V0j0j0j0V0b0V0V0C0V0C0j0j0b080u110u0V0C0j0N0j0b080b080b0j0r0b0r0b0j0j0j0j0C0j0b0r0C0j0b0j0C0C0j0j0j0j0j0j0j0j0j0b110j0b0j0j0j0C0j0C0j0j0j0j0b080b080b0V080b080b0j0j0j0j0j0j0V0j0j0u1v0j0j0j0C0j0j0j0V0C0N1c0j0C0C0j0j0j1n080b0j0V0C0j0C0C2g0j1c0j0j1v2g1v0j0j1v7N0j1c0j3L0j0j1v5Q1Z5Q1v4lfn1v420j1v5Q1Z5Q1v4l1v2z1v",
+      "0H140r0N0r140r0u0r0V171c11140C0j0u110j0u0j1v0j0C0j0j0j0b080V0u080b0C1v0j0j0j0C0j0b080V0j0j0b080b0j0j0j0j0b080b0C080j0b080b0j0j0j0j0j0j0b080j0b080C0b080b080b080b0j0j0j0j080b0j0C0j0j0j0b0j0j080C0b0j0j0j0j0j0j0b08080b0j0C0j0j0j0b0j0j0K0b0j0C0j0j0j0b080b080j0C0b0j080b080b0j0j0j0j080b0j0b0r0j0j0j0b0j0C0r0b0j0j0j0j0j0j0j0b080j0b0r0C0j0b0j0j0j0r0b0j0C0j0j0j0u0r0b0C0j080b0j0j0j0j0j0j0j1c0j0b0j0j0j0C0j0j0j0j0j0j0j0b080j1c0u0j0j0j0C0j1c0j0u0j1c0j0j0j0j0j0j0j0j1c0j0u1v0j0j0V0j0j2g0j0j0j0C1v0C1G0j0j0V0C1Z1O0j0V0j0j2g1v0j0j0V0C2g5x1v4l1v421O7N0V0C4l1v2S1c0j1v2S2_",
+      "050b080C0j0j0j0C0j0j0C0j0j0j0C0j0C0j0C030j0j0j0j0j0j0j0j0j0C0j0b080u0V080b0j0j0V0j0j0j0j0j0j0j0j0j0V0N0j0C0C0j0j0j0j0j0j0j0j1c0j0u0j1v0j0j0j0j0j0b080b080j0j0j0b080b080b080b080b0j0j0j080b0j0b080j0j0j0j0b080b0j0j0r0b080b0b080j0j0j0j0b080b080j0b080j0b080b080b080b080b0j0j0r0b0j0b080j0j0j0j0b080b0j0j0C080b0b080j0j0j0j0j0j0j0b080u080j0j0b0j0j0j0C0j0b080j0j0j0j0b080b080b080b0C080b080b080b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0b080j0j0C0b080b080j0b0j0j0C080b0j0j0j0j0j0j0b0j0j080C0b0j080b0j0j0j0j0j0j0j0C0j0j0j0b0j0j0C080b0j0j0j0j0j0j0b080b080b0K0b080b080b0j0j0j0j0j0j0j0C0j0j0u0j0j0V0j080b0j0C0j0j0j0b0j0r0C0b0j0j0j0j0j0j0j0j0j0C0j0b080b080b0j0C0C0j0C0j0j0j0u110u0j0j0j0j0j0j0j0j0C0j0j0u0j1c0j0j0j0j0j0j0j0j0V0C0u0j0C0C0V0C1Z0j0j0j0C0j0j0j1v0u0j1c0j0j0j0C0j0j2g0j1c1v0C1Z0V0j4l0j0V0j0j2g0j1v0j1v2S1c7N1v",
+      "0w0j1c0j0V0j0j0V0V0V0j0m0V0j0C1c140j0j0j0C0V0C0j1v0j0N0j0C0j0j0j0V0j0j1v0N0j0j0V0j0j0j0j0j0j080b0j0j0j0j0j0j0j080b0j0C0j0j0j0b0j0j080u080b0j0j0j0j0j0j0b080b080b080C0b0j080b080b0j0j0j0j080b0j0C0j0j0j0b0j0j080u080b0j0j0j0j0j0j0b080b080b080b0r0b0j080b080b0j0j0j0j080b0j0b0r0j0j0b080b0j0j080b0j080b0j080b080b0j0j0j0j0j0b080b0r0C0b080b0j0j0j0j080b0b080b080j0j0j0b080b080b080b0j0j0j0j080b0j0b080j0j0j0j0b080b0j0j0r0b080b0j0j0j0j0j0b080b080j0b0r0b080j0b080b0j0j0j0j080b0j0b080j0j0j0j0b080b0j080b0r0b0j080b080b0j0j0j0j0j0b080b0r0C0b080b0j0j0j0j0j0j0b080j0j0j0b080b080b080b0j0j0j0r0b0j0b080j0j0j0j0b080b0r0b0r0b0j080b080b0j0j0j0j0j0j0b0r0j0j0j0b0j0j0j0j080b0j0b080j0j0j0j0b080b080b0j0r0b0j080b0j0j0j0j0j0j0j0b0r0C0b0j0j0j0j0j0j0j080b0j0C0j0j0j0b0j0C0r0b0j0j0j0j0j0j0b080b080u0r0b0j080b0j0j0j0j0j0j0j0b0r0C0u0j0j0j0C0j080b0j0C0j0j0j0u110b0j0j0j0j0j0j0j0j0j0C0j0b080b0j0j0C0C0j0C0j0j0j0b0j1c0j080b0j0j0j0j0j0j0V0j0j0u0j1c0j0j0j0C0j0j2g0j0j0j0C0j0j0V0j0b080b1c0C0V0j0j2g0j0j0V0j0j1c0j1Z0j0j0C0C0j1v",
+      "160j0j0V0j1c0j0C0j0C0j1f0j0V0C0j0j0C0j0j0j1G080b080u0V080b0j0j0V0j1v0j0u0j1c0j0j0j0C0j0j0j0C0C0j1D0b0j080b0j0j0j0j0C0j0b0r0C0j0b0j0C0C0j0j0j0j0j0j0j0j0j0b0r0b0r0j0b0j0j0j0C0j0b0r0j0j0j0b080b080j0b0C0j080b080b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0b080j0j0j0j0b080b080j0b0C0r0j0b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0j0j0j0C0j0j0b080b0j0j0C080b0j0j0j0j0j0j0b080b080b080C0b080b080b080b0j0j0j0j0j0b080C0j0j0b080b0j0j0C080b0j0j0j0j0j0j0b080j0b0C080j0j0b0j0j0j0j0j0j0b080j0b080C0b080b080b080b0j0j0j0j080b0j0C0j0j0b080b0j0j0C080b0j0j0j0j0j0j0b080j0b080u080j0j0b0j0j0j0j0j0j0b080C0j0j0b080b0j0j0C0j0j080b0j0j0j0j0j0b080b0C0r0b080b0j0j0j0j0j0j0b080j0b080u080b080b080b0j0j0j0C0j0b080j0j0j0j0b0j0j0j0C0j0j080b0j0j0j0j0j0b080b0C0r0b080b0j0j0j0j0j0j0b080j0b0r0b080b080b080b0j0j0j0r0b0j0b0r0j0j0j0b0j0j0j0r0b0j080b0j0j0j0j0j0j0j0b0r0C0b0j0j0j0j0j0j0j0b080j0C0u080b080b0j0j0j0r0b0j0C0C0j0b0j110b0j080b0j0j0j0j0j0j0u0r0C0b0j0j0j0j0j0j0j0j0j0C0j0j0j0b0j1c0j0C0j0j0j0b0j0814080b080b0j0j0j0j0j0j1c0j0u0j0j0V0j0j0j0j0j0j0j0u110u0j0j0j",
+      "020b0r0C0j0j0j0C0j0j0V0j0j0j0j0j0C0j1f0j0C0j0V1G0j0j0j0j0V0C0j0C1v0u0j0j0j0V0j0j0C0j0j0j1v0N0C0V0j0j0j0K0C250b0C0V0j0j0V0j0j2g0C0V0j0j0C0j0j0b081v0N0j0j0V0V0j0j0u0j1c0j080b0j0j0j0j0j0j0V0j0j0u0j0j0V0j0j0j0C0j0b080b080V0b0j080b0j0j0j0j0j0j0j0b0r0C0j0b0j0j0j0C0j080b0j0j0j0j0j0j0u0r0C0u0j0j0j0j0j0j0b080j0C0j0b080b080b0j0C0j080b0j0j0j0j0j0j0b080b110b0j0j0j0j0j0j0j0j0j0b0r0j0j0j0b0j0j0j0r0b0j0b080j0j0j0j0b080b080b080b0r0b0j080b080b0j0j0j0j0j0j0b0r0C0b080b0j0j0j0j080b0j0b080j0j0j0j0b080b080b0j0j0j0r0b0j0j0j0j0j0j0b080b0j080C0b0j080b080b0j0j0j0j080b0j0b0r0C0b080b0j0j0j0j080b0j0j0j0j0j0b080b080b080b0j0j080b0r0b0j0j0j0j0j0j0b0j0j080C0b0j080b080b0j0j0j0j0j0b080C0j0j0b080b0j0j0C0j0b080j0j0j0j0b080b080b080b0C0C080b0j0j0j0j0j0j0b0C0C080b080b080b0j0j0j0j0j0j0b0C080j0j0b0j0j0j0C0j0b080j0b080j0j0b080b080b080b0C0r0b0j0j0j0j0j0j0b080b0r0b0r0b0j080b080b0j0j0j0j0j0j0b0r0C0j0b0j0j0j0j0j0j0b080j0C0j0b080j0b0j0j0K0b0j0C0j0j0j0b080b0j0K0b0j080b0j0j0j0j0j0j0V0j0j0b0j0j0j0C0j0j0j0j",
+      "0l0C0K0N0r0N0j0r1G0V0m0j0V1c0C0j0j0j0j1O0N110u0j0j0j0C0j0j0V0C0j0u110u0j0j0j0C0j0j0j0C0C0j250j1c2S1v1v0j5x2g0j1c0j0j1c2z0j1c0j0j1c0j0N1v0V0C1v0C0b0C0V0j0j0C0j0C1v0u0j0C0C0j0j0j0C0j0j0j0u110u0j0j0j0C0j0C0C0C0b080b0j0C0j080b0j0C0j0j0j0u110u0j0j0j0C0j0j0j0C0j0j0j0u0C0r0u0j0j0j0j0j0j0b0r0b0V080b080b0j0C0j0j0j0V0j0j0b0j0j0j0C0j0j0j0j0j0j0j0b080j0b0C0r0j0b0j0j0j0C0j0b0r0b0r0j0b080b080b0j0C0j0j0j0j0j0j0j0j0b0j0C0r0b0j0j0j0j0j0j0b080b080j0b0r0b0r0j0b0j0j0j0j080b0j0b0r0j0j0j0b080b080b0j0j0j0j080b0j0j0j0j0j0j0b0j0j0j0r0b0j0j0j0j0j0j0b080b080b080b0r0C0b080b0j0j0j0j0j0b080b0r0C0b080b080b080b0j0j0j0j080b0j0C0j0j0j0b0j0j0C080b0j0j0j0j0j0j0b080j0b0C080j0j0b0j0j0j0j0j0j0b0r0b080j0j0b080b080b0j0j0j0j0j0j0b080j0j0j0j0b0j0j0j0r0b0j0b080j0j0j0j0j0b080b080b0C0r0b0j0j0j0j0j0j0b080b080j0C0b0j080b080b0j0j0j0j0j0j",
+      "0a0j0j0j0j0C0j0j0C0j0C0C0j0j0j0j0j0j0j0m0C0j0j0j0j0u080j0j0j1n0j0j0j0j0C0j0j0j0V0j0j0j1c0u0j0C0V0j0j0V0j0j1v0N0C0V2o1v1O2S2o141v0j1v4l0j1c0j1v2S2o0C0u1v0j0C0C2S1v0j1c0j0j1v0N251c0j1v0b1c1v1n1v0j0j0V0j0j1v0N1v0C0V0j0j1v0b0C0j0j0V1c0j0u0j1c0j0j0j0j0j0j0j0j1c0j0u0j0j0V0j0j0j0j0j0j0b080u110u0j0j0j0j0j0j1c0j0b0j080b0j0C0j0j0j0V0j0j0u0C0V0j0j0j0C0j0b080j1c0j0b0j0j0j0C0j0C0j0j0j0b080b080b0j0C0j080b0j0j0j0j0j0j0j0b0C0r0u0j0j0j0j0j0j0b080j0b0r0C0j0b0j0j0j0r0b0j0b0r0j0j0j0b080b080b0j0r0b0j080b0j0j0j0j0j0j0b0j0r0C0b0j0j0j0j0j0j0b080j0j0C0j0j0b080b0j0j0j0j0j0j0j0j0j0j0b080b080b080b0C0j0j080b0j0j0j0j0j0j0b0j0j0C080b0j0j0j0j0j0j0j0j0b0C080j0j0b0j0j0j0j0j",
+      "0n0Q0j1c14010q0V1c171k0u0r140V0j0j1c0C0N1O0j0V0j0j0j1c0j0u110u0C0j0C0V0C0j0j0b671v0j1v5Q1O2S2o2S1v4l1v0j1v2S2o0C1Z0j0C0C1O141v0j1c0j2z1O0j0V0j0j1v0b2H390j1c0j0V0C2z0j1c0j1v2g0C0V0j1O0b0j0j0V0C1c0j0u0j1c0j0j0j0j0j0j0j0j1c0N0j0j0V0j0j0C0j0j0b081v0u0j0j0j0C0j1c0N0j0j0C0j0j0j0C0j0j0j0u0C0r0u0j0j0j0C0j0b080j1c0j0b0j0C0C0j0C0C0j0b080b080u0C0j080b0j0C0j0j0j0u110u0j0j0j0j0j0j0j0j0C0C0j0b0j0j0j0C0j0C0C0j0b080b080b0j0C0j080b0j0C0j0j0j0b0j110b0j0j0j0j0j",
+      "0B0j0V0j0j0C0j0j0j0C0j0C0j0j0C0j0m0j0j0j0j0C0j0C0j0j0u0j1c0j0j0C0C0j0j0j0j0j0j0j0j0u110N0j0j0V0C0V0j0b081n080b0CrU1O5e2SbX2_1Z0V2o141v0j0C0C0j2z1v0j1c0j7N1O420j1c0j1v2S1c0j1v2S2_0b0j0V0j0j1v0N1v0j0j1c0j1v140j0V0j0j0C0C0b080u1v0C0V0u110u0j0j0j0C0j0j0j0C0C0N0C0V0j0j0C0j0j0b080u110u0C0j0C0u0r0C0u080b0j0j0C0j0j0j"
+    ];
+    for (let i = 0; i < 12; i++) {
+      let n = 0;
+      const m = months[i];
+      const size = ~~(m.length / 2);
+      const l = [];
+      for (let y = 0; y < size; y++) {
+        const z = y * 2;
+        let t = 0;
+        let c = 1;
+        for (let x = 1; x > -1; x--) {
+          t += c * chars.indexOf(m.charAt(z + x));
+          c *= 64;
+        }
+        n += t;
+        l.push(n);
+      }
+      LunarYear.LEAP.push(l);
+    }
+    LunarYear.isInit = true;
+  }
+  constructor(year) {
+    LunarYear.init();
+    const y = LunarYear.numeric(year, "lunar year");
+    LunarYear.validate(y);
+    super(y);
+  }
+  static validate(year) {
+    LunarYear.validateRange(year, -1, 9999, "lunar year");
+  }
+  static fromYear(year) {
+    return new LunarYear(year);
+  }
+  getDayCount() {
+    let n = 0;
+    const months = this.getMonths();
+    for (let i = 0, j = months.length; i < j; i++) {
+      n += months[i].getDayCount();
+    }
+    return n;
+  }
+  getName() {
+    return `\u519C\u5386${this.getSixtyCycle().getName()}\u5E74`;
+  }
+  next(n) {
+    return LunarYear.fromYear(this.year + n);
+  }
+  getLeapMonth() {
+    if (this.year === -1) {
+      return 11;
+    }
+    for (let i = 0, j = LunarYear.LEAP.length; i < j; i++) {
+      if (LunarYear.LEAP[i].indexOf(this.year) > -1) {
+        return i + 1;
+      }
+    }
+    return 0;
+  }
+  getFirstMonth() {
+    return LunarMonth.fromYm(this.year, 1);
+  }
+  getMonths() {
+    const l = [];
+    const leapMonth = this.getLeapMonth();
+    for (let i = 1; i < 13; i++) {
+      l.push(LunarMonth.fromYm(this.year, i));
+      if (i === leapMonth) {
+        l.push(LunarMonth.fromYm(this.year, -i));
+      }
+    }
+    return l;
+  }
+  getKitchenGodSteed() {
+    return KitchenGodSteed.fromLunarYear(this.year);
+  }
+}
+class LunarSeason extends LoopTyme {
+  static NAMES = ["\u5B5F\u6625", "\u4EF2\u6625", "\u5B63\u6625", "\u5B5F\u590F", "\u4EF2\u590F", "\u5B63\u590F", "\u5B5F\u79CB", "\u4EF2\u79CB", "\u5B63\u79CB", "\u5B5F\u51AC", "\u4EF2\u51AC", "\u5B63\u51AC"];
+  constructor(indexOrName) {
+    super(LunarSeason.NAMES, indexOrName);
+  }
+  static fromIndex(index) {
+    return new LunarSeason(LunarSeason.numeric(index, "lunar season index"));
+  }
+  static fromName(name) {
+    return new LunarSeason(name);
+  }
+  next(n) {
+    return LunarSeason.fromIndex(this.nextIndex(n));
+  }
+}
+class LunarMonth extends AbstractLeapMonth {
+  static NAMES = ["\u6B63\u6708", "\u4E8C\u6708", "\u4E09\u6708", "\u56DB\u6708", "\u4E94\u6708", "\u516D\u6708", "\u4E03\u6708", "\u516B\u6708", "\u4E5D\u6708", "\u5341\u6708", "\u5341\u4E00\u6708", "\u5341\u4E8C\u6708"];
+  static NEW_MOON_CACHE = [];
+  constructor(year, month) {
+    const y = LunarMonth.numeric(year, "lunar year");
+    const m = LunarMonth.numeric(month, "lunar month");
+    LunarMonth.validate(y, m);
+    super(y, m);
+  }
+  static validate(year, month) {
+    if (month === 0 || month > 12 || month < -12) {
+      throw new Error(`illegal lunar month: ${month}`);
+    }
+    if (month < 0 && -month != LunarYear.fromYear(year).getLeapMonth()) {
+      throw new Error(`illegal leap month ${-month} in lunar year ${year}`);
+    }
+  }
+  static fromYm(year, month) {
+    return new LunarMonth(year, month);
+  }
+  getNewMoon() {
+    const m = this.getIndexInYear();
+    const y = this.year;
+    let months = LunarMonth.NEW_MOON_CACHE[y];
+    if (!months) {
+      months = Array(13).fill(NaN);
+      LunarMonth.NEW_MOON_CACHE[y] = months;
+    }
+    let v = months[m];
+    if (Number.isNaN(v)) {
+      const dongZhiJd = SolarTerm.fromIndex(y, 0).getCursoryJulianDay();
+      let w = ShouXingUtil.calcShuo(dongZhiJd);
+      if (w > dongZhiJd) {
+        w -= 29.53;
+      }
+      let offset = 2;
+      if (y > 8 && y < 24) {
+        offset = 1;
+      } else if (LunarYear.fromYear(y - 1).getLeapMonth() > 10 && y != 239 && y != 240) {
+        offset = 3;
+      }
+      v = w + 29.5306 * (offset + m);
+      months[m] = v;
+    }
+    return v;
+  }
+  getLunarYear() {
+    return LunarYear.fromYear(this.year);
+  }
+  getAbstractYear() {
+    return this.getLunarYear();
+  }
+  getDayCount() {
+    const w = this.getNewMoon();
+    return ~~(ShouXingUtil.calcShuo(w + 29.5306) - ShouXingUtil.calcShuo(w));
+  }
+  getSeason() {
+    return LunarSeason.fromIndex(this.getMonth() - 1);
+  }
+  getFirstJulianDay() {
+    return JulianDay.fromJulianDay(JulianDay.J2000 + ShouXingUtil.calcShuo(this.getNewMoon()));
+  }
+  getName() {
+    return (this.leap ? "\u95F0" : "") + LunarMonth.NAMES[this.getMonth() - 1];
+  }
+  next(n) {
+    const m = super.next(n);
+    return LunarMonth.fromYm(m.getYear(), m.getMonthValue());
+  }
+  getDays() {
+    const m = this.getMonthValue();
+    const l = [];
+    for (let i = 1, j = this.getDayCount(); i <= j; i++) {
+      l.push(LunarDay.fromYmd(this.year, m, i));
+    }
+    return l;
+  }
+  getFirstDay() {
+    return LunarDay.fromYmd(this.year, this.getMonthValue(), 1);
+  }
+  getWeeks(start) {
+    const m = this.getMonthValue();
+    const l = [];
+    for (let i = 0, j = this.getWeekCount(start); i < j; i++) {
+      l.push(LunarWeek.fromYm(this.year, m, i, start));
+    }
+    return l;
+  }
+  getSixtyCycle() {
+    return SixtyCycle.fromIndex(this.year * 12 + this.month - 47);
+  }
+  getNineStar() {
+    let index = this.getSixtyCycle().getEarthBranch().getIndex();
+    if (index < 2) {
+      index += 3;
+    }
+    return NineStar.fromIndex(27 - this.getLunarYear().getSixtyCycle().getEarthBranch().getIndex() % 3 * 3 - index);
+  }
+  getJupiterDirection() {
+    const sixtyCycle = this.getSixtyCycle();
+    const n = [7, -1, 1, 3][sixtyCycle.getEarthBranch().next(-2).getIndex() % 4];
+    return n !== -1 ? Direction.fromIndex(n) : sixtyCycle.getHeavenStem().getDirection();
+  }
+  getFetus() {
+    return FetusMonth.fromLunarMonth(this);
+  }
+  getMinorRen() {
+    return MinorRen.fromIndex((this.month - 1) % 6);
+  }
+}
+class LunarWeek extends AbstractWeek {
+  constructor(year, month, index, start) {
+    const y = SolarWeek.numeric(year, "lunar year");
+    const m = SolarWeek.numeric(month, "lunar month");
+    const i = SolarWeek.numeric(index, "lunar week index");
+    const s = SolarWeek.numeric(start, "week index");
+    LunarWeek.validate(y, m, i, s);
+    super(y, m, i, s);
+  }
+  static validate(year, month, index, start) {
+    WeekUnit.validate(year, month, index, start);
+    const m = LunarMonth.fromYm(year, month);
+    if (index >= m.getWeekCount(start)) {
+      throw new Error(`illegal lunar week index: ${index} in month: ${m}`);
+    }
+  }
+  static fromYm(year, month, index, start) {
+    return new LunarWeek(year, month, index, start);
+  }
+  getLunarMonth() {
+    return LunarMonth.fromYm(this.year, this.month);
+  }
+  getAbstractMonth() {
+    return this.getLunarMonth();
+  }
+  getName() {
+    return WeekUnit.NAMES[this.index];
+  }
+  next(n) {
+    const w = super.next(n);
+    return LunarWeek.fromYm(w.getYear(), w.getMonth(), w.getIndex(), this.start);
+  }
+  getFirstDay() {
+    const firstDay = LunarDay.fromYmd(this.year, this.month, 1);
+    return firstDay.next(this.index * 7 - this.indexOf(firstDay.getWeek().getIndex() - this.start, 7));
+  }
+  getDays() {
+    const l = [];
+    const d = this.getFirstDay();
+    l.push(d);
+    for (let i = 1; i < 7; i++) {
+      l.push(d.next(i));
+    }
+    return l;
+  }
+  equals(o) {
+    return o && o.getFirstDay().equals(this.getFirstDay());
+  }
+}
+class LunarDay extends AbstractDay {
+  static NAMES = ["\u521D\u4E00", "\u521D\u4E8C", "\u521D\u4E09", "\u521D\u56DB", "\u521D\u4E94", "\u521D\u516D", "\u521D\u4E03", "\u521D\u516B", "\u521D\u4E5D", "\u521D\u5341", "\u5341\u4E00", "\u5341\u4E8C", "\u5341\u4E09", "\u5341\u56DB", "\u5341\u4E94", "\u5341\u516D", "\u5341\u4E03", "\u5341\u516B", "\u5341\u4E5D", "\u4E8C\u5341", "\u5EFF\u4E00", "\u5EFF\u4E8C", "\u5EFF\u4E09", "\u5EFF\u56DB", "\u5EFF\u4E94", "\u5EFF\u516D", "\u5EFF\u4E03", "\u5EFF\u516B", "\u5EFF\u4E5D", "\u4E09\u5341"];
+  constructor(year, month, day) {
+    const y = LunarDay.numeric(year, "lunar year");
+    const m = LunarDay.numeric(month, "lunar month");
+    const d = LunarDay.numeric(day, "lunar day");
+    LunarDay.validate(y, m, d);
+    super(y, m, d);
+  }
+  static validate(year, month, day) {
+    if (day < 1) {
+      throw new Error(`illegal day ${day}`);
+    }
+    const m = LunarMonth.fromYm(year, month);
+    if (day > m.getDayCount()) {
+      throw new Error(`illegal day ${day} in ${m}`);
+    }
+  }
+  static fromYmd(year, month, day) {
+    return new LunarDay(year, month, day);
+  }
+  getLunarMonth() {
+    return LunarMonth.fromYm(this.year, this.month);
+  }
+  getName() {
+    return LunarDay.NAMES[this.day - 1];
+  }
+  toString() {
+    return this.getLunarMonth().toString() + this.getName();
+  }
+  next(n) {
+    return this.getSolarDay().next(n).getLunarDay();
+  }
+  isBefore(target) {
+    return this.getCompareIndex() < target.getCompareIndex();
+  }
+  isAfter(target) {
+    return this.getCompareIndex() > target.getCompareIndex();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  /**
+   * @deprecated
+   */
+  getYearSixtyCycle() {
+    return this.getSixtyCycleDay().getYear();
+  }
+  /**
+   * @deprecated
+   */
+  getMonthSixtyCycle() {
+    return this.getSixtyCycleDay().getMonth();
+  }
+  getSixtyCycle() {
+    return SixtyCycle.fromIndex(~~this.getLunarMonth().getFirstJulianDay().next(this.day - 12).getDay());
+  }
+  getDuty() {
+    return this.getSixtyCycleDay().getDuty();
+  }
+  getTwelveStar() {
+    return this.getSixtyCycleDay().getTwelveStar();
+  }
+  getNineStar() {
+    return this.getSolarDay().getNineStar();
+  }
+  getJupiterDirection() {
+    const index = this.getSixtyCycle().getIndex();
+    return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : this.getLunarMonth().getLunarYear().getJupiterDirection();
+  }
+  getFetusDay() {
+    return FetusDay.fromLunarDay(this);
+  }
+  getPhaseDay() {
+    const today = this.getSolarDay();
+    const m = this.getLunarMonth().next(1);
+    let p = Phase.fromIndex(m.getYear(), m.getMonthValue(), 0);
+    let d = p.getSolarDay();
+    while (d.isAfter(today)) {
+      p = p.next(-1);
+      d = p.getSolarDay();
+    }
+    return new PhaseDay(p, today.subtract(d));
+  }
+  getPhase() {
+    return this.getPhaseDay().getPhase();
+  }
+  getSolarDay() {
+    return this.getLunarMonth().getFirstJulianDay().next(this.day - 1).getSolarDay();
+  }
+  getSixtyCycleDay() {
+    return this.getSolarDay().getSixtyCycleDay();
+  }
+  getTwentyEightStar() {
+    return TwentyEightStar.fromIndex([10, 18, 26, 6, 14, 22, 2][this.getSolarDay().getWeek().getIndex()]).next(-7 * this.getSixtyCycle().getEarthBranch().getIndex());
+  }
+  getFestival() {
+    return LunarFestival.fromYmd(this.year, this.month, this.day);
+  }
+  getSixStar() {
+    return SixStar.fromIndex((Math.abs(this.month) + this.day - 2) % 6);
+  }
+  getGods() {
+    return this.getSixtyCycleDay().getGods();
+  }
+  getRecommends() {
+    return this.getSixtyCycleDay().getRecommends();
+  }
+  getAvoids() {
+    return this.getSixtyCycleDay().getAvoids();
+  }
+  getHours() {
+    const l = [];
+    l.push(LunarHour.fromYmdHms(this.year, this.month, this.day, 0, 0, 0));
+    for (let i = 0; i < 24; i += 2) {
+      l.push(LunarHour.fromYmdHms(this.year, this.month, this.day, i + 1, 0, 0));
+    }
+    return l;
+  }
+  getMinorRen() {
+    return this.getLunarMonth().getMinorRen().next(this.day - 1);
+  }
+  getThreePillars() {
+    return this.getSixtyCycleDay().getThreePillars();
+  }
+}
+class SixtyCycleYear extends AbstractTraditionalYear {
+  constructor(year) {
+    const y = SixtyCycleYear.numeric(year, "sixty cycle year");
+    SixtyCycleYear.validateRange(y, -1, 9999, "sixty cycle year");
+    super(y);
+  }
+  static fromYear(year) {
+    return new SixtyCycleYear(year);
+  }
+  getName() {
+    return `${this.getSixtyCycle().getName()}\u5E74`;
+  }
+  next(n) {
+    return SixtyCycleYear.fromYear(this.year + n);
+  }
+  getFirstMonth() {
+    return new SixtyCycleMonth(this, SixtyCycle.fromIndex(this.year * 12 - 46));
+  }
+  getMonths() {
+    const l = [];
+    const m = this.getFirstMonth();
+    l.push(m);
+    for (let i = 1; i < 12; i++) {
+      l.push(m.next(i));
+    }
+    return l;
+  }
+}
+class SixtyCycleMonth extends AbstractTyme {
+  year;
+  month;
+  constructor(year, month) {
+    super();
+    this.year = year;
+    this.month = month;
+  }
+  static fromIndex(year, index) {
+    return SixtyCycleYear.fromYear(year).getFirstMonth().next(SixtyCycleMonth.numeric(index, "index"));
+  }
+  getSixtyCycleYear() {
+    return this.year;
+  }
+  getYear() {
+    return this.year.getSixtyCycle();
+  }
+  getIndexInYear() {
+    return this.month.getEarthBranch().next(-2).getIndex();
+  }
+  getName() {
+    return this.month.getName() + "\u6708";
+  }
+  toString() {
+    return this.year.toString() + this.getName();
+  }
+  next(n) {
+    return new SixtyCycleMonth(SixtyCycleYear.fromYear(Math.floor((this.year.getYear() * 12 + this.getIndexInYear() + n) / 12)), this.month.next(n));
+  }
+  getFirstDay() {
+    return SixtyCycleDay.fromSolarDay(SolarTerm.fromIndex(this.year.getYear(), 3 + this.getIndexInYear() * 2).getSolarDay());
+  }
+  getDays() {
+    const l = [];
+    let d = this.getFirstDay();
+    while (d.getSixtyCycleMonth().equals(this)) {
+      l.push(d);
+      d = d.next(1);
+    }
+    return l;
+  }
+  getSixtyCycle() {
+    return this.month;
+  }
+  getNineStar() {
+    let index = this.getSixtyCycle().getEarthBranch().getIndex();
+    if (index < 2) {
+      index += 3;
+    }
+    return NineStar.fromIndex(27 - this.year.getSixtyCycle().getEarthBranch().getIndex() % 3 * 3 - index);
+  }
+  getJupiterDirection() {
+    const sixtyCycle = this.getSixtyCycle();
+    const n = [7, -1, 1, 3][sixtyCycle.getEarthBranch().next(-2).getIndex() % 4];
+    return n === -1 ? sixtyCycle.getHeavenStem().getDirection() : Direction.fromIndex(n);
+  }
+}
+class SixtyCycleDay extends AbstractTyme {
+  solarDay;
+  month;
+  day;
+  constructor(solarDay, month, day) {
+    super();
+    this.solarDay = solarDay;
+    this.month = month;
+    this.day = day;
+  }
+  static fromSolarDay(solarDay) {
+    const term = solarDay.getTerm();
+    const index = term.getIndex();
+    const offset = index < 3 ? index === 0 ? -2 : -1 : Math.floor((index - 3) / 2);
+    const month = SixtyCycleYear.fromYear(term.getYear()).getFirstMonth().next(offset);
+    return new SixtyCycleDay(solarDay, month, SixtyCycle.fromIndex(solarDay.subtract(SolarDay.fromYmd(2e3, 1, 7))));
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getSixtyCycleMonth() {
+    return this.month;
+  }
+  getYear() {
+    return this.month.getYear();
+  }
+  getMonth() {
+    return this.month.getSixtyCycle();
+  }
+  getSixtyCycle() {
+    return this.day;
+  }
+  getName() {
+    return this.day.getName() + "\u65E5";
+  }
+  toString() {
+    return this.month.toString() + this.getName();
+  }
+  next(n) {
+    return SixtyCycleDay.fromSolarDay(this.solarDay.next(n));
+  }
+  getDuty() {
+    return Duty.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() - this.getMonth().getEarthBranch().getIndex());
+  }
+  getTwelveStar() {
+    return TwelveStar.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() + (8 - this.getMonth().getEarthBranch().getIndex() % 6) * 2);
+  }
+  getNineStar() {
+    return this.solarDay.getNineStar();
+  }
+  getJupiterDirection() {
+    const index = this.getSixtyCycle().getIndex();
+    return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : this.month.getSixtyCycleYear().getJupiterDirection();
+  }
+  getFetusDay() {
+    return FetusDay.fromSixtyCycleDay(this);
+  }
+  getTwentyEightStar() {
+    return TwentyEightStar.fromIndex([10, 18, 26, 6, 14, 22, 2][this.solarDay.getWeek().getIndex()]).next(-7 * this.day.getEarthBranch().getIndex());
+  }
+  getGods() {
+    return God.getDayGods(this.getMonth(), this.day);
+  }
+  getRecommends() {
+    return Taboo.getDayRecommends(this.getMonth(), this.day);
+  }
+  getAvoids() {
+    return Taboo.getDayAvoids(this.getMonth(), this.day);
+  }
+  getHours() {
+    const l = [];
+    const d = this.solarDay.next(-1);
+    let h = SixtyCycleHour.fromSolarTime(SolarTime.fromYmdHms(d.getYear(), d.getMonth(), d.getDay(), 23, 0, 0));
+    l.push(h);
+    for (let i = 0; i < 11; i++) {
+      h = h.next(7200);
+      l.push(h);
+    }
+    return l;
+  }
+  getThreePillars() {
+    return new ThreePillars(this.getYear(), this.getMonth(), this.getSixtyCycle());
+  }
+}
+class SixtyCycleHour extends AbstractTyme {
+  static SPRING_CACHE = {};
+  solarTime;
+  day;
+  hour;
+  /**
+   * 立春时刻，按年缓存，避免逐时重复精算
+   */
+  static getSpringSolarTime(year) {
+    let t = SixtyCycleHour.SPRING_CACHE[year];
+    if (!t) {
+      t = SolarTerm.fromIndex(year, 3).getJulianDay().getSolarTime();
+      SixtyCycleHour.SPRING_CACHE[year] = t;
+    }
+    return t;
+  }
+  constructor(solarTime) {
+    super();
+    const solarYear = solarTime.getYear();
+    const springSolarTime = SixtyCycleHour.getSpringSolarTime(solarYear);
+    const lunarHour = solarTime.getLunarHour();
+    const lunarDay = lunarHour.getLunarDay();
+    let lunarYear = lunarDay.getLunarMonth().getLunarYear();
+    if (lunarYear.getYear() === solarYear) {
+      if (solarTime.isBefore(springSolarTime)) {
+        lunarYear = lunarYear.next(-1);
+      }
+    } else if (lunarYear.getYear() < solarYear) {
+      if (!solarTime.isBefore(springSolarTime)) {
+        lunarYear = lunarYear.next(1);
+      }
+    }
+    const term = solarTime.getTerm();
+    let index = term.getIndex() - 3;
+    if (index < 0 && term.getJulianDay().getSolarTime().isAfter(springSolarTime)) {
+      index += 24;
+    }
+    const d = lunarDay.getSixtyCycle();
+    this.solarTime = solarTime;
+    this.day = new SixtyCycleDay(solarTime.getSolarDay(), new SixtyCycleMonth(SixtyCycleYear.fromYear(lunarYear.getYear()), LunarMonth.fromYm(solarYear, 1).getSixtyCycle().next(~~Math.floor(index * 0.5))), solarTime.getHour() < 23 ? d : d.next(1));
+    this.hour = lunarHour.getSixtyCycle();
+  }
+  static fromSolarTime(solarTime) {
+    return new SixtyCycleHour(solarTime);
+  }
+  getYear() {
+    return this.day.getYear();
+  }
+  getMonth() {
+    return this.day.getMonth();
+  }
+  getDay() {
+    return this.day.getSixtyCycle();
+  }
+  getSixtyCycle() {
+    return this.hour;
+  }
+  getSixtyCycleDay() {
+    return this.day;
+  }
+  getSolarTime() {
+    return this.solarTime;
+  }
+  getName() {
+    return this.hour.getName() + "\u65F6";
+  }
+  toString() {
+    return `${this.day}${this.getName()}`;
+  }
+  getIndexInDay() {
+    const h = this.solarTime.getHour();
+    return h === 23 ? 0 : ~~((h + 1) / 2);
+  }
+  next(n) {
+    return SixtyCycleHour.fromSolarTime(this.solarTime.next(n));
+  }
+  getTwelveStar() {
+    return TwelveStar.fromIndex(this.hour.getEarthBranch().getIndex() + (8 - this.getDay().getEarthBranch().getIndex() % 6) * 2);
+  }
+  getNineStar() {
+    const solar = this.solarTime.getSolarDay();
+    const dongZhi = SolarTerm.fromIndex(solar.getYear(), 0);
+    const earthBranchIndex = this.getIndexInDay() % 12;
+    let index = [8, 5, 2][this.getDay().getEarthBranch().getIndex() % 3];
+    if (!solar.isBefore(dongZhi.getJulianDay().getSolarDay()) && solar.isBefore(dongZhi.next(12).getJulianDay().getSolarDay())) {
+      index = 8 + earthBranchIndex - index;
+    } else {
+      index -= earthBranchIndex;
+    }
+    return NineStar.fromIndex(index);
+  }
+  getEightChar() {
+    return new EightChar(this.getYear(), this.getMonth(), this.getDay(), this.hour);
+  }
+  getRecommends() {
+    return Taboo.getHourRecommends(this.getDay(), this.hour);
+  }
+  getAvoids() {
+    return Taboo.getHourAvoids(this.getDay(), this.hour);
+  }
+}
+class ThreePillars extends AbstractCulture {
+  year;
+  month;
+  day;
+  constructor(year, month, day) {
+    super();
+    this.year = year instanceof SixtyCycle ? year : SixtyCycle.fromName(year);
+    this.month = month instanceof SixtyCycle ? month : SixtyCycle.fromName(month);
+    this.day = day instanceof SixtyCycle ? day : SixtyCycle.fromName(day);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getName() {
+    return `${this.year} ${this.month} ${this.day}`;
+  }
+  getSolarDays(startYear, endYear) {
+    const l = [];
+    let m = this.month.getEarthBranch().next(-2).getIndex();
+    if (!HeavenStem.fromIndex((this.year.getHeavenStem().getIndex() + 1) * 2 + m).equals(this.month.getHeavenStem())) {
+      return l;
+    }
+    let y = this.year.next(-57).getIndex() + 1;
+    m *= 2;
+    const baseYear = startYear - 1;
+    if (baseYear > y) {
+      y += 60 * ~~Math.ceil((baseYear - y) / 60);
+    }
+    while (y <= endYear) {
+      let term = SolarTerm.fromIndex(y, 3);
+      if (m > 0) {
+        term = term.next(m);
+      }
+      let solarDay = term.getSolarDay();
+      if (solarDay.getYear() >= startYear) {
+        const d = this.day.next(-solarDay.getLunarDay().getSixtyCycle().getIndex()).getIndex();
+        if (d > 0) {
+          solarDay = solarDay.next(d);
+        }
+        if (solarDay.getSixtyCycleDay().getThreePillars().equals(this)) {
+          l.push(solarDay);
+        }
+      }
+      y += 60;
+    }
+    return l;
+  }
+}
+class DefaultEightCharProvider {
+  getEightChar(hour) {
+    return hour.getSixtyCycleHour().getEightChar();
+  }
+}
+class LunarSect2EightCharProvider {
+  getEightChar(hour) {
+    const h = hour.getSixtyCycleHour();
+    return new EightChar(h.getYear(), h.getMonth(), hour.getLunarDay().getSixtyCycle(), h.getSixtyCycle());
+  }
+}
+class LunarHour extends SecondUnit {
+  static provider = new DefaultEightCharProvider();
+  constructor(year, month, day, hour, minute, second) {
+    const y = LunarHour.numeric(year, "lunar year");
+    const m = LunarHour.numeric(month, "lunar month");
+    const d = LunarHour.numeric(day, "lunar day");
+    const h = LunarHour.numeric(hour, "hour");
+    const n = LunarHour.numeric(minute, "minute");
+    const s = LunarHour.numeric(second, "second");
+    LunarHour.validate(y, m, d, h, n, s);
+    super(y, m, d, h, n, s);
+  }
+  static validate(year, month, day, hour, minute, second) {
+    SecondUnit.validate(year, month, day, hour, minute, second);
+    LunarDay.validate(year, month, day);
+  }
+  static fromYmdHms(year, month, day, hour, minute, second) {
+    return new LunarHour(year, month, day, hour, minute, second);
+  }
+  getLunarDay() {
+    return LunarDay.fromYmd(this.year, this.month, this.day);
+  }
+  getName() {
+    return EarthBranch.fromIndex(this.getIndexInDay()).getName() + "\u65F6";
+  }
+  toString() {
+    return `${this.getLunarDay()}${this.getSixtyCycle().getName()}\u65F6`;
+  }
+  getIndexInDay() {
+    return ~~((this.hour + 1) / 2);
+  }
+  next(n) {
+    if (n === 0) {
+      return LunarHour.fromYmdHms(this.year, this.month, this.day, this.hour, this.minute, this.second);
+    }
+    const h = this.hour + n * 2;
+    const d = this.getLunarDay().next(Math.floor(h / 24));
+    return LunarHour.fromYmdHms(d.getYear(), d.getMonth(), d.getDay(), this.indexOf(h, 24), this.minute, this.second);
+  }
+  isBefore(target) {
+    return this.getCompareIndex() < target.getCompareIndex();
+  }
+  isAfter(target) {
+    return this.getCompareIndex() > target.getCompareIndex();
+  }
+  /**
+   * @deprecated
+   */
+  getYearSixtyCycle() {
+    return this.getSixtyCycleHour().getYear();
+  }
+  /**
+   * @deprecated
+   */
+  getMonthSixtyCycle() {
+    return this.getSixtyCycleHour().getMonth();
+  }
+  /**
+   * @deprecated
+   */
+  getDaySixtyCycle() {
+    return this.getSixtyCycleHour().getDay();
+  }
+  getSixtyCycle() {
+    let e = this.getIndexInDay();
+    let h = this.getLunarDay().getSixtyCycle().getHeavenStem();
+    if (this.hour >= 23) {
+      h = h.next(1);
+      e = 0;
+    }
+    return SixtyCycle.fromIndex(h.getIndex() * 12 + e);
+  }
+  getTwelveStar() {
+    return TwelveStar.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() + (8 - this.getSixtyCycleHour().getDay().getEarthBranch().getIndex() % 6) * 2);
+  }
+  getNineStar() {
+    const d = this.getLunarDay();
+    const solar = d.getSolarDay();
+    const dongZhi = SolarTerm.fromIndex(solar.getYear(), 0);
+    const earthBranchIndex = this.getIndexInDay() % 12;
+    let index = [8, 5, 2][d.getSixtyCycle().getEarthBranch().getIndex() % 3];
+    if (!solar.isBefore(dongZhi.getJulianDay().getSolarDay()) && solar.isBefore(dongZhi.next(12).getJulianDay().getSolarDay())) {
+      index = 8 + earthBranchIndex - index;
+    } else {
+      index -= earthBranchIndex;
+    }
+    return NineStar.fromIndex(index);
+  }
+  getSolarTime() {
+    const d = this.getLunarDay().getSolarDay();
+    return SolarTime.fromYmdHms(d.getYear(), d.getMonth(), d.getDay(), this.hour, this.minute, this.second);
+  }
+  getSixtyCycleHour() {
+    return this.getSolarTime().getSixtyCycleHour();
+  }
+  getEightChar() {
+    return LunarHour.provider.getEightChar(this);
+  }
+  getRecommends() {
+    return Taboo.getHourRecommends(this.getSixtyCycleHour().getDay(), this.getSixtyCycle());
+  }
+  getAvoids() {
+    return Taboo.getHourAvoids(this.getSixtyCycleHour().getDay(), this.getSixtyCycle());
+  }
+  getMinorRen() {
+    return this.getLunarDay().getMinorRen().next(this.getIndexInDay());
   }
 }
 class EightChar extends AbstractCulture {
@@ -6924,8 +6774,8 @@ class ChildLimit {
   constructor(birthTime, gender) {
     this.gender = gender;
     this.eightChar = birthTime.getLunarHour().getEightChar();
-    const yang = 1 /* YANG */ === this.eightChar.getYear().getHeavenStem().getYinYang();
-    const man = 1 /* MAN */ === gender;
+    const yang = YinYang.YANG === this.eightChar.getYear().getHeavenStem().getYinYang();
+    const man = Gender.MAN === gender;
     this.forward = yang && man || !yang && !man;
     let term = birthTime.getTerm();
     if (!term.isJie()) {
@@ -7687,17 +7537,17 @@ class Event extends AbstractCulture {
   getType() {
     switch (this.getCharIndex(1)) {
       case 1:
-        return 1 /* SOLAR_WEEK */;
+        return EventType.SOLAR_WEEK;
       case 2:
-        return 2 /* LUNAR_DAY */;
+        return EventType.LUNAR_DAY;
       case 3:
-        return 3 /* TERM_DAY */;
+        return EventType.TERM_DAY;
       case 4:
-        return 4 /* TERM_HS */;
+        return EventType.TERM_HS;
       case 5:
-        return 5 /* TERM_EB */;
+        return EventType.TERM_EB;
       default:
-        return 0 /* SOLAR_DAY */;
+        return EventType.SOLAR_DAY;
     }
   }
   getName() {
@@ -7741,22 +7591,22 @@ class Event extends AbstractCulture {
     }
     let d = null;
     switch (this.getType()) {
-      case 0 /* SOLAR_DAY */:
+      case EventType.SOLAR_DAY:
         d = this.getSolarDayBySolarDay(year);
         break;
-      case 1 /* SOLAR_WEEK */:
+      case EventType.SOLAR_WEEK:
         d = this.getSolarDayByWeek(year);
         break;
-      case 2 /* LUNAR_DAY */:
+      case EventType.LUNAR_DAY:
         d = this.getSolarDayByLunarDay(year);
         break;
-      case 3 /* TERM_DAY */:
+      case EventType.TERM_DAY:
         d = this.getSolarDayByTerm(year);
         break;
-      case 4 /* TERM_HS */:
+      case EventType.TERM_HS:
         d = this.getSolarDayByTermHeavenStem(year);
         break;
-      case 5 /* TERM_EB */:
+      case EventType.TERM_EB:
         d = this.getSolarDayByTermEarthBranch(year);
         break;
     }
@@ -7838,19 +7688,19 @@ class EventBuilder {
   encodeType(t) {
     let n = 0;
     switch (t) {
-      case 1 /* SOLAR_WEEK */:
+      case EventType.SOLAR_WEEK:
         n = 1;
         break;
-      case 2 /* LUNAR_DAY */:
+      case EventType.LUNAR_DAY:
         n = 2;
         break;
-      case 3 /* TERM_DAY */:
+      case EventType.TERM_DAY:
         n = 3;
         break;
-      case 4 /* TERM_HS */:
+      case EventType.TERM_HS:
         n = 4;
         break;
-      case 5 /* TERM_EB */:
+      case EventType.TERM_EB:
         n = 5;
         break;
     }
@@ -7861,22 +7711,22 @@ class EventBuilder {
     return this.setValue(2, a).setValue(3, b).setValue(4, c);
   }
   solarDay(solarMonth, solarDay, delayDays) {
-    return this.content(0 /* SOLAR_DAY */, solarMonth, solarDay, delayDays);
+    return this.content(EventType.SOLAR_DAY, solarMonth, solarDay, delayDays);
   }
   lunarDay(lunarMonth, lunarDay, delayDays) {
-    return this.content(2 /* LUNAR_DAY */, lunarMonth, lunarDay, delayDays);
+    return this.content(EventType.LUNAR_DAY, lunarMonth, lunarDay, delayDays);
   }
   solarWeek(solarMonth, weekIndex, week) {
-    return this.content(1 /* SOLAR_WEEK */, solarMonth, weekIndex, week);
+    return this.content(EventType.SOLAR_WEEK, solarMonth, weekIndex, week);
   }
   termDay(termIndex, delayDays) {
-    return this.content(3 /* TERM_DAY */, termIndex, 0, delayDays);
+    return this.content(EventType.TERM_DAY, termIndex, 0, delayDays);
   }
   termHeavenStem(termIndex, heavenStemIndex, delayDays) {
-    return this.content(4 /* TERM_HS */, termIndex, heavenStemIndex, delayDays);
+    return this.content(EventType.TERM_HS, termIndex, heavenStemIndex, delayDays);
   }
   termEarthBranch(termIndex, earthBranchIndex, delayDays) {
-    return this.content(5 /* TERM_EB */, termIndex, earthBranchIndex, delayDays);
+    return this.content(EventType.TERM_EB, termIndex, earthBranchIndex, delayDays);
   }
   startYear(year) {
     const size = EventManager.CHARS.length;
@@ -7919,1678 +7769,365 @@ class EventManager {
     EventManager.saveOrUpdate(name, e.getData() + (e.getName() ? e.getName() : name));
   }
 }
-class DutyAdvice extends AbstractCulture {
-  duty;
-  static RECOMMENDS = [
-    "\u51FA\u884C\u3001\u4E0A\u4EFB\u3001\u4F1A\u53CB\u3001\u4E0A\u4E66\u3001\u89C1\u5DE5",
-    "\u9664\u670D\u3001\u7597\u75C5\u3001\u626B\u820D\u3001\u51FA\u884C\u3001\u5AC1\u5A36",
-    "\u796D\u7940\u3001\u7948\u798F\u3001\u7ED3\u4EB2\u3001\u5F00\u5E02\u3001\u7ACB\u5238",
-    "\u4FEE\u9020\u3001\u6D82\u6CE5\u3001\u5E73\u6CBB\u9053\u6D82\u3001\u5AC1\u5A36",
-    "\u796D\u7940\u3001\u7948\u798F\u3001\u5AC1\u5A36\u3001\u9020\u5C4B\u3001\u5B89\u5E8A",
-    "\u7948\u798F\u3001\u796D\u7940\u3001\u6355\u6349\u3001\u7EB3\u755C\u3001\u9020\u5C4B",
-    "\u7834\u5C4B\u574F\u57A3\u3001\u6C42\u533B\u6CBB\u75C5",
-    "\u796D\u7940\u3001\u5B89\u5E8A\u3001\u62C6\u5378",
-    "\u5F00\u5E02\u3001\u5AC1\u5A36\u3001\u5165\u5B85\u3001\u5165\u5B66\u3001\u4E0A\u4EFB",
-    "\u7EB3\u8D22\u3001\u6536\u8D26\u3001\u8FDB\u4EBA\u53E3\u3001\u7EB3\u755C\u3001\u6355\u6349",
-    "\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5AC1\u5A36\u3001\u5165\u5B66\u3001\u4E0A\u4EFB",
-    "\u7B51\u5824\u3001\u8865\u57A3\u3001\u4FEE\u5C4B\u3001\u57CB\u7A74"
-  ];
-  static AVOIDS = [
-    "\u52A8\u571F\u3001\u5F00\u4ED3\u3001\u51FA\u8D27\u8D22\u3001\u5B89\u846C",
-    "\u6C42\u5B98\u3001\u4E0A\u4EFB\u3001\u5F00\u5E02\u3001\u642C\u5BB6",
-    "\u670D\u836F\u3001\u683D\u79CD\u3001\u5B89\u846C\u3001\u8D74\u4EFB",
-    "\u5F00\u6E20\u3001\u683D\u79CD\u3001\u9488\u7078",
-    "\u8BC9\u8BBC\u3001\u51FA\u884C\u3001\u4EA4\u6D89",
-    "\u642C\u5BB6\u3001\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5F00\u4ED3",
-    "\u5AC1\u5A36\u3001\u5F00\u5E02\u3001\u52A8\u571F\u3001\u7B7E\u7EA6",
-    "\u767B\u9AD8\u3001\u884C\u8239\u3001\u8FDC\u884C",
-    "\u8BC9\u8BBC\u3001\u7834\u571F",
-    "\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5B89\u846C",
-    "\u5B89\u846C\u3001\u7834\u571F",
-    "\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5C31\u533B\u3001\u4E0A\u4EFB"
-  ];
-  static DESCRIPTIONS = [
-    "\u5EFA\u4E3A\u4E00\u6708\u4E4B\u4E3B\uFF0C\u8BF8\u4E8B\u53EF\u4E3A\uFF0C\u60DF\u4E0D\u5B9C\u52A8\u571F\u4FEE\u9020\u3002",
-    "\u9664\u65E7\u5E03\u65B0\uFF0C\u5927\u5409\uFF0C\u5C11\u6709\u4E0D\u5B9C\u4E4B\u4E8B\u3002",
-    "\u53EA\u5B9C\u796D\u7940\u7948\u613F\uFF0C\u5FCC\u4E0A\u4EFB\u3001\u5AC1\u5A36\uFF0C\u4F59\u4E8B\u4E0D\u5229\u3002",
-    "\u5E73\u6CBB\u9053\u6D82\uFF0C\u4E07\u4E8B\u5E73\u5E38\uFF0C\u65E0\u5927\u5409\u4EA6\u65E0\u5927\u51F6\u3002",
-    "\u5B9C\u5BB4\u996E\u3001\u534F\u8BAE\uFF0C\u5FCC\u533B\u7597\u3001\u8BC9\u8BBC\u53CA\u51FA\u5E08\u3002",
-    "\u5B9C\u65B0\u5EFA\u3001\u79CD\u83B3\u3001\u6355\u6349\uFF0C\u5FCC\u79FB\u5C45\u3001\u51FA\u884C\u3001\u5F00\u5E02\u3002",
-    "\u4E07\u4E8B\u4E0D\u5229\uFF0C\u53EA\u5B9C\u7834\u57A3\u574F\u5C4B\u3002",
-    "\u4E07\u4E8B\u7686\u51F6\uFF0C\u60DF\u5B9C\u5B89\u5E8A\u3001\u796D\u7940\u3002",
-    "\u5B9C\u5F00\u4E1A\u3001\u5165\u5B66\u3001\u5AC1\u5A36\u3001\u4E0A\u4EFB\uFF0C\u4E0D\u5229\u8BC9\u8BBC\u3002",
-    "\u5B9C\u6536\u83B7\u3001\u7EB3\u8D22\uFF0C\u5FCC\u51FA\u884C\u3001\u846C\u793C\u3002",
-    "\u767E\u4E8B\u7686\u5409\uFF0C\u60DF\u7834\u571F\u5B89\u846C\u5219\u51F6\u3002",
-    "\u4E07\u4E8B\u7686\u51F6\uFF0C\u60DF\u4FEE\u7B51\u5824\u9632\u4E4B\u7C7B\u5219\u5409\u3002"
-  ];
-  constructor(duty) {
-    super();
-    this.duty = duty;
-  }
-  static fromDuty(duty) {
-    return new DutyAdvice(duty);
-  }
-  getDuty() {
-    return this.duty;
-  }
-  getName() {
-    return this.duty.getName();
-  }
-  /**
-   * 宜
-   */
-  getRecommends() {
-    return DutyAdvice.RECOMMENDS[this.duty.getIndex()];
-  }
-  /**
-   * 忌
-   */
-  getAvoids() {
-    return DutyAdvice.AVOIDS[this.duty.getIndex()];
-  }
-  /**
-   * 定性描述
-   */
-  getDescription() {
-    return DutyAdvice.DESCRIPTIONS[this.duty.getIndex()];
-  }
-}
-class Clash extends AbstractCulture {
-  day;
-  constructor(day) {
-    super();
-    this.day = day;
-  }
-  static fromSixtyCycle(day) {
-    return new Clash(day);
-  }
-  getSixtyCycle() {
-    return this.day;
-  }
-  /**
-   * 所冲干支
-   */
-  getClashingSixtyCycle() {
-    return this.day.next(-6);
-  }
-  /**
-   * 所冲生肖
-   */
-  getZodiac() {
-    return this.getClashingSixtyCycle().getEarthBranch().getZodiac();
-  }
-  /**
-   * 煞方
-   */
-  getDirection() {
-    return this.day.getEarthBranch().getOminous();
-  }
-  getName() {
-    return `\u51B2${this.getZodiac().getName()}`;
-  }
-  toString() {
-    return `${this.getName()}(${this.getClashingSixtyCycle().getName()})\u715E${this.getDirection().getName()}`;
-  }
-}
-class WuHouDay extends AbstractCulture {
-  static TANG = ["\u5802\u623F", "\u91D1\u5E93", "\u91D1\u5802", "\u987A\u9633", "\u76D7\u8D3C", "\u5B9D\u4ED3"];
-  static ZHONG = ["\u5929\u76D7", "\u5929\u95E8", "\u5929\u5802", "\u5929\u8D22", "\u5929\u8D3C", "\u5929\u9633", "\u5929\u4FAF", "\u5929\u4ED3"];
-  static XIA = ["\u6731\u96C0", "\u767D\u864E\u5934", "\u767D\u864E\u80C1", "\u767D\u864E\u8DB3", "\u7384\u6B66", "\u9752\u9F99\u5934", "\u9752\u9F99\u80C1", "\u9752\u9F99\u8DB3"];
-  static NAMES = [WuHouDay.TANG, WuHouDay.ZHONG, WuHouDay.XIA];
-  static DESCRIPTIONS = [
-    [
-      "\u795E\u9053\u4E0D\u5728\u5B85\u4E2D\uFF0C\u6C42\u8D22\u79F0\u610F\uFF0C\u8D35\u4EBA\u5F97\u9047\uFF0C\u5927\u5409\u3002",
-      "\u8F66\u9A6C\u4E0D\u6210\uFF0C\u6C42\u8D22\u53CD\u5931\uFF0C\u8DEF\u9022\u76D7\u8D3C\uFF0C\u5927\u6709\u5931\u8BEF\uFF0C\u5927\u51F6\u3002",
-      "\u8D35\u4EBA\u76F8\u9047\uFF0C\u8D22\u5229\u901A\u8FBE\uFF0C\u8BCD\u8BBC\u6709\u7406\uFF0C\u5927\u5409\u3002",
-      "\u53BB\u5904\u901A\u8FBE\uFF0C\u597D\u4EBA\u76F8\u9022\uFF0C\u6C42\u8D22\u5F97\u610F\uFF0C\u4E89\u8BBC\u6709\u7406\u3002",
-      "\u767E\u4E8B\u4E0D\u5229\uFF0C\u67B7\u9501\u4E34\u8EAB\uFF0C\u4EBA\u4EA1\u8D22\u6563\uFF0C\u5B9C\u56DE\u907F\uFF0C\u4E0D\u53EF\u7528\u3002",
-      "\u5229\u89C1\u5927\u4EBA\uFF0C\u6C42\u8D22\u9042\u5FC3\uFF0C\u767E\u4E8B\u5982\u610F\uFF0C\u8863\u9526\u8FD8\u4E61\uFF0C\u5927\u5409\u3002"
-    ],
-    [
-      "\u6C42\u8D22\u4E0D\u6210\uFF0C\u7EB5\u6709\u4E3B\u5931\u8131\uFF0C\u5B98\u4E8B\u65E0\u7406\uFF0C\u5927\u51F6\u3002",
-      "\u51E1\u4E8B\u9042\u5FC3\uFF0C\u6240\u6C42\u548C\u5408\uFF0C\u53BB\u5904\u901A\u8FBE\uFF0C\u5927\u5409\u3002",
-      "\u6240\u6C42\u987A\u9042\uFF0C\u8D35\u4EBA\u63A5\u5F15\uFF0C\u4E70\u5356\u4EA8\u901A\uFF0C\u8BF8\u4E8B\u5982\u610F\uFF0C\u5927\u5409\u3002",
-      "\u6700\u5B9C\u6C42\u8D22\uFF0C\u5FC5\u5B9A\u901A\u5229\uFF0C\u597D\u4EBA\u76F8\u9022\uFF0C\u767E\u4E8B\u548C\u987A\uFF0C\u5927\u5409\u3002",
-      "\u6C42\u8D22\u4E0D\u6210\uFF0C\u7EB5\u6709\u4E3B\u5931\u8131\uFF0C\u5B98\u4E8B\u65E0\u7406\uFF0C\u5927\u51F6\u3002",
-      "\u6C42\u8D22\u5F97\u8D22\uFF0C\u6C42\u5A5A\u5F97\u5A5A\uFF0C\u5927\u5409\u3002",
-      "\u5409\u5C11\u51F6\u591A\uFF0C\u4E3B\u6709\u53E3\u820C\u662F\u975E\uFF0C\u8840\u5149\u4E4B\u707E\uFF0C\u5927\u51F6\u3002",
-      "\u89C1\u5B98\u5F97\u559C\uFF0C\u8D22\u6E90\u4E30\u76C8\uFF0C\u51E1\u4E8B\u987A\u5229\uFF0C\u5927\u5409\u3002"
-    ],
-    [
-      "\u6C42\u8D22\u4E0D\u5F97\uFF0C\u4E3B\u53CD\u5931\u8D22\uFF0C\u89C1\u5B98\u65E0\u7406\uFF0C\u5927\u51F6\u3002",
-      "\u4E3B\u5B9C\u8FDC\u884C\uFF0C\u6C42\u8D22\u5FC5\u5F97\uFF0C\u53BB\u5904\u901A\u8FBE\uFF0C\u5927\u5409\u3002",
-      "\u6C42\u8D22\u5982\u610F\uFF0C\u4E1C\u897F\u4EFB\u884C\uFF0C\u5357\u5317\u5229\u5F80\uFF0C\u597D\u4EBA\u76F8\u9022\uFF0C\u5927\u5409\u3002",
-      "\u4E0D\u5B9C\u8FDC\u884C\uFF0C\u4F5C\u4E8B\u4E0D\u6210\uFF0C\u6C42\u8D22\u4E0D\u5229\uFF0C\u5927\u51F6\u3002",
-      "\u4E3B\u62DB\u53E3\u820C\uFF0C\u767E\u4E8B\u4E0D\u5229\uFF0C\u4E0D\u53EF\u7528\u4E4B\uFF0C\u5927\u51F6\u3002",
-      "\u5B9C\u9E21\u9E23\u65F6\u6216\u536F\u65F6\u51FA\u95E8\uFF0C\u6C42\u8D22\u901A\u8FBE\uFF0C\u767E\u4E8B\u5927\u5409\u3002",
-      "\u6C42\u8D22\u9042\u5FC3\uFF0C\u51E1\u4E8B\u6EE1\u610F\uFF0C\u4E1C\u897F\u5357\u5317\u4EFB\u884C\uFF0C\u5927\u5409\u3002",
-      "\u6C42\u8D22\u4E0D\u5F97\uFF0C\u89C1\u5B98\u6CA1\u7406\uFF0C\u51E1\u4E8B\u4E0D\u5409\uFF0C\u4E0D\u5B9C\u7528\uFF0C\u51F6\u3002"
-    ]
-  ];
-  static LUCK = [
-    [0, 1, 0, 0, 1, 0],
-    [1, 0, 0, 0, 1, 0, 1, 0],
-    [1, 0, 0, 1, 1, 0, 0, 1]
-  ];
-  lunarDay;
-  yuan;
-  index;
-  constructor(lunarDay, yuan, index) {
-    super();
-    this.lunarDay = lunarDay;
-    this.yuan = yuan;
-    this.index = index;
-  }
-  static fromLunarDay(lunarDay) {
-    const remainder = Math.abs(lunarDay.getMonth()) % 3;
-    const yuan = remainder === 0 ? 2 : remainder - 1;
-    const size = WuHouDay.NAMES[yuan].length;
-    return new WuHouDay(lunarDay, Sixty.fromIndex(yuan), (lunarDay.getDay() - 1) % size);
-  }
-  getLunarDay() {
-    return this.lunarDay;
-  }
-  /**
-   * 三元：上元、中元、下元
-   */
-  getYuan() {
-    return this.yuan;
-  }
-  /**
-   * 在本元内的序号（0起）
-   */
-  getIndex() {
-    return this.index;
-  }
-  getName() {
-    return WuHouDay.NAMES[this.yuan.getIndex()][this.index];
-  }
-  getLuck() {
-    return Luck.fromIndex(WuHouDay.LUCK[this.yuan.getIndex()][this.index]);
-  }
-  getDescription() {
-    return WuHouDay.DESCRIPTIONS[this.yuan.getIndex()][this.index];
-  }
-  toString() {
-    return this.getName();
-  }
-}
-class MonthGeneral extends LoopTyme {
-  static NAMES = ["\u795E\u540E", "\u5927\u5409", "\u529F\u66F9", "\u592A\u51B2", "\u5929\u7F61", "\u592A\u4E59", "\u80DC\u5149", "\u5C0F\u5409", "\u4F20\u9001", "\u4ECE\u9B41", "\u6CB3\u9B41", "\u767B\u660E"];
+class Dog extends LoopTyme {
+  static NAMES = ["\u521D\u4F0F", "\u4E2D\u4F0F", "\u672B\u4F0F"];
   constructor(indexOrName) {
-    super(MonthGeneral.NAMES, indexOrName);
+    super(Dog.NAMES, indexOrName);
   }
   static fromIndex(index) {
-    return new MonthGeneral(MonthGeneral.numeric(index, "month general index"));
+    return new Dog(Dog.numeric(index, "dog index"));
   }
   static fromName(name) {
-    return new MonthGeneral(name);
-  }
-  static fromSolarDay(solarDay) {
-    const termIndex = solarDay.getTerm().getIndex();
-    return MonthGeneral.fromIndex(11 - ~~(((termIndex < 4 ? termIndex + 24 : termIndex) - 4) / 2));
+    return new Dog(name);
   }
   next(n) {
-    return MonthGeneral.fromIndex(this.nextIndex(n));
-  }
-  /**
-   * 月将地支
-   */
-  getEarthBranch() {
-    return EarthBranch.fromIndex(this.index);
-  }
-  /**
-   * 起始中气在当年的索引（0 为冬至）
-   */
-  getStartTermIndex() {
-    return (4 + (11 - this.index) * 2) % 24;
-  }
-  toString() {
-    return `${this.getName()}\uFF08${this.getEarthBranch().getName()}\uFF09`;
+    return Dog.fromIndex(this.nextIndex(n));
   }
 }
-class Palace extends LoopTyme {
-  static NAMES = ["\u574E", "\u5764", "\u9707", "\u5DFD", "\u4E2D", "\u4E7E", "\u5151", "\u826E", "\u79BB"];
+class DogDay extends AbstractCultureDay {
+  constructor(dog, dayIndex) {
+    super(dog, dayIndex);
+  }
+  getDog() {
+    return this.culture;
+  }
+}
+class PlumRain extends LoopTyme {
+  static NAMES = ["\u5165\u6885", "\u51FA\u6885"];
   constructor(indexOrName) {
-    super(Palace.NAMES, indexOrName);
+    super(PlumRain.NAMES, indexOrName);
   }
   static fromIndex(index) {
-    return new Palace(Palace.numeric(index, "palace index"));
+    return new PlumRain(PlumRain.numeric(index, "plum rain index"));
   }
   static fromName(name) {
-    return new Palace(name);
+    return new PlumRain(name);
   }
   next(n) {
-    return Palace.fromIndex(this.nextIndex(n));
-  }
-  /**
-   * 洛书数
-   */
-  getNumber() {
-    return this.index + 1;
-  }
-  getDirection() {
-    return Direction.fromIndex(this.index);
-  }
-  getElement() {
-    return Element.fromIndex([4, 2, 0, 0, 2, 3, 3, 2, 1][this.index]);
-  }
-  toString() {
-    return this.getName() + this.getNumber();
+    return PlumRain.fromIndex(this.nextIndex(n));
   }
 }
-class NineStarChart {
-  static ORDER = [4, 5, 6, 7, 8, 0, 1, 2, 3];
-  center;
-  forward;
-  constructor(center, forward) {
-    this.center = center;
-    this.forward = forward;
+class PlumRainDay extends AbstractCultureDay {
+  constructor(plumRain, dayIndex) {
+    super(plumRain, dayIndex);
   }
-  /**
-   * @param center 入中之星
-   * @param forward 是否顺飞，默认顺飞
-   */
-  static fromCenter(center, forward = true) {
-    return new NineStarChart(center, forward);
+  getPlumRain() {
+    return this.culture;
   }
-  getCenterStar() {
-    return this.center;
-  }
-  isForward() {
-    return this.forward;
-  }
-  /**
-   * 指定宫位所飞之星
-   */
-  getStar(palace) {
-    const i = NineStarChart.ORDER.indexOf(palace.getIndex());
-    return this.center.next(this.forward ? i : -i);
-  }
-  /**
-   * 星所在之宫
-   */
-  getPalace(star) {
-    for (let i = 0; i < 9; i++) {
-      if (this.getStar(Palace.fromIndex(i)).getIndex() === star.getIndex()) {
-        return Palace.fromIndex(i);
-      }
-    }
-    throw new Error(`illegal nine star: ${star}`);
-  }
-  /**
-   * 九宫之星，按坎一至离九排列
-   */
-  getStars() {
-    const l = [];
-    for (let i = 0; i < 9; i++) {
-      l.push(this.getStar(Palace.fromIndex(i)));
-    }
-    return l;
-  }
-  /**
-   * 三行九宫格，自左上起为巽四、离九、坤二
-   */
   toString() {
-    const rows = [[3, 8, 1], [2, 4, 6], [7, 0, 5]];
-    const lines = [];
-    for (let i = 0; i < 3; i++) {
-      const cells = [];
-      for (let j = 0; j < 3; j++) {
-        const star = this.getStar(Palace.fromIndex(rows[i][j]));
-        cells.push(star.getName() + star.getColor());
-      }
-      lines.push(cells.join(" "));
-    }
-    return lines.join("\n");
+    return this.getPlumRain().getIndex() === 0 ? super.toString() : this.culture.getName();
   }
 }
-class ZodiacNumbers extends AbstractCulture {
-  lunarYear;
-  zodiac;
-  constructor(lunarYear, zodiac) {
+class FetusHeavenStem extends LoopTyme {
+  static NAMES = ["\u95E8", "\u7893\u78E8", "\u53A8\u7076", "\u4ED3\u5E93", "\u623F\u5E8A"];
+  constructor(index) {
+    super(FetusHeavenStem.NAMES, index);
+  }
+  next(n) {
+    return new FetusHeavenStem(this.nextIndex(n));
+  }
+}
+class FetusEarthBranch extends LoopTyme {
+  static NAMES = ["\u7893", "\u5395", "\u7089", "\u95E8", "\u6816", "\u5E8A"];
+  constructor(index) {
+    super(FetusEarthBranch.NAMES, index);
+  }
+  next(n) {
+    return new FetusEarthBranch(this.nextIndex(n));
+  }
+}
+class FetusDay extends AbstractCulture {
+  fetusHeavenStem;
+  fetusEarthBranch;
+  side;
+  direction;
+  constructor(sixtyCycle) {
     super();
-    this.lunarYear = lunarYear;
-    this.zodiac = zodiac;
-  }
-  /**
-   * 当年十二生肖的号码，自年肖起依次排列
-   */
-  static fromLunarYear(lunarYear) {
-    const yearZodiac = LunarYear.fromYear(lunarYear).getSixtyCycle().getEarthBranch().getZodiac();
-    const l = [];
-    for (let i = 0; i < 12; i++) {
-      l.push(new ZodiacNumbers(lunarYear, yearZodiac.next(-i)));
-    }
-    return l;
-  }
-  /**
-   * 农历日所在年肖的号码
-   */
-  static fromLunarDay(lunarDay) {
-    const yearZodiac = lunarDay.getLunarMonth().getLunarYear().getSixtyCycle().getEarthBranch().getZodiac();
-    return new ZodiacNumbers(lunarDay.getYear(), yearZodiac);
-  }
-  /**
-   * 指定农历年与生肖
-   */
-  static of(lunarYear, zodiac) {
-    return new ZodiacNumbers(lunarYear, zodiac);
-  }
-  getLunarYear() {
-    return this.lunarYear;
-  }
-  getZodiac() {
-    return this.zodiac;
-  }
-  getNumbers() {
-    const yearZodiac = LunarYear.fromYear(this.lunarYear).getSixtyCycle().getEarthBranch().getZodiac();
-    const offset = this.indexOf(yearZodiac.getIndex() - this.zodiac.getIndex(), 12);
-    const l = [];
-    for (let i = offset + 1; i <= 49; i += 12) {
-      l.push(i);
-    }
-    return l;
-  }
-  getName() {
-    return this.zodiac.getName();
-  }
-  toString() {
-    const numbers = [];
-    const l = this.getNumbers();
-    for (let i = 0; i < l.length; i++) {
-      numbers.push((l[i] < 10 ? "0" : "") + l[i]);
-    }
-    return `${this.getName()} ${numbers.join(" ")}`;
-  }
-}
-class DeityFestival extends AbstractCulture {
-  month;
-  day;
-  names;
-  constructor(month, day, names) {
-    super();
-    this.month = month;
-    this.day = day;
-    this.names = names;
-  }
-  static fromLunarMonthDay(month, day) {
-    const key = (month < 10 ? "0" : "") + month + (day < 10 ? "0" : "") + day;
-    const names = DeityFestival.DATA[key];
-    return names ? new DeityFestival(month, day, names) : null;
+    this.fetusHeavenStem = new FetusHeavenStem(sixtyCycle.getHeavenStem().getIndex() % 5);
+    this.fetusEarthBranch = new FetusEarthBranch(sixtyCycle.getEarthBranch().getIndex() % 6);
+    const index = [3, 3, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, -9, -9, -9, -9, -9, -5, -5, -1, -1, -1, -3, -7, -7, -7, -7, -5, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 3, 3, 3, 3][sixtyCycle.getIndex()];
+    this.side = index < 0 ? Side.IN : Side.OUT;
+    this.direction = Direction.fromIndex(index);
   }
   static fromLunarDay(lunarDay) {
-    return DeityFestival.fromLunarMonthDay(Math.abs(lunarDay.getMonth()), lunarDay.getDay());
+    return new FetusDay(lunarDay.getSixtyCycle());
   }
-  getMonth() {
-    return this.month;
-  }
-  getDay() {
-    return this.day;
-  }
-  getNames() {
-    return this.names;
+  static fromSixtyCycleDay(sixtyCycleDay) {
+    return new FetusDay(sixtyCycleDay.getSixtyCycle());
   }
   getName() {
-    return this.names.join("\u3001");
-  }
-  toString() {
-    return `${LunarMonth.NAMES[this.month - 1]}${LunarDay.NAMES[this.day - 1]} ${this.getName()}`;
-  }
-  static DATA = {
-    "0101": ["\u5929\u814A\u4E4B\u8FB0\xB7\u5F25\u52D2\u4F5B\u5723\u8BDE"],
-    "0103": ["\u5B59\u771F\u4EBA\u3001\u90DD\u771F\u4EBA\u5723\u8BDE"],
-    "0106": ["\u8D70\u5149\u4F5B\u5723\u8BDE"],
-    "0108": ["\u6C5F\u4E1C\u795E\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09", "\u4E94\u6BBF\u960E\u7F57\u5929\u5B50\u5723\u8BDE"],
-    "0109": ["\u7389\u7687\u4E0A\u5E1D\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0110": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0111": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0112": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0113": ["\u5218\u731B\u5C06\u519B\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0114": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0115": ["\u4E0A\u5143\u8282\xB7\u4E0A\u5143\u5929\u5B98\u7B49\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
-    "0119": ["\u957F\u6625\u90B1\u771F\u4EBA\uFF08\u4E18\u5904\u673A\uFF09\u7B49\u5723\u8BDE"],
-    "0201": ["\u592A\u9633\u5347\u6BBF\u4E4B\u8FB0\xB7\u52FE\u9648\u3001\u5218\u771F\u4EBA\u5723\u8BDE", "\u4E00\u6BBF\u79E6\u5E7F\u738B\u5723\u8BDE"],
-    "0202": ["\u571F\u5730\u6B63\u795E\u5723\u8BDE"],
-    "0203": ["\u6587\u660C\u6893\u6F7C\u5E1D\u541B\u5723\u8BDE"],
-    "0204": ["\u66F9\u5927\u5C06\u519B\u5723\u8BDE"],
-    "0205": ["\u4E1C\u534E\u5E1D\u541B\u5723\u8BDE"],
-    "0208": ["\u5F20\u5927\u5E1D\u3001\u660C\u798F\u771F\u541B\u5723\u8BDE", "\u4E09\u6BBF\u5B8B\u5E1D\u738B\u5723\u8BDE"],
-    "0213": ["\u845B\u771F\u541B\u5723\u8BDE"],
-    "0215": ["\u592A\u4E0A\u8001\u541B\u7B49\u5723\u8BDE"],
-    "0217": ["\u4E1C\u65B9\u675C\u5C06\u519B\u5723\u8BDE"],
-    "0218": ["\u56DB\u6BBF\u4E94\u5B98\u738B\u5723\u8BDE"],
-    "0219": ["\u89C2\u97F3\u83E9\u8428\u5723\u8BDE"],
-    "0221": ["\u666E\u8D24\u83E9\u8428\u3001\u6C34\u6BCD\u5723\u8BDE"],
-    "0225": ["\u7384\u5929\u5723\u7236\u660E\u771F\u5E1D\u5723\u8BDE"],
-    "0301": ["\u4E8C\u6BBF\u695A\u6C5F\u738B\u5723\u8BDE"],
-    "0303": ["\u5317\u6781\u771F\u6B66\u7384\u5929\u4E0A\u5E1D\u5723\u8BDE"],
-    "0306": ["\u773C\u5149\u5A18\u5A18\u7B49\u5723\u8BDE"],
-    "0308": ["\u516D\u6BBF\u535E\u57CE\u738B\u5723\u8BDE"],
-    "0312": ["\u4E2D\u592E\u4E94\u9053\u5723\u8BDE"],
-    "0315": ["\u660A\u5929\u5927\u5E1D\u7B49\u5723\u8BDE"],
-    "0316": ["\u51C6\u63D0\u83E9\u8428\u3001\u5C71\u795E\u5723\u8BDE"],
-    "0318": ["\u540E\u571F\u5A18\u5A18\u7B49\u5723\u8BDE"],
-    "0320": ["\u5B50\u5B59\u5A18\u5A18\u5723\u8BDE"],
-    "0323": ["\u5929\u5983\u5A18\u5A18\uFF08\u5988\u7956\uFF09\u5723\u8BDE"],
-    "0327": ["\u4E03\u6BBF\u6CF0\u5C71\u738B\u5723\u8BDE"],
-    "0328": ["\u4E1C\u5CB3\u5927\u5E1D\u7B49\u5723\u8BDE"],
-    "0401": ["\u8427\u516C\u5723\u8BDE", "\u516B\u6BBF\u90FD\u5E02\u738B\u5723\u8BDE"],
-    "0404": ["\u6587\u6B8A\u83E9\u8428\u3001\u72C4\u6881\u516C\u5723\u8BDE"],
-    "0408": ["\u6D74\u4F5B\u8282\xB7\u91CA\u8FE6\u6587\u4F5B\u5723\u8BDE", "\u4E5D\u6BBF\u5E73\u7B49\u738B\u5723\u8BDE"],
-    "0413": ["\u5929\u5C39\u771F\u4EBA\u7B49\u5723\u8BDE"],
-    "0414": ["\u5415\u7EAF\u9633\u7956\u5E08\uFF08\u5415\u6D1E\u5BBE\uFF09\u7B49\u5723\u8BDE"],
-    "0415": ["\u949F\u79BB\u7956\u5E08\u5723\u8BDE"],
-    "0417": ["\u5341\u6BBF\u8F6C\u8F6E\u738B\u5723\u8BDE"],
-    "0418": ["\u7D2B\u5FAE\u5927\u5E1D\u7B49\u5723\u8BDE"],
-    "0420": ["\u773C\u5149\u5723\u6BCD\u5A18\u5A18\u5723\u8BDE"],
-    "0426": ["\u949F\u5C71\u848B\u516C\u5723\u8BDE"],
-    "0428": ["\u836F\u738B\uFF08\u5B59\u601D\u9088\uFF09\u5723\u8BDE"],
-    "0501": ["\u5357\u6781\u957F\u751F\u5927\u5E1D\u5723\u8BDE"],
-    "0505": ["\u5730\u814A\u4E4B\u8FB0\u3001\u7AEF\u5348\u8282\xB7\u5730\u7957\u6E29\u5143\u5E05\u7B49\u5723\u8BDE"],
-    "0507": ["\u6731\u592A\u5C09\u5723\u8BDE"],
-    "0508": ["\u5357\u65B9\u4E94\u9053\u5723\u8BDE"],
-    "0511": ["\u90FD\u57CE\u968D\u5723\u8BDE"],
-    "0512": ["\u70B3\u7075\u516C\u5723\u8BDE"],
-    "0513": ["\u5173\u5723\u5E1D\u541B\u964D\u795E"],
-    "0516": ["\u5929\u5730\u4E3B\u7081\u53CA\u9020\u5316\u4E07\u7269\u4E4B\u8FB0\uFF08\u7981\u5FCC\u65E5\uFF09"],
-    "0518": ["\u5F20\u5929\u5E08\u5723\u8BDE"],
-    "0520": ["\u4E39\u9633\u9A6C\u771F\u4EBA\u5723\u8BDE"],
-    "0529": ["\u8BB8\u5A01\u663E\u738B\uFF08\u5510\u5FE0\u81E3\u8BB8\u8FDC\uFF09\u7B49\u5723\u8BDE"],
-    "0604": ["\u5357\u77BB\u90E8\u6D32\u8F6C\u5927\u6CD5\u8F6E\uFF08\u6CD5\u4F1A\u65E5\uFF09"],
-    "0606": ["\u5D14\u5E9C\u541B\u3001\u6768\u56DB\u5C06\u519B\u5723\u8BDE"],
-    "0610": ["\u5218\u6D77\u87FE\u5E1D\u541B\u5723\u8BDE"],
-    "0611": ["\u4E95\u6CC9\u9F99\u738B\u5723\u8BDE"],
-    "0619": ["\u89C2\u97F3\u83E9\u8428\u6210\u9053"],
-    "0623": ["\u706B\u795E\u7B49\u5723\u8BDE"],
-    "0624": ["\u96F7\u7956\u5723\u8BDE"],
-    "0626": ["\u4E8C\u90CE\u771F\u541B\u5723\u8BDE"],
-    "0629": ["\u5929\u67A2\u5DE6\u76F8\u83AB\u541B\uFF08\u5B8B\u6587\u4E1E\u76F8\u6587\u5929\u7965\uFF09\u7B49\u5723\u8BDE"],
-    "0707": ["\u9053\u5FB7\u814A\u4E4B\u8FB0\u3001\u4E03\u5915\uFF08\u814A\u65E5\uFF09"],
-    "0712": ["\u957F\u771F\u8C2D\u771F\u4EBA\u5723\u8BDE"],
-    "0713": ["\u5927\u52BF\u81F3\u83E9\u8428\u5723\u8BDE"],
-    "0715": ["\u4E2D\u5143\u8282\xB7\u4E2D\u5143\u5730\u5B98\u7B49\u5723\u8BDE"],
-    "0718": ["\u738B\u6BCD\u5A18\u5A18\u5723\u8BDE"],
-    "0719": ["\u503C\u5E74\u592A\u5C81\u5723\u8BDE"],
-    "0721": ["\u666E\u5EB5\u7956\u5E08\u7B49\u5723\u8BDE"],
-    "0722": ["\u589E\u798F\u8D22\u795E\u5723\u8BDE"],
-    "0723": ["\u5929\u67A2\u4E0A\u76F8\u771F\u541B\uFF08\u6C49\u8BF8\u845B\u4E1E\u76F8\u8BF8\u845B\u4EAE\uFF09\u7B49\u5723\u8BDE"],
-    "0724": ["\u9F99\u6811\u738B\u83E9\u8428\u5723\u8BDE"],
-    "0730": ["\u5730\u85CF\u738B\u83E9\u8428\u5723\u8BDE"],
-    "0801": ["\u795E\u529F\u5999\u6D4E\u771F\u541B\uFF08\u8BB8\u771F\u541B\uFF09\u7B49\u5723\u8BDE"],
-    "0803": ["\u7076\u541B\u5723\u8BDE", "\u5317\u6597\u4E0B\u964D\uFF08\u4E0B\u964D\uFF09"],
-    "0805": ["\u96F7\u58F0\u5927\u5E1D\u5723\u8BDE"],
-    "0810": ["\u5317\u5CB3\u5927\u5E1D\u5723\u8BDE"],
-    "0812": ["\u897F\u65B9\u4E94\u9053\u5723\u8BDE"],
-    "0815": ["\u592A\u9634\u671D\u5143\u4E4B\u8FB0\u3001\u4E2D\u79CB\u8282\uFF08\u671D\u5143\uFF09"],
-    "0818": ["\u9152\u4ED9\u5723\u8BDE"],
-    "0822": ["\u71C3\u706F\u4F5B\u5723\u8BDE"],
-    "0823": ["\u4F0F\u9B54\u526F\u5C06\u5F20\u663E\u738B\uFF08\u6C49\u6853\u4FAF\u5F20\u98DE\uFF09\u7B49\u5723\u8BDE"],
-    "0827": ["\u5317\u6597\u4E0B\u964D\uFF08\u4E0B\u964D\uFF09"],
-    "0901": ["\u5357\u6597\u4E0B\u964D\u4E4B\u8FB0\uFF08\u4E0B\u964D\uFF09", "\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0902": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0903": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09", "\u4E94\u761F\u5723\u8BDE"],
-    "0904": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0905": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0906": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0907": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0908": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
-    "0909": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09", "\u6597\u6BCD\u5143\u541B\u7B49\u5723\u8BDE"],
-    "0916": ["\u673A\u795E\u5723\u8BDE"],
-    "0917": ["\u91D1\u9F99\u56DB\u5927\u738B\u7B49\u5723\u8BDE"],
-    "0923": ["\u8428\u771F\u4EBA\u5723\u8BDE"],
-    "0928": ["\u4E94\u663E\u7075\u5BAB\u3001\u9A6C\u5143\u5E05\u5723\u8BDE"],
-    "0930": ["\u836F\u5E08\u7409\u7483\u5149\u738B\u4F5B\u5723\u8BDE"],
-    "1001": ["\u6C11\u5C81\u814A\u4E4B\u8FB0\xB7\u4E1C\u7687\u5927\u5E1D\u7B49\u5723\u8BDE"],
-    "1003": ["\u4E09\u8305\u5E94\u5316\u771F\u541B\u5723\u8BDE"],
-    "1005": ["\u8FBE\u6469\u7956\u5E08\u5723\u8BDE"],
-    "1006": ["\u5929\u66F9\u8BF8\u53F8\u4E94\u5CB3\u4E94\u5E1D\u5723\u8BDE"],
-    "1008": ["\u6D85\u69C3\uFF08\u7EAA\u5FF5\u65E5\uFF09"],
-    "1015": ["\u4E0B\u5143\u8282\xB7\u4E0B\u5143\u6C34\u5B98\u7B49\u5723\u8BDE"],
-    "1020": ["\u865A\u9756\u5929\u5E08\uFF08\u4E09\u5341\u4EE3\u5929\u5E08\u5F18\u609F\u5F20\u771F\u4EBA\uFF09\u7B49\u5723\u8BDE"],
-    "1027": ["\u5317\u6781\u7D2B\u5FAE\u5927\u5E1D\u5723\u8BDE"],
-    "1104": ["\u5927\u6210\u81F3\u5723\u5148\u5E08\u6587\u5BA3\u738B\u5B54\u5B50\u7B49\u5723\u8BDE"],
-    "1106": ["\u897F\u5CB3\u5927\u5E1D\u5723\u8BDE"],
-    "1111": ["\u592A\u4E59\u6551\u82E6\u5929\u5C0A\u5723\u8BDE"],
-    "1117": ["\u963F\u5F25\u9640\u4F5B\u5723\u8BDE"],
-    "1119": ["\u65E5\u5149\u5929\u5B50\u7B49\u5723\u8BDE"],
-    "1123": ["\u5357\u6597\u4E0B\u964D\xB7\u5F20\u4ED9\u5723\u8BDE"],
-    "1126": ["\u5317\u65B9\u4E94\u9053\u5723\u8BDE"],
-    "1208": ["\u738B\u4FAF\u814A\u4E4B\u8FB0\u3001\u814A\u516B\u8282\xB7\u5F20\u82F1\u6D4E\u738B\uFF08\u5510\u5FE0\u81E3\u5F20\u5DE1\uFF09\u7B49\u5723\u8BDE"],
-    "1216": ["\u5357\u5CB3\u5927\u5E1D\u5723\u8BDE"],
-    "1220": ["\u9C81\u73ED\u5723\u8BDE"],
-    "1221": ["\u5929\u7337\u4E0A\u5E1D\u5723\u8BDE"],
-    "1224": ["\u53F8\u547D\u7076\u541B\u4E0A\u5929\u671D\u7389\u5E1D"],
-    "1229": ["\u534E\u4E25\u83E9\u8428\u5723\u8BDE"],
-    "1230": ["\u8BF8\u4F5B\u4E0B\u754C\u63A2\u8BBF\u5584\u6076"]
-  };
-}
-class DayAlmanac {
-  solarDay;
-  lunarDayCache;
-  sixtyCycleDayCache;
-  hoursCache;
-  constructor(solarDay) {
-    this.solarDay = solarDay;
-    this.lunarDayCache = null;
-    this.sixtyCycleDayCache = null;
-    this.hoursCache = null;
-  }
-  static fromSolarDay(solarDay) {
-    return new DayAlmanac(solarDay);
-  }
-  static fromYmd(year, month, day) {
-    return new DayAlmanac(SolarDay.fromYmd(year, month, day));
-  }
-  /**
-   * 以本地时区的年月日构造
-   */
-  static fromDate(date) {
-    return new DayAlmanac(SolarDay.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate()));
-  }
-  getSolarDay() {
-    return this.solarDay;
-  }
-  getLunarDay() {
-    if (!this.lunarDayCache) {
-      this.lunarDayCache = this.solarDay.getLunarDay();
+    let s = this.fetusHeavenStem.getName() + this.fetusEarthBranch.getName();
+    if ("\u95E8\u95E8" === s) {
+      s = "\u5360\u5927\u95E8";
+    } else if ("\u7893\u78E8\u7893" === s) {
+      s = "\u5360\u7893\u78E8";
+    } else if ("\u623F\u5E8A\u5E8A" === s) {
+      s = "\u5360\u623F\u5E8A";
+    } else if (s.indexOf("\u95E8") === 0) {
+      s = "\u5360" + s;
     }
-    return this.lunarDayCache;
-  }
-  getSixtyCycleDay() {
-    if (!this.sixtyCycleDayCache) {
-      this.sixtyCycleDayCache = this.solarDay.getSixtyCycleDay();
-    }
-    return this.sixtyCycleDayCache;
-  }
-  /**
-   * 十二时辰，同一实例内复用
-   */
-  getHours() {
-    if (!this.hoursCache) {
-      this.hoursCache = this.getSixtyCycleDay().getHours();
-    }
-    return this.hoursCache;
-  }
-  getDuty() {
-    return this.getSixtyCycleDay().getDuty();
-  }
-  getDutyAdvice() {
-    return DutyAdvice.fromDuty(this.getDuty());
-  }
-  /**
-   * 日冲煞
-   */
-  getClash() {
-    return Clash.fromSixtyCycle(this.getSixtyCycleDay().getSixtyCycle());
-  }
-  /**
-   * 诸葛武侯出行择日
-   */
-  getWuHouDay() {
-    return WuHouDay.fromLunarDay(this.getLunarDay());
-  }
-  /**
-   * 月将
-   */
-  getMonthGeneral() {
-    return MonthGeneral.fromSolarDay(this.solarDay);
-  }
-  /**
-   * 神明诞辰，无则返回 null
-   */
-  getDeityFestival() {
-    return DeityFestival.fromLunarDay(this.getLunarDay());
-  }
-  /**
-   * 年肖号码
-   */
-  getYearZodiacNumbers() {
-    return ZodiacNumbers.fromLunarDay(this.getLunarDay());
-  }
-  /**
-   * 六合生肖号码，如「六合猪 07 19 31 43」
-   */
-  getCombineZodiacNumbers() {
-    const branch = this.getSixtyCycleDay().getSixtyCycle().getEarthBranch();
-    return ZodiacNumbers.of(this.getLunarDay().getYear(), branch.getCombine().getZodiac());
-  }
-  /**
-   * 三合生肖号码
-   */
-  getTriangleZodiacNumbers() {
-    const branches = this.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getTriangle();
-    const l = [];
-    for (let i = 0; i < branches.length; i++) {
-      l.push(ZodiacNumbers.of(this.getLunarDay().getYear(), branches[i].getZodiac()));
-    }
-    return l;
-  }
-  /**
-   * 旬空（空亡）
-   */
-  getVoidBranches() {
-    return this.getSixtyCycleDay().getSixtyCycle().getExtraEarthBranches();
-  }
-  /**
-   * 贵人时（天乙贵人所在时辰）
-   */
-  getNobleHours() {
-    const nobels = this.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getNoble();
-    const l = [];
-    const hours = this.getHours();
-    for (let i = 0; i < hours.length; i++) {
-      const branch = hours[i].getSixtyCycle().getEarthBranch();
-      for (let j = 0; j < nobels.length; j++) {
-        if (branch.getIndex() === nobels[j].getIndex()) {
-          l.push(hours[i]);
-          break;
-        }
-      }
-    }
-    return l;
-  }
-  /**
-   * 吉时（黄道时辰）
-   */
-  getLuckyHours() {
-    const l = [];
-    const hours = this.getHours();
-    for (let i = 0; i < hours.length; i++) {
-      if (hours[i].getTwelveStar().getEcliptic().getLuck().getIndex() === 0) {
-        l.push(hours[i]);
-      }
-    }
-    return l;
-  }
-  /**
-   * 月破（日支冲月建）
-   */
-  isMonthBreak() {
-    const day = this.getSixtyCycleDay();
-    return day.getSixtyCycle().getEarthBranch().equals(day.getMonth().getEarthBranch().getOpposite());
-  }
-  /**
-   * 岁破（日支冲年支）
-   */
-  isYearBreak() {
-    const day = this.getSixtyCycleDay();
-    return day.getSixtyCycle().getEarthBranch().equals(day.getYear().getEarthBranch().getOpposite());
-  }
-  /**
-   * 天赦日：春月戊寅、夏月甲午、秋月戊申、冬月甲子
-   */
-  isHeavenlyPardon() {
-    const month = this.getSixtyCycleDay().getMonth().getEarthBranch().getIndex();
-    const season = ~~((month + 10) % 12 / 3);
-    return this.getSixtyCycleDay().getSixtyCycle().getName() === ["\u620A\u5BC5", "\u7532\u5348", "\u620A\u7533", "\u7532\u5B50"][season];
-  }
-  /**
-   * 四离日：春分、秋分、夏至、冬至前一日
-   */
-  isFourDeparture() {
-    const termDay = this.solarDay.next(1).getTermDay();
-    return termDay.getDayIndex() === 0 && termDay.getSolarTerm().getIndex() % 6 === 0;
-  }
-  /**
-   * 四绝日：立春、立夏、立秋、立冬前一日
-   */
-  isFourSeverance() {
-    const termDay = this.solarDay.next(1).getTermDay();
-    return termDay.getDayIndex() === 0 && termDay.getSolarTerm().getIndex() % 6 === 3;
-  }
-  /**
-   * 年家九宫飞星
-   */
-  getYearNineStarChart(forward = true) {
-    return NineStarChart.fromCenter(this.getSixtyCycleDay().getSixtyCycleMonth().getSixtyCycleYear().getNineStar(), forward);
-  }
-  /**
-   * 月家九宫飞星
-   */
-  getMonthNineStarChart(forward = true) {
-    return NineStarChart.fromCenter(this.getSixtyCycleDay().getSixtyCycleMonth().getNineStar(), forward);
-  }
-  /**
-   * 日家九宫飞星
-   */
-  getDayNineStarChart(forward = true) {
-    return NineStarChart.fromCenter(this.solarDay.getNineStar(), forward);
-  }
-  /**
-   * 时家九宫飞星
-   */
-  getHourNineStarChart(hour, forward = true) {
-    return NineStarChart.fromCenter(hour.getNineStar(), forward);
-  }
-  /**
-   * 农历月大小
-   */
-  getLunarMonthSize() {
-    return this.getLunarDay().getLunarMonth().getDayCount() === 30 ? "\u5927" : "\u5C0F";
-  }
-  /**
-   * 十二时辰吉凶
-   */
-  getHourFortunes() {
-    const hours = this.getHours();
-    const l = [];
-    for (let i = 0; i < hours.length; i++) {
-      l.push(HourFortune.fromSixtyCycleHour(hours[i]));
-    }
-    return l;
-  }
-  /**
-   * 某年命与今日的关系，对应通胜「日禄」「择日须知」两栏
-   */
-  getLifeRelation(birthYear) {
-    return LifeRelation.fromBirthYear(birthYear, this.getSixtyCycleDay().getSixtyCycle());
-  }
-  /**
-   * 十二生肖流月运程
-   */
-  getZodiacFortunes() {
-    const month = this.getSixtyCycleDay().getMonth();
-    const l = [];
-    for (let i = 0; i < 12; i++) {
-      l.push(ZodiacFortune.fromZodiac(Zodiac.fromIndex(i), month));
-    }
-    return l;
-  }
-  /**
-   * 今日吉数（规则推演，非原版数值）
-   */
-  getDailyNumbers(count = 6) {
-    return DailyNumbers.fromSixtyCycleDay(this.getSixtyCycleDay()).getNumbers(count);
-  }
-  /**
-   * 风水常识
-   */
-  getFengShuiTip() {
-    return FengShuiTip.of(this.solarDay);
-  }
-  /**
-   * 周公解梦，逐日一则
-   */
-  getDreamOracle() {
-    return DreamOracle.of(this.solarDay);
-  }
-  /**
-   * 民俗节日
-   */
-  getFolkFestivals() {
-    return FolkFestival.of(this.solarDay, this.getLunarDay());
-  }
-  /**
-   * 当日节日名（公历、农历、民俗），按名称去重
-   */
-  getFestivalNames() {
-    const l = [];
-    const solar = this.solarDay.getFestival();
-    if (solar) {
-      l.push(solar.getName());
-    }
-    const lunar = this.getLunarDay().getFestival();
-    if (lunar && l.indexOf(lunar.getName()) < 0) {
-      l.push(lunar.getName());
-    }
-    const folk = this.getFolkFestivals().getNames();
-    for (let i = 0; i < folk.length; i++) {
-      if (l.indexOf(folk[i]) < 0) {
-        l.push(folk[i]);
-      }
-    }
-    return l;
-  }
-}
-class LifeRelation extends AbstractCulture {
-  birthYear;
-  birth;
-  day;
-  constructor(birthYear, birth, day) {
-    super();
-    this.birthYear = birthYear;
-    this.birth = birth;
-    this.day = day;
-  }
-  /**
-   * @param birthYear 出生年（以立春为界）
-   */
-  static fromBirthYear(birthYear, day) {
-    return new LifeRelation(birthYear, SixtyCycle.fromIndex(birthYear - 4), day);
-  }
-  getBirthYear() {
-    return this.birthYear;
-  }
-  /**
-   * 年命干支
-   */
-  getBirthSixtyCycle() {
-    return this.birth;
-  }
-  getDaySixtyCycle() {
-    return this.day;
-  }
-  /**
-   * 日干对年命的十神
-   */
-  getTenStar() {
-    return this.birth.getHeavenStem().getTenStar(this.day.getHeavenStem());
-  }
-  /**
-   * 互禄：日干之禄临年命支
-   */
-  isMutualProsperity() {
-    return this.day.getHeavenStem().getProsperity().getIndex() === this.birth.getEarthBranch().getIndex();
-  }
-  /**
-   * 进禄：年命干之禄临日支
-   */
-  isAdvanceProsperity() {
-    return this.birth.getHeavenStem().getProsperity().getIndex() === this.day.getEarthBranch().getIndex();
-  }
-  /**
-   * 贵：年命支为日干之天乙贵人
-   */
-  isNoble() {
-    const nobles = this.day.getHeavenStem().getNoble();
-    for (let i = 0; i < nobles.length; i++) {
-      if (nobles[i].getIndex() === this.birth.getEarthBranch().getIndex()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  /**
-   * 六合：年命支与日支六合
-   */
-  isCombine() {
-    return this.birth.getEarthBranch().getCombine().getIndex() === this.day.getEarthBranch().getIndex();
-  }
-  /**
-   * 三合：年命支与日支三合
-   */
-  isTriangle() {
-    const branches = this.day.getEarthBranch().getTriangle();
-    for (let i = 0; i < branches.length; i++) {
-      if (branches[i].getIndex() === this.birth.getEarthBranch().getIndex()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  getName() {
-    return `${this.birth.getHeavenStem().getName()}\u547D${this.getTenStar().getName()}`;
-  }
-  toString() {
-    const l = [this.getName()];
-    if (this.isMutualProsperity()) {
-      l.push("\u4E92\u7984");
-    }
-    if (this.isAdvanceProsperity()) {
-      l.push("\u8FDB\u7984");
-    }
-    if (this.isNoble()) {
-      l.push("\u8D35");
-    }
-    if (this.isCombine()) {
-      l.push("\u516D\u5408");
-    }
-    if (this.isTriangle()) {
-      l.push("\u4E09\u5408");
-    }
-    return l.join("\uFF0C");
-  }
-}
-class HourFortune extends AbstractCulture {
-  hour;
-  constructor(hour) {
-    super();
-    this.hour = hour;
-  }
-  static fromSixtyCycleHour(hour) {
-    return new HourFortune(hour);
-  }
-  getHour() {
-    return this.hour;
-  }
-  getTwelveStar() {
-    return this.hour.getTwelveStar();
-  }
-  getEcliptic() {
-    return this.getTwelveStar().getEcliptic();
-  }
-  /**
-   * 黄道为吉，黑道为凶
-   */
-  getLuck() {
-    return this.getEcliptic().getLuck();
-  }
-  /**
-   * 贵人时
-   */
-  isNoble() {
-    const nobles = this.hour.getDay().getHeavenStem().getNoble();
-    for (let i = 0; i < nobles.length; i++) {
-      if (nobles[i].getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  /**
-   * 日禄时
-   */
-  isProsperity() {
-    return this.hour.getDay().getHeavenStem().getProsperity().getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex();
-  }
-  /**
-   * 六合时
-   */
-  isCombine() {
-    return this.hour.getDay().getEarthBranch().getCombine().getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex();
-  }
-  getGrade() {
-    if (this.getLuck().getIndex() !== 0) {
-      return 2;
-    }
-    return this.isNoble() || this.isProsperity() || this.isCombine() ? 0 : 1;
-  }
-  getName() {
-    return ["\u5409", "\u4E2D", "\u51F6"][this.getGrade()];
-  }
-  toString() {
-    const l = [this.hour.getSixtyCycle().getName(), this.getName()];
-    if (this.isNoble()) {
-      l.push("\u8D35");
-    }
-    if (this.isProsperity()) {
-      l.push("\u7984");
-    }
-    if (this.isCombine()) {
-      l.push("\u5408");
-    }
-    return l.join("");
-  }
-}
-class ElementBalance extends AbstractCulture {
-  eightChar;
-  counts;
-  strong;
-  constructor(eightChar) {
-    super();
-    this.eightChar = eightChar;
-    const stems = [
-      eightChar.getYear().getHeavenStem(),
-      eightChar.getMonth().getHeavenStem(),
-      eightChar.getDay().getHeavenStem(),
-      eightChar.getHour().getHeavenStem()
-    ];
-    const branches = [
-      eightChar.getYear().getEarthBranch(),
-      eightChar.getMonth().getEarthBranch(),
-      eightChar.getDay().getEarthBranch(),
-      eightChar.getHour().getEarthBranch()
-    ];
-    const counts = [0, 0, 0, 0, 0];
-    for (let i = 0; i < 4; i++) {
-      counts[stems[i].getElement().getIndex()]++;
-      counts[branches[i].getElement().getIndex()]++;
-    }
-    counts[branches[1].getElement().getIndex()] += 2;
-    this.counts = counts;
-    const me = eightChar.getDay().getHeavenStem().getElement().getIndex();
-    const supporting = counts[me] + counts[(me + 4) % 5];
-    let total = 0;
-    for (let i = 0; i < 5; i++) {
-      total += counts[i];
-    }
-    this.strong = supporting * 2 >= total;
-  }
-  static fromEightChar(eightChar) {
-    return new ElementBalance(eightChar);
-  }
-  getEightChar() {
-    return this.eightChar;
-  }
-  /**
-   * 木火土金水五行个数
-   */
-  getCounts() {
-    return this.counts;
-  }
-  getDayMaster() {
-    return this.eightChar.getDay().getHeavenStem();
-  }
-  isStrong() {
-    return this.strong;
-  }
-  /**
-   * 未出现的五行
-   */
-  getMissing() {
-    const l = [];
-    for (let i = 0; i < 5; i++) {
-      if (this.counts[i] === 0) {
-        l.push(Element.fromIndex(i));
-      }
-    }
-    return l;
-  }
-  /**
-   * 取用五行：身强取克泄耗，身弱取生扶
-   */
-  getFavorable() {
-    const me = this.getDayMaster().getElement().getIndex();
-    const l = [];
-    if (this.strong) {
-      l.push(Element.fromIndex((me + 2) % 5));
-      l.push(Element.fromIndex((me + 1) % 5));
-      l.push(Element.fromIndex((me + 3) % 5));
+    s += " ";
+    if (Side.IN === this.side) {
+      s += "\u623F\u5185";
     } else {
-      l.push(Element.fromIndex((me + 4) % 5));
-      l.push(Element.fromIndex(me));
+      s += "\u5916";
     }
-    return l;
-  }
-  getName() {
-    return this.getDayMaster().getName() + this.getDayMaster().getElement().getName();
-  }
-  toString() {
-    const names = [];
-    for (let i = 0; i < 5; i++) {
-      names.push(Element.fromIndex(i).getName() + this.counts[i]);
+    const directionName = this.direction.getName();
+    if (Side.OUT === this.side && "\u5317\u5357\u897F\u4E1C".indexOf(directionName) > -1) {
+      s += "\u6B63";
     }
-    return `${this.getName()}\uFF08${names.join(" ")}\uFF09${this.strong ? "\u8EAB\u5F3A" : "\u8EAB\u5F31"}`;
+    s += directionName;
+    return s;
+  }
+  getSide() {
+    return this.side;
+  }
+  getDirection() {
+    return this.direction;
+  }
+  getFetusHeavenStem() {
+    return this.fetusHeavenStem;
+  }
+  getFetusEarthBranch() {
+    return this.fetusEarthBranch;
   }
 }
-class ZodiacFortune extends AbstractCulture {
-  zodiac;
-  month;
-  static TEXTS = [
-    "\u4E0E\u6708\u5EFA\u516D\u5408\uFF0C\u8BF8\u4E8B\u987A\u9042\uFF0C\u5B9C\u5408\u4F5C\u6C42\u8D22\u3002",
-    "\u4E0E\u6708\u5EFA\u4E09\u5408\uFF0C\u8D35\u4EBA\u76F8\u52A9\uFF0C\u8C0B\u4E8B\u53EF\u6210\u3002",
-    "\u4E0E\u6708\u5EFA\u540C\u6C14\uFF0C\u8FD0\u52BF\u5E73\u7A33\uFF0C\u5B9C\u6309\u90E8\u5C31\u73ED\u3002",
-    "\u4E0E\u6708\u5EFA\u65E0\u6D89\uFF0C\u8FD0\u52BF\u5E73\u5E38\uFF0C\u5B9C\u5B88\u5E38\u5F85\u65F6\u3002",
-    "\u4E0E\u6708\u5EFA\u76F8\u51B2\uFF0C\u53D8\u52A8\u8F83\u591A\uFF0C\u5B9C\u5B88\u4E0D\u5B9C\u653B\u3002",
-    "\u4E0E\u6708\u5EFA\u76F8\u5211\uFF0C\u53E3\u820C\u662F\u975E\uFF0C\u5B9C\u8C28\u8A00\u614E\u884C\u3002",
-    "\u4E0E\u6708\u5EFA\u76F8\u5BB3\uFF0C\u5C0F\u4EBA\u6697\u635F\uFF0C\u5B9C\u9632\u5FAE\u675C\u6E10\u3002",
-    "\u4E0E\u6708\u5EFA\u76F8\u7834\uFF0C\u4E8B\u591A\u53CD\u590D\uFF0C\u5B9C\u7A33\u4E2D\u6C42\u8FDB\u3002"
-  ];
-  static LUCK = [0, 0, 0, 1, 1, 1, 1, 1];
-  constructor(zodiac, month) {
-    super();
-    this.zodiac = zodiac;
-    this.month = month;
+class FetusMonth extends LoopTyme {
+  static NAMES = ["\u5360\u623F\u5E8A", "\u5360\u6237\u7A97", "\u5360\u95E8\u5802", "\u5360\u53A8\u7076", "\u5360\u623F\u5E8A", "\u5360\u5E8A\u4ED3", "\u5360\u7893\u78E8", "\u5360\u5395\u6237", "\u5360\u95E8\u623F", "\u5360\u623F\u5E8A", "\u5360\u7076\u7089", "\u5360\u623F\u5E8A"];
+  constructor(indexOrName) {
+    super(FetusMonth.NAMES, indexOrName);
   }
-  static fromZodiac(zodiac, month) {
-    return new ZodiacFortune(zodiac, month);
+  static fromLunarMonth(lunarMonth) {
+    return lunarMonth.isLeap() ? null : new FetusMonth(lunarMonth.getMonth() - 1);
   }
-  getZodiac() {
-    return this.zodiac;
-  }
-  getMonth() {
-    return this.month;
-  }
-  /**
-   * 关系序号：0 六合、1 三合、2 同气、3 无涉、4 冲、5 刑、6 害、7 破
-   */
-  getRelationIndex() {
-    const b = this.zodiac.getEarthBranch();
-    const m = this.month.getEarthBranch();
-    if (b.getCombine().getIndex() === m.getIndex()) {
-      return 0;
-    }
-    const triangles = m.getTriangle();
-    for (let i = 0; i < triangles.length; i++) {
-      if (triangles[i].getIndex() === b.getIndex()) {
-        return 1;
-      }
-    }
-    if (b.getIndex() === m.getIndex()) {
-      return 2;
-    }
-    if (b.getOpposite().getIndex() === m.getIndex()) {
-      return 4;
-    }
-    const punishments = m.getPunishments();
-    for (let i = 0; i < punishments.length; i++) {
-      if (punishments[i].getIndex() === b.getIndex() && punishments[i].getIndex() !== m.getIndex()) {
-        return 5;
-      }
-    }
-    if (b.getHarm().getIndex() === m.getIndex()) {
-      return 6;
-    }
-    if (b.getDestruction().getIndex() === m.getIndex()) {
-      return 7;
-    }
-    return 3;
-  }
-  getLuck() {
-    return Luck.fromIndex(ZodiacFortune.LUCK[this.getRelationIndex()]);
-  }
-  getName() {
-    return this.zodiac.getName();
-  }
-  getText() {
-    return ZodiacFortune.TEXTS[this.getRelationIndex()];
-  }
-  toString() {
-    return `${this.getName()}\uFF1A${this.getText()}`;
+  next(n) {
+    return new FetusMonth(this.nextIndex(n));
   }
 }
-class FengShuiTip extends AbstractCulture {
-  index;
-  static DATA = [
-    "\u5927\u95E8\u662F\u6C14\u53E3\uFF0C\u5C5E\u5185\u5916\u6C14\u6D41\u52A8\u7684\u5FC5\u7ECF\u4E4B\u5730\uFF0C\u662F\u4E0E\u5916\u754C\u8054\u7CFB\u7684\u54BD\u5589\u548C\u5C4F\u969C\u3002",
-    "\u660E\u5802\u5B9C\u5F00\u9614\u660E\u4EAE\uFF0C\u5FCC\u5806\u79EF\u6742\u7269\uFF0C\u6C14\u805A\u5219\u8D22\u805A\uFF0C\u6C14\u6EDE\u5219\u8FD0\u6EDE\u3002",
-    "\u7384\u5173\u4E3A\u5165\u95E8\u7B2C\u4E00\u5370\u8C61\uFF0C\u5B9C\u6574\u6D01\u901A\u900F\uFF0C\u4E0D\u5B9C\u76F4\u5BF9\u95E8\u7A97\u5F62\u6210\u7A7F\u5802\u3002",
-    "\u5BA2\u5385\u5B9C\u65B9\u6B63\uFF0C\u6C99\u53D1\u5B9C\u80CC\u6709\u5B9E\u5899\uFF0C\u4E3B\u4EBA\u5750\u5367\u5B89\u7A33\uFF0C\u884C\u4E8B\u6709\u9760\u3002",
-    "\u5367\u5BA4\u5B9C\u9759\uFF0C\u5E8A\u5934\u5FCC\u9760\u7A97\u3001\u5FCC\u5BF9\u955C\u3001\u5FCC\u538B\u6881\uFF0C\u4EE5\u6C42\u5B89\u7720\u3002",
-    "\u53A8\u623F\u5C5E\u706B\uFF0C\u5B9C\u4E0E\u5395\u6240\u5206\u9694\uFF0C\u7076\u53E3\u4E0D\u5B9C\u6B63\u5BF9\u6C34\u69FD\uFF0C\u53D6\u6C34\u706B\u65E2\u6D4E\u4E4B\u610F\u3002",
-    "\u7076\u4F4D\u5B9C\u5750\u715E\u5411\u5409\uFF0C\u5FCC\u538B\u6881\u3001\u5FCC\u5BF9\u95E8\uFF0C\u53E4\u79F0\u300C\u7076\u4E3A\u517B\u547D\u4E4B\u6E90\u300D\u3002",
-    "\u5395\u6240\u5C5E\u6C34\uFF0C\u5B9C\u9690\u853D\u901A\u98CE\uFF0C\u5FCC\u5C45\u5B85\u4E2D\u3001\u5FCC\u5BF9\u5927\u95E8\uFF0C\u4EE5\u514D\u79FD\u6C14\u51B2\u5802\u3002",
-    "\u4E66\u623F\u5B9C\u660E\u4EAE\u5B89\u9759\uFF0C\u4E66\u684C\u5B9C\u9762\u5411\u5F00\u9614\uFF0C\u80CC\u540E\u6709\u9760\uFF0C\u53D6\u6587\u660C\u5B89\u5B9A\u4E4B\u8C61\u3002",
-    "\u9633\u53F0\u4E3A\u7EB3\u6C14\u4E4B\u6240\uFF0C\u5B9C\u901A\u900F\uFF0C\u5FCC\u5C01\u95ED\u8FC7\u5BC6\uFF0C\u4EA6\u5FCC\u6B63\u5BF9\u8857\u5DF7\u76F4\u51B2\u3002",
-    "\u697C\u68AF\u5B9C\u9760\u5899\uFF0C\u5FCC\u5C45\u4E2D\u76D8\u8E1E\uFF0C\u4E0A\u4E0B\u4E4B\u6C14\u5B9C\u56DE\u65CB\u800C\u4E0D\u5B9C\u76F4\u51B2\u3002",
-    "\u795E\u4F4D\u5B9C\u6D01\u51C0\u5B89\u9759\uFF0C\u5FCC\u5BF9\u5395\u3001\u5FCC\u5BF9\u5367\u3001\u5FCC\u7F6E\u4E8E\u697C\u68AF\u4E4B\u4E0B\u3002",
-    "\u8D22\u4F4D\u591A\u53D6\u5165\u95E8\u659C\u89D2\uFF0C\u5B9C\u5B89\u7A33\u660E\u4EAE\uFF0C\u5FCC\u7A7A\u3001\u5FCC\u538B\u3001\u5FCC\u6C34\u51B2\u3002",
-    "\u6587\u660C\u4F4D\u5B9C\u7F6E\u4E66\u684C\u4E66\u67DC\uFF0C\u5FCC\u5806\u653E\u6742\u7269\uFF0C\u4E3B\u5B66\u4E1A\u529F\u540D\u4E4B\u601D\u3002",
-    "\u5E8A\u4F4D\u5B9C\u5357\u5317\u987A\u5730\u78C1\uFF0C\u5FCC\u6B63\u5BF9\u623F\u95E8\uFF0C\u5FCC\u4E0E\u5395\u6240\u76F8\u90BB\u3002",
-    "\u955C\u5B9C\u85CF\u4E0D\u5B9C\u9732\uFF0C\u5FCC\u5BF9\u5E8A\u3001\u5FCC\u5BF9\u95E8\uFF0C\u4EE5\u514D\u591C\u95F4\u60CA\u6270\u3001\u6C14\u6563\u4E0D\u805A\u3002",
-    "\u9C7C\u7F38\u5C5E\u6C34\uFF0C\u5B9C\u7F6E\u4E8E\u8870\u4F4D\u4EE5\u5316\u715E\uFF0C\u5FCC\u7F6E\u4E8E\u8D22\u4F4D\u4EE5\u6CC4\u6C14\u3002",
-    "\u7EFF\u690D\u5B9C\u9614\u53F6\u5E38\u7EFF\uFF0C\u5FCC\u5C16\u53F6\u5E26\u523A\uFF0C\u67AF\u840E\u5B9C\u53CA\u65F6\u66F4\u6362\u3002",
-    "\u6881\u67F1\u538B\u9876\u8C13\u4E4B\u300C\u6A2A\u6881\u538B\u9876\u300D\uFF0C\u5750\u5367\u5176\u4E0A\u6613\u751F\u538B\u6291\uFF0C\u5B9C\u4EE5\u540A\u9876\u5316\u89E3\u3002",
-    "\u95E8\u7A97\u5B9C\u6BD4\u4F8B\u76F8\u79F0\uFF0C\u95E8\u5927\u7A97\u5C0F\u5219\u6C14\u6563\uFF0C\u7A97\u5927\u95E8\u5C0F\u5219\u6C14\u6EDE\u3002",
-    "\u5EAD\u9662\u5B9C\u7559\u767D\uFF0C\u5FCC\u6EE1\u94FA\u786C\u5730\uFF0C\u8349\u6728\u5F97\u6C14\uFF0C\u5C45\u8005\u4EA6\u5F97\u8212\u7545\u3002",
-    "\u6392\u6C34\u5B9C\u987A\u7545\uFF0C\u5FCC\u79EF\u6C34\u6EDE\u7559\uFF0C\u6C34\u805A\u4E0D\u6D41\u5219\u6E7F\u6C14\u751F\u3002",
-    "\u91C7\u5149\u5B9C\u67D4\u548C\uFF0C\u5FCC\u7EC8\u65E5\u4E0D\u89C1\u65E5\u5149\uFF0C\u9633\u6C14\u4E0D\u8DB3\u5219\u5C45\u8005\u5026\u6020\u3002",
-    "\u901A\u98CE\u5B9C\u5BF9\u6D41\u800C\u4E0D\u5B9C\u76F4\u51B2\uFF0C\u6C14\u7F13\u5219\u805A\uFF0C\u6C14\u6025\u5219\u6563\u3002"
-  ];
-  constructor(index) {
-    super();
-    this.index = index;
+class Phenology extends LoopTyme {
+  static NAMES = ["\u86AF\u8693\u7ED3", "\u9E8B\u89D2\u89E3", "\u6C34\u6CC9\u52A8", "\u96C1\u5317\u4E61", "\u9E4A\u59CB\u5DE2", "\u96C9\u59CB\u96CA", "\u9E21\u59CB\u4E73", "\u5F81\u9E1F\u5389\u75BE", "\u6C34\u6CFD\u8179\u575A", "\u4E1C\u98CE\u89E3\u51BB", "\u86F0\u866B\u59CB\u632F", "\u9C7C\u965F\u8D1F\u51B0", "\u736D\u796D\u9C7C", "\u5019\u96C1\u5317", "\u8349\u6728\u840C\u52A8", "\u6843\u59CB\u534E", "\u4ED3\u5E9A\u9E23", "\u9E70\u5316\u4E3A\u9E20", "\u7384\u9E1F\u81F3", "\u96F7\u4E43\u53D1\u58F0", "\u59CB\u7535", "\u6850\u59CB\u534E", "\u7530\u9F20\u5316\u4E3A\u9D3D", "\u8679\u59CB\u89C1", "\u840D\u59CB\u751F", "\u9E23\u9E20\u62C2\u5176\u7FBD", "\u6234\u80DC\u964D\u4E8E\u6851", "\u877C\u8748\u9E23", "\u86AF\u8693\u51FA", "\u738B\u74DC\u751F", "\u82E6\u83DC\u79C0", "\u9761\u8349\u6B7B", "\u9EA6\u79CB\u81F3", "\u87B3\u8782\u751F", "\u9D59\u59CB\u9E23", "\u53CD\u820C\u65E0\u58F0", "\u9E7F\u89D2\u89E3", "\u8729\u59CB\u9E23", "\u534A\u590F\u751F", "\u6E29\u98CE\u81F3", "\u87CB\u87C0\u5C45\u58C1", "\u9E70\u59CB\u631A", "\u8150\u8349\u4E3A\u8424", "\u571F\u6DA6\u6EBD\u6691", "\u5927\u96E8\u884C\u65F6", "\u51C9\u98CE\u81F3", "\u767D\u9732\u964D", "\u5BD2\u8749\u9E23", "\u9E70\u4E43\u796D\u9E1F", "\u5929\u5730\u59CB\u8083", "\u79BE\u4E43\u767B", "\u9E3F\u96C1\u6765", "\u7384\u9E1F\u5F52", "\u7FA4\u9E1F\u517B\u7F9E", "\u96F7\u59CB\u6536\u58F0", "\u86F0\u866B\u576F\u6237", "\u6C34\u59CB\u6DB8", "\u9E3F\u96C1\u6765\u5BBE", "\u96C0\u5165\u5927\u6C34\u4E3A\u86E4", "\u83CA\u6709\u9EC4\u82B1", "\u8C7A\u4E43\u796D\u517D", "\u8349\u6728\u9EC4\u843D", "\u86F0\u866B\u54B8\u4FEF", "\u6C34\u59CB\u51B0", "\u5730\u59CB\u51BB", "\u96C9\u5165\u5927\u6C34\u4E3A\u8703", "\u8679\u85CF\u4E0D\u89C1", "\u5929\u6C14\u4E0A\u5347\u5730\u6C14\u4E0B\u964D", "\u95ED\u585E\u800C\u6210\u51AC", "\u9E56\u9D20\u4E0D\u9E23", "\u864E\u59CB\u4EA4", "\u8354\u633A\u51FA"];
+  year;
+  constructor(year, indexOrName) {
+    super(Phenology.NAMES, indexOrName);
+    const y = Phenology.numeric(year, "phenology year");
+    if (typeof indexOrName === "number") {
+      const size = this.getSize();
+      this.year = ~~((y * size + indexOrName) / size);
+    } else {
+      this.year = y;
+    }
   }
-  /**
-   * 依日期确定性轮换
-   */
-  static of(solarDay) {
-    return new FengShuiTip((solarDay.getYear() * 373 + solarDay.getMonth() * 37 + solarDay.getDay()) % FengShuiTip.DATA.length);
+  static fromIndex(year, index) {
+    return new Phenology(year, Phenology.numeric(index, "phenology index"));
   }
-  static fromIndex(index) {
-    return new FengShuiTip(index % FengShuiTip.DATA.length);
+  static fromName(year, name) {
+    return new Phenology(year, name);
   }
-  getIndex() {
-    return this.index;
+  next(n) {
+    const size = this.getSize();
+    const i = this.getIndex() + n;
+    return Phenology.fromIndex(~~((this.year * size + i) / size), this.indexOf(i, size));
   }
-  /**
-   * 栏目名，取正文首句主语
-   */
-  getTopic() {
-    const text = this.getText();
-    const i = text.indexOf("\u5B9C");
-    return i > 0 ? text.substring(0, i) : text.substring(0, 2);
+  getYear() {
+    return this.year;
   }
-  getText() {
-    return FengShuiTip.DATA[this.index];
+  getThreePhenology() {
+    return ThreePhenology.fromIndex(this.index % 3);
   }
-  getName() {
-    return this.getText();
+  getJulianDay() {
+    const t = ShouXingUtil.saLonT((this.year - 2e3 + (this.getIndex() - 18) * 5 / 360 + 1) * 2 * Math.PI);
+    return JulianDay.fromJulianDay(t * 36525 + JulianDay.J2000 + 8 / 24 - ShouXingUtil.dtT(t * 36525));
   }
 }
-class DreamOracle extends AbstractCulture {
-  static CATEGORY_DATA = [
-    "\u5929\u5730\u65E5\u6708\u661F\u8FB0:\u5929\u9580\u958B\u8CB4\u4EBA\u85A6\u5F15|\u5929\u5149\u7167\u4E3B\u75BE\u75C5\u9664|\u5929\u6674\u96E8\u6563\u767E\u6182\u53BB|\u5929\u660E\u5A66\u4EBA\u751F\u8CB4\u5B50|\u5929\u9580\u8D64\u4E3B\u6709\u5927\u8D77|\u4EF0\u9762\u5411\u5929\u5927\u5BCC\u8CB4|\u4E58\u9F8D\u4E0A\u5929\u5927\u4E3B\u8CB4|\u4E0A\u5929\u6C42\u59BB\u5152\u5973\u8CB4|\u5929\u4E0A\u53D6\u7269\u4F4D\u738B\u4FAF|\u98DB\u4E0A\u5929\u5BCC\u8CB4\u5927\u5409|\u767B\u5929\u4E0A\u5C4B\u5F97\u9AD8\u5B98|\u5929\u88C2\u6709\u5206\u570B\u4E4B\u6182|\u5929\u661F\u660E\u4E3B\u516C\u537F\u81F3|\u5929\u6108\u9403\u76CA\u58FD\u547D\u5409|\u6E21\u5929\u6CB3\u4E3B\u6709\u6240\u5409|\u5929\u5730\u5BCC\u6240\u6C42\u7686\u5F97|\u5929\u516C\u4F7F\u6709\u5927\u5409\u7965|\u65E5\u6708\u521D\u51FA\u5BB6\u9053\u660C|\u65E5\u6708\u7167\u8EAB\u5F97\u91CD\u4F4D|\u65E5\u6708\u843D\u6182\u6C92\u7236\u6BCD|\u65E5\u6708\u660F\u6697\u5B55\u5A66\u5409|\u65E5\u6708\u6B32\u51FA\u6709\u5B98\u8077|\u65E5\u6708\u5408\u6703\u59BB\u6709\u5B50|\u65E5\u6708\u5563\u5C71\u5974\u6B3A\u4E3B|\u8CA0\u62B1\u65E5\u6708\u8CB4\u4FAF\u738B|\u541E\u65E5\u6708\u7576\u751F\u8CB4\u5B50|\u79AE\u62DC\u65E5\u6708\u5927\u5409\u660C|\u65E5\u5149\u5165\u5C4B\u5B98\u4F4D\u81F3|\u65E5\u521D\u51FA\u7121\u96F2\u5927\u5409|\u65E5\u51FA\u6709\u5149\u6709\u597D\u4E8B|\u96F2\u958B\u65E5\u51FA\u51F6\u4E8B\u6563|\u65E5\u5165\u61F7\u8CB4\u5B50\u6708\u5973|\u62DC\u661F\u6708\u71D2\u9999\u5927\u5409|\u96F2\u5FFD\u906E\u65E5\u6709\u9670\u79C1|\u661F\u5165\u61F7\u4E3B\u751F\u8CB4\u5B50|\u661F\u843D\u6709\u75C5\u53CA\u5B98\u4E8B|\u661F\u5217\u884C\u4E3B\u6DFB\u5974\u5A62|\u6301\u57F7\u661F\u5BBF\u5927\u5BCC\u8CB4|\u6D41\u661F\u4E0D\u843D\u4E3B\u79FB\u5C45|\u5DE1\u5929\u6469\u661F\u4F4D\u516C\u537F|\u96F2\u8D77\u56DB\u65B9\u4EA4\u6613\u5409|\u4E94\u8272\u96F2\u4E3B\u5927\u5409\u660C|\u96F2\u8D64\u767D\u5409\u9752\u9ED1\u51F6|\u898B\u6D6E\u96F2\u4F5C\u4E8B\u4E0D\u6210|\u96F2\u9727\u906E\u4E8B\u5927\u5409\u5229|\u9ED1\u96F2\u81F3\u5730\u6642\u6C23\u75C5|\u971C\u96EA\u964D\u4E3B\u4E8B\u4E0D\u6210|\u96EA\u4E0B\u53CA\u6642\u5927\u5409\u5229|\u96EA\u843D\u8EAB\u4E0A\u842C\u4E8B\u6210|\u96EA\u4E0D\u6CBE\u8EAB\u4E3B\u5B5D\u670D|\u96EA\u843D\u5BB6\u5EAD\u4E3B\u55AA\u4E8B|\u9670\u96E8\u6666\u6697\u4E3B\u51F6\u4E8B|\u884C\u8DEF\u9022\u96E8\u6709\u9152\u98DF|\u96F7\u9706\u4F5C\u4E8B\u5B98\u4F4D\u81F3|\u96F7\u8072\u6050\u6015\u79FB\u5C45\u5409|\u96F7\u5F9E\u5730\u9707\u4E3B\u5FD7\u9042|\u8EAB\u88AB\u9739\u9742\u4E3B\u5BCC\u8CB4|\u96FB\u5149\u7167\u8EAB\u6709\u5409\u6176|\u8D64\u8679\u898B\u5409\u9ED1\u8679\u51F6|\u971E\u6EFF\u5929\u767E\u4E8B\u6B61\u6085|\u72C2\u98A8\u5927\u96E8\u4EBA\u6B7B\u4EA1|\u98A8\u5439\u4EBA\u8863\u4E3B\u75BE\u75C5|\u5FFD\u5927\u98A8\u570B\u6709\u865F\u4EE4|\u98A8\u5982\u543C\u4E3B\u9060\u4FE1\u81F3",
-    "\u5730\u7406\u5C71\u77F3\u6A39\u6728:\u5730\u52D5\u4E3B\u9077\u5B98\u4F4D\u5409|\u5730\u88C2\u4E3B\u75BE\u75C5\u5927\u51F6|\u4FEE\u5E73\u7530\u5730\u5927\u5409\u660C|\u5730\u9AD8\u4E0B\u4E0D\u5E73\u4E3B\u75C5|\u81E5\u65BC\u77F3\u4E0A\u4E3B\u5927\u5409|\u5730\u4E2D\u9ED1\u6C23\u4E0A\u4E3B\u51F6|\u904B\u77F3\u5165\u5BB6\u4E3B\u5BCC\u8CB4|\u77F3\u4E0A\u5F97\u5229\u797F\u5927\u5409|\u76E4\u77F3\u5B89\u7A69\u7121\u6182\u7591|\u767B\u5CA9\u62B1\u77F3\u5B98\u8077\u9077|\u624B\u5F04\u5C0F\u77F3\u751F\u8CB4\u5B50|\u8EAB\u5165\u571F\u4E2D\u767E\u4E8B\u5409|\u81EA\u8EAB\u53D6\u571F\u88AB\u6065\u8FB1|\u6607\u5C71\u843D\u5730\u4E3B\u5931\u4F4D|\u4E0A\u5C71\u6050\u6015\u797F\u4F4D\u81F3|\u4E0A\u5C71\u6BC0\u58DE\u4E3B\u51F6\u60E1|\u904A\u770B\u9AD8\u5C71\u6625\u590F\u5409|\u884C\u8D70\u4E0A\u5761\u75C5\u601D\u9664|\u5C45\u4F4F\u9AD8\u5C71\u6709\u559C\u4E8B|\u5C71\u884C\u5F97\u8CA1\u6709\u798F\u7DE3|\u62B1\u7269\u4E0A\u5C71\u5B55\u8CB4\u5B50|\u5C71\u4E2D\u8FB2\u7A3C\u8863\u98DF\u8C50|\u67AF\u6728\u518D\u767C\u5B50\u5B6B\u8208|\u5802\u4E0A\u5730\u9677\u4E3B\u6BCD\u6182|\u5712\u6797\u8302\u76DB\u5927\u5409\u5229|\u6A39\u6728\u67AF\u6B7B\u5B85\u4E0D\u5B89|\u6797\u4E2D\u5750\u81E5\u75C5\u6B32\u75CA|\u6A39\u6728\u51CB\u96F6\u4E3B\u4EBA\u51F6|\u6797\u4E2D\u6A39\u751F\u6DFB\u8CB4\u5B50|\u7A2E\u690D\u6A39\u6728\u5927\u5409\u660C|\u767B\u5927\u6A39\u540D\u5229\u986F\u63DA|\u4E0A\u6A39\u5FFD\u6298\u6709\u6B7B\u50B7|\u8207\u4EBA\u5206\u82B1\u4E3B\u5206\u6563|\u67AF\u6728\u958B\u82B1\u5B50\u5B6B\u8208|\u5927\u6A39\u843D\u4EBA\u5C4B\u4E0A\u5409|\u7ACB\u6A39\u4E0B\u8CB4\u4EBA\u5E87\u852D|\u6A39\u751F\u5802\u4E0A\u7236\u6BCD\u6182|\u5927\u6A39\u5FFD\u6298\u4E3B\u51F6\u60E1|\u64D4\u6728\u4F86\u5BB6\u5F97\u8CA1\u559C|\u780D\u4F10\u5927\u6A39\u591A\u5F97\u8CA1|\u8349\u6728\u8302\u76DB\u5BB6\u9053\u8208|\u9580\u4E2D\u751F\u679C\u6A39\u6709\u5B50|\u677E\u751F\u8179\u4E0A\u4F4D\u4E09\u516C|\u5BB6\u4E2D\u751F\u677E\u4E8B\u8F49\u8C50|\u5BB6\u4E2D\u751F\u67CF\u591A\u5409\u5229|\u5EAD\u524D\u7AF9\u6728\u559C\u91CD\u91CD|\u6953\u751F\u5C4B\u4E0A\u767E\u4E8B\u9042|\u862D\u751F\u5EAD\u524D\u4E3B\u6DFB\u5B6B|\u679C\u6797\u4E2D\u884C\u4E3B\u5F97\u8CA1|\u5165\u83DC\u5712\u4E2D\u5927\u767C\u8CA1|\u6851\u751F\u4E95\u4E0A\u4E3B\u6709\u6182|\u679C\u6A39\u591A\u719F\u5B50\u5B6B\u5B89|\u6298\u7B4D\u5230\u5BB6\u5973\u6709\u5B50|\u898B\u7B4D\u8005\u4E3B\u6DFB\u5B50\u5B6B|\u6383\u5730\u9664\u7CDE\u5BB6\u6B32\u7834|\u7CDE\u571F\u5806\u8005\u9322\u8CA1\u805A",
-    "\u8EAB\u9AD4\u9762\u76EE\u9F52\u9AEE:\u81EA\u8EAB\u767D\u8863\u4EBA\u6240\u8B00|\u68B3\u982D\u6D17\u9762\u767E\u6182\u53BB|\u8EAB\u62DC\u5C0A\u9577\u5927\u5409\u660C|\u8EAB\u4E0A\u6C57\u51FA\u4E3B\u51F6\u60E1|\u8EAB\u75C5\u87F2\u751F\u5F97\u8ECD\u8077|\u8EAB\u4E0A\u87F2\u884C\u75C5\u60A3\u5B89|\u7E69\u7D22\u7E6B\u8EAB\u9577\u547D\u5409|\u67B7\u9396\u81E8\u8EAB\u75C5\u6B32\u4F86|\u8EAB\u6210\u80A5\u7626\u7686\u70BA\u51F6|\u9762\u5C0D\u5B98\u8005\u4E3B\u5927\u5409|\u9732\u9AD4\u7121\u8863\u5927\u5409\u5229|\u5A66\u4EBA\u62AB\u982D\u6709\u79C1\u60C5|\u982D\u767D\u4E3B\u9577\u547D\u5927\u5409|\u982D\u751F\u5169\u89D2\u6709\u722D\u7AF6|\u982D\u79BF\u9AEE\u843D\u7686\u51F6\u4E8B|\u9762\u751F\u7621\u9ED1\u4E3B\u5B50\u51F6|\u982D\u9B1A\u767D\u843D\u6182\u5B50\u5B6B|\u982D\u9B1A\u518D\u751F\u4E3B\u9577\u547D|\u6C90\u6D74\u9077\u5B98\u75BE\u75C5\u9664|\u6D17\u624B\u6D17\u8DB3\u820A\u75C5\u9664|\u7167\u93E1\u660E\u5409\u6697\u8005\u51F6|\u7834\u93E1\u7167\u4EBA\u4E3B\u5206\u6563|\u624B\u8DB3\u81BF\u8840\u51FA\u5927\u5409|\u5C4E\u5C3F\u6C61\u4EBA\u5927\u5409\u4EA8|\u9732\u982D\u62AB\u9AEE\u4E3B\u4EBA\u8B00|\u62AB\u9AEE\u84CB\u9762\u5B98\u8A1F\u81F3|\u5243\u982D\u526A\u9AEE\u5BB6\u5167\u51F6|\u7709\u8207\u9AEE\u9F4A\u797F\u4F4D\u81F3|\u9F52\u81EA\u843D\u8005\u7236\u6BCD\u51F6|\u9F52\u843D\u66F4\u751F\u5B50\u5B6B\u8208",
-    "\u51A0\u5E36\u8863\u670D\u978B\u896A:\u6234\u5B98\u767B\u8ECA\u5B98\u6B32\u9077|\u81EA\u6234\u8946\u982D\u5DFE\u5E3D\u5409|\u7C2A\u51A0\u767B\u53F0\u8077\u4F4D\u9077|\u8CB4\u4EBA\u8207\u4E4B\u8863\u51A0\u5409|\u65B0\u63DB\u8863\u51A0\u797F\u4F4D\u81F3|\u71D2\u6BC0\u51A0\u5E3D\u6B32\u66F4\u5B98|\u5931\u53BB\u51A0\u5E3D\u53BB\u9000\u8077|\u62FE\u5F97\u5B98\u5E36\u797F\u4F4D\u81F3|\u8207\u4EBA\u516C\u670D\u4E3B\u5F97\u8077|\u4EBA\u8207\u516C\u670D\u52A0\u5B98\u8077|\u5973\u8457\u51A0\u5E36\u4E3B\u751F\u5B50|\u6D17\u7B0F\u67D3\u670D\u65B0\u5B98\u4F86|\u57F7\u7B0F\u898B\u8CB4\u4EBA\u5927\u5409|\u7B0F\u786B\u6182\u51F6\u4E09\u4E0D\u7965|\u8207\u4EBA\u7B0F\u7DAC\u4E3B\u5B98\u9077|\u8170\u5E36\u8005\u4E3B\u5B98\u81F3\u5409|\u6587\u66F8\u7528\u5370\u6709\u540D\u8072|\u5E36\u5370\u4E3B\u59BB\u751F\u8CB4\u5B50|\u8457\u65B0\u888D\u4E3B\u6DFB\u59BB\u59BE|\u8457\u9326\u7E61\u8863\u5B50\u5B6B\u69AE|\u6D17\u67D3\u8863\u670D\u7686\u5927\u5409|\u62AB\u84D1\u8863\u4E3B\u5927\u6069\u81F3|\u88AB\u6CB9\u6C61\u8863\u5927\u6069\u6FA4|\u8863\u670D\u5FFD\u7834\u59BB\u5916\u5FC3|\u65B0\u8863\u6522\u7C73\u767E\u4E8B\u51F6|\u8207\u4EBA\u8863\u670D\u4E3B\u60A3\u81F3|\u88C1\u8863\u8457\u5B5B\u8863\u7686\u5409|\u8863\u5E36\u81EA\u89E3\u767E\u4E8B\u5409|\u8457\u9EC3\u8863\u7682\u8863\u7686\u5409|\u8457\u767D\u8863\u4E3B\u6709\u4EBA\u8ACB|\u8457\u9752\u8863\u795E\u4EBA\u52A9\u529B|\u8457\u85CD\u7E61\u8863\u59BB\u5927\u5229|\u773E\u4EBA\u8457\u7D2B\u4E3B\u60C5\u7358|\u8207\u4EBA\u8457\u9752\u5BB6\u4EBA\u6563|\u773E\u4EBA\u8457\u767D\u4E3B\u5B98\u4E8B|\u773E\u4EBA\u8457\u7DCB\u5927\u5409\u5229|\u59BB\u8457\u592B\u8863\u751F\u8CB4\u5B50|\u5973\u5B50\u8457\u8863\u5E73\u7121\u4E8B|\u8207\u4EBA\u5171\u8863\u59BB\u79C1\u60C5|\u5931\u537B\u8863\u670D\u59BB\u96E3\u7522|\u597D\u88AB\u81EA\u84CB\u5F97\u5BCC\u8CB4|\u4EBA\u8457\u5DF1\u5C65\u59BB\u6709\u79C1|\u5F97\u9774\u978B\u4E3B\u5974\u5A62\u5409|\u5931\u5C65\u4E3B\u5974\u5A62\u9003\u8D70|\u812B\u9774\u675F\u5E36\u4E3B\u6709\u51F6|\u978B\u7834\u5B50\u5B6B\u59BB\u59BE\u75C5|\u8457\u9EBB\u978B\u767E\u4E8B\u548C\u5408|\u65B0\u6388\u5B98\u7235\u4E3B\u8CB4\u5B50|\u4E5E\u5F97\u978B\u5C65\u4EBA\u52A9\u529B|\u6728\u5C65\u812B\u6642\u5DF1\u51FA\u5384",
-    "\u5200\u528D\u65CC\u7BC0\u9418\u9F13:\u541B\u738B\u5C0D\u4ED7\u6709\u7570\u5409|\u65CC\u65C2\u6709\u9F8D\u5927\u5409\u5229|\u62B1\u65CC\u7BC0\u4E3B\u8CB4\u4EBA\u6276|\u65CC\u528D\u5F15\u5165\u5C71\u4E3B\u51F6|\u9020\u65CC\u84CB\u4E3B\u5927\u5409\u5229|\u7FBD\u84CB\u84CB\u8EAB\u4E3B\u5BCC\u8CB4|\u65C2\u65DB\u8FCE\u63A5\u5927\u5BCC\u8CB4|\u65D7\u65DB\u7ADF\u51FA\u4E3B\u75BE\u75C5|\u624B\u6301\u65CC\u7BC0\u6709\u6069\u8CDE|\u767D\u84CB\u8986\u8EAB\u5927\u5409\u5229|\u898B\u505A\u65B0\u65CC\u5927\u5409\u5229|\u8207\u4EBA\u5206\u5098\u4E3B\u5206\u6563|\u62D4\u5200\u51FA\u884C\u4E3B\u5927\u5409|\u5F97\u4EBA\u5200\u4E3B\u884C\u4EBA\u81F3|\u4EBA\u8207\u4E09\u5200\u4F5C\u523A\u53F2|\u8207\u4EBA\u8207\u65AB\u5927\u5409\u6176|\u88AB\u5200\u51FA\u8840\u5F97\u9152\u98DF|\u6298\u5200\u523A\u4EBA\u4E3B\u5931\u5229|\u5200\u65A7\u81EA\u50B7\u5927\u5409\u5229|\u5F97\u4EBA\u5200\u65A7\u797F\u4F4D\u81F3|\u5200\u843D\u6C34\u4E2D\u59BB\u59BE\u4EA1|\u5931\u843D\u5200\u528D\u4E3B\u7834\u8CA1|\u5E36\u5200\u528D\u884C\u6709\u8CA1\u5229|\u78E8\u5200\u528D\u92D2\u5FEB\u5927\u5409|\u8207\u4EBA\u5200\u528D\u7686\u4E3B\u51F6|\u528D\u5728\u5E8A\u982D\u5927\u5409\u5229|\u5973\u4EBA\u5E36\u5200\u5927\u5409\u6176|\u5973\u4EBA\u62D4\u5200\u4E3B\u6709\u5B50|\u526A\u5200\u4E3B\u5206\u8CA1\u4E4B\u4E8B|\u526A\u5200\u526A\u7269\u4E3B\u5F97\u8CA1|\u526A\u5200\u6298\u80A1\u59BB\u59BE\u4EA1|\u7532\u5191\u5E87\u8EAB\u4E3B\u5409\u5229|\u9397\u69CA\u4E3B\u5B98\u4F4D\u5409\u5229|\u898B\u8ECD\u5175\u6563\u4E3B\u6709\u51F6|\u9418\u78D0\u6709\u8072\u9060\u4EBA\u4F86|\u9418\u8C49\u5927\u9CF4\u798F\u797F\u81F3|\u6253\u9F13\u6709\u8072\u9060\u4EBA\u4F86|\u898B\u9F13\u4F73\u8072\u61FD\u6A02\u5409|\u898B\u9F13\u4E0D\u55DA\u51F6\u5FC5\u81F3|\u770B\u653E\u7159\u706B\u767E\u6182\u6563",
-    "\u5E1D\u738B\u6587\u6B66\u547C\u53EC:\u5E1D\u738B\u5BA3\u53EC\u6709\u9A5A\u559C|\u540E\u5983\u547C\u53EC\u98F2\u6709\u75BE|\u592A\u5B50\u53EC\u5927\u559C\u5409\u5229|\u5929\u5B50\u8CDC\u5750\u6709\u8CA1\u5409|\u898B\u8001\u541B\u8A00\u6709\u4ED9\u5206|\u62DC\u4F5B\u6B32\u52D5\u5927\u6709\u8CA1|\u770B\u706B\u4E0A\u9673\u4E8B\u5927\u5409|\u795E\u4F5B\u55D4\u6012\u7686\u4E0D\u5409|\u738B\u4FAF\u4E26\u5750\u5927\u5409\u5229|\u4F86\u898B\u8CB4\u4EBA\u4E0D\u5F97\u51F6|\u8207\u8056\u8CE2\u8AAA\u8A71\u5927\u5409|\u4F7F\u547D\u5165\u9580\u5927\u5409\u5229|\u767D\u8863\u53EC\u4F5C\u4FBF\u6B7B\u4EA1|\u62DC\u5C0A\u9577\u8005\u6709\u5409\u6176|\u5148\u7956\u8003\u8A00\u6C42\u98DF\u5409|\u4EBA\u4E91\u5927\u597D\u8005\u5373\u51F6|\u4EBA\u4E91\u6B7B\u8005\u5F97\u9577\u547D|\u4EBA\u5728\u5916\u547C\u4E4B\u62DB\u51F6|\u6211\u6B32\u5171\u6C5D\u53BB\u5927\u51F6|\u4EBA\u4E91\u4E0D\u7528\u6C5D\u5927\u5409|\u8207\u60E1\u4EBA\u8A00\u4E3B\u53E3\u820C|\u88AB\u6BBA\u5BB3\u5409\u4F0F\u85CF\u51F6|\u8EAB\u751F\u7FBD\u7FFC\u98DB\u5927\u5409|\u8EAB\u9003\u53BB\u5F97\u812B\u75C5\u53BB|\u8207\u4EBA\u4EA4\u6613\u4E3B\u6709\u75BE|\u8CA7\u7AAE\u5175\u5C45\u4E3B\u5927\u5409|\u5408\u4F34\u540C\u884C\u51F6\u4E8B\u81F3|\u4E00\u5207\u8CB4\u4EBA\u7686\u5409\u7965",
-    "\u5BAE\u5BA4\u5C4B\u5B87\u5009\u5EAB:\u5165\u5E1D\u738B\u5BAE\u884C\u5927\u5409|\u62DC\u671D\u5EF7\u8005\u4E3B\u5BCC\u8CB4|\u5165\u738B\u4FAF\u5E9C\u5EAB\u5927\u5409|\u884C\u9053\u5BAE\u898B\u4ED9\u4E3B\u5409|\u5750\u5B98\u5E9C\u4E2D\u4E3B\u5927\u5409|\u795E\u5EDF\u5EE3\u5927\u4E8B\u4E8B\u5409|\u4E0A\u6A13\u95A3\u58C7\u4E3B\u5927\u5409|\u4E0A\u9AD8\u5802\u5927\u5BCC\u8CB4\u81F3|\u9AD8\u6A13\u98F2\u9152\u5BCC\u8CB4\u81F3|\u5BB6\u8D77\u9AD8\u6A13\u5B89\u7A69\u4E8B|\u4E0A\u57CE\u70BA\u4EBA\u6240\u62FD\u5409|\u4E0A\u57CE\u88AB\u57F7\u5B98\u8077\u986F|\u57CE\u90ED\u5EE3\u5927\u8CA1\u559C\u591A|\u57CE\u4E2D\u884C\u51F6\u51FA\u9580\u5409|\u9023\u57CE\u9752\u8272\u6709\u559C\u5409|\u767B\u8D64\u57CE\u90ED\u4E3B\u5927\u5409|\u84CB\u57CE\u4E0A\u5C4B\u5927\u5409\u5229|\u4E0A\u5C4B\u4E3B\u5BCC\u51FA\u5712\u5409|\u4E0A\u5C4B\u7834\u58DE\u5BB6\u9053\u51F6|\u5802\u4E0A\u6709\u68FA\u8EAB\u5B89\u6A02|\u6B63\u5802\u5012\u9677\u5BB6\u4E3B\u51F6|\u8986\u84CB\u5C4B\u5B87\u9577\u547D\u5409|\u5C4B\u5B85\u66F4\u65B0\u4E3B\u5927\u5409|\u98A8\u5439\u5C4B\u52D5\u4E3B\u9077\u79FB|\u9077\u5165\u4ED6\u4EBA\u65B0\u5B85\u5409|\u5C45\u51FA\u5B85\u4E3B\u59BB\u559C\u4E8B|\u642C\u79FB\u7834\u5C4B\u4E3B\u7F8E\u59BB|\u4EBA\u6216\u5178\u623F\u4E3B\u5B98\u4F4D|\u5BB6\u9053\u8CA7\u7AAE\u5927\u5409\u5229|\u6D12\u6383\u5B85\u820D\u9060\u4EBA\u4F86|\u5178\u8CE3\u5178\u820D\u4E3B\u5931\u4F4D|\u5C4B\u5B85\u7121\u4EBA\u4E3B\u6B7B\u4EA1|\u5C4B\u4E0A\u7A7F\u821F\u6709\u6697\u6627|\u8E30\u7246\u6E21\u5B85\u767E\u4E8B\u53BB|\u8207\u4EBA\u722D\u5C4B\u4E3B\u5927\u51F6|\u8207\u5A66\u4EBA\u722D\u5C4B\u4E3B\u5409|\u623F\u6A11\u5FFD\u6298\u4E3B\u5927\u51F6|\u9662\u5B85\u5751\u4E0B\u4E3B\u6B7B\u4EA1|\u59BB\u7537\u7246\u4E0B\u5B98\u4F4D\u81F3|\u7246\u4E0A\u6398\u571F\u4E3B\u66F4\u653F|\u8ECD\u4EBA\u5165\u5B85\u4E3B\u5927\u5409|\u6B7B\u592E\u74E6\u843D\u5A66\u722D\u9B25|\u5C4B\u4E2D\u751F\u99AC\u7537\u4FE1\u81F3|\u5C4B\u4E2D\u751F\u8349\u5BB6\u6B32\u7A7A|\u5C4B\u4E0A\u751F\u677E\u67CF\u76CA\u58FD|\u4FEE\u7406\u7530\u820D\u6709\u5927\u559C|\u5165\u5BFA\u9662\u4E2D\u751F\u7537\u5B50|\u5BFA\u820D\u6709\u7D93\u75C5\u4EBA\u75CA|\u9077\u79FB\u5C3C\u5BFA\u4E3B\u75C5\u81F3|\u8D77\u84CB\u5009\u5EAB\u798F\u797F\u81F3|\u5165\u5009\u5EAB\u4E2D\u5927\u5409\u6602|\u5009\u5EAB\u5D29\u58DE\u767E\u4E8B\u51F6",
-    "\u9580\u6236\u4E95\u7076\u5EDA\u5EC1:\u9580\u6236\u9AD8\u5927\u4E3B\u5BCC\u8CB4|\u65B0\u958B\u9580\u6236\u5927\u5BCC\u8CB4|\u9580\u6236\u5FFD\u958B\u4E3B\u5927\u5409|\u9580\u6236\u5927\u958B\u5927\u5409\u5229|\u9580\u66F4\u65B0\u4E3B\u751F\u8CB4\u5B50|\u9580\u81EA\u958B\u59BB\u6709\u79C1\u60C5|\u9580\u6236\u88C2\u958B\u4E3B\u5927\u5409|\u9580\u6236\u7834\u58DE\u6709\u51F6\u4E8B|\u57CE\u9580\u5927\u958B\u4E3B\u53E3\u820C|\u5BAE\u57CE\u585E\u8005\u53E3\u820C\u81F3|\u9580\u6236\u9589\u585E\u4E8B\u4E0D\u901A|\u9580\u6236\u7834\u58DE\u4E3B\u5927\u51F6|\u9580\u6247\u81EA\u6298\u5974\u50D5\u8D70|\u9580\u6236\u5167\u7121\u4EBA\u5927\u51F6|\u4FEE\u79FB\u9580\u6236\u5927\u5409\u5229|\u77F3\u70BA\u9580\u6236\u4E3B\u58FD\u547D|\u9580\u524D\u751F\u8349\u4F5C\u523A\u53F2|\u9580\u524D\u5751\u6E9D\u4E8B\u4E0D\u6210|\u5929\u706B\u71D2\u9580\u4E3B\u51F6\u4E8B|\u5C4B\u958B\u5C0F\u9580\u4E3B\u79C1\u60C5|\u7A7F\u4E95\u898B\u6C34\u9060\u4FE1\u81F3|\u4E95\u81EA\u640D\u58DE\u5BB6\u5927\u6557|\u4E95\u4E2D\u6CB8\u6EA2\u4E3B\u5F97\u8CA1|\u4E95\u67AF\u6DB8\u8005\u5BB6\u8CA1\u6563|\u4E95\u4E2D\u7167\u8EAB\u797F\u4F4D\u81F3|\u8EAB\u589C\u4E95\u4E2D\u75BE\u75C5\u51F6|\u623F\u5728\u4E95\u4E2D\u4E3B\u898B\u75C5|\u53D6\u4E95\u6C34\u6E05\u5409\u6DF7\u51F6|\u4E95\u6C34\u8CA0\u6CE5\u51FA\u8CA1\u4E3B|\u4E95\u4E2D\u6B32\u4E7E\u5BB6\u6B32\u7834|\u4E95\u4E2D\u6709\u9B5A\u8EAB\u4E3B\u8CB4|\u7ABA\u4E95\u6709\u8072\u53E3\u820C\u751F|\u4F0F\u85CF\u4E95\u4E2D\u5211\u7344\u4E8B|\u9189\u843D\u4E95\u4E2D\u5B98\u4E8B\u81F3|\u5BB6\u4F4F\u4E95\u4E2D\u9577\u5B50\u51F6|\u4EBA\u4E91\u51FA\u4E95\u559C\u6C23\u81F3|\u6DD8\u4E95\u9020\u4E95\u4E3B\u5927\u8CB4|\u5668\u76BF\u843D\u4E95\u6709\u5409\u4E8B|\u7076\u4E0B\u6C34\u6D41\u5F97\u6A6B\u8CA1|\u7076\u4E0B\u71C3\u706B\u6709\u8072\u540D|\u7076\u91DC\u7834\u6557\u6709\u6B7B\u4EA1|\u7076\u4E0B\u5439\u8005\u5BB6\u7834\u6557|\u7076\u4E0B\u9CF4\u5668\u4E3B\u53E3\u820C|\u5C4B\u6709\u4E8C\u7076\u4E8B\u4E0D\u6210|\u4FEE\u9020\u5EDA\u7076\u5927\u5409\u5229|\u5728\u5B98\u5EDA\u4E2D\u5F97\u8CA1\u797F|\u81EA\u5439\u81FC\u4E2D\u59BB\u59BE\u4EA1|\u6DD8\u5EC1\u8005\u4E3B\u5F97\u6A6B\u8CA1|\u4E0A\u5EC1\u5728\u5C4E\u5C3F\u4E2D\u5409|\u5EC1\u4E2D\u5C4E\u6EA2\u5927\u5409\u5229|\u7CDE\u4E2D\u5750\u8005\u4E3B\u5927\u51F6|\u7CDE\u571F\u5806\u7A4D\u4E3B\u5F97\u8CA1",
-    "\u91D1\u9280\u73E0\u7389\u7D79\u5E1B:\u91D1\u9280\u5BF6\u8005\u4E3B\u5BCC\u8CB4|\u91D1\u9280\u73E0\u7389\u5927\u5409\u5229|\u91D1\u9280\u676F\u76BF\u6709\u8CB4\u5B55|\u91D1\u9280\u4F5C\u943A\u5668\u5927\u5409|\u7389\u7A4D\u5982\u5C71\u5927\u5BCC\u8CB4|\u5F97\u91D1\u7389\u74B0\u751F\u8CB4\u5B50|\u9285\u943A\u4E3B\u6709\u53E3\u820C\u81F3|\u73E0\u7389\u6EFF\u61F7\u4E3B\u5927\u51F6|\u5F97\u7389\u7897\u5668\u7269\u7686\u5409|\u898B\u9435\u5668\u7269\u4E3B\u5F97\u8CA1|\u925B\u8207\u935A\u8005\u4E3B\u5F97\u8CA1|\u5F97\u9285\u7269\u4E3B\u5927\u5BCC\u8CB4|\u9472\u5D4C\u5668\u7269\u75BE\u75C5\u53BB|\u9084\u4EBA\u9322\u7269\u75BE\u75C5\u53BB|\u62FE\u5F97\u9322\u7269\u7686\u5927\u5409|\u9322\u6625\u590F\u5409\u79CB\u51AC\u51F6|\u5BB6\u4E2D\u5206\u8CA1\u4E3B\u96E2\u6557|\u8D08\u5F69\u5E1B\u8005\u4E3B\u6709\u6B0A|\u8CB4\u4EBA\u8CDC\u7DBE\u9326\u5B98\u81F3|\u4EBA\u8CDC\u7D79\u5E1B\u5927\u5409\u660C|\u8207\u4EBA\u7D72\u5E1B\u5927\u51F6\u60E1|\u5F97\u4ED6\u4EBA\u9EBB\u5E03\u8863\u51F6|\u5F97\u5E03\u5E1B\u9060\u89AA\u4F86\u81F3|\u8207\u4EBA\u8863\u670D\u5B98\u4E8B\u81F3|\u5C0B\u7D72\u7D79\u4E3B\u9032\u5165\u53E3|\u7D21\u7E3E\u8005\u4E3B\u58FD\u547D\u9577|\u7D93\u7D61\u8005\u4E3B\u88AB\u4EBA\u8FB1|\u7BB1\u5668\u4E3B\u53E3\u820C\u4E4B\u4E8B",
-    "\u93E1\u74B0\u91F5\u91E7\u68B3\u7BE6:\u660E\u93E1\u8005\u5409\u6697\u8005\u51F6|\u62FE\u5F97\u93E1\u8005\u62DB\u597D\u59BB|\u5C07\u93E1\u81EA\u7167\u9060\u4FE1\u81F3|\u93E1\u7167\u4ED6\u4EBA\u59BB\u59BE\u51F6|\u5F97\u4ED6\u4EBA\u93E1\u6709\u8CB4\u5B50|\u4ED6\u4EBA\u5F04\u5DF1\u93E1\u59BB\u51F6|\u93E1\u7834\u4E3B\u592B\u59BB\u96E2\u5225|\u91D1\u91F5\u52D5\u6709\u9060\u884C\u4E8B|\u91D1\u923F\u6210\u96D9\u589E\u611B\u59BE|\u91F5\u91E7\u76F8\u6572\u59BB\u5225\u51F6|\u91D1\u91F5\u8000\u4E3B\u751F\u8CB4\u5B50|\u82B1\u91F5\u59BB\u59BE\u6709\u59E6\u4F5E|\u9280\u91E7\u592B\u59BB\u4E3B\u76F8\u6BC6|\u82B1\u58D3\u59BB\u59BE\u751F\u5916\u5FC3|\u4EBA\u8207\u68B3\u7BE6\u5F97\u7F8E\u59BE|\u7259\u6728\u68B3\u820A\u4E8B\u76E1\u53BB|\u898B\u7BE6\u5B50\u8CB4\u4EBA\u63D0\u651C|\u5F97\u7BE6\u5B50\u8005\u7F8E\u5973\u81F3|\u5237\u7259\u8005\u75C5\u60A3\u4E0D\u751F|\u5F97\u80ED\u8102\u7C89\u4E3B\u751F\u5973|\u898B\u8102\u7C89\u4E3B\u5927\u8CA1\u5229|\u5F97\u7C89\u50D5\u59BB\u751F\u5B0C\u5973|\u624B\u5E15\u8005\u4E3B\u53E3\u820C\u4E8B|\u91DD\u7DDA\u5F97\u8005\u767E\u4E8B\u5C31",
-    "\u8863\u5E33\u6BEF\u8925\u5319\u6AE1:\u5E8A\u5E33\u6539\u4E3B\u5B98\u9077\u79FB|\u8212\u5C55\u5E8A\u5E33\u5927\u5BCC\u8CB4|\u65B0\u5B89\u5E8A\u5E33\u9060\u4EBA\u4F86|\u5E8A\u5E33\u51FA\u9580\u8005\u59BB\u4EA1|\u5E8A\u5E33\u6536\u63DB\u79FB\u5C45\u5409|\u5E8A\u4E0A\u6709\u87FB\u81F3\u4E0D\u7965|\u5E8A\u5E33\u7834\u640D\u59BB\u6B32\u4EA1|\u958B\u5E33\u5E54\u4E3B\u6709\u9152\u98DF|\u5E33\u5E54\u58DE\u8005\u59BB\u5B50\u75C5|\u5E8A\u8173\u65B0\u63DB\u5974\u50D5\u51F6|\u4E0A\u5E8A\u81E5\u8005\u5927\u51F6\u60E1|\u8840\u5728\u5E8A\u59BB\u59BE\u6709\u59E6|\u6D17\u5E8A\u5E33\u5247\u4E3B\u5927\u5409|\u85A6\u84C6\u5165\u5409\u51FA\u5247\u51F6|\u7834\u84C6\u8005\u4E3B\u5931\u5B98\u4F4D|\u63DB\u84C6\u5165\u5409\u51FA\u5247\u51F6|\u84C6\u7C1E\u8005\u4E3B\u6709\u529B\u52A9|\u6BEF\u8925\u8216\u9673\u842C\u4E8B\u7A69|\u6BC0\u84C6\u5E54\u8005\u59BB\u6709\u59E6|\u65B0\u7C3E\u8005\u4E3B\u5F97\u597D\u59BB|\u8216\u84C6\u5408\u5750\u5F97\u5B98\u4F4D|\u597D\u88AB\u81EA\u84CB\u4E3B\u5927\u5409|\u898B\u597D\u6795\u6709\u8CB4\u4EBA\u6276|\u898B\u624B\u5E15\u4E3B\u6709\u53E3\u820C|\u624B\u4E2D\u7E1B\u5E03\u75C5\u60A3\u81F3|\u6BDB\u80A9\u5FFD\u6301\u5B98\u4E8B\u81F3|\u9F0E\u9F10\u8005\u4E3B\u5F97\u5927\u8CA1|\u91DC\u6EA2\u8005\u4E3B\u5F97\u5927\u8CA1|\u7389\u77F3\u5668\u4E3B\u6709\u4EBA\u52A9|\u9285\u943A\u8005\u4E3B\u53E3\u820C\u81F3|\u934B\u9435\u7834\u4E3B\u55AA\u4E8B\u4F86|\u943A\u76DE\u7834\u4E3B\u6709\u60E1\u4E8B|\u78C1\u7897\u8005\u4E3B\u9152\u98DF\u81F3|\u78C1\u789F\u8005\u4E3B\u53E3\u820C\u81F3|\u5319\u4E3B\u76CA\u59BB\u59BE\u5B50\u5B6B|\u6AE1\u4E3B\u76CA\u7530\u5B85\u5974\u50D5|\u76C6\u4E3B\u76CA\u5009\u5EAB\u5927\u5409|\u68F3\u76C6\u812B\u5E95\u4E3B\u8CA1\u6563|\u5165\u76C6\u7515\u5668\u5927\u5BCC\u8CB4|\u6D17\u9762\u76C6\u8005\u7F8E\u59BE\u81F3|\u5927\u5C0F\u76C6\u8005\u4E3B\u5718\u5713|\u5F97\u76C6\u5B50\u8005\u6240\u6C42\u5F97|\u6876\u76DB\u6C34\u8005\u4E3B\u5927\u5409|\u6876\u7121\u6C34\u8005\u4E3B\u5927\u51F6|\u4EBA\u9001\u5927\u6876\u4E3B\u5F97\u5229|\u684C\u67B6\u65BC\u5B85\u4E8B\u4E0D\u6210|\u92F8\u4E3B\u6709\u65B7\u6C7A\u4E4B\u4E8B|\u78BE\u8863\u98DF\u79FB\u5C45\u5927\u5409|\u939A\u947D\u8005\u4E3B\u4FB5\u5BB3\u4E8B|\u939A\u6B32\u8209\u52D5\u6709\u4EBA\u6301|\u947F\u4E3B\u88AB\u4EBA\u9A45\u4F7F\u5409|\u71A8\u6597\u76DB\u706B\u597D\u4E8B\u6210|\u71FB\u7C60\u8005\u76CA\u589E\u7530\u7522|\u4EBA\u8207\u79E4\u8005\u4E3B\u6B0A\u4F4D|\u7E69\u7D22\u4E3B\u9577\u547D\u5927\u5409|\u7E69\u7D22\u65B7\u8005\u4E3B\u51F6\u60E1|\u4EBA\u8207\u947F\u8005\u5F97\u5931\u91D1|\u4EBA\u9001\u5E36\u8005\u4E3B\u5F97\u4F4D",
-    "\u8239\u8ECA\u904A\u884C\u7269\u4EF6:\u8239\u98DB\u884C\u4E3B\u5927\u5BCC\u8CB4|\u8239\u6DFA\u5728\u5CB8\u662F\u975E\u5384|\u4E58\u8239\u6E21\u6C5F\u6CB3\u5F97\u5B98|\u8239\u4E2D\u6709\u6C34\u4E3B\u5F97\u8CA1|\u4E58\u8239\u770B\u65E5\u6708\u5F97\u8077|\u4E58\u8239\u904E\u65E5\u6708\u4E3B\u5BCC|\u4E58\u8239\u98F2\u9152\u9060\u5BA2\u81F3|\u8207\u4EBA\u540C\u8239\u4E3B\u79FB\u5C45|\u4E58\u8239\u98A8\u5E06\u5927\u5409\u5229|\u4E58\u8239\u898B\u8235\u4E3B\u5B89\u7A69|\u4E58\u8239\u6A4B\u4E0B\u904E\u5927\u5409|\u75C5\u4EBA\u4E58\u8239\u5FC5\u4E3B\u6B7B|\u52A9\u7236\u4E58\u8239\u5B98\u4F4D\u81F3|\u8EAB\u81E5\u8239\u4E2D\u4E3B\u6709\u51F6|\u57F7\u706B\u5165\u8239\u4E3B\u5927\u5409|\u5BB6\u4E2D\u4E58\u8239\u4E3B\u6C92\u8CA1|\u4E58\u8239\u770B\u82B1\u9152\u98DF\u81F3|\u8239\u8ECA\u7834\u788E\u4E3B\u4E0D\u7965|\u8ECA\u8F2A\u7834\u592B\u59BB\u76F8\u5225|\u8ECA\u8F2A\u6298\u5012\u4E3B\u7834\u6557|\u8ECA\u8F09\u4E0D\u8D77\u5384\u4E8B\u53BB|\u99D5\u8ECA\u904A\u884C\u797F\u4F4D\u81F3|\u8ECA\u884C\u4E3B\u767E\u4E8B\u9806\u548C|\u8ECA\u4E0D\u884C\u6240\u6C42\u4E0D\u9042|\u8ECA\u5165\u9580\u4E3B\u6709\u51F6\u4E8B|\u75C5\u4EBA\u4E0A\u8ECA\u4E3B\u5927\u51F6|\u55AA\u8ECA\u9047\u8005\u4E3B\u707D\u6563|\u884C\u8ECA\u767D\u99AC\u4E3B\u5927\u5409|\u56DB\u99AC\u99D5\u8ECA\u5409\u53CD\u51F6|\u4EE5\u7F8A\u99D5\u8ECA\u4E8B\u4E0D\u5E38|\u5099\u99AC\u8005\u4E3B\u9060\u884C\u4E8B|\u9060\u884C\u51FA\u5165\u547D\u901A\u9054",
-    "\u9053\u8DEF\u6A4B\u6881\u5E02\u96C6:\u898B\u56DB\u8DEF\u901A\u540D\u5229\u9042|\u9053\u4E2D\u5F97\u8CA1\u4E3B\u901A\u9054|\u9053\u6CE5\u834A\u68D8\u4E8B\u4E0D\u6210|\u5927\u9053\u5D29\u9677\u4E3B\u5931\u8CA1|\u4FEE\u6A4B\u6A11\u8005\u842C\u4E8B\u548C|\u898B\u6E21\u6A4B\u4E3B\u6709\u5B98\u4E8B|\u6A4B\u4E0A\u5750\u4E3B\u797F\u4F4D\u81F3|\u898B\u6A4B\u58DE\u4E3B\u6709\u5B98\u4E8B|\u651C\u624B\u4E0A\u6A4B\u59BB\u6709\u5B55|\u6A4B\u4E0A\u547C\u559A\u8A1F\u5F97\u7406|\u65B0\u9020\u6A4B\u8005\u5927\u548C\u5408|\u6A4B\u65B7\u8005\u4E3B\u6709\u53E3\u820C|\u6A4B\u67F1\u6298\u8005\u5B50\u5B6B\u51F6|\u6A4B\u8DEF\u4E0A\u5F80\u8ECA\u7686\u51F6|\u592B\u59BB\u5165\u5E02\u4E3B\u7F6E\u7522|\u898B\u5E02\u4E2D\u7121\u4EBA\u4E3B\u51F6",
-    "\u592B\u59BB\u7522\u5B55\u4EA4\u61FD:\u592B\u59BB\u5BB4\u6703\u4E3B\u76F8\u5225|\u592B\u59BB\u76F8\u7F75\u4E3B\u75C5\u60A3|\u592B\u59BB\u5206\u91F5\u4E3B\u96E2\u5225|\u592B\u59BB\u76F8\u6253\u6B32\u548C\u6703|\u540C\u5A66\u4EBA\u884C\u4E3B\u5931\u8CA1|\u62B1\u5A66\u4EBA\u4E3B\u6709\u559C\u4E8B|\u8207\u5A66\u4EBA\u4EA4\u6709\u90AA\u795F|\u8207\u5A66\u4EBA\u5171\u5750\u5927\u5409|\u62B1\u592B\u4E3B\u5927\u5F97\u8CA1\u559C|\u5A66\u4EBA\u8207\u592B\u5165\u6C34\u5409|\u592B\u59BB\u5404\u8207\u68B3\u982D\u5409|\u592B\u59BB\u76F8\u62DC\u4E3B\u5206\u6563|\u4EA4\u63A5\u7537\u5B50\u4E3B\u5931\u8CA1|\u59BB\u8457\u9326\u8863\u751F\u8CB4\u5B50|\u59BB\u6709\u5B55\u4E3B\u5916\u79C1\u60C5|\u898B\u5A66\u4EBA\u9670\u4E3B\u53E3\u820C|\u5A66\u4EBA\u8D64\u8EAB\u4E3B\u5927\u5409|\u7537\u5B50\u88F8\u9AD4\u547D\u901A\u9054|\u5144\u5F1F\u5206\u5225\u53E3\u820C\u81E8|\u62B1\u5C0F\u5152\u5973\u4E3B\u53E3\u820C|\u5C0F\u5152\u6B7B\u8005\u4E3B\u53E3\u820C|\u65B0\u751F\u7537\u5973\u4E3B\u5927\u5409|\u898B\u5AC1\u5A36\u53CA\u5B5D\u4E3B\u51F6|\u7537\u5B50\u5316\u70BA\u5C3C\u59D1\u51F6",
-    "\u98F2\u98DF\u9152\u8089\u74DC\u83DC:\u4EBA\u8ACB\u98F2\u9152\u4E3B\u9577\u547D|\u8207\u4EBA\u98F2\u9152\u6709\u53E3\u820C|\u8207\u4EBA\u5403\u6703\u5BCC\u8CB4\u81F3|\u7B75\u6703\u5BA2\u4EBA\u5BB6\u6B32\u7834|\u98F2\u9152\u8005\u4E3B\u54ED\u6CE3\u4E8B|\u98F2\u9152\u81F3\u9189\u4E3B\u75BE\u75C5|\u8CB4\u4EBA\u8CDC\u5BB4\u4E3B\u75BE\u75C5|\u8207\u8CB4\u4EBA\u5C0D\u98F2\u5927\u5409|\u4EBA\u8ACB\u5403\u9165\u916A\u4E3B\u559C|\u8207\u4EBA\u5403\u4E73\u5C0A\u89AA\u81F3|\u8207\u4EBA\u5403\u871C\u5927\u5409\u5229|\u5614\u5410\u8005\u75C5\u4EBA\u4E3B\u7625|\u98DF\u6C34\u8005\u4E3B\u5F97\u5927\u5229|\u6B7B\u4EBA\u98DF\u8005\u4E3B\u75BE\u75C5|\u98DF\u725B\u8089\u65BC\u5802\u4E0A\u5409|\u98DF\u72AC\u8089\u4E3B\u6709\u722D\u8A1F|\u98DF\u8C6C\u8089\u4E3B\u75BE\u75C5\u81F3|\u5200\u5272\u8C6C\u8089\u4E3B\u751F\u75C5|\u98DF\u751F\u8089\u51F6\u719F\u8089\u5409|\u98DF\u81EA\u6B7B\u8089\u4E3B\u5225\u96E2|\u98DF\u9D5D\u8089\u4E3B\u59BE\u75BE\u75C5|\u98DF\u96DE\u9D28\u7B49\u8089\u7686\u5409|\u98DF\u9945\u982D\u4E3B\u53E3\u820C\u6563|\u898B\u9945\u982D\u672A\u98DF\u4E3B\u6C23|\u98DF\u721B\u74DC\u4E3B\u751F\u75BE\u75C5|\u98DF\u9905\u98DF\u98EF\u5FC3\u4E0D\u9042|\u98DF\u74DC\u5B50\u4E3B\u751F\u8CB4\u5B50|\u98DF\u67FF\u98DF\u67D1\u4E3B\u75BE\u75C5|\u98DF\u67FF\u6843\u96E2\u800C\u5FA9\u5408|\u98DF\u68D7\u8005\u4E3B\u751F\u8CB4\u5B50|\u98DF\u6851\u6939\u4E3B\u751F\u8CB4\u5B50|\u98DF\u7C9F\u8005\u4E3B\u6709\u5206\u96E2|\u98DF\u68A8\u8005\u4E3B\u5931\u8CA1\u5E1B|\u98DF\u4E00\u5207\u83DC\u8005\u51F6\u81F3|\u98DF\u8304\u8005\u4E3B\u59BB\u6709\u5B50|\u98DF\u8525\u97ED\u4E3B\u6709\u722D\u9B25|\u98DF\u85A4\u8005\u6709\u91CD\u50B7\u81F3|\u98DF\u849C\u8005\u4E3B\u707D\u5BB3\u81F3|\u98DF\u83DC\u898B\u83DC\u9EC3\u4E3B\u51F6|\u98DF\u6CB9\u9E7D\u91AC\u9178\u8C49\u5409",
-    "\u585A\u5893\u68FA\u69E8\u8FCE\u9001:\u585A\u5893\u9AD8\u8005\u5927\u5409\u5229|\u65B0\u585A\u68FA\u69E8\u4E3B\u6182\u9664|\u585A\u5893\u4E0A\u6709\u96F2\u6C23\u5409|\u585A\u5893\u9580\u958B\u767E\u4E8B\u5409|\u585A\u5893\u4E0A\u660E\u5409\u6697\u51F6|\u585A\u5893\u751F\u6A39\u5409\u6298\u51F6|\u585A\u5893\u4E0A\u958B\u82B1\u5927\u5409|\u68FA\u81EA\u51FA\u5893\u4E2D\u5927\u5409|\u62AC\u68FA\u5165\u5B85\u797F\u4F4D\u81F3|\u6B7B\u4EBA\u51FA\u68FA\u5916\u5BA2\u81F3|\u958B\u68FA\u8207\u6B7B\u4EBA\u8A00\u51F6|\u68FA\u6BAE\u6B7B\u4EBA\u4E3B\u5F97\u8CA1|\u898B\u68FA\u6C34\u4E0A\u5927\u5F97\u8CA1|\u7A7A\u9060\u7121\u4EBA\u4E3B\u9060\u884C",
-    "\u6587\u66F8\u7B46\u786F\u5175\u5668:\u5404\u8272\u7D93\u66F8\u5927\u5BCC\u8CB4|\u4E94\u8272\u7D19\u8005\u5927\u76CA\u8CA1|\u541E\u4E94\u8272\u7D19\u8A69\u66F8\u9032|\u51E0\u4E0A\u6709\u66F8\u797F\u4F4D\u81F3|\u8A69\u6587\u66F8\u5BEB\u5B57\u5927\u5409|\u6709\u4EBA\u6559\u66F8\u5927\u5BCC\u8CB4|\u898B\u8B80\u66F8\u8005\u4E3B\u8070\u660E|\u89C0\u4EBA\u8B80\u66F8\u751F\u8CB4\u5B50|\u5F97\u66C6\u65E5\u8005\u4E2D\u9EC3\u7532|\u5C01\u66F8\u4FE1\u8005\u4E3B\u901A\u9054|\u624B\u5F04\u7B46\u786F\u4E3B\u9060\u4FE1|\u4EBA\u8207\u58A8\u8005\u6587\u7AE0\u9032|\u4EBA\u5C07\u5DF1\u7B46\u6587\u7AE0\u9000|\u4ED6\u4EBA\u9001\u7B46\u4E3B\u624D\u9032|\u541B\u738B\u968A\u4F0D\u6709\u7570\u540D|\u5F97\u5927\u8D66\u8005\u5B85\u820D\u51F6|\u5C31\u4EBA\u535C\u6613\u4E3B\u75BE\u75C5|\u53D7\u4EBA\u7D19\u9322\u4E3B\u5927\u5409|\u516C\u5EA7\u79FB\u52D5\u4E3B\u9077\u5B98|\u53D7\u8077\u4E0A\u5B98\u8CA1\u7269\u4F86|\u4F69\u5370\u516C\u7235\u4E3B\u5927\u5409|\u4F69\u5370\u57F7\u7BC0\u4E3B\u79FB\u5C45|\u4F69\u5370\u4FE1\u8005\u540D\u8B7D\u51FA|\u7DE9\u5370\u6539\u9077\u751F\u8CB4\u5B50|\u7881\u5B50\u4E3B\u6DFB\u4E01\u9032\u53E3|\u6253\u7403\u8005\u4E3B\u5F97\u865B\u540D|\u5175\u99AC\u5165\u57CE\u798F\u797F\u81F3|\u7387\u773E\u7834\u8CCA\u6240\u6C42\u5F97|\u5728\u8ECD\u9663\u4E2D\u4E3B\u5927\u5409|\u5C07\u5352\u96A8\u884C\u4E3B\u559C\u4E8B|\u5F81\u4EBA\u521D\u51FA\u4E8B\u672A\u6210|\u5F81\u4EBA\u56DE\u8005\u4E3B\u75BE\u75C5|\u898B\u8ECD\u5175\u6557\u4E3B\u51F6\u4E8B|\u5DF1\u5C04\u4EBA\u5FC5\u4E3B\u9060\u884C|\u4EBA\u5C04\u5DF1\u6709\u884C\u4EBA\u81F3|\u6301\u5F13\u77E2\u8005\u4E3B\u5927\u5409|\u633D\u5F13\u65B7\u5F26\u4E3B\u51F6\u60E1|\u4EBA\u9001\u5F13\u5F29\u5F97\u4EBA\u529B|\u5F29\u5F26\u96E3\u4E0A\u5144\u5F1F\u6563|\u5F13\u5F29\u76F8\u9B25\u4E3B\u722D\u8AD6|\u6208\u925E\u6709\u5149\u797F\u4F4D\u81F3|\u62AB\u7532\u4ED7\u528D\u5F97\u9AD8\u5B98",
-    "\u54C0\u6A02\u75C5\u6B7B\u6B4C\u5531:\u8207\u4EBA\u54ED\u6CE3\u6709\u6176\u8CC0|\u653E\u8072\u5927\u54ED\u6B61\u6A02\u81F3|\u8EAB\u8457\u5B5D\u670D\u5B98\u797F\u81F3|\u9060\u4EBA\u4F86\u60B2\u6CE3\u4E3B\u51F6|\u5E8A\u4E0A\u54ED\u6CE3\u4E3B\u5927\u51F6|\u898B\u6B4C\u821E\u8005\u53E3\u820C\u81F3|\u5BB6\u4E2D\u6B61\u559C\u767E\u4E8B\u5409|\u61F7\u4E2D\u7435\u7436\u5F97\u4EBA\u52A9|\u4ED6\u4EBA\u8207\u7B1B\u6709\u540D\u8072|\u8207\u4EBA\u62CD\u677F\u6709\u53E3\u820C|\u5802\u4E0A\u6B4C\u6A02\u4E3B\u55AA\u4E8B|\u5439\u7B19\u8005\u4E3B\u6709\u66F4\u6539|\u5439\u7B1B\u6253\u9F13\u6709\u5409\u6176|\u4ED6\u4EBA\u4F5C\u6A02\u8A1F\u6709\u7406|\u9732\u9F52\u54ED\u8005\u6709\u722D\u8A1F|\u75C5\u81E5\u70BA\u4EBA\u6276\u52A0\u5B98|\u75C5\u91CD\u8005\u4E3B\u6709\u51F6\u4E8B|\u81EA\u75BE\u75C5\u8005\u4E3B\u6709\u559C|\u75C5\u4EBA\u6B4C\u5531\u4E3B\u5927\u51F6|\u75C5\u4EBA\u54ED\u7B11\u75BE\u75C5\u9664|\u75C5\u4EBA\u8D77\u8005\u5FC5\u5B9A\u6B7B|\u75C5\u4EBA\u88DD\u8ECA\u5FC5\u6B7B\u4EA1|\u6B7B\u4EBA\u54ED\u6CE3\u6709\u53E3\u820C|\u6B7B\u4EBA\u7ACB\u8005\u4E3B\u5927\u51F6|\u6B7B\u4EBA\u54ED\u61F7\u8005\u5F97\u8CA1|\u6B7B\u4EBA\u5FA9\u6D3B\u4E3B\u6709\u4FE1|\u898B\u4EBA\u6B7B\u81EA\u6B7B\u8005\u5409|\u5B50\u6B7B\u8005\u6709\u6DFB\u559C\u4E8B|\u898B\u5148\u4EA1\u5C0A\u9577\u5927\u5409|\u554F\u5F14\u4ED6\u4EBA\u4E3B\u751F\u5B50",
-    "\u4F5B\u9053\u50E7\u5C3C\u9B3C\u795E:\u8AF8\u4F5B\u83E9\u85A9\u5927\u5409\u5229|\u6CD5\u5E2B\u767B\u5EA7\u4E3B\u75BE\u75C5|\u8001\u541B\u771F\u5165\u7686\u4E3B\u5409|\u756B\u795E\u4F5B\u8005\u5F97\u4EBA\u6B3D|\u5165\u795E\u5EDF\u795E\u52D5\u5927\u5409|\u9020\u65DB\u84CB\u8005\u5927\u5409\u5229|\u50E7\u5E2B\u6559\u4EBA\u5538\u7D93\u5409|\u9053\u58EB\u5973\u51A0\u8A00\u8A9E\u5409|\u548C\u5C1A\u5C3C\u59D1\u770B\u7D93\u60B6|\u88AB\u795E\u9B3C\u6253\u5927\u4E0D\u7965|\u5802\u4E0A\u795E\u4F5B\u5927\u5409\u5229|\u795E\u4F5B\u4E0D\u6210\u5F62\u5927\u51F6|\u71D2\u9999\u79AE\u62DC\u7686\u5927\u5409|\u8FCE\u795E\u8CFD\u793E\u6709\u5916\u8CA1|\u4ED9\u8056\u5230\u5BB6\u798F\u797F\u81F3|\u8207\u9B3C\u9B25\u8005\u4E3B\u5EF6\u58FD|\u796D\u7940\u795E\u9053\u5927\u5409\u5229|\u8EAB\u53D7\u6212\u884C\u8005\u5B50\u5B5D|\u8207\u795E\u5973\u901A\u5F97\u8CB4\u5B50|\u8207\u5C3C\u59D1\u4EA4\u4E3B\u5931\u8CA1|\u770B\u795E\u4F5B\u8005\u59BB\u6709\u5B50|\u4F5B\u5171\u4EBA\u8A00\u6709\u798F\u52A9",
-    "\u88AB\u5BB3\u9B25\u50B7\u6253\u7F75:\u88AB\u4EBA\u6BBA\u5BB3\u8005\u5927\u5409|\u6BBA\u6B7B\u4ED6\u4EBA\u5927\u5BCC\u8CB4|\u6301\u5200\u81EA\u6BBA\u8005\u5927\u5409|\u6BBA\u4EBA\u8840\u6C61\u8863\u5F97\u8CA1|\u88AB\u5200\u523A\u706B\u51FA\u5FEB\u5229|\u6301\u5200\u76F8\u6BBA\u898B\u8840\u5409|\u5200\u50B7\u51FA\u8840\u4E3B\u9152\u98DF|\u780D\u523A\u898B\u8840\u4E3B\u5927\u5409|\u7099\u8EAB\u898B\u8840\u6D41\u5927\u5409|\u5200\u65A7\u81EA\u50B7\u4E3B\u5927\u5409|\u6301\u5200\u65AB\u4EBA\u81EA\u5931\u8CA1|\u4EBA\u780D\u982D\u8166\u4E2D\u4E8C\u5409|\u88AB\u4EBA\u6253\u8005\u4E3B\u5F97\u529B|\u88AB\u4EBA\u8173\u8E22\u4E3B\u6C42\u8CA1|\u6253\u59BB\u59BE\u8005\u4E3B\u5931\u529B|\u5BB6\u4E2D\u4EBA\u9B25\u4E3B\u5206\u6563|\u65B7\u982D\u800C\u884C\u4E3B\u5927\u559C|\u5973\u4EBA\u76F8\u6253\u4E3B\u75C5\u81F3|\u5144\u5F1F\u76F8\u6253\u5927\u5409\u5229|\u88AB\u59BB\u59BE\u6253\u4E3B\u51F6\u4E8B|\u770B\u898B\u6BBA\u4EBA\u4E3B\u5927\u5409|\u88AB\u4EBA\u7C3D\u523A\u5927\u5409\u660C|\u624B\u63AA\u6298\u8005\u4E3B\u5B50\u75C5|\u5411\u4EBA\u53E9\u982D\u767E\u4E8B\u5409|\u8207\u4EBA\u76F8\u7F75\u8005\u4E3B\u5409|\u88AB\u7F75\u4F6F\u985B\u5927\u8CB4\u81F3|\u88AB\u4EBA\u51CC\u8FB1\u4E3B\u5F97\u8CA1|\u6BBA\u8C6C\u8C56\u8005\u5927\u5409\u5229|\u6BBA\u7F8A\u6253\u7F8A\u4E3B\u75C5\u51F6|\u6BBA\u864E\u8C79\u4E3B\u5F97\u91CD\u5370|\u6BBA\u725B\u9E7F\u8005\u5927\u5BCC\u8CB4|\u6BBA\u725B\u98DF\u8089\u4E3B\u751F\u8CA1|\u6BBA\u9A62\u9A3E\u99AC\u6709\u9152\u98DF|\u6BBA\u9F9C\u8005\u4E3B\u6709\u55AA\u4E8B|\u6BBA\u9CE5\u96C0\u59BB\u59BE\u707D\u96E3|\u6BBA\u96DE\u9D5D\u9D28\u4E3B\u5927\u5409",
-    "\u6355\u7981\u5211\u7F70\u7344\u5177:\u7262\u7344\u5D29\u58DE\u6709\u8D66\u5409|\u5750\u7344\u4E2D\u5FC5\u6709\u6069\u8D66|\u5165\u7344\u611B\u707D\u4E3B\u69AE\u8CB4|\u7344\u4E2D\u6B7B\u8005\u5B98\u4E8B\u6563|\u4F7F\u4EBA\u5165\u7344\u5F97\u8CA1\u5409|\u5165\u7262\u7344\u4E3B\u6709\u5927\u8CB4|\u76DC\u8CCA\u81EA\u5165\u7344\u5927\u51F6|\u7262\u7344\u81ED\u6C61\u767E\u4E8B\u5409|\u7F6A\u4EBA\u8D70\u812B\u75BE\u75C5\u53BB|\u8D95\u8CCA\u884C\u898B\u8005\u5927\u5409|\u67B7\u92B7\u81E8\u8EAB\u75BE\u75C5\u81F3|\u67B7\u9396\u6298\u640D\u53E3\u820C\u6563|\u67B7\u9396\u5165\u5B85\u4E3B\u5927\u51F6|\u7E69\u7D22\u7E6B\u8EAB\u5927\u5409\u5229|\u8EAB\u88AB\u7F85\u7DB2\u4E3B\u5B98\u4E8B|\u88AB\u7F85\u7DB2\u7F69\u4E3B\u9152\u98DF|\u88AB\u4EBA\u6C7A\u7F70\u797F\u4F4D\u81F3|\u88AB\u4EBA\u4F5C\u8CE4\u8005\u5927\u5409|\u88AB\u4EBA\u7D81\u4F4F\u75BE\u75C5\u81F3|\u88AB\u5B98\u6253\u8EAB\u4E3B\u5B5D\u670D|\u81EA\u4EE5\u6756\u6C7A\u6065\u8FB1\u751F|\u67B7\u9396\u6015\u6016\u4E3B\u5206\u6563|\u5165\u5B98\u8A5E\u8A1F\u4E3B\u5927\u5409|\u9080\u4EBA\u5165\u5B98\u4E3B\u5927\u5409|\u540F\u5F15\u5165\u53F8\u4E3B\u5927\u5409|\u70BA\u540F\u6240\u9304\u6709\u6025\u4E8B|\u8CB4\u4EBA\u8D70\u99AC\u5B98\u4E8B\u660E|\u62F7\u8A0A\u6756\u8CAC\u4E3B\u5927\u5409",
-    "\u7530\u5712\u4E94\u6996\u8015\u7A2E:\u7530\u4E2D\u751F\u8349\u4E3B\u5F97\u8CA1|\u7A2E\u7530\u5EE3\u5927\u6709\u797F\u4F4D|\u81EA\u7A2E\u7530\u79BE\u4E3B\u51FA\u884C|\u898B\u7A2E\u7530\u8005\u797F\u4F4D\u81F3|\u6559\u4EBA\u8015\u7A2E\u9060\u884C\u81F3|\u4F7F\u4EBA\u7A2E\u7530\u5730\u5927\u5409|\u8CB7\u4EBA\u7530\u5B85\u4E3B\u9032\u8077|\u8EAB\u5728\u79BE\u4E2D\u5927\u5409\u5229|\u7834\u6557\u7530\u5730\u4E3B\u5927\u5409|\u5272\u6536\u7530\u79BE\u5BB6\u5C45\u5B89|\u5C4B\u4E0A\u751F\u79BE\u5B98\u4F4D\u5409|\u79BE\u82D7\u8C4A\u719F\u5BCC\u8CB4\u9577|\u898B\u9EA5\u7A3B\u4E3B\u5F97\u5927\u8CA1|\u7CB3\u7CBE\u7C73\u8005\u6709\u8CA1\u5409|\u4E94\u7A40\u8302\u76DB\u4E3B\u5F97\u8CA1|\u7A40\u7A57\u9F4A\u79C0\u5927\u5409\u5229|\u7C73\u8C37\u5806\u5409\u6563\u4E3B\u51F6|\u5927\u5C0F\u9EA5\u4E3B\u59BB\u79C1\u5FC3|\u5927\u8C46\u82D7\u8449\u5B50\u5B6B\u51F6|\u7C73\u9EA5\u76F8\u6392\u5927\u5409\u5229|\u5750\u81E5\u7C73\u9EA5\u4E3B\u5927\u5409|\u624B\u4E2D\u628A\u6996\u4E3B\u798F\u797F|\u5F97\u79BE\u6996\u8005\u4E3B\u5927\u5409|\u5F97\u79BE\u5FFD\u5931\u4E3B\u5F97\u5FD7|\u7C9F\u7C73\u5FC5\u6709\u737B\u7269\u81F3|\u7A2E\u83DC\u4E3B\u9577\u547D\u5927\u5409|\u55AC\u9EA5\u9EB5\u9905\u5B98\u4E8B\u9077|\u9EB5\u7CE0\u76F8\u4EA4\u5BB6\u6B32\u5109|\u6D93\u9EB4\u5FC5\u4E3B\u6789\u5C48\u4E8B|\u840C\u82BD\u8005\u4E3B\u60E1\u4E8B\u9023|\u9EBB\u53E2\u8EAB\u8005\u4E3B\u75BE\u81F3|\u9EBB\u751F\u5982\u6797\u5927\u5409\u5229",
-    "\u6C34\u706B\u76DC\u8CCA\u71C8\u71ED:\u6C34\u4E0A\u884C\u8005\u4E3B\u5927\u5409|\u6C34\u4E0A\u7ACB\u8005\u4E3B\u51F6\u4E8B|\u6C34\u6D41\u6D0B\u6D0B\u6709\u65B0\u5A5A|\u6C34\u4E0A\u706B\u51FA\u4E3B\u5927\u5409|\u81EA\u5728\u6C34\u4E2D\u5927\u5409\u5229|\u81EA\u8DCC\u6C34\u4E2D\u4E0D\u51FA\u51F6|\u98F2\u6C34\u4E0D\u4F11\u5F97\u5927\u8CA1|\u6D41\u6C34\u9076\u8EAB\u6709\u7344\u8A1F|\u5927\u6C34\u6F84\u6E05\u5927\u5409\u5229|\u4EBA\u5BB6\u6709\u6C34\u5152\u5B50\u4EA1|\u6C5F\u6D77\u6F32\u6F2B\u5927\u5409\u660C|\u6CB3\u6C34\u6C99\u77F3\u76CA\u6587\u7AE0|\u706B\u71D2\u65E5\u6708\u6709\u4EBA\u52A9|\u706B\u71D2\u6CB3\u6C34\u9577\u547D\u5409|\u706B\u71D2\u5C71\u91CE\u5927\u986F\u9054|\u706B\u71D2\u81EA\u5C4B\u4E3B\u8208\u65FA|\u706B\u7130\u708E\u708E\u4E3B\u767C\u8CA1|\u706B\u5F9E\u5730\u751F\u75BE\u75C5\u81F3|\u57F7\u706B\u4E58\u884C\u5B98\u4F4D\u81F3|\u5927\u706B\u71D2\u5929\u4E3B\u570B\u5B89|\u8EAB\u5728\u706B\u4E2D\u8CB4\u4EBA\u6276|\u706B\u7159\u9ED1\u8272\u4E3B\u75BE\u75C5|\u628A\u706B\u884C\u8DEF\u5927\u901A\u9054|\u628A\u706B\u71D2\u4E95\u4E3B\u75BE\u75C5|\u5B85\u4E2D\u706B\u5149\u5927\u5409\u5229|\u5EDA\u4E2D\u706B\u51FA\u6709\u6025\u4E8B|\u807D\u9078\u71C3\u706B\u4F5C\u660E\u5E9C|\u71D2\u4EBA\u81ED\u7A62\u4E3B\u5927\u5409|\u898B\u71ED\u8005\u4E3B\u5927\u767C\u8CA1|\u71C8\u71ED\u5149\u660E\u4E3B\u5927\u5409|\u773E\u4EBA\u95C8\u7210\u548C\u5408\u5409|\u60E1\u4EBA\u76F8\u5F15\u75BE\u75C5\u81F3|\u8D95\u8CCA\u5165\u5E02\u4E0D\u51FA\u51F6|\u5F37\u8CCA\u5165\u5B85\u4E3B\u5BB6\u7834|\u8207\u8CCA\u540C\u884C\u5927\u5409\u5229|\u5DF1\u8EAB\u4F5C\u8CCA\u6240\u6C42\u5F97",
-    "\u57A2\u6C61\u6C90\u6D74\u51CC\u8FB1:\u5C3F\u5C4E\u6C61\u8EAB\u4E3B\u5F97\u8CA1|\u5927\u4FBF\u6EFF\u5730\u4E3B\u5BCC\u8CB4|\u8655\u5EC1\u4E2D\u5F97\u5B98\u797F\u4F4D|\u843D\u5EC1\u51FA\u5409\u4E0D\u51FA\u51F6|\u5EC1\u5C4B\u4E0A\u81E5\u4E3B\u5F97\u8CA1|\u5EC1\u4E2D\u4E7E\u8005\u4E3B\u5BB6\u7834|\u67B6\u5EC1\u5C4B\u4E3B\u6709\u8CA1\u559C|\u6311\u7CDE\u56DE\u5BB6\u5927\u5409\u5229|\u5728\u6CE5\u4E2D\u6240\u6C42\u4E0D\u6210|\u5931\u5927\u5C0F\u4FBF\u4E3B\u5931\u8CA1|\u6C61\u6CE5\u8863\u88F3\u4E3B\u7522\u51F6|\u6CE5\u6C61\u886B\u8863\u4E3B\u8EAB\u8FB1|\u7537\u5973\u6C90\u6D74\u4E0A\u5E8A\u51F6|\u6C90\u6D74\u5875\u571F\u75BE\u75C5\u5B89|\u6D17\u982D\u9077\u5C45\u75BE\u75C5\u9664|\u88AB\u8FB1\u7F75\u60F9\u4EBA\u8A5E\u8A1F",
-    "\u9F8D\u86C7\u79BD\u7378\u7B49\u985E:\u4E58\u9F8D\u5165\u6C34\u6709\u8CB4\u4F4D|\u9F8D\u7720\u6C34\u4E2D\u6C42\u4E8B\u9042|\u9F8D\u7576\u9580\u8005\u5927\u5409\u660C|\u9F8D\u6B7B\u4EA1\u4E3B\u5931\u8CB4\u4F4D|\u4E58\u9F8D\u4E0A\u5C71\u6240\u6C42\u9042|\u9F8D\u5165\u4E95\u4E2D\u5B98\u88AB\u8FB1|\u9F8D\u98DB\u6709\u5B98\u4F4D\u5927\u8CB4|\u4E58\u9F8D\u5165\u5E02\u4E3B\u8CB4\u4F4D|\u9F8D\u86C7\u5165\u9580\u4E3B\u5F97\u8CA1|\u9F8D\u86C7\u5165\u7076\u6709\u5B98\u81F3|\u86C7\u5316\u9F8D\u5F97\u8CB4\u4EBA\u52A9|\u5A66\u4EBA\u898B\u9F8D\u751F\u8CB4\u5B50|\u9F8D\u86C7\u6BBA\u4EBA\u4E3B\u5927\u51F6|\u86C7\u86DF\u4EBA\u4E3B\u5F97\u5927\u8CA1|\u86C7\u5165\u61F7\u4E2D\u751F\u8CB4\u5B50|\u86C7\u884C\u6C34\u5167\u4E3B\u69AE\u9077|\u86C7\u96A8\u4EBA\u53BB\u59BB\u5916\u5FC3|\u86C7\u5165\u8C37\u9053\u4E3B\u53E3\u820C|\u86C7\u9076\u8EAB\u8005\u751F\u8CB4\u5B50|\u86C7\u591A\u8005\u4E3B\u9670\u53F8\u4E8B|\u86C7\u8D64\u9ED1\u53E3\u820C\u9752\u5409|\u86C7\u9EC3\u767D\u4E3B\u6709\u5B98\u4E8B|\u9CF3\u51F0\u4E3B\u6709\u8CB4\u4EBA\u52A9|\u9CF3\u96C6\u638C\u4E0A\u6BCD\u75C5\u81F3|\u5B54\u96C0\u8005\u4E3B\u5927\u5409\u5229|\u9DB4\u4E0A\u5929\u4E3B\u5C0F\u53E3\u707D|\u9DB4\u9CF4\u8005\u797F\u4F4D\u5927\u986F|\u9DB4\u5165\u61F7\u4E2D\u751F\u8CB4\u5B50|\u9DB4\u99D5\u8ECA\u4E3B\u5F81\u4EE3\u4E8B|\u653E\u9DB4\u8005\u4E3B\u5F97\u8CA1\u5409|\u5B54\u96C0\u98DB\u821E\u6709\u6587\u7AE0|\u9E1A\u9D61\u5A66\u4EBA\u4E3B\u53E3\u820C|\u9D1B\u9D26\u6563\u53BB\u4E3B\u59BB\u51F6|\u9CE7\u5165\u5B85\u4E3B\u6709\u5927\u51F6|\u99D5\u9DC2\u8005\u4E3B\u797F\u4F4D\u81F3|\u9CE9\u9CF4\u8005\u5A66\u4EBA\u53E3\u820C|\u71D5\u98DB\u5165\u61F7\u59BB\u8CB4\u5B50|\u71D5\u5B50\u81F3\u6709\u9060\u5BA2\u4F86|\u7A7A\u4E2D\u9CE5\u9CF4\u4E3B\u59BB\u4EA1|\u98DB\u9CE5\u5165\u61F7\u7686\u4E3B\u5409|\u6349\u4F4F\u98DB\u9CE5\u9060\u4FE1\u81F3|\u96C0\u9F20\u722D\u9B25\u6709\u5B98\u4E8B|\u9D09\u96C0\u76F8\u566A\u4E3B\u9152\u98DF|\u9D5D\u9D28\u540C\u6E38\u6DFB\u597D\u59BE|\u9CE5\u8D74\u86C7\u4F86\u4EBA\u5F15\u85A6|\u6D17\u96DE\u5F97\u5B98\u9CF4\u53E3\u820C|\u96DE\u62B1\u5375\u4E3B\u6709\u5927\u559C|\u96DE\u5728\u6A39\u4E0A\u4E3B\u5F97\u8CA1|\u9E92\u9E9F\u8005\u540D\u9707\u5929\u4E0B|\u767D\u8C61\u6C5F\u8C6C\u5B98\u4F4D\u81F3|\u7345\u5B50\u53EB\u543C\u8072\u540D\u9707|\u731B\u864E\u5927\u543C\u4E3B\u5F97\u5B98|\u9A0E\u864E\u884C\u8005\u7121\u60E1\u4E8B|\u864E\u5165\u5B85\u4E2D\u5B98\u8077\u91CD|\u864E\u72FC\u4E0D\u52D5\u898B\u5B98\u5409|\u8C79\u72FC\u60E1\u72D7\u6709\u76DC\u8CCA|\u72FC\u5556\u8173\u8005\u4E3B\u4E0D\u5F97|\u99F1\u99DD\u8C79\u8C78\u5F97\u91CD\u5370|\u718A\u7F86\u4E3B\u8EAB\u751F\u8CB4\u5B50|\u7FA4\u5154\u4E0A\u5929\u5F97\u8CB4\u4F4D|\u7350\u9E7F\u5728\u5BB6\u5F97\u5B98\u797F|\u6D3B\u5154\u5728\u5712\u767E\u6182\u53BB|\u8C93\u6355\u9F20\u8005\u5927\u5F97\u8CA1|\u767D\u9F20\u5F15\u8DEF\u4EBA\u63D0\u651C|\u9F20\u54AC\u4EBA\u8863\u6240\u6C42\u5F97|\u9F20\u5927\u8D70\u4E3B\u6709\u559C\u4E8B|\u5C71\u7334\u4E3B\u6709\u722D\u8A1F\u7AEF|\u767D\u7334\u4E3B\u6709\u797F\u4F4D\u5F97",
-    "\u725B\u99AC\u8C6C\u7F8A\u516D\u755C:\u9EC3\u725B\u4F86\u5BB6\u4E3B\u5BCC\u8CB4|\u6C34\u725B\u4E3B\u5148\u7956\u7D22\u98DF|\u725B\u4E0A\u5C71\u5761\u5927\u5409\u660C|\u727D\u725B\u4E0A\u5C71\u4E3B\u5BCC\u8CB4|\u725B\u89D2\u6709\u8840\u4E3B\u4E09\u516C|\u725B\u89F8\u4EBA\u51E1\u4E8B\u4E0D\u6210|\u725B\u51FA\u9580\u597D\u4E8B\u7ACB\u81F3|\u6C34\u725B\u4F86\u5BB6\u4E3B\u55AA\u4E8B|\u725B\u751F\u72A2\u6240\u6C42\u7686\u5F97|\u9A0E\u725B\u5165\u57CE\u6709\u559C\u81E8|\u99AC\u821E\u5EAD\u524D\u51F6\u4E8B\u6563|\u727D\u725B\u7F8A\u4F86\u5BB6\u6B61\u6A02|\u99AC\u884C\u5343\u91CC\u5927\u559C\u81F3|\u4E58\u99AC\u5FEB\u5409\u920D\u4E3B\u51F6|\u8D70\u99AC\u4F86\u5F80\u6587\u66F8\u4E8B|\u99AC\u99DD\u9322\u7269\u5931\u797F\u4F4D|\u99AC\u5165\u5BA4\u4E3B\u5978\u60C5\u4E8B|\u62AB\u6D17\u653E\u99AC\u7686\u559C\u4E8B|\u7FA4\u99AC\u5954\u9060\u767E\u51F6\u89E3|\u7F6A\u4EBA\u8D70\u99AC\u5384\u4E8B\u53BB|\u88AB\u99AC\u54AC\u6709\u797F\u4F4D\u81F3|\u4E58\u767D\u99AC\u8005\u4E3B\u75BE\u75C5|\u9A0E\u9A62\u9A3E\u4E3B\u5F97\u8CA1\u5409|\u6BBA\u8C6C\u5409\u8C6C\u81EA\u6B7B\u51F6|\u8C6C\u8C5A\u8B8A\u4EBA\u5B98\u4E8B\u81F3|\u7F8A\u4F5C\u8C5A\u884C\u884C\u4EBA\u81F3|\u8C6C\u7F8A\u6414\u7662\u4E3B\u53E3\u820C|\u9A0E\u7F8A\u4E0A\u8857\u4E3B\u5F97\u8CA1|\u5B50\u6BCD\u7F8A\u76CA\u547D\u5927\u5409|\u72AC\u5420\u4EBA\u9B3C\u4F86\u6C42\u98DF|\u72AC\u5420\u4E3B\u4EBA\u5931\u8CA1\u51F6|\u5C4B\u4E2D\u751F\u99AC\u4E3B\u5927\u5409",
-    "\u9F9C\u9C49\u9B5A\u8766\u6606\u87F2:\u9F9C\u5165\u4E95\u5B85\u5BCC\u8CB4\u81F3|\u9F9C\u86C7\u76F8\u540C\u4E3B\u751F\u8CA1|\u898B\u9F9C\u8005\u4E3B\u5973\u4EBA\u8CB4|\u6349\u9F9C\u8005\u4E3B\u55AA\u4E8B\u81F3|\u898B\u9C49\u8005\u4E3B\u6709\u5F97\u8CA1|\u9B5A\u98DB\u6C34\u4E0A\u767E\u4E8B\u6563|\u4E95\u5167\u6709\u9B5A\u9077\u5B98\u81F3|\u5F35\u7DB2\u6355\u9B5A\u5927\u5409\u5229|\u4EBA\u6355\u9B5A\u4E3B\u98DF\u7686\u5409|\u6436\u9B5A\u98DF\u9B5A\u4E3B\u5C0F\u75BE|\u6C34\u4E2D\u91E3\u9B5A\u5927\u5409\u5229|\u6797\u4E2D\u9B5A\u7375\u4E8B\u7121\u6210|\u7FA4\u9B5A\u6E38\u6C34\u4E3B\u6709\u8CA1|\u9BC9\u9B5A\u59BB\u6709\u5B55\u5927\u5409|\u5927\u9B5A\u63DA\u52D5\u4E3B\u8072\u540D|\u5C0F\u9B5A\u751F\u5B50\u5927\u5409\u5229|\u4E7E\u9B5A\u4E0B\u6C34\u547D\u5FA9\u901A|\u8766\u8B8A\u9B5A\u4E3B\u5931\u8CA1\u7269|\u8EAB\u5750\u9B5A\u87F2\u75C5\u60A3\u9664|\u8783\u87F9\u4E3B\u767E\u75C5\u6D88\u6563|\u8766\u86E4\u9CF4\u8D70\u6709\u53E3\u820C|\u6C34\u86ED\u4E3B\u5973\u4EBA\u5931\u8CA1|\u87BA\u8784\u4E3B\u5728\u5916\u4E0D\u5229|\u86E4\u870A\u4E3B\u8001\u4F86\u751F\u5B50|\u98DB\u86FE\u5165\u71C8\u4ED6\u4EBA\u6557|\u86A4\u98DB\u4E0D\u7E6D\u4E3B\u5C0F\u5409|\u8702\u8776\u4EA4\u6232\u4E8B\u4E0D\u6210|\u8702\u87AB\u4EBA\u8173\u6709\u8CA1\u559C|\u8723\u870B\u4F5C\u5806\u4E3B\u5931\u8CA1|\u873B\u8713\u5C0D\u98DB\u7F8E\u4EBA\u4F86|\u4FC3\u7E54\u8072\u7E41\u6709\u5C0F\u60F1|\u8759\u8760\u7FA4\u98DB\u9670\u4E8B\u9577|\u8708\u86A3\u54AC\u4EBA\u58FD\u547D\u5409|\u8713\u86B0\u4E3B\u6709\u5C0F\u8CA1\u5409|\u86AF\u8693\u4E3B\u7530\u5B85\u5927\u5409|\u868A\u5B50\u54AC\u4EBA\u4E3B\u6709\u5931|\u8805\u6C78\u4EBA\u8863\u5FC5\u6709\u8B92|\u87BB\u87C8\u4E3B\u6709\u4E0D\u660E\u4E8B"
-  ];
-  static ENTRIES = [];
-  static CATEGORIES = [];
-  static isInit = false;
-  index;
-  static init() {
-    if (DreamOracle.isInit) {
-      return;
-    }
-    for (let i = 0; i < DreamOracle.CATEGORY_DATA.length; i++) {
-      const item = DreamOracle.CATEGORY_DATA[i];
-      const p = item.indexOf(":");
-      const category = item.substring(0, p);
-      const entries = item.substring(p + 1).split("|");
-      for (let j = 0; j < entries.length; j++) {
-        DreamOracle.CATEGORIES.push(category);
-        DreamOracle.ENTRIES.push(entries[j]);
-      }
-    }
-    DreamOracle.isInit = true;
+class PhenologyDay extends AbstractCultureDay {
+  constructor(phenology, dayIndex) {
+    super(phenology, dayIndex);
   }
-  constructor(index) {
-    super();
-    this.index = index;
-  }
-  /**
-   * 逐日一则，同日同条
-   */
-  static of(solarDay) {
-    DreamOracle.init();
-    const n = (solarDay.getYear() * 373 + solarDay.getMonth() * 37 + solarDay.getDay()) % DreamOracle.ENTRIES.length;
-    return new DreamOracle(n);
-  }
-  static fromIndex(index) {
-    DreamOracle.init();
-    return new DreamOracle(index % DreamOracle.ENTRIES.length);
-  }
-  static getSize() {
-    DreamOracle.init();
-    return DreamOracle.ENTRIES.length;
-  }
-  static getCategories() {
-    DreamOracle.init();
-    return DreamOracle.CATEGORY_DATA.map((item) => item.substring(0, item.indexOf(":")));
-  }
-  getIndex() {
-    return this.index;
-  }
-  getCategory() {
-    DreamOracle.init();
-    return DreamOracle.CATEGORIES[this.index];
-  }
-  /**
-   * 原文断语
-   */
-  getText() {
-    DreamOracle.init();
-    return DreamOracle.ENTRIES[this.index];
-  }
-  getDream() {
-    const text = this.getText();
-    const i = DreamOracle.splitIndex(text);
-    return i < 0 ? text : text.substring(0, i);
-  }
-  getInterpretation() {
-    const text = this.getText();
-    const i = DreamOracle.splitIndex(text);
-    return i < 0 ? "" : text.substring(i);
-  }
-  static splitIndex(text) {
-    let i = text.indexOf("\u4E3B");
-    if (i > 0) {
-      return i;
-    }
-    i = -1;
-    const marks = ["\u5927\u5409", "\u5927\u51F6", "\u5409", "\u51F6"];
-    for (let k = 0; k < marks.length; k++) {
-      const j = text.indexOf(marks[k], 2);
-      if (j > 0 && (i < 0 || j < i)) {
-        i = j;
-      }
-    }
-    return i;
-  }
-  getName() {
-    return this.getText();
-  }
-  toString() {
-    const text = this.getInterpretation();
-    return text ? `\u68A6\u89C1\uFF1A${this.getDream()}\u3000\u89E3\uFF1A${text}` : this.getText();
+  getPhenology() {
+    return this.culture;
   }
 }
-class DailyNumbers extends AbstractCulture {
-  day;
-  // 依 Element 之序：木、火、土、金、水
-  static PAIRS = [[3, 8], [2, 7], [5, 10], [4, 9], [1, 6]];
-  constructor(day) {
-    super();
-    this.day = day;
+class NineDay extends AbstractCultureDay {
+  constructor(nine, dayIndex) {
+    super(nine, dayIndex);
   }
-  static fromSixtyCycleDay(day) {
-    return new DailyNumbers(day);
-  }
-  getSixtyCycleDay() {
-    return this.day;
-  }
-  /**
-   * 日干、日支、纳音之五行
-   */
-  getElements() {
-    const l = [];
-    const source = [
-      this.day.getSixtyCycle().getHeavenStem().getElement(),
-      this.day.getSixtyCycle().getEarthBranch().getElement(),
-      this.day.getSixtyCycle().getSound().getElement()
-    ];
-    for (let i = 0; i < source.length; i++) {
-      let exists = false;
-      for (let j = 0; j < l.length; j++) {
-        if (l[j].getIndex() === source[i].getIndex()) {
-          exists = true;
-          break;
-        }
-      }
-      if (!exists) {
-        l.push(source[i]);
-      }
-    }
-    return l;
-  }
-  /**
-   * 河图数对应之数（一至四十九）
-   */
-  getElementNumbers(element) {
-    const l = [];
-    const pair = DailyNumbers.PAIRS[element.getIndex()];
-    for (let n = 1; n <= 49; n++) {
-      if (pair.indexOf(n % 10) > -1 || n % 10 === 0 && pair.indexOf(10) > -1) {
-        l.push(n);
-      }
-    }
-    return l;
-  }
-  getNumbers(count = 6) {
-    const elements = this.getElements();
-    const lists = [];
-    for (let i = 0; i < elements.length; i++) {
-      lists.push(this.getElementNumbers(elements[i]));
-    }
-    const l = [];
-    for (let round = 0; l.length < count; round++) {
-      let added = false;
-      for (let i = 0; i < lists.length && l.length < count; i++) {
-        if (round < lists[i].length) {
-          const n = lists[i][round];
-          if (l.indexOf(n) < 0) {
-            l.push(n);
-            added = true;
-          }
-        }
-      }
-      if (!added) {
-        break;
-      }
-    }
-    return l;
-  }
-  getName() {
-    const l = this.getNumbers();
-    const names = [];
-    for (let i = 0; i < l.length; i++) {
-      names.push((l[i] < 10 ? "0" : "") + l[i]);
-    }
-    return names.join(" ");
-  }
-  toString() {
-    return this.getName();
+  getNine() {
+    return this.culture;
   }
 }
-class NameSuggestion extends AbstractCulture {
-  surname;
-  givenName;
-  elements;
-  meaning;
-  constructor(surname, givenName, elements, meaning) {
-    super();
-    this.surname = surname;
-    this.givenName = givenName;
-    this.elements = elements;
-    this.meaning = meaning;
-  }
-  getSurname() {
-    return this.surname;
-  }
-  getGivenName() {
-    return this.givenName;
-  }
-  getFullName() {
-    return this.surname + this.givenName;
-  }
-  getElements() {
-    return this.elements;
-  }
-  getMeaning() {
-    return this.meaning;
-  }
-  getName() {
-    return this.getFullName();
-  }
-  toString() {
-    return `${this.getFullName()}\uFF08${this.meaning}\uFF09`;
-  }
-}
-class Naming {
-  /**
-   * 字|五行|字义|性别（0 通用、1 男、2 女）
-   */
-  static CHARS = [
-    "\u6850|\u6728|\u68A7\u6850\uFF0C\u9AD8\u6D01\u633A\u62D4|0",
-    "\u6960|\u6728|\u6960\u6728\uFF0C\u575A\u5B9E\u8D35\u91CD|0",
-    "\u6977|\u6728|\u6977\u6A21\uFF0C\u7AEF\u6B63\u53EF\u6CD5|1",
-    "\u695A|\u6728|\u695A\u695A\uFF0C\u6E05\u79C0\u660E\u6670|0",
-    "\u67CF|\u6728|\u67CF\u6728\uFF0C\u5C81\u5BD2\u957F\u9752|1",
-    "\u68EE|\u6728|\u6797\u6728\uFF0C\u7E41\u8302\u660C\u76DB|1",
-    "\u8363|\u6728|\u8363\u534E\uFF0C\u663E\u8FBE\u5174\u65FA|1",
-    "\u8431|\u6728|\u8431\u8349\uFF0C\u5FD8\u5FE7\u5B89\u548C|2",
-    "\u82B8|\u6728|\u82B8\u9999\uFF0C\u6E05\u96C5\u81EA\u6301|2",
-    "\u82B7|\u6728|\u767D\u82B7\uFF0C\u82AC\u82B3\u9AD8\u6D01|2",
-    "\u82E5|\u6728|\u675C\u82E5\uFF0C\u6E29\u5A49\u8212\u5F90|2",
-    "\u831C|\u6728|\u831C\u8349\uFF0C\u660E\u8273\u53EF\u4EBA|2",
-    "\u715C|\u706B|\u5149\u8000\uFF0C\u660E\u4EAE\u7167\u4EBA|1",
-    "\u70E8|\u706B|\u706B\u5149\uFF0C\u76DB\u660E\u707F\u70C2|0",
-    "\u714A|\u706B|\u6E29\u6696\uFF0C\u58F0\u52BF\u663E\u8D6B|1",
-    "\u7199|\u706B|\u548C\u4E50\uFF0C\u5149\u660E\u7199\u7136|0",
-    "\u5F64|\u706B|\u6731\u7EA2\uFF0C\u70ED\u70C8\u9C9C\u660E|2",
-    "\u65ED|\u706B|\u671D\u9633\uFF0C\u521D\u5347\u6709\u671B|1",
-    "\u6657|\u706B|\u5929\u5C06\u660E\uFF0C\u542B\u5149|0",
-    "\u6674|\u706B|\u6674\u6717\uFF0C\u5F00\u6717\u660E\u51C0|2",
-    "\u662D|\u706B|\u663E\u8457\uFF0C\u8D24\u660E\u662D\u5F70|0",
-    "\u66DC|\u706B|\u65E5\u6708\u4E4B\u8F89\uFF0C\u5149\u8000|1",
-    "\u66E6|\u706B|\u6668\u5149\uFF0C\u71B9\u5FAE\u521D\u7167|0",
-    "\u7075|\u706B|\u7075\u79C0\uFF0C\u806A\u6167\u654F\u6377|2",
-    "\u5764|\u571F|\u5764\u539A\u8F7D\u7269\uFF0C\u5BBD\u5B8F|1",
-    "\u579A|\u571F|\u5C71\u9AD8\u800C\u7A33\uFF0C\u539A\u91CD|0",
-    "\u57F9|\u571F|\u57F9\u690D\uFF0C\u539A\u5FB7\u8F7D\u7269|1",
-    "\u57CE|\u571F|\u57CE\u6C60\uFF0C\u575A\u56FA\u53EF\u5B88|1",
-    "\u5747|\u571F|\u5747\u5E73\uFF0C\u4E2D\u6B63\u4E0D\u504F|0",
-    "\u58A8|\u571F|\u7FF0\u58A8\uFF0C\u6587\u96C5\u6709\u81F4|1",
-    "\u5723|\u571F|\u5723\u660E\uFF0C\u901A\u8FBE\u4E8B\u7406|0",
-    "\u5C9A|\u571F|\u5C71\u96FE\uFF0C\u6E05\u5E7D\u7F25\u7F08|0",
-    "\u5CF0|\u571F|\u5C71\u5CF0\uFF0C\u9AD8\u8FDC\u72EC\u7ACB|1",
-    "\u5CFB|\u571F|\u5CFB\u62D4\uFF0C\u4E25\u6B63\u4E0D\u963F|1",
-    "\u5D07|\u571F|\u5D07\u9AD8\uFF0C\u666F\u4EF0\u6709\u5FB7|1",
-    "\u5CA9|\u571F|\u5CA9\u77F3\uFF0C\u521A\u6BC5\u4E0D\u79FB|1",
-    "\u94ED|\u91D1|\u94ED\u8BB0\uFF0C\u523B\u9AA8\u4E0D\u5FD8|1",
-    "\u9510|\u91D1|\u9510\u5229\uFF0C\u8FDB\u53D6\u6709\u4E3A|1",
-    "\u9526|\u91D1|\u9526\u7EE3\uFF0C\u534E\u7F8E\u7EDA\u70C2|0",
-    "\u94A7|\u91D1|\u6743\u8861\uFF0C\u7A33\u91CD\u5F97\u4F53|1",
-    "\u94C3|\u91D1|\u6E05\u94C3\uFF0C\u7075\u52A8\u60A6\u8033|2",
-    "\u94CE|\u91D1|\u6728\u94CE\uFF0C\u8B66\u9192\u4E16\u4EBA|1",
-    "\u946B|\u91D1|\u4E09\u91D1\u76F8\u53E0\uFF0C\u5174\u65FA|1",
-    "\u94EE|\u91D1|\u94EE\u7136\uFF0C\u521A\u76F4\u4E0D\u66F2|1",
-    "\u94B0|\u91D1|\u73CD\u5B9D\uFF0C\u575A\u6DA6|0",
-    "\u745C|\u91D1|\u7F8E\u7389\uFF0C\u7455\u4E0D\u63A9\u745C|0",
-    "\u741B|\u91D1|\u73CD\u5B9D\uFF0C\u8D35\u91CD|1",
-    "\u745E|\u91D1|\u7965\u745E\uFF0C\u5409\u5E86|0",
-    "\u6CFD|\u6C34|\u6069\u6CFD\uFF0C\u6DA6\u7269\u65E0\u58F0|1",
-    "\u6D0B|\u6C34|\u6C6A\u6D0B\uFF0C\u5BBD\u5E7F\u65E0\u6DAF|0",
-    "\u6D69|\u6C34|\u6D69\u8361\uFF0C\u6B63\u5927\u5149\u660E|1",
-    "\u6DA6|\u6C34|\u6E29\u6DA6\uFF0C\u6ECB\u517B\u6709\u5EA6|0",
-    "\u6E05|\u6C34|\u6E05\u6F88\uFF0C\u9AD8\u6D01\u81EA\u5B88|0",
-    "\u6DB5|\u6C34|\u6DB5\u517B\uFF0C\u5305\u5BB9\u6DF1\u539A|0",
-    "\u6D01|\u6C34|\u6D01\u767D\uFF0C\u5B88\u8EAB\u5982\u7389|2",
-    "\u6DF3|\u6C34|\u6DF3\u539A\uFF0C\u8D28\u6734\u65E0\u534E|0",
-    "\u6E0A|\u6C34|\u6DF1\u6E0A\uFF0C\u535A\u5B66\u6C89\u9759|1",
-    "\u6EAA|\u6C34|\u6EAA\u6D41\uFF0C\u67D4\u97E7\u4E0D\u7EDD|0",
-    "\u6C50|\u6C34|\u6F6E\u6C50\uFF0C\u5E94\u65F6\u6709\u4FE1|2",
-    "\u6C90|\u6C34|\u6C90\u6D74\uFF0C\u627F\u6069\u53D7\u6DA6|0"
-  ];
-  static ELEMENTS = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
-  /**
-   * 八字五行分析
-   */
-  static analyze(eightChar) {
-    return ElementBalance.fromEightChar(eightChar);
-  }
-  /**
-   * 依喜用五行取双字名
-   *
-   * @param surname 姓氏
-   * @param eightChar 生辰八字
-   * @param gender 性别，用于筛选偏女性或偏男性用字
-   * @param count 返回条数
-   */
-  static suggest(surname, eightChar, gender, count = 6) {
-    const balance = ElementBalance.fromEightChar(eightChar);
-    const favorable = balance.getFavorable();
-    const pools = [];
-    for (let i = 0; i < favorable.length; i++) {
-      pools.push(Naming.getChars(favorable[i], gender));
-    }
-    const l = [];
-    for (let i = 0; i < pools.length && l.length < count; i++) {
-      const secondPool = pools[(i + 1) % pools.length];
-      if (pools[i].length === 0 || secondPool.length === 0) {
-        continue;
-      }
-      for (let j = 0; j < pools[i].length && l.length < count; j++) {
-        const first = pools[i][j];
-        const second = secondPool[j % secondPool.length];
-        if (second === first || surname.indexOf(first) > -1 || surname.indexOf(second) > -1) {
-          continue;
-        }
-        l.push(Naming.build(surname, first, second));
-      }
-    }
-    return l;
-  }
-  static build(surname, first, second) {
-    const elements = [];
-    const meanings = [];
-    const chars = [first, second];
-    for (let i = 0; i < chars.length; i++) {
-      const data = Naming.getCharData(chars[i]);
-      elements.push(Element.fromName(data[1]));
-      meanings.push(chars[i] + "\uFF1A" + data[2]);
-    }
-    return new NameSuggestion(surname, first + second, elements, meanings.join("\uFF1B"));
-  }
-  static getCharData(char) {
-    for (let i = 0; i < Naming.CHARS.length; i++) {
-      if (Naming.CHARS[i].charAt(0) === char) {
-        return Naming.CHARS[i].split("|");
-      }
-    }
-    throw new Error(`illegal char: ${char}`);
-  }
-  static getChars(element, gender) {
-    const l = [];
-    for (let i = 0; i < Naming.CHARS.length; i++) {
-      const data = Naming.CHARS[i].split("|");
-      if (data[1] !== Naming.ELEMENTS[element.getIndex()]) {
-        continue;
-      }
-      const g = parseInt(data[3], 10);
-      if (g !== 0 && g !== (gender === 1 /* MAN */ ? 1 : 2)) {
-        continue;
-      }
-      l.push(data[0]);
-    }
-    return l;
-  }
-  /**
-   * 字库规模
-   */
-  static getCharCount() {
-    return Naming.CHARS.length;
-  }
-}
-class Era extends AbstractCulture {
-  name;
+
+class IcsEvent extends AbstractCulture {
+  summary;
   start;
-  static JAPANESE = [
-    new Era("\u4EE4\u548C", SolarDay.fromYmd(2019, 5, 1)),
-    new Era("\u5E73\u6210", SolarDay.fromYmd(1989, 1, 8)),
-    new Era("\u662D\u548C", SolarDay.fromYmd(1926, 12, 25)),
-    new Era("\u5927\u6B63", SolarDay.fromYmd(1912, 7, 30)),
-    new Era("\u660E\u6CBB", SolarDay.fromYmd(1868, 1, 25))
-  ];
-  constructor(name, start) {
+  end;
+  rrule;
+  uid;
+  location;
+  description;
+  constructor(summary, start, end, rrule, uid, location, description) {
     super();
-    this.name = name;
+    this.summary = summary;
     this.start = start;
+    this.end = end;
+    this.rrule = rrule;
+    this.uid = uid;
+    this.location = location;
+    this.description = description;
   }
-  /**
-   * 所在年号，早于明治者返回 null
-   */
-  static of(solarDay) {
-    for (let i = 0; i < Era.JAPANESE.length; i++) {
-      if (!solarDay.isBefore(Era.JAPANESE[i].getStart())) {
-        return Era.JAPANESE[i];
-      }
-    }
-    return null;
+  getName() {
+    return this.summary;
   }
   getStart() {
     return this.start;
   }
-  getName() {
-    return this.name;
+  getEnd() {
+    return this.end;
   }
-  /**
-   * 年号年，元年为一
-   */
-  getYear(solarDay) {
-    return solarDay.getYear() - this.start.getYear() + 1;
+  getRrule() {
+    return this.rrule;
   }
-  getYearName(solarDay) {
-    const y = this.getYear(solarDay);
-    return y === 1 ? "\u5143" : String(y);
+  getUid() {
+    return this.uid;
+  }
+  getLocation() {
+    return this.location;
+  }
+  getDescription() {
+    return this.description;
   }
   toString() {
-    return this.name;
-  }
-  /**
-   * 佛历纪年，公历加五四三
-   */
-  static getBuddhistYear(solarYear) {
-    return solarYear + 543;
-  }
-  /**
-   * 民国纪年，公历减一九一一
-   */
-  static getMinguoYear(solarYear) {
-    return solarYear - 1911;
-  }
-  /**
-   * 主体纪年，公历减一九一一
-   */
-  static getJucheYear(solarYear) {
-    return solarYear - 1911;
+    return `${this.start} ${this.summary}`;
   }
 }
+class IcsCalendar {
+  events;
+  constructor(events) {
+    this.events = events;
+  }
+  static parse(text) {
+    const lines = text.replace(/\r\n[ \t]/g, "").replace(/\n[ \t]/g, "").split(/\r?\n/);
+    const events = [];
+    let fields = null;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line === "BEGIN:VEVENT") {
+        fields = {};
+        continue;
+      }
+      if (line === "END:VEVENT") {
+        if (fields && fields["DTSTART"]) {
+          events.push(IcsCalendar.build(fields));
+        }
+        fields = null;
+        continue;
+      }
+      if (!fields) {
+        continue;
+      }
+      const p = line.indexOf(":");
+      if (p < 0) {
+        continue;
+      }
+      const key = line.substring(0, p).split(";")[0].toUpperCase();
+      fields[key] = line.substring(p + 1);
+    }
+    return new IcsCalendar(events);
+  }
+  static build(fields) {
+    return new IcsEvent(
+      IcsCalendar.unescape(fields["SUMMARY"] || ""),
+      IcsCalendar.parseDate(fields["DTSTART"]),
+      fields["DTEND"] ? IcsCalendar.parseDate(fields["DTEND"]) : null,
+      fields["RRULE"] || "",
+      fields["UID"] || "",
+      IcsCalendar.unescape(fields["LOCATION"] || ""),
+      IcsCalendar.unescape(fields["DESCRIPTION"] || "")
+    );
+  }
+  /**
+   * 还原 iCalendar 文本转义
+   */
+  static unescape(text) {
+    return text.replace(/\\n/gi, "\n").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\");
+  }
+  static parseDate(value) {
+    const s = value.replace(/[^0-9]/g, "");
+    return SolarDay.fromYmd(parseInt(s.substring(0, 4), 10), parseInt(s.substring(4, 6), 10), parseInt(s.substring(6, 8), 10));
+  }
+  getEvents() {
+    return this.events;
+  }
+  /**
+   * 可表达为 tyme 循环事件者
+   */
+  toTymeEvents() {
+    const l = [];
+    for (let i = 0; i < this.events.length; i++) {
+      const e = this.toTymeEvent(this.events[i]);
+      if (e) {
+        l.push(e);
+      }
+    }
+    return l;
+  }
+  toTymeEvent(event) {
+    const start = event.getStart();
+    const rule = {};
+    const rrule = event.getRrule();
+    if (!rrule) {
+      return null;
+    }
+    const parts = rrule.split(";");
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i].indexOf("=");
+      rule[parts[i].substring(0, p).toUpperCase()] = parts[i].substring(p + 1);
+    }
+    if (rule["FREQ"] !== "YEARLY") {
+      return null;
+    }
+    const month = rule["BYMONTH"] ? parseInt(rule["BYMONTH"], 10) : start.getMonth();
+    const monthDay = rule["BYMONTHDAY"] || "";
+    const byDay = rule["BYDAY"] || "";
+    if (byDay) {
+      const m = /^(-?\d)([A-Z]{2})$/.exec(byDay);
+      if (!m) {
+        return null;
+      }
+      const weeks = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+      return Event.builder().name(event.getName()).solarWeek(month, parseInt(m[1], 10), weeks.indexOf(m[2])).startYear(start.getYear()).build();
+    }
+    const day = monthDay ? parseInt(monthDay.split(",")[0], 10) : start.getDay();
+    if (day < 1 || day > 31) {
+      return null;
+    }
+    return Event.builder().name(event.getName()).solarDay(month, day, 0).startYear(start.getYear()).build();
+  }
+  /**
+   * 无法表达为循环事件者，返回其起始日
+   */
+  getOneOffDays() {
+    const l = [];
+    for (let i = 0; i < this.events.length; i++) {
+      if (!this.events[i].getRrule()) {
+        l.push(this.events[i].getStart());
+      }
+    }
+    return l;
+  }
+  /**
+   * 无法转换为 tyme 事件者（非年度循环或循环规则不受支持）
+   */
+  getUnsupported() {
+    const l = [];
+    for (let i = 0; i < this.events.length; i++) {
+      if (!this.toTymeEvent(this.events[i])) {
+        l.push(this.events[i]);
+      }
+    }
+    return l;
+  }
+}
+
 var HolidayType = /* @__PURE__ */ ((HolidayType2) => {
   HolidayType2[HolidayType2["SOLAR"] = 0] = "SOLAR";
   HolidayType2[HolidayType2["LUNAR"] = 1] = "LUNAR";
@@ -9758,6 +8295,7 @@ class HolidayRule extends AbstractCulture {
     return last.next(last.getWeek().stepsBackTo(week) + 7 * (weekIndex + 1));
   }
 }
+
 class Holiday extends AbstractCulture {
   day;
   name;
@@ -10492,6 +9030,7 @@ class HolidayCalendar {
     return null;
   }
 }
+
 class FolkFestival extends AbstractCulture {
   solarDay;
   names;
@@ -10618,172 +9157,1642 @@ class FolkFestival extends AbstractCulture {
     return this.getName();
   }
 }
-class IcsEvent extends AbstractCulture {
-  summary;
-  start;
-  end;
-  rrule;
-  uid;
-  location;
-  description;
-  constructor(summary, start, end, rrule, uid, location, description) {
+class DeityFestival extends AbstractCulture {
+  month;
+  day;
+  names;
+  constructor(month, day, names) {
     super();
-    this.summary = summary;
-    this.start = start;
-    this.end = end;
-    this.rrule = rrule;
-    this.uid = uid;
-    this.location = location;
-    this.description = description;
+    this.month = month;
+    this.day = day;
+    this.names = names;
+  }
+  static fromLunarMonthDay(month, day) {
+    const key = (month < 10 ? "0" : "") + month + (day < 10 ? "0" : "") + day;
+    const names = DeityFestival.DATA[key];
+    return names ? new DeityFestival(month, day, names) : null;
+  }
+  static fromLunarDay(lunarDay) {
+    return DeityFestival.fromLunarMonthDay(Math.abs(lunarDay.getMonth()), lunarDay.getDay());
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getNames() {
+    return this.names;
   }
   getName() {
-    return this.summary;
+    return this.names.join("\u3001");
+  }
+  toString() {
+    return `${LunarMonth.NAMES[this.month - 1]}${LunarDay.NAMES[this.day - 1]} ${this.getName()}`;
+  }
+  static DATA = {
+    "0101": ["\u5929\u814A\u4E4B\u8FB0\xB7\u5F25\u52D2\u4F5B\u5723\u8BDE"],
+    "0103": ["\u5B59\u771F\u4EBA\u3001\u90DD\u771F\u4EBA\u5723\u8BDE"],
+    "0106": ["\u8D70\u5149\u4F5B\u5723\u8BDE"],
+    "0108": ["\u6C5F\u4E1C\u795E\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09", "\u4E94\u6BBF\u960E\u7F57\u5929\u5B50\u5723\u8BDE"],
+    "0109": ["\u7389\u7687\u4E0A\u5E1D\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0110": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0111": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0112": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0113": ["\u5218\u731B\u5C06\u519B\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0114": ["\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0115": ["\u4E0A\u5143\u8282\xB7\u4E0A\u5143\u5929\u5B98\u7B49\u5723\u8BDE", "\u663E\u5927\u795E\u901A\u964D\u9B54\uFF08\u658B\u671F\uFF09"],
+    "0119": ["\u957F\u6625\u90B1\u771F\u4EBA\uFF08\u4E18\u5904\u673A\uFF09\u7B49\u5723\u8BDE"],
+    "0201": ["\u592A\u9633\u5347\u6BBF\u4E4B\u8FB0\xB7\u52FE\u9648\u3001\u5218\u771F\u4EBA\u5723\u8BDE", "\u4E00\u6BBF\u79E6\u5E7F\u738B\u5723\u8BDE"],
+    "0202": ["\u571F\u5730\u6B63\u795E\u5723\u8BDE"],
+    "0203": ["\u6587\u660C\u6893\u6F7C\u5E1D\u541B\u5723\u8BDE"],
+    "0204": ["\u66F9\u5927\u5C06\u519B\u5723\u8BDE"],
+    "0205": ["\u4E1C\u534E\u5E1D\u541B\u5723\u8BDE"],
+    "0208": ["\u5F20\u5927\u5E1D\u3001\u660C\u798F\u771F\u541B\u5723\u8BDE", "\u4E09\u6BBF\u5B8B\u5E1D\u738B\u5723\u8BDE"],
+    "0213": ["\u845B\u771F\u541B\u5723\u8BDE"],
+    "0215": ["\u592A\u4E0A\u8001\u541B\u7B49\u5723\u8BDE"],
+    "0217": ["\u4E1C\u65B9\u675C\u5C06\u519B\u5723\u8BDE"],
+    "0218": ["\u56DB\u6BBF\u4E94\u5B98\u738B\u5723\u8BDE"],
+    "0219": ["\u89C2\u97F3\u83E9\u8428\u5723\u8BDE"],
+    "0221": ["\u666E\u8D24\u83E9\u8428\u3001\u6C34\u6BCD\u5723\u8BDE"],
+    "0225": ["\u7384\u5929\u5723\u7236\u660E\u771F\u5E1D\u5723\u8BDE"],
+    "0301": ["\u4E8C\u6BBF\u695A\u6C5F\u738B\u5723\u8BDE"],
+    "0303": ["\u5317\u6781\u771F\u6B66\u7384\u5929\u4E0A\u5E1D\u5723\u8BDE"],
+    "0306": ["\u773C\u5149\u5A18\u5A18\u7B49\u5723\u8BDE"],
+    "0308": ["\u516D\u6BBF\u535E\u57CE\u738B\u5723\u8BDE"],
+    "0312": ["\u4E2D\u592E\u4E94\u9053\u5723\u8BDE"],
+    "0315": ["\u660A\u5929\u5927\u5E1D\u7B49\u5723\u8BDE"],
+    "0316": ["\u51C6\u63D0\u83E9\u8428\u3001\u5C71\u795E\u5723\u8BDE"],
+    "0318": ["\u540E\u571F\u5A18\u5A18\u7B49\u5723\u8BDE"],
+    "0320": ["\u5B50\u5B59\u5A18\u5A18\u5723\u8BDE"],
+    "0323": ["\u5929\u5983\u5A18\u5A18\uFF08\u5988\u7956\uFF09\u5723\u8BDE"],
+    "0327": ["\u4E03\u6BBF\u6CF0\u5C71\u738B\u5723\u8BDE"],
+    "0328": ["\u4E1C\u5CB3\u5927\u5E1D\u7B49\u5723\u8BDE"],
+    "0401": ["\u8427\u516C\u5723\u8BDE", "\u516B\u6BBF\u90FD\u5E02\u738B\u5723\u8BDE"],
+    "0404": ["\u6587\u6B8A\u83E9\u8428\u3001\u72C4\u6881\u516C\u5723\u8BDE"],
+    "0408": ["\u6D74\u4F5B\u8282\xB7\u91CA\u8FE6\u6587\u4F5B\u5723\u8BDE", "\u4E5D\u6BBF\u5E73\u7B49\u738B\u5723\u8BDE"],
+    "0413": ["\u5929\u5C39\u771F\u4EBA\u7B49\u5723\u8BDE"],
+    "0414": ["\u5415\u7EAF\u9633\u7956\u5E08\uFF08\u5415\u6D1E\u5BBE\uFF09\u7B49\u5723\u8BDE"],
+    "0415": ["\u949F\u79BB\u7956\u5E08\u5723\u8BDE"],
+    "0417": ["\u5341\u6BBF\u8F6C\u8F6E\u738B\u5723\u8BDE"],
+    "0418": ["\u7D2B\u5FAE\u5927\u5E1D\u7B49\u5723\u8BDE"],
+    "0420": ["\u773C\u5149\u5723\u6BCD\u5A18\u5A18\u5723\u8BDE"],
+    "0426": ["\u949F\u5C71\u848B\u516C\u5723\u8BDE"],
+    "0428": ["\u836F\u738B\uFF08\u5B59\u601D\u9088\uFF09\u5723\u8BDE"],
+    "0501": ["\u5357\u6781\u957F\u751F\u5927\u5E1D\u5723\u8BDE"],
+    "0505": ["\u5730\u814A\u4E4B\u8FB0\u3001\u7AEF\u5348\u8282\xB7\u5730\u7957\u6E29\u5143\u5E05\u7B49\u5723\u8BDE"],
+    "0507": ["\u6731\u592A\u5C09\u5723\u8BDE"],
+    "0508": ["\u5357\u65B9\u4E94\u9053\u5723\u8BDE"],
+    "0511": ["\u90FD\u57CE\u968D\u5723\u8BDE"],
+    "0512": ["\u70B3\u7075\u516C\u5723\u8BDE"],
+    "0513": ["\u5173\u5723\u5E1D\u541B\u964D\u795E"],
+    "0516": ["\u5929\u5730\u4E3B\u7081\u53CA\u9020\u5316\u4E07\u7269\u4E4B\u8FB0\uFF08\u7981\u5FCC\u65E5\uFF09"],
+    "0518": ["\u5F20\u5929\u5E08\u5723\u8BDE"],
+    "0520": ["\u4E39\u9633\u9A6C\u771F\u4EBA\u5723\u8BDE"],
+    "0529": ["\u8BB8\u5A01\u663E\u738B\uFF08\u5510\u5FE0\u81E3\u8BB8\u8FDC\uFF09\u7B49\u5723\u8BDE"],
+    "0604": ["\u5357\u77BB\u90E8\u6D32\u8F6C\u5927\u6CD5\u8F6E\uFF08\u6CD5\u4F1A\u65E5\uFF09"],
+    "0606": ["\u5D14\u5E9C\u541B\u3001\u6768\u56DB\u5C06\u519B\u5723\u8BDE"],
+    "0610": ["\u5218\u6D77\u87FE\u5E1D\u541B\u5723\u8BDE"],
+    "0611": ["\u4E95\u6CC9\u9F99\u738B\u5723\u8BDE"],
+    "0619": ["\u89C2\u97F3\u83E9\u8428\u6210\u9053"],
+    "0623": ["\u706B\u795E\u7B49\u5723\u8BDE"],
+    "0624": ["\u96F7\u7956\u5723\u8BDE"],
+    "0626": ["\u4E8C\u90CE\u771F\u541B\u5723\u8BDE"],
+    "0629": ["\u5929\u67A2\u5DE6\u76F8\u83AB\u541B\uFF08\u5B8B\u6587\u4E1E\u76F8\u6587\u5929\u7965\uFF09\u7B49\u5723\u8BDE"],
+    "0707": ["\u9053\u5FB7\u814A\u4E4B\u8FB0\u3001\u4E03\u5915\uFF08\u814A\u65E5\uFF09"],
+    "0712": ["\u957F\u771F\u8C2D\u771F\u4EBA\u5723\u8BDE"],
+    "0713": ["\u5927\u52BF\u81F3\u83E9\u8428\u5723\u8BDE"],
+    "0715": ["\u4E2D\u5143\u8282\xB7\u4E2D\u5143\u5730\u5B98\u7B49\u5723\u8BDE"],
+    "0718": ["\u738B\u6BCD\u5A18\u5A18\u5723\u8BDE"],
+    "0719": ["\u503C\u5E74\u592A\u5C81\u5723\u8BDE"],
+    "0721": ["\u666E\u5EB5\u7956\u5E08\u7B49\u5723\u8BDE"],
+    "0722": ["\u589E\u798F\u8D22\u795E\u5723\u8BDE"],
+    "0723": ["\u5929\u67A2\u4E0A\u76F8\u771F\u541B\uFF08\u6C49\u8BF8\u845B\u4E1E\u76F8\u8BF8\u845B\u4EAE\uFF09\u7B49\u5723\u8BDE"],
+    "0724": ["\u9F99\u6811\u738B\u83E9\u8428\u5723\u8BDE"],
+    "0730": ["\u5730\u85CF\u738B\u83E9\u8428\u5723\u8BDE"],
+    "0801": ["\u795E\u529F\u5999\u6D4E\u771F\u541B\uFF08\u8BB8\u771F\u541B\uFF09\u7B49\u5723\u8BDE"],
+    "0803": ["\u7076\u541B\u5723\u8BDE", "\u5317\u6597\u4E0B\u964D\uFF08\u4E0B\u964D\uFF09"],
+    "0805": ["\u96F7\u58F0\u5927\u5E1D\u5723\u8BDE"],
+    "0810": ["\u5317\u5CB3\u5927\u5E1D\u5723\u8BDE"],
+    "0812": ["\u897F\u65B9\u4E94\u9053\u5723\u8BDE"],
+    "0815": ["\u592A\u9634\u671D\u5143\u4E4B\u8FB0\u3001\u4E2D\u79CB\u8282\uFF08\u671D\u5143\uFF09"],
+    "0818": ["\u9152\u4ED9\u5723\u8BDE"],
+    "0822": ["\u71C3\u706F\u4F5B\u5723\u8BDE"],
+    "0823": ["\u4F0F\u9B54\u526F\u5C06\u5F20\u663E\u738B\uFF08\u6C49\u6853\u4FAF\u5F20\u98DE\uFF09\u7B49\u5723\u8BDE"],
+    "0827": ["\u5317\u6597\u4E0B\u964D\uFF08\u4E0B\u964D\uFF09"],
+    "0901": ["\u5357\u6597\u4E0B\u964D\u4E4B\u8FB0\uFF08\u4E0B\u964D\uFF09", "\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0902": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0903": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09", "\u4E94\u761F\u5723\u8BDE"],
+    "0904": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0905": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0906": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0907": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0908": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09"],
+    "0909": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0\uFF08\u658B\u671F\uFF09", "\u6597\u6BCD\u5143\u541B\u7B49\u5723\u8BDE"],
+    "0916": ["\u673A\u795E\u5723\u8BDE"],
+    "0917": ["\u91D1\u9F99\u56DB\u5927\u738B\u7B49\u5723\u8BDE"],
+    "0923": ["\u8428\u771F\u4EBA\u5723\u8BDE"],
+    "0928": ["\u4E94\u663E\u7075\u5BAB\u3001\u9A6C\u5143\u5E05\u5723\u8BDE"],
+    "0930": ["\u836F\u5E08\u7409\u7483\u5149\u738B\u4F5B\u5723\u8BDE"],
+    "1001": ["\u6C11\u5C81\u814A\u4E4B\u8FB0\xB7\u4E1C\u7687\u5927\u5E1D\u7B49\u5723\u8BDE"],
+    "1003": ["\u4E09\u8305\u5E94\u5316\u771F\u541B\u5723\u8BDE"],
+    "1005": ["\u8FBE\u6469\u7956\u5E08\u5723\u8BDE"],
+    "1006": ["\u5929\u66F9\u8BF8\u53F8\u4E94\u5CB3\u4E94\u5E1D\u5723\u8BDE"],
+    "1008": ["\u6D85\u69C3\uFF08\u7EAA\u5FF5\u65E5\uFF09"],
+    "1015": ["\u4E0B\u5143\u8282\xB7\u4E0B\u5143\u6C34\u5B98\u7B49\u5723\u8BDE"],
+    "1020": ["\u865A\u9756\u5929\u5E08\uFF08\u4E09\u5341\u4EE3\u5929\u5E08\u5F18\u609F\u5F20\u771F\u4EBA\uFF09\u7B49\u5723\u8BDE"],
+    "1027": ["\u5317\u6781\u7D2B\u5FAE\u5927\u5E1D\u5723\u8BDE"],
+    "1104": ["\u5927\u6210\u81F3\u5723\u5148\u5E08\u6587\u5BA3\u738B\u5B54\u5B50\u7B49\u5723\u8BDE"],
+    "1106": ["\u897F\u5CB3\u5927\u5E1D\u5723\u8BDE"],
+    "1111": ["\u592A\u4E59\u6551\u82E6\u5929\u5C0A\u5723\u8BDE"],
+    "1117": ["\u963F\u5F25\u9640\u4F5B\u5723\u8BDE"],
+    "1119": ["\u65E5\u5149\u5929\u5B50\u7B49\u5723\u8BDE"],
+    "1123": ["\u5357\u6597\u4E0B\u964D\xB7\u5F20\u4ED9\u5723\u8BDE"],
+    "1126": ["\u5317\u65B9\u4E94\u9053\u5723\u8BDE"],
+    "1208": ["\u738B\u4FAF\u814A\u4E4B\u8FB0\u3001\u814A\u516B\u8282\xB7\u5F20\u82F1\u6D4E\u738B\uFF08\u5510\u5FE0\u81E3\u5F20\u5DE1\uFF09\u7B49\u5723\u8BDE"],
+    "1216": ["\u5357\u5CB3\u5927\u5E1D\u5723\u8BDE"],
+    "1220": ["\u9C81\u73ED\u5723\u8BDE"],
+    "1221": ["\u5929\u7337\u4E0A\u5E1D\u5723\u8BDE"],
+    "1224": ["\u53F8\u547D\u7076\u541B\u4E0A\u5929\u671D\u7389\u5E1D"],
+    "1229": ["\u534E\u4E25\u83E9\u8428\u5723\u8BDE"],
+    "1230": ["\u8BF8\u4F5B\u4E0B\u754C\u63A2\u8BBF\u5584\u6076"]
+  };
+}
+
+class DutyAdvice extends AbstractCulture {
+  duty;
+  static RECOMMENDS = [
+    "\u51FA\u884C\u3001\u4E0A\u4EFB\u3001\u4F1A\u53CB\u3001\u4E0A\u4E66\u3001\u89C1\u5DE5",
+    "\u9664\u670D\u3001\u7597\u75C5\u3001\u626B\u820D\u3001\u51FA\u884C\u3001\u5AC1\u5A36",
+    "\u796D\u7940\u3001\u7948\u798F\u3001\u7ED3\u4EB2\u3001\u5F00\u5E02\u3001\u7ACB\u5238",
+    "\u4FEE\u9020\u3001\u6D82\u6CE5\u3001\u5E73\u6CBB\u9053\u6D82\u3001\u5AC1\u5A36",
+    "\u796D\u7940\u3001\u7948\u798F\u3001\u5AC1\u5A36\u3001\u9020\u5C4B\u3001\u5B89\u5E8A",
+    "\u7948\u798F\u3001\u796D\u7940\u3001\u6355\u6349\u3001\u7EB3\u755C\u3001\u9020\u5C4B",
+    "\u7834\u5C4B\u574F\u57A3\u3001\u6C42\u533B\u6CBB\u75C5",
+    "\u796D\u7940\u3001\u5B89\u5E8A\u3001\u62C6\u5378",
+    "\u5F00\u5E02\u3001\u5AC1\u5A36\u3001\u5165\u5B85\u3001\u5165\u5B66\u3001\u4E0A\u4EFB",
+    "\u7EB3\u8D22\u3001\u6536\u8D26\u3001\u8FDB\u4EBA\u53E3\u3001\u7EB3\u755C\u3001\u6355\u6349",
+    "\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5AC1\u5A36\u3001\u5165\u5B66\u3001\u4E0A\u4EFB",
+    "\u7B51\u5824\u3001\u8865\u57A3\u3001\u4FEE\u5C4B\u3001\u57CB\u7A74"
+  ];
+  static AVOIDS = [
+    "\u52A8\u571F\u3001\u5F00\u4ED3\u3001\u51FA\u8D27\u8D22\u3001\u5B89\u846C",
+    "\u6C42\u5B98\u3001\u4E0A\u4EFB\u3001\u5F00\u5E02\u3001\u642C\u5BB6",
+    "\u670D\u836F\u3001\u683D\u79CD\u3001\u5B89\u846C\u3001\u8D74\u4EFB",
+    "\u5F00\u6E20\u3001\u683D\u79CD\u3001\u9488\u7078",
+    "\u8BC9\u8BBC\u3001\u51FA\u884C\u3001\u4EA4\u6D89",
+    "\u642C\u5BB6\u3001\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5F00\u4ED3",
+    "\u5AC1\u5A36\u3001\u5F00\u5E02\u3001\u52A8\u571F\u3001\u7B7E\u7EA6",
+    "\u767B\u9AD8\u3001\u884C\u8239\u3001\u8FDC\u884C",
+    "\u8BC9\u8BBC\u3001\u7834\u571F",
+    "\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5B89\u846C",
+    "\u5B89\u846C\u3001\u7834\u571F",
+    "\u5F00\u5E02\u3001\u51FA\u884C\u3001\u5C31\u533B\u3001\u4E0A\u4EFB"
+  ];
+  static DESCRIPTIONS = [
+    "\u5EFA\u4E3A\u4E00\u6708\u4E4B\u4E3B\uFF0C\u8BF8\u4E8B\u53EF\u4E3A\uFF0C\u60DF\u4E0D\u5B9C\u52A8\u571F\u4FEE\u9020\u3002",
+    "\u9664\u65E7\u5E03\u65B0\uFF0C\u5927\u5409\uFF0C\u5C11\u6709\u4E0D\u5B9C\u4E4B\u4E8B\u3002",
+    "\u53EA\u5B9C\u796D\u7940\u7948\u613F\uFF0C\u5FCC\u4E0A\u4EFB\u3001\u5AC1\u5A36\uFF0C\u4F59\u4E8B\u4E0D\u5229\u3002",
+    "\u5E73\u6CBB\u9053\u6D82\uFF0C\u4E07\u4E8B\u5E73\u5E38\uFF0C\u65E0\u5927\u5409\u4EA6\u65E0\u5927\u51F6\u3002",
+    "\u5B9C\u5BB4\u996E\u3001\u534F\u8BAE\uFF0C\u5FCC\u533B\u7597\u3001\u8BC9\u8BBC\u53CA\u51FA\u5E08\u3002",
+    "\u5B9C\u65B0\u5EFA\u3001\u79CD\u83B3\u3001\u6355\u6349\uFF0C\u5FCC\u79FB\u5C45\u3001\u51FA\u884C\u3001\u5F00\u5E02\u3002",
+    "\u4E07\u4E8B\u4E0D\u5229\uFF0C\u53EA\u5B9C\u7834\u57A3\u574F\u5C4B\u3002",
+    "\u4E07\u4E8B\u7686\u51F6\uFF0C\u60DF\u5B9C\u5B89\u5E8A\u3001\u796D\u7940\u3002",
+    "\u5B9C\u5F00\u4E1A\u3001\u5165\u5B66\u3001\u5AC1\u5A36\u3001\u4E0A\u4EFB\uFF0C\u4E0D\u5229\u8BC9\u8BBC\u3002",
+    "\u5B9C\u6536\u83B7\u3001\u7EB3\u8D22\uFF0C\u5FCC\u51FA\u884C\u3001\u846C\u793C\u3002",
+    "\u767E\u4E8B\u7686\u5409\uFF0C\u60DF\u7834\u571F\u5B89\u846C\u5219\u51F6\u3002",
+    "\u4E07\u4E8B\u7686\u51F6\uFF0C\u60DF\u4FEE\u7B51\u5824\u9632\u4E4B\u7C7B\u5219\u5409\u3002"
+  ];
+  constructor(duty) {
+    super();
+    this.duty = duty;
+  }
+  static fromDuty(duty) {
+    return new DutyAdvice(duty);
+  }
+  getDuty() {
+    return this.duty;
+  }
+  getName() {
+    return this.duty.getName();
+  }
+  /**
+   * 宜
+   */
+  getRecommends() {
+    return DutyAdvice.RECOMMENDS[this.duty.getIndex()];
+  }
+  /**
+   * 忌
+   */
+  getAvoids() {
+    return DutyAdvice.AVOIDS[this.duty.getIndex()];
+  }
+  /**
+   * 定性描述
+   */
+  getDescription() {
+    return DutyAdvice.DESCRIPTIONS[this.duty.getIndex()];
+  }
+}
+class Clash extends AbstractCulture {
+  day;
+  constructor(day) {
+    super();
+    this.day = day;
+  }
+  static fromSixtyCycle(day) {
+    return new Clash(day);
+  }
+  getSixtyCycle() {
+    return this.day;
+  }
+  /**
+   * 所冲干支
+   */
+  getClashingSixtyCycle() {
+    return this.day.next(-6);
+  }
+  /**
+   * 所冲生肖
+   */
+  getZodiac() {
+    return this.getClashingSixtyCycle().getEarthBranch().getZodiac();
+  }
+  /**
+   * 煞方
+   */
+  getDirection() {
+    return this.day.getEarthBranch().getOminous();
+  }
+  getName() {
+    return `\u51B2${this.getZodiac().getName()}`;
+  }
+  toString() {
+    return `${this.getName()}(${this.getClashingSixtyCycle().getName()})\u715E${this.getDirection().getName()}`;
+  }
+}
+class WuHouDay extends AbstractCulture {
+  static TANG = ["\u5802\u623F", "\u91D1\u5E93", "\u91D1\u5802", "\u987A\u9633", "\u76D7\u8D3C", "\u5B9D\u4ED3"];
+  static ZHONG = ["\u5929\u76D7", "\u5929\u95E8", "\u5929\u5802", "\u5929\u8D22", "\u5929\u8D3C", "\u5929\u9633", "\u5929\u4FAF", "\u5929\u4ED3"];
+  static XIA = ["\u6731\u96C0", "\u767D\u864E\u5934", "\u767D\u864E\u80C1", "\u767D\u864E\u8DB3", "\u7384\u6B66", "\u9752\u9F99\u5934", "\u9752\u9F99\u80C1", "\u9752\u9F99\u8DB3"];
+  static NAMES = [WuHouDay.TANG, WuHouDay.ZHONG, WuHouDay.XIA];
+  static DESCRIPTIONS = [
+    [
+      "\u795E\u9053\u4E0D\u5728\u5B85\u4E2D\uFF0C\u6C42\u8D22\u79F0\u610F\uFF0C\u8D35\u4EBA\u5F97\u9047\uFF0C\u5927\u5409\u3002",
+      "\u8F66\u9A6C\u4E0D\u6210\uFF0C\u6C42\u8D22\u53CD\u5931\uFF0C\u8DEF\u9022\u76D7\u8D3C\uFF0C\u5927\u6709\u5931\u8BEF\uFF0C\u5927\u51F6\u3002",
+      "\u8D35\u4EBA\u76F8\u9047\uFF0C\u8D22\u5229\u901A\u8FBE\uFF0C\u8BCD\u8BBC\u6709\u7406\uFF0C\u5927\u5409\u3002",
+      "\u53BB\u5904\u901A\u8FBE\uFF0C\u597D\u4EBA\u76F8\u9022\uFF0C\u6C42\u8D22\u5F97\u610F\uFF0C\u4E89\u8BBC\u6709\u7406\u3002",
+      "\u767E\u4E8B\u4E0D\u5229\uFF0C\u67B7\u9501\u4E34\u8EAB\uFF0C\u4EBA\u4EA1\u8D22\u6563\uFF0C\u5B9C\u56DE\u907F\uFF0C\u4E0D\u53EF\u7528\u3002",
+      "\u5229\u89C1\u5927\u4EBA\uFF0C\u6C42\u8D22\u9042\u5FC3\uFF0C\u767E\u4E8B\u5982\u610F\uFF0C\u8863\u9526\u8FD8\u4E61\uFF0C\u5927\u5409\u3002"
+    ],
+    [
+      "\u6C42\u8D22\u4E0D\u6210\uFF0C\u7EB5\u6709\u4E3B\u5931\u8131\uFF0C\u5B98\u4E8B\u65E0\u7406\uFF0C\u5927\u51F6\u3002",
+      "\u51E1\u4E8B\u9042\u5FC3\uFF0C\u6240\u6C42\u548C\u5408\uFF0C\u53BB\u5904\u901A\u8FBE\uFF0C\u5927\u5409\u3002",
+      "\u6240\u6C42\u987A\u9042\uFF0C\u8D35\u4EBA\u63A5\u5F15\uFF0C\u4E70\u5356\u4EA8\u901A\uFF0C\u8BF8\u4E8B\u5982\u610F\uFF0C\u5927\u5409\u3002",
+      "\u6700\u5B9C\u6C42\u8D22\uFF0C\u5FC5\u5B9A\u901A\u5229\uFF0C\u597D\u4EBA\u76F8\u9022\uFF0C\u767E\u4E8B\u548C\u987A\uFF0C\u5927\u5409\u3002",
+      "\u6C42\u8D22\u4E0D\u6210\uFF0C\u7EB5\u6709\u4E3B\u5931\u8131\uFF0C\u5B98\u4E8B\u65E0\u7406\uFF0C\u5927\u51F6\u3002",
+      "\u6C42\u8D22\u5F97\u8D22\uFF0C\u6C42\u5A5A\u5F97\u5A5A\uFF0C\u5927\u5409\u3002",
+      "\u5409\u5C11\u51F6\u591A\uFF0C\u4E3B\u6709\u53E3\u820C\u662F\u975E\uFF0C\u8840\u5149\u4E4B\u707E\uFF0C\u5927\u51F6\u3002",
+      "\u89C1\u5B98\u5F97\u559C\uFF0C\u8D22\u6E90\u4E30\u76C8\uFF0C\u51E1\u4E8B\u987A\u5229\uFF0C\u5927\u5409\u3002"
+    ],
+    [
+      "\u6C42\u8D22\u4E0D\u5F97\uFF0C\u4E3B\u53CD\u5931\u8D22\uFF0C\u89C1\u5B98\u65E0\u7406\uFF0C\u5927\u51F6\u3002",
+      "\u4E3B\u5B9C\u8FDC\u884C\uFF0C\u6C42\u8D22\u5FC5\u5F97\uFF0C\u53BB\u5904\u901A\u8FBE\uFF0C\u5927\u5409\u3002",
+      "\u6C42\u8D22\u5982\u610F\uFF0C\u4E1C\u897F\u4EFB\u884C\uFF0C\u5357\u5317\u5229\u5F80\uFF0C\u597D\u4EBA\u76F8\u9022\uFF0C\u5927\u5409\u3002",
+      "\u4E0D\u5B9C\u8FDC\u884C\uFF0C\u4F5C\u4E8B\u4E0D\u6210\uFF0C\u6C42\u8D22\u4E0D\u5229\uFF0C\u5927\u51F6\u3002",
+      "\u4E3B\u62DB\u53E3\u820C\uFF0C\u767E\u4E8B\u4E0D\u5229\uFF0C\u4E0D\u53EF\u7528\u4E4B\uFF0C\u5927\u51F6\u3002",
+      "\u5B9C\u9E21\u9E23\u65F6\u6216\u536F\u65F6\u51FA\u95E8\uFF0C\u6C42\u8D22\u901A\u8FBE\uFF0C\u767E\u4E8B\u5927\u5409\u3002",
+      "\u6C42\u8D22\u9042\u5FC3\uFF0C\u51E1\u4E8B\u6EE1\u610F\uFF0C\u4E1C\u897F\u5357\u5317\u4EFB\u884C\uFF0C\u5927\u5409\u3002",
+      "\u6C42\u8D22\u4E0D\u5F97\uFF0C\u89C1\u5B98\u6CA1\u7406\uFF0C\u51E1\u4E8B\u4E0D\u5409\uFF0C\u4E0D\u5B9C\u7528\uFF0C\u51F6\u3002"
+    ]
+  ];
+  static LUCK = [
+    [0, 1, 0, 0, 1, 0],
+    [1, 0, 0, 0, 1, 0, 1, 0],
+    [1, 0, 0, 1, 1, 0, 0, 1]
+  ];
+  lunarDay;
+  yuan;
+  index;
+  constructor(lunarDay, yuan, index) {
+    super();
+    this.lunarDay = lunarDay;
+    this.yuan = yuan;
+    this.index = index;
+  }
+  static fromLunarDay(lunarDay) {
+    const remainder = Math.abs(lunarDay.getMonth()) % 3;
+    const yuan = remainder === 0 ? 2 : remainder - 1;
+    const size = WuHouDay.NAMES[yuan].length;
+    return new WuHouDay(lunarDay, Sixty.fromIndex(yuan), (lunarDay.getDay() - 1) % size);
+  }
+  getLunarDay() {
+    return this.lunarDay;
+  }
+  /**
+   * 三元：上元、中元、下元
+   */
+  getYuan() {
+    return this.yuan;
+  }
+  /**
+   * 在本元内的序号（0起）
+   */
+  getIndex() {
+    return this.index;
+  }
+  getName() {
+    return WuHouDay.NAMES[this.yuan.getIndex()][this.index];
+  }
+  getLuck() {
+    return Luck.fromIndex(WuHouDay.LUCK[this.yuan.getIndex()][this.index]);
+  }
+  getDescription() {
+    return WuHouDay.DESCRIPTIONS[this.yuan.getIndex()][this.index];
+  }
+  toString() {
+    return this.getName();
+  }
+}
+class Palace extends LoopTyme {
+  static NAMES = ["\u574E", "\u5764", "\u9707", "\u5DFD", "\u4E2D", "\u4E7E", "\u5151", "\u826E", "\u79BB"];
+  constructor(indexOrName) {
+    super(Palace.NAMES, indexOrName);
+  }
+  static fromIndex(index) {
+    return new Palace(Palace.numeric(index, "palace index"));
+  }
+  static fromName(name) {
+    return new Palace(name);
+  }
+  next(n) {
+    return Palace.fromIndex(this.nextIndex(n));
+  }
+  /**
+   * 洛书数
+   */
+  getNumber() {
+    return this.index + 1;
+  }
+  getDirection() {
+    return Direction.fromIndex(this.index);
+  }
+  getElement() {
+    return Element.fromIndex([4, 2, 0, 0, 2, 3, 3, 2, 1][this.index]);
+  }
+  toString() {
+    return this.getName() + this.getNumber();
+  }
+}
+class NineStarChart {
+  static ORDER = [4, 5, 6, 7, 8, 0, 1, 2, 3];
+  center;
+  forward;
+  constructor(center, forward) {
+    this.center = center;
+    this.forward = forward;
+  }
+  /**
+   * @param center 入中之星
+   * @param forward 是否顺飞，默认顺飞
+   */
+  static fromCenter(center, forward = true) {
+    return new NineStarChart(center, forward);
+  }
+  getCenterStar() {
+    return this.center;
+  }
+  isForward() {
+    return this.forward;
+  }
+  /**
+   * 指定宫位所飞之星
+   */
+  getStar(palace) {
+    const i = NineStarChart.ORDER.indexOf(palace.getIndex());
+    return this.center.next(this.forward ? i : -i);
+  }
+  /**
+   * 星所在之宫
+   */
+  getPalace(star) {
+    for (let i = 0; i < 9; i++) {
+      if (this.getStar(Palace.fromIndex(i)).getIndex() === star.getIndex()) {
+        return Palace.fromIndex(i);
+      }
+    }
+    throw new Error(`illegal nine star: ${star}`);
+  }
+  /**
+   * 九宫之星，按坎一至离九排列
+   */
+  getStars() {
+    const l = [];
+    for (let i = 0; i < 9; i++) {
+      l.push(this.getStar(Palace.fromIndex(i)));
+    }
+    return l;
+  }
+  /**
+   * 三行九宫格，自左上起为巽四、离九、坤二
+   */
+  toString() {
+    const rows = [[3, 8, 1], [2, 4, 6], [7, 0, 5]];
+    const lines = [];
+    for (let i = 0; i < 3; i++) {
+      const cells = [];
+      for (let j = 0; j < 3; j++) {
+        const star = this.getStar(Palace.fromIndex(rows[i][j]));
+        cells.push(star.getName() + star.getColor());
+      }
+      lines.push(cells.join(" "));
+    }
+    return lines.join("\n");
+  }
+}
+class ZodiacNumbers extends AbstractCulture {
+  lunarYear;
+  zodiac;
+  constructor(lunarYear, zodiac) {
+    super();
+    this.lunarYear = lunarYear;
+    this.zodiac = zodiac;
+  }
+  /**
+   * 当年十二生肖的号码，自年肖起依次排列
+   */
+  static fromLunarYear(lunarYear) {
+    const yearZodiac = LunarYear.fromYear(lunarYear).getSixtyCycle().getEarthBranch().getZodiac();
+    const l = [];
+    for (let i = 0; i < 12; i++) {
+      l.push(new ZodiacNumbers(lunarYear, yearZodiac.next(-i)));
+    }
+    return l;
+  }
+  /**
+   * 农历日所在年肖的号码
+   */
+  static fromLunarDay(lunarDay) {
+    const yearZodiac = lunarDay.getLunarMonth().getLunarYear().getSixtyCycle().getEarthBranch().getZodiac();
+    return new ZodiacNumbers(lunarDay.getYear(), yearZodiac);
+  }
+  /**
+   * 指定农历年与生肖
+   */
+  static of(lunarYear, zodiac) {
+    return new ZodiacNumbers(lunarYear, zodiac);
+  }
+  getLunarYear() {
+    return this.lunarYear;
+  }
+  getZodiac() {
+    return this.zodiac;
+  }
+  getNumbers() {
+    const yearZodiac = LunarYear.fromYear(this.lunarYear).getSixtyCycle().getEarthBranch().getZodiac();
+    const offset = this.indexOf(yearZodiac.getIndex() - this.zodiac.getIndex(), 12);
+    const l = [];
+    for (let i = offset + 1; i <= 49; i += 12) {
+      l.push(i);
+    }
+    return l;
+  }
+  getName() {
+    return this.zodiac.getName();
+  }
+  toString() {
+    const numbers = [];
+    const l = this.getNumbers();
+    for (let i = 0; i < l.length; i++) {
+      numbers.push((l[i] < 10 ? "0" : "") + l[i]);
+    }
+    return `${this.getName()} ${numbers.join(" ")}`;
+  }
+}
+class LifeRelation extends AbstractCulture {
+  birthYear;
+  birth;
+  day;
+  constructor(birthYear, birth, day) {
+    super();
+    this.birthYear = birthYear;
+    this.birth = birth;
+    this.day = day;
+  }
+  /**
+   * @param birthYear 出生年（以立春为界）
+   */
+  static fromBirthYear(birthYear, day) {
+    return new LifeRelation(birthYear, SixtyCycle.fromIndex(birthYear - 4), day);
+  }
+  getBirthYear() {
+    return this.birthYear;
+  }
+  /**
+   * 年命干支
+   */
+  getBirthSixtyCycle() {
+    return this.birth;
+  }
+  getDaySixtyCycle() {
+    return this.day;
+  }
+  /**
+   * 日干对年命的十神
+   */
+  getTenStar() {
+    return this.birth.getHeavenStem().getTenStar(this.day.getHeavenStem());
+  }
+  /**
+   * 互禄：日干之禄临年命支
+   */
+  isMutualProsperity() {
+    return this.day.getHeavenStem().getProsperity().getIndex() === this.birth.getEarthBranch().getIndex();
+  }
+  /**
+   * 进禄：年命干之禄临日支
+   */
+  isAdvanceProsperity() {
+    return this.birth.getHeavenStem().getProsperity().getIndex() === this.day.getEarthBranch().getIndex();
+  }
+  /**
+   * 贵：年命支为日干之天乙贵人
+   */
+  isNoble() {
+    const nobles = this.day.getHeavenStem().getNoble();
+    for (let i = 0; i < nobles.length; i++) {
+      if (nobles[i].getIndex() === this.birth.getEarthBranch().getIndex()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  /**
+   * 六合：年命支与日支六合
+   */
+  isCombine() {
+    return this.birth.getEarthBranch().getCombine().getIndex() === this.day.getEarthBranch().getIndex();
+  }
+  /**
+   * 三合：年命支与日支三合
+   */
+  isTriangle() {
+    const branches = this.day.getEarthBranch().getTriangle();
+    for (let i = 0; i < branches.length; i++) {
+      if (branches[i].getIndex() === this.birth.getEarthBranch().getIndex()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  getName() {
+    return `${this.birth.getHeavenStem().getName()}\u547D${this.getTenStar().getName()}`;
+  }
+  toString() {
+    const l = [this.getName()];
+    if (this.isMutualProsperity()) {
+      l.push("\u4E92\u7984");
+    }
+    if (this.isAdvanceProsperity()) {
+      l.push("\u8FDB\u7984");
+    }
+    if (this.isNoble()) {
+      l.push("\u8D35");
+    }
+    if (this.isCombine()) {
+      l.push("\u516D\u5408");
+    }
+    if (this.isTriangle()) {
+      l.push("\u4E09\u5408");
+    }
+    return l.join("\uFF0C");
+  }
+}
+class HourFortune extends AbstractCulture {
+  hour;
+  constructor(hour) {
+    super();
+    this.hour = hour;
+  }
+  static fromSixtyCycleHour(hour) {
+    return new HourFortune(hour);
+  }
+  getHour() {
+    return this.hour;
+  }
+  getTwelveStar() {
+    return this.hour.getTwelveStar();
+  }
+  getEcliptic() {
+    return this.getTwelveStar().getEcliptic();
+  }
+  /**
+   * 黄道为吉，黑道为凶
+   */
+  getLuck() {
+    return this.getEcliptic().getLuck();
+  }
+  /**
+   * 贵人时
+   */
+  isNoble() {
+    const nobles = this.hour.getDay().getHeavenStem().getNoble();
+    for (let i = 0; i < nobles.length; i++) {
+      if (nobles[i].getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  /**
+   * 日禄时
+   */
+  isProsperity() {
+    return this.hour.getDay().getHeavenStem().getProsperity().getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex();
+  }
+  /**
+   * 六合时
+   */
+  isCombine() {
+    return this.hour.getDay().getEarthBranch().getCombine().getIndex() === this.hour.getSixtyCycle().getEarthBranch().getIndex();
+  }
+  getGrade() {
+    if (this.getLuck().getIndex() !== 0) {
+      return 2;
+    }
+    return this.isNoble() || this.isProsperity() || this.isCombine() ? 0 : 1;
+  }
+  getName() {
+    return ["\u5409", "\u4E2D", "\u51F6"][this.getGrade()];
+  }
+  toString() {
+    const l = [this.hour.getSixtyCycle().getName(), this.getName()];
+    if (this.isNoble()) {
+      l.push("\u8D35");
+    }
+    if (this.isProsperity()) {
+      l.push("\u7984");
+    }
+    if (this.isCombine()) {
+      l.push("\u5408");
+    }
+    return l.join("");
+  }
+}
+class ElementBalance extends AbstractCulture {
+  eightChar;
+  counts;
+  strong;
+  constructor(eightChar) {
+    super();
+    this.eightChar = eightChar;
+    const stems = [
+      eightChar.getYear().getHeavenStem(),
+      eightChar.getMonth().getHeavenStem(),
+      eightChar.getDay().getHeavenStem(),
+      eightChar.getHour().getHeavenStem()
+    ];
+    const branches = [
+      eightChar.getYear().getEarthBranch(),
+      eightChar.getMonth().getEarthBranch(),
+      eightChar.getDay().getEarthBranch(),
+      eightChar.getHour().getEarthBranch()
+    ];
+    const counts = [0, 0, 0, 0, 0];
+    for (let i = 0; i < 4; i++) {
+      counts[stems[i].getElement().getIndex()]++;
+      counts[branches[i].getElement().getIndex()]++;
+    }
+    counts[branches[1].getElement().getIndex()] += 2;
+    this.counts = counts;
+    const me = eightChar.getDay().getHeavenStem().getElement().getIndex();
+    const supporting = counts[me] + counts[(me + 4) % 5];
+    let total = 0;
+    for (let i = 0; i < 5; i++) {
+      total += counts[i];
+    }
+    this.strong = supporting * 2 >= total;
+  }
+  static fromEightChar(eightChar) {
+    return new ElementBalance(eightChar);
+  }
+  getEightChar() {
+    return this.eightChar;
+  }
+  /**
+   * 木火土金水五行个数
+   */
+  getCounts() {
+    return this.counts;
+  }
+  getDayMaster() {
+    return this.eightChar.getDay().getHeavenStem();
+  }
+  isStrong() {
+    return this.strong;
+  }
+  /**
+   * 未出现的五行
+   */
+  getMissing() {
+    const l = [];
+    for (let i = 0; i < 5; i++) {
+      if (this.counts[i] === 0) {
+        l.push(Element.fromIndex(i));
+      }
+    }
+    return l;
+  }
+  /**
+   * 取用五行：身强取克泄耗，身弱取生扶
+   */
+  getFavorable() {
+    const me = this.getDayMaster().getElement().getIndex();
+    const l = [];
+    if (this.strong) {
+      l.push(Element.fromIndex((me + 2) % 5));
+      l.push(Element.fromIndex((me + 1) % 5));
+      l.push(Element.fromIndex((me + 3) % 5));
+    } else {
+      l.push(Element.fromIndex((me + 4) % 5));
+      l.push(Element.fromIndex(me));
+    }
+    return l;
+  }
+  getName() {
+    return this.getDayMaster().getName() + this.getDayMaster().getElement().getName();
+  }
+  toString() {
+    const names = [];
+    for (let i = 0; i < 5; i++) {
+      names.push(Element.fromIndex(i).getName() + this.counts[i]);
+    }
+    return `${this.getName()}\uFF08${names.join(" ")}\uFF09${this.strong ? "\u8EAB\u5F3A" : "\u8EAB\u5F31"}`;
+  }
+}
+class ZodiacFortune extends AbstractCulture {
+  zodiac;
+  month;
+  static TEXTS = [
+    "\u4E0E\u6708\u5EFA\u516D\u5408\uFF0C\u8BF8\u4E8B\u987A\u9042\uFF0C\u5B9C\u5408\u4F5C\u6C42\u8D22\u3002",
+    "\u4E0E\u6708\u5EFA\u4E09\u5408\uFF0C\u8D35\u4EBA\u76F8\u52A9\uFF0C\u8C0B\u4E8B\u53EF\u6210\u3002",
+    "\u4E0E\u6708\u5EFA\u540C\u6C14\uFF0C\u8FD0\u52BF\u5E73\u7A33\uFF0C\u5B9C\u6309\u90E8\u5C31\u73ED\u3002",
+    "\u4E0E\u6708\u5EFA\u65E0\u6D89\uFF0C\u8FD0\u52BF\u5E73\u5E38\uFF0C\u5B9C\u5B88\u5E38\u5F85\u65F6\u3002",
+    "\u4E0E\u6708\u5EFA\u76F8\u51B2\uFF0C\u53D8\u52A8\u8F83\u591A\uFF0C\u5B9C\u5B88\u4E0D\u5B9C\u653B\u3002",
+    "\u4E0E\u6708\u5EFA\u76F8\u5211\uFF0C\u53E3\u820C\u662F\u975E\uFF0C\u5B9C\u8C28\u8A00\u614E\u884C\u3002",
+    "\u4E0E\u6708\u5EFA\u76F8\u5BB3\uFF0C\u5C0F\u4EBA\u6697\u635F\uFF0C\u5B9C\u9632\u5FAE\u675C\u6E10\u3002",
+    "\u4E0E\u6708\u5EFA\u76F8\u7834\uFF0C\u4E8B\u591A\u53CD\u590D\uFF0C\u5B9C\u7A33\u4E2D\u6C42\u8FDB\u3002"
+  ];
+  static LUCK = [0, 0, 0, 1, 1, 1, 1, 1];
+  constructor(zodiac, month) {
+    super();
+    this.zodiac = zodiac;
+    this.month = month;
+  }
+  static fromZodiac(zodiac, month) {
+    return new ZodiacFortune(zodiac, month);
+  }
+  getZodiac() {
+    return this.zodiac;
+  }
+  getMonth() {
+    return this.month;
+  }
+  /**
+   * 关系序号：0 六合、1 三合、2 同气、3 无涉、4 冲、5 刑、6 害、7 破
+   */
+  getRelationIndex() {
+    const b = this.zodiac.getEarthBranch();
+    const m = this.month.getEarthBranch();
+    if (b.getCombine().getIndex() === m.getIndex()) {
+      return 0;
+    }
+    const triangles = m.getTriangle();
+    for (let i = 0; i < triangles.length; i++) {
+      if (triangles[i].getIndex() === b.getIndex()) {
+        return 1;
+      }
+    }
+    if (b.getIndex() === m.getIndex()) {
+      return 2;
+    }
+    if (b.getOpposite().getIndex() === m.getIndex()) {
+      return 4;
+    }
+    const punishments = m.getPunishments();
+    for (let i = 0; i < punishments.length; i++) {
+      if (punishments[i].getIndex() === b.getIndex() && punishments[i].getIndex() !== m.getIndex()) {
+        return 5;
+      }
+    }
+    if (b.getHarm().getIndex() === m.getIndex()) {
+      return 6;
+    }
+    if (b.getDestruction().getIndex() === m.getIndex()) {
+      return 7;
+    }
+    return 3;
+  }
+  getLuck() {
+    return Luck.fromIndex(ZodiacFortune.LUCK[this.getRelationIndex()]);
+  }
+  getName() {
+    return this.zodiac.getName();
+  }
+  getText() {
+    return ZodiacFortune.TEXTS[this.getRelationIndex()];
+  }
+  toString() {
+    return `${this.getName()}\uFF1A${this.getText()}`;
+  }
+}
+class DailyNumbers extends AbstractCulture {
+  day;
+  // 依 Element 之序：木、火、土、金、水
+  static PAIRS = [[3, 8], [2, 7], [5, 10], [4, 9], [1, 6]];
+  constructor(day) {
+    super();
+    this.day = day;
+  }
+  static fromSixtyCycleDay(day) {
+    return new DailyNumbers(day);
+  }
+  getSixtyCycleDay() {
+    return this.day;
+  }
+  /**
+   * 日干、日支、纳音之五行
+   */
+  getElements() {
+    const l = [];
+    const source = [
+      this.day.getSixtyCycle().getHeavenStem().getElement(),
+      this.day.getSixtyCycle().getEarthBranch().getElement(),
+      this.day.getSixtyCycle().getSound().getElement()
+    ];
+    for (let i = 0; i < source.length; i++) {
+      let exists = false;
+      for (let j = 0; j < l.length; j++) {
+        if (l[j].getIndex() === source[i].getIndex()) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        l.push(source[i]);
+      }
+    }
+    return l;
+  }
+  /**
+   * 河图数对应之数（一至四十九）
+   */
+  getElementNumbers(element) {
+    const l = [];
+    const pair = DailyNumbers.PAIRS[element.getIndex()];
+    for (let n = 1; n <= 49; n++) {
+      if (pair.indexOf(n % 10) > -1 || n % 10 === 0 && pair.indexOf(10) > -1) {
+        l.push(n);
+      }
+    }
+    return l;
+  }
+  getNumbers(count = 6) {
+    const elements = this.getElements();
+    const lists = [];
+    for (let i = 0; i < elements.length; i++) {
+      lists.push(this.getElementNumbers(elements[i]));
+    }
+    const l = [];
+    for (let round = 0; l.length < count; round++) {
+      let added = false;
+      for (let i = 0; i < lists.length && l.length < count; i++) {
+        if (round < lists[i].length) {
+          const n = lists[i][round];
+          if (l.indexOf(n) < 0) {
+            l.push(n);
+            added = true;
+          }
+        }
+      }
+      if (!added) {
+        break;
+      }
+    }
+    return l;
+  }
+  getName() {
+    const l = this.getNumbers();
+    const names = [];
+    for (let i = 0; i < l.length; i++) {
+      names.push((l[i] < 10 ? "0" : "") + l[i]);
+    }
+    return names.join(" ");
+  }
+  toString() {
+    return this.getName();
+  }
+}
+class Era extends AbstractCulture {
+  name;
+  start;
+  static JAPANESE = [
+    new Era("\u4EE4\u548C", SolarDay.fromYmd(2019, 5, 1)),
+    new Era("\u5E73\u6210", SolarDay.fromYmd(1989, 1, 8)),
+    new Era("\u662D\u548C", SolarDay.fromYmd(1926, 12, 25)),
+    new Era("\u5927\u6B63", SolarDay.fromYmd(1912, 7, 30)),
+    new Era("\u660E\u6CBB", SolarDay.fromYmd(1868, 1, 25))
+  ];
+  constructor(name, start) {
+    super();
+    this.name = name;
+    this.start = start;
+  }
+  /**
+   * 所在年号，早于明治者返回 null
+   */
+  static of(solarDay) {
+    for (let i = 0; i < Era.JAPANESE.length; i++) {
+      if (!solarDay.isBefore(Era.JAPANESE[i].getStart())) {
+        return Era.JAPANESE[i];
+      }
+    }
+    return null;
   }
   getStart() {
     return this.start;
   }
-  getEnd() {
-    return this.end;
+  getName() {
+    return this.name;
   }
-  getRrule() {
-    return this.rrule;
+  /**
+   * 年号年，元年为一
+   */
+  getYear(solarDay) {
+    return solarDay.getYear() - this.start.getYear() + 1;
   }
-  getUid() {
-    return this.uid;
-  }
-  getLocation() {
-    return this.location;
-  }
-  getDescription() {
-    return this.description;
+  getYearName(solarDay) {
+    const y = this.getYear(solarDay);
+    return y === 1 ? "\u5143" : String(y);
   }
   toString() {
-    return `${this.start} ${this.summary}`;
+    return this.name;
+  }
+  /**
+   * 佛历纪年，公历加五四三
+   */
+  static getBuddhistYear(solarYear) {
+    return solarYear + 543;
+  }
+  /**
+   * 民国纪年，公历减一九一一
+   */
+  static getMinguoYear(solarYear) {
+    return solarYear - 1911;
+  }
+  /**
+   * 主体纪年，公历减一九一一
+   */
+  static getJucheYear(solarYear) {
+    return solarYear - 1911;
   }
 }
-class IcsCalendar {
-  events;
-  constructor(events) {
-    this.events = events;
+
+class FengShuiTip extends AbstractCulture {
+  index;
+  static DATA = [
+    "\u5927\u95E8\u662F\u6C14\u53E3\uFF0C\u5C5E\u5185\u5916\u6C14\u6D41\u52A8\u7684\u5FC5\u7ECF\u4E4B\u5730\uFF0C\u662F\u4E0E\u5916\u754C\u8054\u7CFB\u7684\u54BD\u5589\u548C\u5C4F\u969C\u3002",
+    "\u660E\u5802\u5B9C\u5F00\u9614\u660E\u4EAE\uFF0C\u5FCC\u5806\u79EF\u6742\u7269\uFF0C\u6C14\u805A\u5219\u8D22\u805A\uFF0C\u6C14\u6EDE\u5219\u8FD0\u6EDE\u3002",
+    "\u7384\u5173\u4E3A\u5165\u95E8\u7B2C\u4E00\u5370\u8C61\uFF0C\u5B9C\u6574\u6D01\u901A\u900F\uFF0C\u4E0D\u5B9C\u76F4\u5BF9\u95E8\u7A97\u5F62\u6210\u7A7F\u5802\u3002",
+    "\u5BA2\u5385\u5B9C\u65B9\u6B63\uFF0C\u6C99\u53D1\u5B9C\u80CC\u6709\u5B9E\u5899\uFF0C\u4E3B\u4EBA\u5750\u5367\u5B89\u7A33\uFF0C\u884C\u4E8B\u6709\u9760\u3002",
+    "\u5367\u5BA4\u5B9C\u9759\uFF0C\u5E8A\u5934\u5FCC\u9760\u7A97\u3001\u5FCC\u5BF9\u955C\u3001\u5FCC\u538B\u6881\uFF0C\u4EE5\u6C42\u5B89\u7720\u3002",
+    "\u53A8\u623F\u5C5E\u706B\uFF0C\u5B9C\u4E0E\u5395\u6240\u5206\u9694\uFF0C\u7076\u53E3\u4E0D\u5B9C\u6B63\u5BF9\u6C34\u69FD\uFF0C\u53D6\u6C34\u706B\u65E2\u6D4E\u4E4B\u610F\u3002",
+    "\u7076\u4F4D\u5B9C\u5750\u715E\u5411\u5409\uFF0C\u5FCC\u538B\u6881\u3001\u5FCC\u5BF9\u95E8\uFF0C\u53E4\u79F0\u300C\u7076\u4E3A\u517B\u547D\u4E4B\u6E90\u300D\u3002",
+    "\u5395\u6240\u5C5E\u6C34\uFF0C\u5B9C\u9690\u853D\u901A\u98CE\uFF0C\u5FCC\u5C45\u5B85\u4E2D\u3001\u5FCC\u5BF9\u5927\u95E8\uFF0C\u4EE5\u514D\u79FD\u6C14\u51B2\u5802\u3002",
+    "\u4E66\u623F\u5B9C\u660E\u4EAE\u5B89\u9759\uFF0C\u4E66\u684C\u5B9C\u9762\u5411\u5F00\u9614\uFF0C\u80CC\u540E\u6709\u9760\uFF0C\u53D6\u6587\u660C\u5B89\u5B9A\u4E4B\u8C61\u3002",
+    "\u9633\u53F0\u4E3A\u7EB3\u6C14\u4E4B\u6240\uFF0C\u5B9C\u901A\u900F\uFF0C\u5FCC\u5C01\u95ED\u8FC7\u5BC6\uFF0C\u4EA6\u5FCC\u6B63\u5BF9\u8857\u5DF7\u76F4\u51B2\u3002",
+    "\u697C\u68AF\u5B9C\u9760\u5899\uFF0C\u5FCC\u5C45\u4E2D\u76D8\u8E1E\uFF0C\u4E0A\u4E0B\u4E4B\u6C14\u5B9C\u56DE\u65CB\u800C\u4E0D\u5B9C\u76F4\u51B2\u3002",
+    "\u795E\u4F4D\u5B9C\u6D01\u51C0\u5B89\u9759\uFF0C\u5FCC\u5BF9\u5395\u3001\u5FCC\u5BF9\u5367\u3001\u5FCC\u7F6E\u4E8E\u697C\u68AF\u4E4B\u4E0B\u3002",
+    "\u8D22\u4F4D\u591A\u53D6\u5165\u95E8\u659C\u89D2\uFF0C\u5B9C\u5B89\u7A33\u660E\u4EAE\uFF0C\u5FCC\u7A7A\u3001\u5FCC\u538B\u3001\u5FCC\u6C34\u51B2\u3002",
+    "\u6587\u660C\u4F4D\u5B9C\u7F6E\u4E66\u684C\u4E66\u67DC\uFF0C\u5FCC\u5806\u653E\u6742\u7269\uFF0C\u4E3B\u5B66\u4E1A\u529F\u540D\u4E4B\u601D\u3002",
+    "\u5E8A\u4F4D\u5B9C\u5357\u5317\u987A\u5730\u78C1\uFF0C\u5FCC\u6B63\u5BF9\u623F\u95E8\uFF0C\u5FCC\u4E0E\u5395\u6240\u76F8\u90BB\u3002",
+    "\u955C\u5B9C\u85CF\u4E0D\u5B9C\u9732\uFF0C\u5FCC\u5BF9\u5E8A\u3001\u5FCC\u5BF9\u95E8\uFF0C\u4EE5\u514D\u591C\u95F4\u60CA\u6270\u3001\u6C14\u6563\u4E0D\u805A\u3002",
+    "\u9C7C\u7F38\u5C5E\u6C34\uFF0C\u5B9C\u7F6E\u4E8E\u8870\u4F4D\u4EE5\u5316\u715E\uFF0C\u5FCC\u7F6E\u4E8E\u8D22\u4F4D\u4EE5\u6CC4\u6C14\u3002",
+    "\u7EFF\u690D\u5B9C\u9614\u53F6\u5E38\u7EFF\uFF0C\u5FCC\u5C16\u53F6\u5E26\u523A\uFF0C\u67AF\u840E\u5B9C\u53CA\u65F6\u66F4\u6362\u3002",
+    "\u6881\u67F1\u538B\u9876\u8C13\u4E4B\u300C\u6A2A\u6881\u538B\u9876\u300D\uFF0C\u5750\u5367\u5176\u4E0A\u6613\u751F\u538B\u6291\uFF0C\u5B9C\u4EE5\u540A\u9876\u5316\u89E3\u3002",
+    "\u95E8\u7A97\u5B9C\u6BD4\u4F8B\u76F8\u79F0\uFF0C\u95E8\u5927\u7A97\u5C0F\u5219\u6C14\u6563\uFF0C\u7A97\u5927\u95E8\u5C0F\u5219\u6C14\u6EDE\u3002",
+    "\u5EAD\u9662\u5B9C\u7559\u767D\uFF0C\u5FCC\u6EE1\u94FA\u786C\u5730\uFF0C\u8349\u6728\u5F97\u6C14\uFF0C\u5C45\u8005\u4EA6\u5F97\u8212\u7545\u3002",
+    "\u6392\u6C34\u5B9C\u987A\u7545\uFF0C\u5FCC\u79EF\u6C34\u6EDE\u7559\uFF0C\u6C34\u805A\u4E0D\u6D41\u5219\u6E7F\u6C14\u751F\u3002",
+    "\u91C7\u5149\u5B9C\u67D4\u548C\uFF0C\u5FCC\u7EC8\u65E5\u4E0D\u89C1\u65E5\u5149\uFF0C\u9633\u6C14\u4E0D\u8DB3\u5219\u5C45\u8005\u5026\u6020\u3002",
+    "\u901A\u98CE\u5B9C\u5BF9\u6D41\u800C\u4E0D\u5B9C\u76F4\u51B2\uFF0C\u6C14\u7F13\u5219\u805A\uFF0C\u6C14\u6025\u5219\u6563\u3002"
+  ];
+  constructor(index) {
+    super();
+    this.index = index;
   }
-  static parse(text) {
-    const lines = text.replace(/\r\n[ \t]/g, "").replace(/\n[ \t]/g, "").split(/\r?\n/);
-    const events = [];
-    let fields = null;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line === "BEGIN:VEVENT") {
-        fields = {};
+  /**
+   * 依日期确定性轮换
+   */
+  static of(solarDay) {
+    return new FengShuiTip((solarDay.getYear() * 373 + solarDay.getMonth() * 37 + solarDay.getDay()) % FengShuiTip.DATA.length);
+  }
+  static fromIndex(index) {
+    return new FengShuiTip(index % FengShuiTip.DATA.length);
+  }
+  getIndex() {
+    return this.index;
+  }
+  /**
+   * 栏目名，取正文首句主语
+   */
+  getTopic() {
+    const text = this.getText();
+    const i = text.indexOf("\u5B9C");
+    return i > 0 ? text.substring(0, i) : text.substring(0, 2);
+  }
+  getText() {
+    return FengShuiTip.DATA[this.index];
+  }
+  getName() {
+    return this.getText();
+  }
+}
+class DreamOracle extends AbstractCulture {
+  static CATEGORY_DATA = [
+    "\u5929\u5730\u65E5\u6708\u661F\u8FB0:\u5929\u9580\u958B\u8CB4\u4EBA\u85A6\u5F15|\u5929\u5149\u7167\u4E3B\u75BE\u75C5\u9664|\u5929\u6674\u96E8\u6563\u767E\u6182\u53BB|\u5929\u660E\u5A66\u4EBA\u751F\u8CB4\u5B50|\u5929\u9580\u8D64\u4E3B\u6709\u5927\u8D77|\u4EF0\u9762\u5411\u5929\u5927\u5BCC\u8CB4|\u4E58\u9F8D\u4E0A\u5929\u5927\u4E3B\u8CB4|\u4E0A\u5929\u6C42\u59BB\u5152\u5973\u8CB4|\u5929\u4E0A\u53D6\u7269\u4F4D\u738B\u4FAF|\u98DB\u4E0A\u5929\u5BCC\u8CB4\u5927\u5409|\u767B\u5929\u4E0A\u5C4B\u5F97\u9AD8\u5B98|\u5929\u88C2\u6709\u5206\u570B\u4E4B\u6182|\u5929\u661F\u660E\u4E3B\u516C\u537F\u81F3|\u5929\u6108\u9403\u76CA\u58FD\u547D\u5409|\u6E21\u5929\u6CB3\u4E3B\u6709\u6240\u5409|\u5929\u5730\u5BCC\u6240\u6C42\u7686\u5F97|\u5929\u516C\u4F7F\u6709\u5927\u5409\u7965|\u65E5\u6708\u521D\u51FA\u5BB6\u9053\u660C|\u65E5\u6708\u7167\u8EAB\u5F97\u91CD\u4F4D|\u65E5\u6708\u843D\u6182\u6C92\u7236\u6BCD|\u65E5\u6708\u660F\u6697\u5B55\u5A66\u5409|\u65E5\u6708\u6B32\u51FA\u6709\u5B98\u8077|\u65E5\u6708\u5408\u6703\u59BB\u6709\u5B50|\u65E5\u6708\u5563\u5C71\u5974\u6B3A\u4E3B|\u8CA0\u62B1\u65E5\u6708\u8CB4\u4FAF\u738B|\u541E\u65E5\u6708\u7576\u751F\u8CB4\u5B50|\u79AE\u62DC\u65E5\u6708\u5927\u5409\u660C|\u65E5\u5149\u5165\u5C4B\u5B98\u4F4D\u81F3|\u65E5\u521D\u51FA\u7121\u96F2\u5927\u5409|\u65E5\u51FA\u6709\u5149\u6709\u597D\u4E8B|\u96F2\u958B\u65E5\u51FA\u51F6\u4E8B\u6563|\u65E5\u5165\u61F7\u8CB4\u5B50\u6708\u5973|\u62DC\u661F\u6708\u71D2\u9999\u5927\u5409|\u96F2\u5FFD\u906E\u65E5\u6709\u9670\u79C1|\u661F\u5165\u61F7\u4E3B\u751F\u8CB4\u5B50|\u661F\u843D\u6709\u75C5\u53CA\u5B98\u4E8B|\u661F\u5217\u884C\u4E3B\u6DFB\u5974\u5A62|\u6301\u57F7\u661F\u5BBF\u5927\u5BCC\u8CB4|\u6D41\u661F\u4E0D\u843D\u4E3B\u79FB\u5C45|\u5DE1\u5929\u6469\u661F\u4F4D\u516C\u537F|\u96F2\u8D77\u56DB\u65B9\u4EA4\u6613\u5409|\u4E94\u8272\u96F2\u4E3B\u5927\u5409\u660C|\u96F2\u8D64\u767D\u5409\u9752\u9ED1\u51F6|\u898B\u6D6E\u96F2\u4F5C\u4E8B\u4E0D\u6210|\u96F2\u9727\u906E\u4E8B\u5927\u5409\u5229|\u9ED1\u96F2\u81F3\u5730\u6642\u6C23\u75C5|\u971C\u96EA\u964D\u4E3B\u4E8B\u4E0D\u6210|\u96EA\u4E0B\u53CA\u6642\u5927\u5409\u5229|\u96EA\u843D\u8EAB\u4E0A\u842C\u4E8B\u6210|\u96EA\u4E0D\u6CBE\u8EAB\u4E3B\u5B5D\u670D|\u96EA\u843D\u5BB6\u5EAD\u4E3B\u55AA\u4E8B|\u9670\u96E8\u6666\u6697\u4E3B\u51F6\u4E8B|\u884C\u8DEF\u9022\u96E8\u6709\u9152\u98DF|\u96F7\u9706\u4F5C\u4E8B\u5B98\u4F4D\u81F3|\u96F7\u8072\u6050\u6015\u79FB\u5C45\u5409|\u96F7\u5F9E\u5730\u9707\u4E3B\u5FD7\u9042|\u8EAB\u88AB\u9739\u9742\u4E3B\u5BCC\u8CB4|\u96FB\u5149\u7167\u8EAB\u6709\u5409\u6176|\u8D64\u8679\u898B\u5409\u9ED1\u8679\u51F6|\u971E\u6EFF\u5929\u767E\u4E8B\u6B61\u6085|\u72C2\u98A8\u5927\u96E8\u4EBA\u6B7B\u4EA1|\u98A8\u5439\u4EBA\u8863\u4E3B\u75BE\u75C5|\u5FFD\u5927\u98A8\u570B\u6709\u865F\u4EE4|\u98A8\u5982\u543C\u4E3B\u9060\u4FE1\u81F3",
+    "\u5730\u7406\u5C71\u77F3\u6A39\u6728:\u5730\u52D5\u4E3B\u9077\u5B98\u4F4D\u5409|\u5730\u88C2\u4E3B\u75BE\u75C5\u5927\u51F6|\u4FEE\u5E73\u7530\u5730\u5927\u5409\u660C|\u5730\u9AD8\u4E0B\u4E0D\u5E73\u4E3B\u75C5|\u81E5\u65BC\u77F3\u4E0A\u4E3B\u5927\u5409|\u5730\u4E2D\u9ED1\u6C23\u4E0A\u4E3B\u51F6|\u904B\u77F3\u5165\u5BB6\u4E3B\u5BCC\u8CB4|\u77F3\u4E0A\u5F97\u5229\u797F\u5927\u5409|\u76E4\u77F3\u5B89\u7A69\u7121\u6182\u7591|\u767B\u5CA9\u62B1\u77F3\u5B98\u8077\u9077|\u624B\u5F04\u5C0F\u77F3\u751F\u8CB4\u5B50|\u8EAB\u5165\u571F\u4E2D\u767E\u4E8B\u5409|\u81EA\u8EAB\u53D6\u571F\u88AB\u6065\u8FB1|\u6607\u5C71\u843D\u5730\u4E3B\u5931\u4F4D|\u4E0A\u5C71\u6050\u6015\u797F\u4F4D\u81F3|\u4E0A\u5C71\u6BC0\u58DE\u4E3B\u51F6\u60E1|\u904A\u770B\u9AD8\u5C71\u6625\u590F\u5409|\u884C\u8D70\u4E0A\u5761\u75C5\u601D\u9664|\u5C45\u4F4F\u9AD8\u5C71\u6709\u559C\u4E8B|\u5C71\u884C\u5F97\u8CA1\u6709\u798F\u7DE3|\u62B1\u7269\u4E0A\u5C71\u5B55\u8CB4\u5B50|\u5C71\u4E2D\u8FB2\u7A3C\u8863\u98DF\u8C50|\u67AF\u6728\u518D\u767C\u5B50\u5B6B\u8208|\u5802\u4E0A\u5730\u9677\u4E3B\u6BCD\u6182|\u5712\u6797\u8302\u76DB\u5927\u5409\u5229|\u6A39\u6728\u67AF\u6B7B\u5B85\u4E0D\u5B89|\u6797\u4E2D\u5750\u81E5\u75C5\u6B32\u75CA|\u6A39\u6728\u51CB\u96F6\u4E3B\u4EBA\u51F6|\u6797\u4E2D\u6A39\u751F\u6DFB\u8CB4\u5B50|\u7A2E\u690D\u6A39\u6728\u5927\u5409\u660C|\u767B\u5927\u6A39\u540D\u5229\u986F\u63DA|\u4E0A\u6A39\u5FFD\u6298\u6709\u6B7B\u50B7|\u8207\u4EBA\u5206\u82B1\u4E3B\u5206\u6563|\u67AF\u6728\u958B\u82B1\u5B50\u5B6B\u8208|\u5927\u6A39\u843D\u4EBA\u5C4B\u4E0A\u5409|\u7ACB\u6A39\u4E0B\u8CB4\u4EBA\u5E87\u852D|\u6A39\u751F\u5802\u4E0A\u7236\u6BCD\u6182|\u5927\u6A39\u5FFD\u6298\u4E3B\u51F6\u60E1|\u64D4\u6728\u4F86\u5BB6\u5F97\u8CA1\u559C|\u780D\u4F10\u5927\u6A39\u591A\u5F97\u8CA1|\u8349\u6728\u8302\u76DB\u5BB6\u9053\u8208|\u9580\u4E2D\u751F\u679C\u6A39\u6709\u5B50|\u677E\u751F\u8179\u4E0A\u4F4D\u4E09\u516C|\u5BB6\u4E2D\u751F\u677E\u4E8B\u8F49\u8C50|\u5BB6\u4E2D\u751F\u67CF\u591A\u5409\u5229|\u5EAD\u524D\u7AF9\u6728\u559C\u91CD\u91CD|\u6953\u751F\u5C4B\u4E0A\u767E\u4E8B\u9042|\u862D\u751F\u5EAD\u524D\u4E3B\u6DFB\u5B6B|\u679C\u6797\u4E2D\u884C\u4E3B\u5F97\u8CA1|\u5165\u83DC\u5712\u4E2D\u5927\u767C\u8CA1|\u6851\u751F\u4E95\u4E0A\u4E3B\u6709\u6182|\u679C\u6A39\u591A\u719F\u5B50\u5B6B\u5B89|\u6298\u7B4D\u5230\u5BB6\u5973\u6709\u5B50|\u898B\u7B4D\u8005\u4E3B\u6DFB\u5B50\u5B6B|\u6383\u5730\u9664\u7CDE\u5BB6\u6B32\u7834|\u7CDE\u571F\u5806\u8005\u9322\u8CA1\u805A",
+    "\u8EAB\u9AD4\u9762\u76EE\u9F52\u9AEE:\u81EA\u8EAB\u767D\u8863\u4EBA\u6240\u8B00|\u68B3\u982D\u6D17\u9762\u767E\u6182\u53BB|\u8EAB\u62DC\u5C0A\u9577\u5927\u5409\u660C|\u8EAB\u4E0A\u6C57\u51FA\u4E3B\u51F6\u60E1|\u8EAB\u75C5\u87F2\u751F\u5F97\u8ECD\u8077|\u8EAB\u4E0A\u87F2\u884C\u75C5\u60A3\u5B89|\u7E69\u7D22\u7E6B\u8EAB\u9577\u547D\u5409|\u67B7\u9396\u81E8\u8EAB\u75C5\u6B32\u4F86|\u8EAB\u6210\u80A5\u7626\u7686\u70BA\u51F6|\u9762\u5C0D\u5B98\u8005\u4E3B\u5927\u5409|\u9732\u9AD4\u7121\u8863\u5927\u5409\u5229|\u5A66\u4EBA\u62AB\u982D\u6709\u79C1\u60C5|\u982D\u767D\u4E3B\u9577\u547D\u5927\u5409|\u982D\u751F\u5169\u89D2\u6709\u722D\u7AF6|\u982D\u79BF\u9AEE\u843D\u7686\u51F6\u4E8B|\u9762\u751F\u7621\u9ED1\u4E3B\u5B50\u51F6|\u982D\u9B1A\u767D\u843D\u6182\u5B50\u5B6B|\u982D\u9B1A\u518D\u751F\u4E3B\u9577\u547D|\u6C90\u6D74\u9077\u5B98\u75BE\u75C5\u9664|\u6D17\u624B\u6D17\u8DB3\u820A\u75C5\u9664|\u7167\u93E1\u660E\u5409\u6697\u8005\u51F6|\u7834\u93E1\u7167\u4EBA\u4E3B\u5206\u6563|\u624B\u8DB3\u81BF\u8840\u51FA\u5927\u5409|\u5C4E\u5C3F\u6C61\u4EBA\u5927\u5409\u4EA8|\u9732\u982D\u62AB\u9AEE\u4E3B\u4EBA\u8B00|\u62AB\u9AEE\u84CB\u9762\u5B98\u8A1F\u81F3|\u5243\u982D\u526A\u9AEE\u5BB6\u5167\u51F6|\u7709\u8207\u9AEE\u9F4A\u797F\u4F4D\u81F3|\u9F52\u81EA\u843D\u8005\u7236\u6BCD\u51F6|\u9F52\u843D\u66F4\u751F\u5B50\u5B6B\u8208",
+    "\u51A0\u5E36\u8863\u670D\u978B\u896A:\u6234\u5B98\u767B\u8ECA\u5B98\u6B32\u9077|\u81EA\u6234\u8946\u982D\u5DFE\u5E3D\u5409|\u7C2A\u51A0\u767B\u53F0\u8077\u4F4D\u9077|\u8CB4\u4EBA\u8207\u4E4B\u8863\u51A0\u5409|\u65B0\u63DB\u8863\u51A0\u797F\u4F4D\u81F3|\u71D2\u6BC0\u51A0\u5E3D\u6B32\u66F4\u5B98|\u5931\u53BB\u51A0\u5E3D\u53BB\u9000\u8077|\u62FE\u5F97\u5B98\u5E36\u797F\u4F4D\u81F3|\u8207\u4EBA\u516C\u670D\u4E3B\u5F97\u8077|\u4EBA\u8207\u516C\u670D\u52A0\u5B98\u8077|\u5973\u8457\u51A0\u5E36\u4E3B\u751F\u5B50|\u6D17\u7B0F\u67D3\u670D\u65B0\u5B98\u4F86|\u57F7\u7B0F\u898B\u8CB4\u4EBA\u5927\u5409|\u7B0F\u786B\u6182\u51F6\u4E09\u4E0D\u7965|\u8207\u4EBA\u7B0F\u7DAC\u4E3B\u5B98\u9077|\u8170\u5E36\u8005\u4E3B\u5B98\u81F3\u5409|\u6587\u66F8\u7528\u5370\u6709\u540D\u8072|\u5E36\u5370\u4E3B\u59BB\u751F\u8CB4\u5B50|\u8457\u65B0\u888D\u4E3B\u6DFB\u59BB\u59BE|\u8457\u9326\u7E61\u8863\u5B50\u5B6B\u69AE|\u6D17\u67D3\u8863\u670D\u7686\u5927\u5409|\u62AB\u84D1\u8863\u4E3B\u5927\u6069\u81F3|\u88AB\u6CB9\u6C61\u8863\u5927\u6069\u6FA4|\u8863\u670D\u5FFD\u7834\u59BB\u5916\u5FC3|\u65B0\u8863\u6522\u7C73\u767E\u4E8B\u51F6|\u8207\u4EBA\u8863\u670D\u4E3B\u60A3\u81F3|\u88C1\u8863\u8457\u5B5B\u8863\u7686\u5409|\u8863\u5E36\u81EA\u89E3\u767E\u4E8B\u5409|\u8457\u9EC3\u8863\u7682\u8863\u7686\u5409|\u8457\u767D\u8863\u4E3B\u6709\u4EBA\u8ACB|\u8457\u9752\u8863\u795E\u4EBA\u52A9\u529B|\u8457\u85CD\u7E61\u8863\u59BB\u5927\u5229|\u773E\u4EBA\u8457\u7D2B\u4E3B\u60C5\u7358|\u8207\u4EBA\u8457\u9752\u5BB6\u4EBA\u6563|\u773E\u4EBA\u8457\u767D\u4E3B\u5B98\u4E8B|\u773E\u4EBA\u8457\u7DCB\u5927\u5409\u5229|\u59BB\u8457\u592B\u8863\u751F\u8CB4\u5B50|\u5973\u5B50\u8457\u8863\u5E73\u7121\u4E8B|\u8207\u4EBA\u5171\u8863\u59BB\u79C1\u60C5|\u5931\u537B\u8863\u670D\u59BB\u96E3\u7522|\u597D\u88AB\u81EA\u84CB\u5F97\u5BCC\u8CB4|\u4EBA\u8457\u5DF1\u5C65\u59BB\u6709\u79C1|\u5F97\u9774\u978B\u4E3B\u5974\u5A62\u5409|\u5931\u5C65\u4E3B\u5974\u5A62\u9003\u8D70|\u812B\u9774\u675F\u5E36\u4E3B\u6709\u51F6|\u978B\u7834\u5B50\u5B6B\u59BB\u59BE\u75C5|\u8457\u9EBB\u978B\u767E\u4E8B\u548C\u5408|\u65B0\u6388\u5B98\u7235\u4E3B\u8CB4\u5B50|\u4E5E\u5F97\u978B\u5C65\u4EBA\u52A9\u529B|\u6728\u5C65\u812B\u6642\u5DF1\u51FA\u5384",
+    "\u5200\u528D\u65CC\u7BC0\u9418\u9F13:\u541B\u738B\u5C0D\u4ED7\u6709\u7570\u5409|\u65CC\u65C2\u6709\u9F8D\u5927\u5409\u5229|\u62B1\u65CC\u7BC0\u4E3B\u8CB4\u4EBA\u6276|\u65CC\u528D\u5F15\u5165\u5C71\u4E3B\u51F6|\u9020\u65CC\u84CB\u4E3B\u5927\u5409\u5229|\u7FBD\u84CB\u84CB\u8EAB\u4E3B\u5BCC\u8CB4|\u65C2\u65DB\u8FCE\u63A5\u5927\u5BCC\u8CB4|\u65D7\u65DB\u7ADF\u51FA\u4E3B\u75BE\u75C5|\u624B\u6301\u65CC\u7BC0\u6709\u6069\u8CDE|\u767D\u84CB\u8986\u8EAB\u5927\u5409\u5229|\u898B\u505A\u65B0\u65CC\u5927\u5409\u5229|\u8207\u4EBA\u5206\u5098\u4E3B\u5206\u6563|\u62D4\u5200\u51FA\u884C\u4E3B\u5927\u5409|\u5F97\u4EBA\u5200\u4E3B\u884C\u4EBA\u81F3|\u4EBA\u8207\u4E09\u5200\u4F5C\u523A\u53F2|\u8207\u4EBA\u8207\u65AB\u5927\u5409\u6176|\u88AB\u5200\u51FA\u8840\u5F97\u9152\u98DF|\u6298\u5200\u523A\u4EBA\u4E3B\u5931\u5229|\u5200\u65A7\u81EA\u50B7\u5927\u5409\u5229|\u5F97\u4EBA\u5200\u65A7\u797F\u4F4D\u81F3|\u5200\u843D\u6C34\u4E2D\u59BB\u59BE\u4EA1|\u5931\u843D\u5200\u528D\u4E3B\u7834\u8CA1|\u5E36\u5200\u528D\u884C\u6709\u8CA1\u5229|\u78E8\u5200\u528D\u92D2\u5FEB\u5927\u5409|\u8207\u4EBA\u5200\u528D\u7686\u4E3B\u51F6|\u528D\u5728\u5E8A\u982D\u5927\u5409\u5229|\u5973\u4EBA\u5E36\u5200\u5927\u5409\u6176|\u5973\u4EBA\u62D4\u5200\u4E3B\u6709\u5B50|\u526A\u5200\u4E3B\u5206\u8CA1\u4E4B\u4E8B|\u526A\u5200\u526A\u7269\u4E3B\u5F97\u8CA1|\u526A\u5200\u6298\u80A1\u59BB\u59BE\u4EA1|\u7532\u5191\u5E87\u8EAB\u4E3B\u5409\u5229|\u9397\u69CA\u4E3B\u5B98\u4F4D\u5409\u5229|\u898B\u8ECD\u5175\u6563\u4E3B\u6709\u51F6|\u9418\u78D0\u6709\u8072\u9060\u4EBA\u4F86|\u9418\u8C49\u5927\u9CF4\u798F\u797F\u81F3|\u6253\u9F13\u6709\u8072\u9060\u4EBA\u4F86|\u898B\u9F13\u4F73\u8072\u61FD\u6A02\u5409|\u898B\u9F13\u4E0D\u55DA\u51F6\u5FC5\u81F3|\u770B\u653E\u7159\u706B\u767E\u6182\u6563",
+    "\u5E1D\u738B\u6587\u6B66\u547C\u53EC:\u5E1D\u738B\u5BA3\u53EC\u6709\u9A5A\u559C|\u540E\u5983\u547C\u53EC\u98F2\u6709\u75BE|\u592A\u5B50\u53EC\u5927\u559C\u5409\u5229|\u5929\u5B50\u8CDC\u5750\u6709\u8CA1\u5409|\u898B\u8001\u541B\u8A00\u6709\u4ED9\u5206|\u62DC\u4F5B\u6B32\u52D5\u5927\u6709\u8CA1|\u770B\u706B\u4E0A\u9673\u4E8B\u5927\u5409|\u795E\u4F5B\u55D4\u6012\u7686\u4E0D\u5409|\u738B\u4FAF\u4E26\u5750\u5927\u5409\u5229|\u4F86\u898B\u8CB4\u4EBA\u4E0D\u5F97\u51F6|\u8207\u8056\u8CE2\u8AAA\u8A71\u5927\u5409|\u4F7F\u547D\u5165\u9580\u5927\u5409\u5229|\u767D\u8863\u53EC\u4F5C\u4FBF\u6B7B\u4EA1|\u62DC\u5C0A\u9577\u8005\u6709\u5409\u6176|\u5148\u7956\u8003\u8A00\u6C42\u98DF\u5409|\u4EBA\u4E91\u5927\u597D\u8005\u5373\u51F6|\u4EBA\u4E91\u6B7B\u8005\u5F97\u9577\u547D|\u4EBA\u5728\u5916\u547C\u4E4B\u62DB\u51F6|\u6211\u6B32\u5171\u6C5D\u53BB\u5927\u51F6|\u4EBA\u4E91\u4E0D\u7528\u6C5D\u5927\u5409|\u8207\u60E1\u4EBA\u8A00\u4E3B\u53E3\u820C|\u88AB\u6BBA\u5BB3\u5409\u4F0F\u85CF\u51F6|\u8EAB\u751F\u7FBD\u7FFC\u98DB\u5927\u5409|\u8EAB\u9003\u53BB\u5F97\u812B\u75C5\u53BB|\u8207\u4EBA\u4EA4\u6613\u4E3B\u6709\u75BE|\u8CA7\u7AAE\u5175\u5C45\u4E3B\u5927\u5409|\u5408\u4F34\u540C\u884C\u51F6\u4E8B\u81F3|\u4E00\u5207\u8CB4\u4EBA\u7686\u5409\u7965",
+    "\u5BAE\u5BA4\u5C4B\u5B87\u5009\u5EAB:\u5165\u5E1D\u738B\u5BAE\u884C\u5927\u5409|\u62DC\u671D\u5EF7\u8005\u4E3B\u5BCC\u8CB4|\u5165\u738B\u4FAF\u5E9C\u5EAB\u5927\u5409|\u884C\u9053\u5BAE\u898B\u4ED9\u4E3B\u5409|\u5750\u5B98\u5E9C\u4E2D\u4E3B\u5927\u5409|\u795E\u5EDF\u5EE3\u5927\u4E8B\u4E8B\u5409|\u4E0A\u6A13\u95A3\u58C7\u4E3B\u5927\u5409|\u4E0A\u9AD8\u5802\u5927\u5BCC\u8CB4\u81F3|\u9AD8\u6A13\u98F2\u9152\u5BCC\u8CB4\u81F3|\u5BB6\u8D77\u9AD8\u6A13\u5B89\u7A69\u4E8B|\u4E0A\u57CE\u70BA\u4EBA\u6240\u62FD\u5409|\u4E0A\u57CE\u88AB\u57F7\u5B98\u8077\u986F|\u57CE\u90ED\u5EE3\u5927\u8CA1\u559C\u591A|\u57CE\u4E2D\u884C\u51F6\u51FA\u9580\u5409|\u9023\u57CE\u9752\u8272\u6709\u559C\u5409|\u767B\u8D64\u57CE\u90ED\u4E3B\u5927\u5409|\u84CB\u57CE\u4E0A\u5C4B\u5927\u5409\u5229|\u4E0A\u5C4B\u4E3B\u5BCC\u51FA\u5712\u5409|\u4E0A\u5C4B\u7834\u58DE\u5BB6\u9053\u51F6|\u5802\u4E0A\u6709\u68FA\u8EAB\u5B89\u6A02|\u6B63\u5802\u5012\u9677\u5BB6\u4E3B\u51F6|\u8986\u84CB\u5C4B\u5B87\u9577\u547D\u5409|\u5C4B\u5B85\u66F4\u65B0\u4E3B\u5927\u5409|\u98A8\u5439\u5C4B\u52D5\u4E3B\u9077\u79FB|\u9077\u5165\u4ED6\u4EBA\u65B0\u5B85\u5409|\u5C45\u51FA\u5B85\u4E3B\u59BB\u559C\u4E8B|\u642C\u79FB\u7834\u5C4B\u4E3B\u7F8E\u59BB|\u4EBA\u6216\u5178\u623F\u4E3B\u5B98\u4F4D|\u5BB6\u9053\u8CA7\u7AAE\u5927\u5409\u5229|\u6D12\u6383\u5B85\u820D\u9060\u4EBA\u4F86|\u5178\u8CE3\u5178\u820D\u4E3B\u5931\u4F4D|\u5C4B\u5B85\u7121\u4EBA\u4E3B\u6B7B\u4EA1|\u5C4B\u4E0A\u7A7F\u821F\u6709\u6697\u6627|\u8E30\u7246\u6E21\u5B85\u767E\u4E8B\u53BB|\u8207\u4EBA\u722D\u5C4B\u4E3B\u5927\u51F6|\u8207\u5A66\u4EBA\u722D\u5C4B\u4E3B\u5409|\u623F\u6A11\u5FFD\u6298\u4E3B\u5927\u51F6|\u9662\u5B85\u5751\u4E0B\u4E3B\u6B7B\u4EA1|\u59BB\u7537\u7246\u4E0B\u5B98\u4F4D\u81F3|\u7246\u4E0A\u6398\u571F\u4E3B\u66F4\u653F|\u8ECD\u4EBA\u5165\u5B85\u4E3B\u5927\u5409|\u6B7B\u592E\u74E6\u843D\u5A66\u722D\u9B25|\u5C4B\u4E2D\u751F\u99AC\u7537\u4FE1\u81F3|\u5C4B\u4E2D\u751F\u8349\u5BB6\u6B32\u7A7A|\u5C4B\u4E0A\u751F\u677E\u67CF\u76CA\u58FD|\u4FEE\u7406\u7530\u820D\u6709\u5927\u559C|\u5165\u5BFA\u9662\u4E2D\u751F\u7537\u5B50|\u5BFA\u820D\u6709\u7D93\u75C5\u4EBA\u75CA|\u9077\u79FB\u5C3C\u5BFA\u4E3B\u75C5\u81F3|\u8D77\u84CB\u5009\u5EAB\u798F\u797F\u81F3|\u5165\u5009\u5EAB\u4E2D\u5927\u5409\u6602|\u5009\u5EAB\u5D29\u58DE\u767E\u4E8B\u51F6",
+    "\u9580\u6236\u4E95\u7076\u5EDA\u5EC1:\u9580\u6236\u9AD8\u5927\u4E3B\u5BCC\u8CB4|\u65B0\u958B\u9580\u6236\u5927\u5BCC\u8CB4|\u9580\u6236\u5FFD\u958B\u4E3B\u5927\u5409|\u9580\u6236\u5927\u958B\u5927\u5409\u5229|\u9580\u66F4\u65B0\u4E3B\u751F\u8CB4\u5B50|\u9580\u81EA\u958B\u59BB\u6709\u79C1\u60C5|\u9580\u6236\u88C2\u958B\u4E3B\u5927\u5409|\u9580\u6236\u7834\u58DE\u6709\u51F6\u4E8B|\u57CE\u9580\u5927\u958B\u4E3B\u53E3\u820C|\u5BAE\u57CE\u585E\u8005\u53E3\u820C\u81F3|\u9580\u6236\u9589\u585E\u4E8B\u4E0D\u901A|\u9580\u6236\u7834\u58DE\u4E3B\u5927\u51F6|\u9580\u6247\u81EA\u6298\u5974\u50D5\u8D70|\u9580\u6236\u5167\u7121\u4EBA\u5927\u51F6|\u4FEE\u79FB\u9580\u6236\u5927\u5409\u5229|\u77F3\u70BA\u9580\u6236\u4E3B\u58FD\u547D|\u9580\u524D\u751F\u8349\u4F5C\u523A\u53F2|\u9580\u524D\u5751\u6E9D\u4E8B\u4E0D\u6210|\u5929\u706B\u71D2\u9580\u4E3B\u51F6\u4E8B|\u5C4B\u958B\u5C0F\u9580\u4E3B\u79C1\u60C5|\u7A7F\u4E95\u898B\u6C34\u9060\u4FE1\u81F3|\u4E95\u81EA\u640D\u58DE\u5BB6\u5927\u6557|\u4E95\u4E2D\u6CB8\u6EA2\u4E3B\u5F97\u8CA1|\u4E95\u67AF\u6DB8\u8005\u5BB6\u8CA1\u6563|\u4E95\u4E2D\u7167\u8EAB\u797F\u4F4D\u81F3|\u8EAB\u589C\u4E95\u4E2D\u75BE\u75C5\u51F6|\u623F\u5728\u4E95\u4E2D\u4E3B\u898B\u75C5|\u53D6\u4E95\u6C34\u6E05\u5409\u6DF7\u51F6|\u4E95\u6C34\u8CA0\u6CE5\u51FA\u8CA1\u4E3B|\u4E95\u4E2D\u6B32\u4E7E\u5BB6\u6B32\u7834|\u4E95\u4E2D\u6709\u9B5A\u8EAB\u4E3B\u8CB4|\u7ABA\u4E95\u6709\u8072\u53E3\u820C\u751F|\u4F0F\u85CF\u4E95\u4E2D\u5211\u7344\u4E8B|\u9189\u843D\u4E95\u4E2D\u5B98\u4E8B\u81F3|\u5BB6\u4F4F\u4E95\u4E2D\u9577\u5B50\u51F6|\u4EBA\u4E91\u51FA\u4E95\u559C\u6C23\u81F3|\u6DD8\u4E95\u9020\u4E95\u4E3B\u5927\u8CB4|\u5668\u76BF\u843D\u4E95\u6709\u5409\u4E8B|\u7076\u4E0B\u6C34\u6D41\u5F97\u6A6B\u8CA1|\u7076\u4E0B\u71C3\u706B\u6709\u8072\u540D|\u7076\u91DC\u7834\u6557\u6709\u6B7B\u4EA1|\u7076\u4E0B\u5439\u8005\u5BB6\u7834\u6557|\u7076\u4E0B\u9CF4\u5668\u4E3B\u53E3\u820C|\u5C4B\u6709\u4E8C\u7076\u4E8B\u4E0D\u6210|\u4FEE\u9020\u5EDA\u7076\u5927\u5409\u5229|\u5728\u5B98\u5EDA\u4E2D\u5F97\u8CA1\u797F|\u81EA\u5439\u81FC\u4E2D\u59BB\u59BE\u4EA1|\u6DD8\u5EC1\u8005\u4E3B\u5F97\u6A6B\u8CA1|\u4E0A\u5EC1\u5728\u5C4E\u5C3F\u4E2D\u5409|\u5EC1\u4E2D\u5C4E\u6EA2\u5927\u5409\u5229|\u7CDE\u4E2D\u5750\u8005\u4E3B\u5927\u51F6|\u7CDE\u571F\u5806\u7A4D\u4E3B\u5F97\u8CA1",
+    "\u91D1\u9280\u73E0\u7389\u7D79\u5E1B:\u91D1\u9280\u5BF6\u8005\u4E3B\u5BCC\u8CB4|\u91D1\u9280\u73E0\u7389\u5927\u5409\u5229|\u91D1\u9280\u676F\u76BF\u6709\u8CB4\u5B55|\u91D1\u9280\u4F5C\u943A\u5668\u5927\u5409|\u7389\u7A4D\u5982\u5C71\u5927\u5BCC\u8CB4|\u5F97\u91D1\u7389\u74B0\u751F\u8CB4\u5B50|\u9285\u943A\u4E3B\u6709\u53E3\u820C\u81F3|\u73E0\u7389\u6EFF\u61F7\u4E3B\u5927\u51F6|\u5F97\u7389\u7897\u5668\u7269\u7686\u5409|\u898B\u9435\u5668\u7269\u4E3B\u5F97\u8CA1|\u925B\u8207\u935A\u8005\u4E3B\u5F97\u8CA1|\u5F97\u9285\u7269\u4E3B\u5927\u5BCC\u8CB4|\u9472\u5D4C\u5668\u7269\u75BE\u75C5\u53BB|\u9084\u4EBA\u9322\u7269\u75BE\u75C5\u53BB|\u62FE\u5F97\u9322\u7269\u7686\u5927\u5409|\u9322\u6625\u590F\u5409\u79CB\u51AC\u51F6|\u5BB6\u4E2D\u5206\u8CA1\u4E3B\u96E2\u6557|\u8D08\u5F69\u5E1B\u8005\u4E3B\u6709\u6B0A|\u8CB4\u4EBA\u8CDC\u7DBE\u9326\u5B98\u81F3|\u4EBA\u8CDC\u7D79\u5E1B\u5927\u5409\u660C|\u8207\u4EBA\u7D72\u5E1B\u5927\u51F6\u60E1|\u5F97\u4ED6\u4EBA\u9EBB\u5E03\u8863\u51F6|\u5F97\u5E03\u5E1B\u9060\u89AA\u4F86\u81F3|\u8207\u4EBA\u8863\u670D\u5B98\u4E8B\u81F3|\u5C0B\u7D72\u7D79\u4E3B\u9032\u5165\u53E3|\u7D21\u7E3E\u8005\u4E3B\u58FD\u547D\u9577|\u7D93\u7D61\u8005\u4E3B\u88AB\u4EBA\u8FB1|\u7BB1\u5668\u4E3B\u53E3\u820C\u4E4B\u4E8B",
+    "\u93E1\u74B0\u91F5\u91E7\u68B3\u7BE6:\u660E\u93E1\u8005\u5409\u6697\u8005\u51F6|\u62FE\u5F97\u93E1\u8005\u62DB\u597D\u59BB|\u5C07\u93E1\u81EA\u7167\u9060\u4FE1\u81F3|\u93E1\u7167\u4ED6\u4EBA\u59BB\u59BE\u51F6|\u5F97\u4ED6\u4EBA\u93E1\u6709\u8CB4\u5B50|\u4ED6\u4EBA\u5F04\u5DF1\u93E1\u59BB\u51F6|\u93E1\u7834\u4E3B\u592B\u59BB\u96E2\u5225|\u91D1\u91F5\u52D5\u6709\u9060\u884C\u4E8B|\u91D1\u923F\u6210\u96D9\u589E\u611B\u59BE|\u91F5\u91E7\u76F8\u6572\u59BB\u5225\u51F6|\u91D1\u91F5\u8000\u4E3B\u751F\u8CB4\u5B50|\u82B1\u91F5\u59BB\u59BE\u6709\u59E6\u4F5E|\u9280\u91E7\u592B\u59BB\u4E3B\u76F8\u6BC6|\u82B1\u58D3\u59BB\u59BE\u751F\u5916\u5FC3|\u4EBA\u8207\u68B3\u7BE6\u5F97\u7F8E\u59BE|\u7259\u6728\u68B3\u820A\u4E8B\u76E1\u53BB|\u898B\u7BE6\u5B50\u8CB4\u4EBA\u63D0\u651C|\u5F97\u7BE6\u5B50\u8005\u7F8E\u5973\u81F3|\u5237\u7259\u8005\u75C5\u60A3\u4E0D\u751F|\u5F97\u80ED\u8102\u7C89\u4E3B\u751F\u5973|\u898B\u8102\u7C89\u4E3B\u5927\u8CA1\u5229|\u5F97\u7C89\u50D5\u59BB\u751F\u5B0C\u5973|\u624B\u5E15\u8005\u4E3B\u53E3\u820C\u4E8B|\u91DD\u7DDA\u5F97\u8005\u767E\u4E8B\u5C31",
+    "\u8863\u5E33\u6BEF\u8925\u5319\u6AE1:\u5E8A\u5E33\u6539\u4E3B\u5B98\u9077\u79FB|\u8212\u5C55\u5E8A\u5E33\u5927\u5BCC\u8CB4|\u65B0\u5B89\u5E8A\u5E33\u9060\u4EBA\u4F86|\u5E8A\u5E33\u51FA\u9580\u8005\u59BB\u4EA1|\u5E8A\u5E33\u6536\u63DB\u79FB\u5C45\u5409|\u5E8A\u4E0A\u6709\u87FB\u81F3\u4E0D\u7965|\u5E8A\u5E33\u7834\u640D\u59BB\u6B32\u4EA1|\u958B\u5E33\u5E54\u4E3B\u6709\u9152\u98DF|\u5E33\u5E54\u58DE\u8005\u59BB\u5B50\u75C5|\u5E8A\u8173\u65B0\u63DB\u5974\u50D5\u51F6|\u4E0A\u5E8A\u81E5\u8005\u5927\u51F6\u60E1|\u8840\u5728\u5E8A\u59BB\u59BE\u6709\u59E6|\u6D17\u5E8A\u5E33\u5247\u4E3B\u5927\u5409|\u85A6\u84C6\u5165\u5409\u51FA\u5247\u51F6|\u7834\u84C6\u8005\u4E3B\u5931\u5B98\u4F4D|\u63DB\u84C6\u5165\u5409\u51FA\u5247\u51F6|\u84C6\u7C1E\u8005\u4E3B\u6709\u529B\u52A9|\u6BEF\u8925\u8216\u9673\u842C\u4E8B\u7A69|\u6BC0\u84C6\u5E54\u8005\u59BB\u6709\u59E6|\u65B0\u7C3E\u8005\u4E3B\u5F97\u597D\u59BB|\u8216\u84C6\u5408\u5750\u5F97\u5B98\u4F4D|\u597D\u88AB\u81EA\u84CB\u4E3B\u5927\u5409|\u898B\u597D\u6795\u6709\u8CB4\u4EBA\u6276|\u898B\u624B\u5E15\u4E3B\u6709\u53E3\u820C|\u624B\u4E2D\u7E1B\u5E03\u75C5\u60A3\u81F3|\u6BDB\u80A9\u5FFD\u6301\u5B98\u4E8B\u81F3|\u9F0E\u9F10\u8005\u4E3B\u5F97\u5927\u8CA1|\u91DC\u6EA2\u8005\u4E3B\u5F97\u5927\u8CA1|\u7389\u77F3\u5668\u4E3B\u6709\u4EBA\u52A9|\u9285\u943A\u8005\u4E3B\u53E3\u820C\u81F3|\u934B\u9435\u7834\u4E3B\u55AA\u4E8B\u4F86|\u943A\u76DE\u7834\u4E3B\u6709\u60E1\u4E8B|\u78C1\u7897\u8005\u4E3B\u9152\u98DF\u81F3|\u78C1\u789F\u8005\u4E3B\u53E3\u820C\u81F3|\u5319\u4E3B\u76CA\u59BB\u59BE\u5B50\u5B6B|\u6AE1\u4E3B\u76CA\u7530\u5B85\u5974\u50D5|\u76C6\u4E3B\u76CA\u5009\u5EAB\u5927\u5409|\u68F3\u76C6\u812B\u5E95\u4E3B\u8CA1\u6563|\u5165\u76C6\u7515\u5668\u5927\u5BCC\u8CB4|\u6D17\u9762\u76C6\u8005\u7F8E\u59BE\u81F3|\u5927\u5C0F\u76C6\u8005\u4E3B\u5718\u5713|\u5F97\u76C6\u5B50\u8005\u6240\u6C42\u5F97|\u6876\u76DB\u6C34\u8005\u4E3B\u5927\u5409|\u6876\u7121\u6C34\u8005\u4E3B\u5927\u51F6|\u4EBA\u9001\u5927\u6876\u4E3B\u5F97\u5229|\u684C\u67B6\u65BC\u5B85\u4E8B\u4E0D\u6210|\u92F8\u4E3B\u6709\u65B7\u6C7A\u4E4B\u4E8B|\u78BE\u8863\u98DF\u79FB\u5C45\u5927\u5409|\u939A\u947D\u8005\u4E3B\u4FB5\u5BB3\u4E8B|\u939A\u6B32\u8209\u52D5\u6709\u4EBA\u6301|\u947F\u4E3B\u88AB\u4EBA\u9A45\u4F7F\u5409|\u71A8\u6597\u76DB\u706B\u597D\u4E8B\u6210|\u71FB\u7C60\u8005\u76CA\u589E\u7530\u7522|\u4EBA\u8207\u79E4\u8005\u4E3B\u6B0A\u4F4D|\u7E69\u7D22\u4E3B\u9577\u547D\u5927\u5409|\u7E69\u7D22\u65B7\u8005\u4E3B\u51F6\u60E1|\u4EBA\u8207\u947F\u8005\u5F97\u5931\u91D1|\u4EBA\u9001\u5E36\u8005\u4E3B\u5F97\u4F4D",
+    "\u8239\u8ECA\u904A\u884C\u7269\u4EF6:\u8239\u98DB\u884C\u4E3B\u5927\u5BCC\u8CB4|\u8239\u6DFA\u5728\u5CB8\u662F\u975E\u5384|\u4E58\u8239\u6E21\u6C5F\u6CB3\u5F97\u5B98|\u8239\u4E2D\u6709\u6C34\u4E3B\u5F97\u8CA1|\u4E58\u8239\u770B\u65E5\u6708\u5F97\u8077|\u4E58\u8239\u904E\u65E5\u6708\u4E3B\u5BCC|\u4E58\u8239\u98F2\u9152\u9060\u5BA2\u81F3|\u8207\u4EBA\u540C\u8239\u4E3B\u79FB\u5C45|\u4E58\u8239\u98A8\u5E06\u5927\u5409\u5229|\u4E58\u8239\u898B\u8235\u4E3B\u5B89\u7A69|\u4E58\u8239\u6A4B\u4E0B\u904E\u5927\u5409|\u75C5\u4EBA\u4E58\u8239\u5FC5\u4E3B\u6B7B|\u52A9\u7236\u4E58\u8239\u5B98\u4F4D\u81F3|\u8EAB\u81E5\u8239\u4E2D\u4E3B\u6709\u51F6|\u57F7\u706B\u5165\u8239\u4E3B\u5927\u5409|\u5BB6\u4E2D\u4E58\u8239\u4E3B\u6C92\u8CA1|\u4E58\u8239\u770B\u82B1\u9152\u98DF\u81F3|\u8239\u8ECA\u7834\u788E\u4E3B\u4E0D\u7965|\u8ECA\u8F2A\u7834\u592B\u59BB\u76F8\u5225|\u8ECA\u8F2A\u6298\u5012\u4E3B\u7834\u6557|\u8ECA\u8F09\u4E0D\u8D77\u5384\u4E8B\u53BB|\u99D5\u8ECA\u904A\u884C\u797F\u4F4D\u81F3|\u8ECA\u884C\u4E3B\u767E\u4E8B\u9806\u548C|\u8ECA\u4E0D\u884C\u6240\u6C42\u4E0D\u9042|\u8ECA\u5165\u9580\u4E3B\u6709\u51F6\u4E8B|\u75C5\u4EBA\u4E0A\u8ECA\u4E3B\u5927\u51F6|\u55AA\u8ECA\u9047\u8005\u4E3B\u707D\u6563|\u884C\u8ECA\u767D\u99AC\u4E3B\u5927\u5409|\u56DB\u99AC\u99D5\u8ECA\u5409\u53CD\u51F6|\u4EE5\u7F8A\u99D5\u8ECA\u4E8B\u4E0D\u5E38|\u5099\u99AC\u8005\u4E3B\u9060\u884C\u4E8B|\u9060\u884C\u51FA\u5165\u547D\u901A\u9054",
+    "\u9053\u8DEF\u6A4B\u6881\u5E02\u96C6:\u898B\u56DB\u8DEF\u901A\u540D\u5229\u9042|\u9053\u4E2D\u5F97\u8CA1\u4E3B\u901A\u9054|\u9053\u6CE5\u834A\u68D8\u4E8B\u4E0D\u6210|\u5927\u9053\u5D29\u9677\u4E3B\u5931\u8CA1|\u4FEE\u6A4B\u6A11\u8005\u842C\u4E8B\u548C|\u898B\u6E21\u6A4B\u4E3B\u6709\u5B98\u4E8B|\u6A4B\u4E0A\u5750\u4E3B\u797F\u4F4D\u81F3|\u898B\u6A4B\u58DE\u4E3B\u6709\u5B98\u4E8B|\u651C\u624B\u4E0A\u6A4B\u59BB\u6709\u5B55|\u6A4B\u4E0A\u547C\u559A\u8A1F\u5F97\u7406|\u65B0\u9020\u6A4B\u8005\u5927\u548C\u5408|\u6A4B\u65B7\u8005\u4E3B\u6709\u53E3\u820C|\u6A4B\u67F1\u6298\u8005\u5B50\u5B6B\u51F6|\u6A4B\u8DEF\u4E0A\u5F80\u8ECA\u7686\u51F6|\u592B\u59BB\u5165\u5E02\u4E3B\u7F6E\u7522|\u898B\u5E02\u4E2D\u7121\u4EBA\u4E3B\u51F6",
+    "\u592B\u59BB\u7522\u5B55\u4EA4\u61FD:\u592B\u59BB\u5BB4\u6703\u4E3B\u76F8\u5225|\u592B\u59BB\u76F8\u7F75\u4E3B\u75C5\u60A3|\u592B\u59BB\u5206\u91F5\u4E3B\u96E2\u5225|\u592B\u59BB\u76F8\u6253\u6B32\u548C\u6703|\u540C\u5A66\u4EBA\u884C\u4E3B\u5931\u8CA1|\u62B1\u5A66\u4EBA\u4E3B\u6709\u559C\u4E8B|\u8207\u5A66\u4EBA\u4EA4\u6709\u90AA\u795F|\u8207\u5A66\u4EBA\u5171\u5750\u5927\u5409|\u62B1\u592B\u4E3B\u5927\u5F97\u8CA1\u559C|\u5A66\u4EBA\u8207\u592B\u5165\u6C34\u5409|\u592B\u59BB\u5404\u8207\u68B3\u982D\u5409|\u592B\u59BB\u76F8\u62DC\u4E3B\u5206\u6563|\u4EA4\u63A5\u7537\u5B50\u4E3B\u5931\u8CA1|\u59BB\u8457\u9326\u8863\u751F\u8CB4\u5B50|\u59BB\u6709\u5B55\u4E3B\u5916\u79C1\u60C5|\u898B\u5A66\u4EBA\u9670\u4E3B\u53E3\u820C|\u5A66\u4EBA\u8D64\u8EAB\u4E3B\u5927\u5409|\u7537\u5B50\u88F8\u9AD4\u547D\u901A\u9054|\u5144\u5F1F\u5206\u5225\u53E3\u820C\u81E8|\u62B1\u5C0F\u5152\u5973\u4E3B\u53E3\u820C|\u5C0F\u5152\u6B7B\u8005\u4E3B\u53E3\u820C|\u65B0\u751F\u7537\u5973\u4E3B\u5927\u5409|\u898B\u5AC1\u5A36\u53CA\u5B5D\u4E3B\u51F6|\u7537\u5B50\u5316\u70BA\u5C3C\u59D1\u51F6",
+    "\u98F2\u98DF\u9152\u8089\u74DC\u83DC:\u4EBA\u8ACB\u98F2\u9152\u4E3B\u9577\u547D|\u8207\u4EBA\u98F2\u9152\u6709\u53E3\u820C|\u8207\u4EBA\u5403\u6703\u5BCC\u8CB4\u81F3|\u7B75\u6703\u5BA2\u4EBA\u5BB6\u6B32\u7834|\u98F2\u9152\u8005\u4E3B\u54ED\u6CE3\u4E8B|\u98F2\u9152\u81F3\u9189\u4E3B\u75BE\u75C5|\u8CB4\u4EBA\u8CDC\u5BB4\u4E3B\u75BE\u75C5|\u8207\u8CB4\u4EBA\u5C0D\u98F2\u5927\u5409|\u4EBA\u8ACB\u5403\u9165\u916A\u4E3B\u559C|\u8207\u4EBA\u5403\u4E73\u5C0A\u89AA\u81F3|\u8207\u4EBA\u5403\u871C\u5927\u5409\u5229|\u5614\u5410\u8005\u75C5\u4EBA\u4E3B\u7625|\u98DF\u6C34\u8005\u4E3B\u5F97\u5927\u5229|\u6B7B\u4EBA\u98DF\u8005\u4E3B\u75BE\u75C5|\u98DF\u725B\u8089\u65BC\u5802\u4E0A\u5409|\u98DF\u72AC\u8089\u4E3B\u6709\u722D\u8A1F|\u98DF\u8C6C\u8089\u4E3B\u75BE\u75C5\u81F3|\u5200\u5272\u8C6C\u8089\u4E3B\u751F\u75C5|\u98DF\u751F\u8089\u51F6\u719F\u8089\u5409|\u98DF\u81EA\u6B7B\u8089\u4E3B\u5225\u96E2|\u98DF\u9D5D\u8089\u4E3B\u59BE\u75BE\u75C5|\u98DF\u96DE\u9D28\u7B49\u8089\u7686\u5409|\u98DF\u9945\u982D\u4E3B\u53E3\u820C\u6563|\u898B\u9945\u982D\u672A\u98DF\u4E3B\u6C23|\u98DF\u721B\u74DC\u4E3B\u751F\u75BE\u75C5|\u98DF\u9905\u98DF\u98EF\u5FC3\u4E0D\u9042|\u98DF\u74DC\u5B50\u4E3B\u751F\u8CB4\u5B50|\u98DF\u67FF\u98DF\u67D1\u4E3B\u75BE\u75C5|\u98DF\u67FF\u6843\u96E2\u800C\u5FA9\u5408|\u98DF\u68D7\u8005\u4E3B\u751F\u8CB4\u5B50|\u98DF\u6851\u6939\u4E3B\u751F\u8CB4\u5B50|\u98DF\u7C9F\u8005\u4E3B\u6709\u5206\u96E2|\u98DF\u68A8\u8005\u4E3B\u5931\u8CA1\u5E1B|\u98DF\u4E00\u5207\u83DC\u8005\u51F6\u81F3|\u98DF\u8304\u8005\u4E3B\u59BB\u6709\u5B50|\u98DF\u8525\u97ED\u4E3B\u6709\u722D\u9B25|\u98DF\u85A4\u8005\u6709\u91CD\u50B7\u81F3|\u98DF\u849C\u8005\u4E3B\u707D\u5BB3\u81F3|\u98DF\u83DC\u898B\u83DC\u9EC3\u4E3B\u51F6|\u98DF\u6CB9\u9E7D\u91AC\u9178\u8C49\u5409",
+    "\u585A\u5893\u68FA\u69E8\u8FCE\u9001:\u585A\u5893\u9AD8\u8005\u5927\u5409\u5229|\u65B0\u585A\u68FA\u69E8\u4E3B\u6182\u9664|\u585A\u5893\u4E0A\u6709\u96F2\u6C23\u5409|\u585A\u5893\u9580\u958B\u767E\u4E8B\u5409|\u585A\u5893\u4E0A\u660E\u5409\u6697\u51F6|\u585A\u5893\u751F\u6A39\u5409\u6298\u51F6|\u585A\u5893\u4E0A\u958B\u82B1\u5927\u5409|\u68FA\u81EA\u51FA\u5893\u4E2D\u5927\u5409|\u62AC\u68FA\u5165\u5B85\u797F\u4F4D\u81F3|\u6B7B\u4EBA\u51FA\u68FA\u5916\u5BA2\u81F3|\u958B\u68FA\u8207\u6B7B\u4EBA\u8A00\u51F6|\u68FA\u6BAE\u6B7B\u4EBA\u4E3B\u5F97\u8CA1|\u898B\u68FA\u6C34\u4E0A\u5927\u5F97\u8CA1|\u7A7A\u9060\u7121\u4EBA\u4E3B\u9060\u884C",
+    "\u6587\u66F8\u7B46\u786F\u5175\u5668:\u5404\u8272\u7D93\u66F8\u5927\u5BCC\u8CB4|\u4E94\u8272\u7D19\u8005\u5927\u76CA\u8CA1|\u541E\u4E94\u8272\u7D19\u8A69\u66F8\u9032|\u51E0\u4E0A\u6709\u66F8\u797F\u4F4D\u81F3|\u8A69\u6587\u66F8\u5BEB\u5B57\u5927\u5409|\u6709\u4EBA\u6559\u66F8\u5927\u5BCC\u8CB4|\u898B\u8B80\u66F8\u8005\u4E3B\u8070\u660E|\u89C0\u4EBA\u8B80\u66F8\u751F\u8CB4\u5B50|\u5F97\u66C6\u65E5\u8005\u4E2D\u9EC3\u7532|\u5C01\u66F8\u4FE1\u8005\u4E3B\u901A\u9054|\u624B\u5F04\u7B46\u786F\u4E3B\u9060\u4FE1|\u4EBA\u8207\u58A8\u8005\u6587\u7AE0\u9032|\u4EBA\u5C07\u5DF1\u7B46\u6587\u7AE0\u9000|\u4ED6\u4EBA\u9001\u7B46\u4E3B\u624D\u9032|\u541B\u738B\u968A\u4F0D\u6709\u7570\u540D|\u5F97\u5927\u8D66\u8005\u5B85\u820D\u51F6|\u5C31\u4EBA\u535C\u6613\u4E3B\u75BE\u75C5|\u53D7\u4EBA\u7D19\u9322\u4E3B\u5927\u5409|\u516C\u5EA7\u79FB\u52D5\u4E3B\u9077\u5B98|\u53D7\u8077\u4E0A\u5B98\u8CA1\u7269\u4F86|\u4F69\u5370\u516C\u7235\u4E3B\u5927\u5409|\u4F69\u5370\u57F7\u7BC0\u4E3B\u79FB\u5C45|\u4F69\u5370\u4FE1\u8005\u540D\u8B7D\u51FA|\u7DE9\u5370\u6539\u9077\u751F\u8CB4\u5B50|\u7881\u5B50\u4E3B\u6DFB\u4E01\u9032\u53E3|\u6253\u7403\u8005\u4E3B\u5F97\u865B\u540D|\u5175\u99AC\u5165\u57CE\u798F\u797F\u81F3|\u7387\u773E\u7834\u8CCA\u6240\u6C42\u5F97|\u5728\u8ECD\u9663\u4E2D\u4E3B\u5927\u5409|\u5C07\u5352\u96A8\u884C\u4E3B\u559C\u4E8B|\u5F81\u4EBA\u521D\u51FA\u4E8B\u672A\u6210|\u5F81\u4EBA\u56DE\u8005\u4E3B\u75BE\u75C5|\u898B\u8ECD\u5175\u6557\u4E3B\u51F6\u4E8B|\u5DF1\u5C04\u4EBA\u5FC5\u4E3B\u9060\u884C|\u4EBA\u5C04\u5DF1\u6709\u884C\u4EBA\u81F3|\u6301\u5F13\u77E2\u8005\u4E3B\u5927\u5409|\u633D\u5F13\u65B7\u5F26\u4E3B\u51F6\u60E1|\u4EBA\u9001\u5F13\u5F29\u5F97\u4EBA\u529B|\u5F29\u5F26\u96E3\u4E0A\u5144\u5F1F\u6563|\u5F13\u5F29\u76F8\u9B25\u4E3B\u722D\u8AD6|\u6208\u925E\u6709\u5149\u797F\u4F4D\u81F3|\u62AB\u7532\u4ED7\u528D\u5F97\u9AD8\u5B98",
+    "\u54C0\u6A02\u75C5\u6B7B\u6B4C\u5531:\u8207\u4EBA\u54ED\u6CE3\u6709\u6176\u8CC0|\u653E\u8072\u5927\u54ED\u6B61\u6A02\u81F3|\u8EAB\u8457\u5B5D\u670D\u5B98\u797F\u81F3|\u9060\u4EBA\u4F86\u60B2\u6CE3\u4E3B\u51F6|\u5E8A\u4E0A\u54ED\u6CE3\u4E3B\u5927\u51F6|\u898B\u6B4C\u821E\u8005\u53E3\u820C\u81F3|\u5BB6\u4E2D\u6B61\u559C\u767E\u4E8B\u5409|\u61F7\u4E2D\u7435\u7436\u5F97\u4EBA\u52A9|\u4ED6\u4EBA\u8207\u7B1B\u6709\u540D\u8072|\u8207\u4EBA\u62CD\u677F\u6709\u53E3\u820C|\u5802\u4E0A\u6B4C\u6A02\u4E3B\u55AA\u4E8B|\u5439\u7B19\u8005\u4E3B\u6709\u66F4\u6539|\u5439\u7B1B\u6253\u9F13\u6709\u5409\u6176|\u4ED6\u4EBA\u4F5C\u6A02\u8A1F\u6709\u7406|\u9732\u9F52\u54ED\u8005\u6709\u722D\u8A1F|\u75C5\u81E5\u70BA\u4EBA\u6276\u52A0\u5B98|\u75C5\u91CD\u8005\u4E3B\u6709\u51F6\u4E8B|\u81EA\u75BE\u75C5\u8005\u4E3B\u6709\u559C|\u75C5\u4EBA\u6B4C\u5531\u4E3B\u5927\u51F6|\u75C5\u4EBA\u54ED\u7B11\u75BE\u75C5\u9664|\u75C5\u4EBA\u8D77\u8005\u5FC5\u5B9A\u6B7B|\u75C5\u4EBA\u88DD\u8ECA\u5FC5\u6B7B\u4EA1|\u6B7B\u4EBA\u54ED\u6CE3\u6709\u53E3\u820C|\u6B7B\u4EBA\u7ACB\u8005\u4E3B\u5927\u51F6|\u6B7B\u4EBA\u54ED\u61F7\u8005\u5F97\u8CA1|\u6B7B\u4EBA\u5FA9\u6D3B\u4E3B\u6709\u4FE1|\u898B\u4EBA\u6B7B\u81EA\u6B7B\u8005\u5409|\u5B50\u6B7B\u8005\u6709\u6DFB\u559C\u4E8B|\u898B\u5148\u4EA1\u5C0A\u9577\u5927\u5409|\u554F\u5F14\u4ED6\u4EBA\u4E3B\u751F\u5B50",
+    "\u4F5B\u9053\u50E7\u5C3C\u9B3C\u795E:\u8AF8\u4F5B\u83E9\u85A9\u5927\u5409\u5229|\u6CD5\u5E2B\u767B\u5EA7\u4E3B\u75BE\u75C5|\u8001\u541B\u771F\u5165\u7686\u4E3B\u5409|\u756B\u795E\u4F5B\u8005\u5F97\u4EBA\u6B3D|\u5165\u795E\u5EDF\u795E\u52D5\u5927\u5409|\u9020\u65DB\u84CB\u8005\u5927\u5409\u5229|\u50E7\u5E2B\u6559\u4EBA\u5538\u7D93\u5409|\u9053\u58EB\u5973\u51A0\u8A00\u8A9E\u5409|\u548C\u5C1A\u5C3C\u59D1\u770B\u7D93\u60B6|\u88AB\u795E\u9B3C\u6253\u5927\u4E0D\u7965|\u5802\u4E0A\u795E\u4F5B\u5927\u5409\u5229|\u795E\u4F5B\u4E0D\u6210\u5F62\u5927\u51F6|\u71D2\u9999\u79AE\u62DC\u7686\u5927\u5409|\u8FCE\u795E\u8CFD\u793E\u6709\u5916\u8CA1|\u4ED9\u8056\u5230\u5BB6\u798F\u797F\u81F3|\u8207\u9B3C\u9B25\u8005\u4E3B\u5EF6\u58FD|\u796D\u7940\u795E\u9053\u5927\u5409\u5229|\u8EAB\u53D7\u6212\u884C\u8005\u5B50\u5B5D|\u8207\u795E\u5973\u901A\u5F97\u8CB4\u5B50|\u8207\u5C3C\u59D1\u4EA4\u4E3B\u5931\u8CA1|\u770B\u795E\u4F5B\u8005\u59BB\u6709\u5B50|\u4F5B\u5171\u4EBA\u8A00\u6709\u798F\u52A9",
+    "\u88AB\u5BB3\u9B25\u50B7\u6253\u7F75:\u88AB\u4EBA\u6BBA\u5BB3\u8005\u5927\u5409|\u6BBA\u6B7B\u4ED6\u4EBA\u5927\u5BCC\u8CB4|\u6301\u5200\u81EA\u6BBA\u8005\u5927\u5409|\u6BBA\u4EBA\u8840\u6C61\u8863\u5F97\u8CA1|\u88AB\u5200\u523A\u706B\u51FA\u5FEB\u5229|\u6301\u5200\u76F8\u6BBA\u898B\u8840\u5409|\u5200\u50B7\u51FA\u8840\u4E3B\u9152\u98DF|\u780D\u523A\u898B\u8840\u4E3B\u5927\u5409|\u7099\u8EAB\u898B\u8840\u6D41\u5927\u5409|\u5200\u65A7\u81EA\u50B7\u4E3B\u5927\u5409|\u6301\u5200\u65AB\u4EBA\u81EA\u5931\u8CA1|\u4EBA\u780D\u982D\u8166\u4E2D\u4E8C\u5409|\u88AB\u4EBA\u6253\u8005\u4E3B\u5F97\u529B|\u88AB\u4EBA\u8173\u8E22\u4E3B\u6C42\u8CA1|\u6253\u59BB\u59BE\u8005\u4E3B\u5931\u529B|\u5BB6\u4E2D\u4EBA\u9B25\u4E3B\u5206\u6563|\u65B7\u982D\u800C\u884C\u4E3B\u5927\u559C|\u5973\u4EBA\u76F8\u6253\u4E3B\u75C5\u81F3|\u5144\u5F1F\u76F8\u6253\u5927\u5409\u5229|\u88AB\u59BB\u59BE\u6253\u4E3B\u51F6\u4E8B|\u770B\u898B\u6BBA\u4EBA\u4E3B\u5927\u5409|\u88AB\u4EBA\u7C3D\u523A\u5927\u5409\u660C|\u624B\u63AA\u6298\u8005\u4E3B\u5B50\u75C5|\u5411\u4EBA\u53E9\u982D\u767E\u4E8B\u5409|\u8207\u4EBA\u76F8\u7F75\u8005\u4E3B\u5409|\u88AB\u7F75\u4F6F\u985B\u5927\u8CB4\u81F3|\u88AB\u4EBA\u51CC\u8FB1\u4E3B\u5F97\u8CA1|\u6BBA\u8C6C\u8C56\u8005\u5927\u5409\u5229|\u6BBA\u7F8A\u6253\u7F8A\u4E3B\u75C5\u51F6|\u6BBA\u864E\u8C79\u4E3B\u5F97\u91CD\u5370|\u6BBA\u725B\u9E7F\u8005\u5927\u5BCC\u8CB4|\u6BBA\u725B\u98DF\u8089\u4E3B\u751F\u8CA1|\u6BBA\u9A62\u9A3E\u99AC\u6709\u9152\u98DF|\u6BBA\u9F9C\u8005\u4E3B\u6709\u55AA\u4E8B|\u6BBA\u9CE5\u96C0\u59BB\u59BE\u707D\u96E3|\u6BBA\u96DE\u9D5D\u9D28\u4E3B\u5927\u5409",
+    "\u6355\u7981\u5211\u7F70\u7344\u5177:\u7262\u7344\u5D29\u58DE\u6709\u8D66\u5409|\u5750\u7344\u4E2D\u5FC5\u6709\u6069\u8D66|\u5165\u7344\u611B\u707D\u4E3B\u69AE\u8CB4|\u7344\u4E2D\u6B7B\u8005\u5B98\u4E8B\u6563|\u4F7F\u4EBA\u5165\u7344\u5F97\u8CA1\u5409|\u5165\u7262\u7344\u4E3B\u6709\u5927\u8CB4|\u76DC\u8CCA\u81EA\u5165\u7344\u5927\u51F6|\u7262\u7344\u81ED\u6C61\u767E\u4E8B\u5409|\u7F6A\u4EBA\u8D70\u812B\u75BE\u75C5\u53BB|\u8D95\u8CCA\u884C\u898B\u8005\u5927\u5409|\u67B7\u92B7\u81E8\u8EAB\u75BE\u75C5\u81F3|\u67B7\u9396\u6298\u640D\u53E3\u820C\u6563|\u67B7\u9396\u5165\u5B85\u4E3B\u5927\u51F6|\u7E69\u7D22\u7E6B\u8EAB\u5927\u5409\u5229|\u8EAB\u88AB\u7F85\u7DB2\u4E3B\u5B98\u4E8B|\u88AB\u7F85\u7DB2\u7F69\u4E3B\u9152\u98DF|\u88AB\u4EBA\u6C7A\u7F70\u797F\u4F4D\u81F3|\u88AB\u4EBA\u4F5C\u8CE4\u8005\u5927\u5409|\u88AB\u4EBA\u7D81\u4F4F\u75BE\u75C5\u81F3|\u88AB\u5B98\u6253\u8EAB\u4E3B\u5B5D\u670D|\u81EA\u4EE5\u6756\u6C7A\u6065\u8FB1\u751F|\u67B7\u9396\u6015\u6016\u4E3B\u5206\u6563|\u5165\u5B98\u8A5E\u8A1F\u4E3B\u5927\u5409|\u9080\u4EBA\u5165\u5B98\u4E3B\u5927\u5409|\u540F\u5F15\u5165\u53F8\u4E3B\u5927\u5409|\u70BA\u540F\u6240\u9304\u6709\u6025\u4E8B|\u8CB4\u4EBA\u8D70\u99AC\u5B98\u4E8B\u660E|\u62F7\u8A0A\u6756\u8CAC\u4E3B\u5927\u5409",
+    "\u7530\u5712\u4E94\u6996\u8015\u7A2E:\u7530\u4E2D\u751F\u8349\u4E3B\u5F97\u8CA1|\u7A2E\u7530\u5EE3\u5927\u6709\u797F\u4F4D|\u81EA\u7A2E\u7530\u79BE\u4E3B\u51FA\u884C|\u898B\u7A2E\u7530\u8005\u797F\u4F4D\u81F3|\u6559\u4EBA\u8015\u7A2E\u9060\u884C\u81F3|\u4F7F\u4EBA\u7A2E\u7530\u5730\u5927\u5409|\u8CB7\u4EBA\u7530\u5B85\u4E3B\u9032\u8077|\u8EAB\u5728\u79BE\u4E2D\u5927\u5409\u5229|\u7834\u6557\u7530\u5730\u4E3B\u5927\u5409|\u5272\u6536\u7530\u79BE\u5BB6\u5C45\u5B89|\u5C4B\u4E0A\u751F\u79BE\u5B98\u4F4D\u5409|\u79BE\u82D7\u8C4A\u719F\u5BCC\u8CB4\u9577|\u898B\u9EA5\u7A3B\u4E3B\u5F97\u5927\u8CA1|\u7CB3\u7CBE\u7C73\u8005\u6709\u8CA1\u5409|\u4E94\u7A40\u8302\u76DB\u4E3B\u5F97\u8CA1|\u7A40\u7A57\u9F4A\u79C0\u5927\u5409\u5229|\u7C73\u8C37\u5806\u5409\u6563\u4E3B\u51F6|\u5927\u5C0F\u9EA5\u4E3B\u59BB\u79C1\u5FC3|\u5927\u8C46\u82D7\u8449\u5B50\u5B6B\u51F6|\u7C73\u9EA5\u76F8\u6392\u5927\u5409\u5229|\u5750\u81E5\u7C73\u9EA5\u4E3B\u5927\u5409|\u624B\u4E2D\u628A\u6996\u4E3B\u798F\u797F|\u5F97\u79BE\u6996\u8005\u4E3B\u5927\u5409|\u5F97\u79BE\u5FFD\u5931\u4E3B\u5F97\u5FD7|\u7C9F\u7C73\u5FC5\u6709\u737B\u7269\u81F3|\u7A2E\u83DC\u4E3B\u9577\u547D\u5927\u5409|\u55AC\u9EA5\u9EB5\u9905\u5B98\u4E8B\u9077|\u9EB5\u7CE0\u76F8\u4EA4\u5BB6\u6B32\u5109|\u6D93\u9EB4\u5FC5\u4E3B\u6789\u5C48\u4E8B|\u840C\u82BD\u8005\u4E3B\u60E1\u4E8B\u9023|\u9EBB\u53E2\u8EAB\u8005\u4E3B\u75BE\u81F3|\u9EBB\u751F\u5982\u6797\u5927\u5409\u5229",
+    "\u6C34\u706B\u76DC\u8CCA\u71C8\u71ED:\u6C34\u4E0A\u884C\u8005\u4E3B\u5927\u5409|\u6C34\u4E0A\u7ACB\u8005\u4E3B\u51F6\u4E8B|\u6C34\u6D41\u6D0B\u6D0B\u6709\u65B0\u5A5A|\u6C34\u4E0A\u706B\u51FA\u4E3B\u5927\u5409|\u81EA\u5728\u6C34\u4E2D\u5927\u5409\u5229|\u81EA\u8DCC\u6C34\u4E2D\u4E0D\u51FA\u51F6|\u98F2\u6C34\u4E0D\u4F11\u5F97\u5927\u8CA1|\u6D41\u6C34\u9076\u8EAB\u6709\u7344\u8A1F|\u5927\u6C34\u6F84\u6E05\u5927\u5409\u5229|\u4EBA\u5BB6\u6709\u6C34\u5152\u5B50\u4EA1|\u6C5F\u6D77\u6F32\u6F2B\u5927\u5409\u660C|\u6CB3\u6C34\u6C99\u77F3\u76CA\u6587\u7AE0|\u706B\u71D2\u65E5\u6708\u6709\u4EBA\u52A9|\u706B\u71D2\u6CB3\u6C34\u9577\u547D\u5409|\u706B\u71D2\u5C71\u91CE\u5927\u986F\u9054|\u706B\u71D2\u81EA\u5C4B\u4E3B\u8208\u65FA|\u706B\u7130\u708E\u708E\u4E3B\u767C\u8CA1|\u706B\u5F9E\u5730\u751F\u75BE\u75C5\u81F3|\u57F7\u706B\u4E58\u884C\u5B98\u4F4D\u81F3|\u5927\u706B\u71D2\u5929\u4E3B\u570B\u5B89|\u8EAB\u5728\u706B\u4E2D\u8CB4\u4EBA\u6276|\u706B\u7159\u9ED1\u8272\u4E3B\u75BE\u75C5|\u628A\u706B\u884C\u8DEF\u5927\u901A\u9054|\u628A\u706B\u71D2\u4E95\u4E3B\u75BE\u75C5|\u5B85\u4E2D\u706B\u5149\u5927\u5409\u5229|\u5EDA\u4E2D\u706B\u51FA\u6709\u6025\u4E8B|\u807D\u9078\u71C3\u706B\u4F5C\u660E\u5E9C|\u71D2\u4EBA\u81ED\u7A62\u4E3B\u5927\u5409|\u898B\u71ED\u8005\u4E3B\u5927\u767C\u8CA1|\u71C8\u71ED\u5149\u660E\u4E3B\u5927\u5409|\u773E\u4EBA\u95C8\u7210\u548C\u5408\u5409|\u60E1\u4EBA\u76F8\u5F15\u75BE\u75C5\u81F3|\u8D95\u8CCA\u5165\u5E02\u4E0D\u51FA\u51F6|\u5F37\u8CCA\u5165\u5B85\u4E3B\u5BB6\u7834|\u8207\u8CCA\u540C\u884C\u5927\u5409\u5229|\u5DF1\u8EAB\u4F5C\u8CCA\u6240\u6C42\u5F97",
+    "\u57A2\u6C61\u6C90\u6D74\u51CC\u8FB1:\u5C3F\u5C4E\u6C61\u8EAB\u4E3B\u5F97\u8CA1|\u5927\u4FBF\u6EFF\u5730\u4E3B\u5BCC\u8CB4|\u8655\u5EC1\u4E2D\u5F97\u5B98\u797F\u4F4D|\u843D\u5EC1\u51FA\u5409\u4E0D\u51FA\u51F6|\u5EC1\u5C4B\u4E0A\u81E5\u4E3B\u5F97\u8CA1|\u5EC1\u4E2D\u4E7E\u8005\u4E3B\u5BB6\u7834|\u67B6\u5EC1\u5C4B\u4E3B\u6709\u8CA1\u559C|\u6311\u7CDE\u56DE\u5BB6\u5927\u5409\u5229|\u5728\u6CE5\u4E2D\u6240\u6C42\u4E0D\u6210|\u5931\u5927\u5C0F\u4FBF\u4E3B\u5931\u8CA1|\u6C61\u6CE5\u8863\u88F3\u4E3B\u7522\u51F6|\u6CE5\u6C61\u886B\u8863\u4E3B\u8EAB\u8FB1|\u7537\u5973\u6C90\u6D74\u4E0A\u5E8A\u51F6|\u6C90\u6D74\u5875\u571F\u75BE\u75C5\u5B89|\u6D17\u982D\u9077\u5C45\u75BE\u75C5\u9664|\u88AB\u8FB1\u7F75\u60F9\u4EBA\u8A5E\u8A1F",
+    "\u9F8D\u86C7\u79BD\u7378\u7B49\u985E:\u4E58\u9F8D\u5165\u6C34\u6709\u8CB4\u4F4D|\u9F8D\u7720\u6C34\u4E2D\u6C42\u4E8B\u9042|\u9F8D\u7576\u9580\u8005\u5927\u5409\u660C|\u9F8D\u6B7B\u4EA1\u4E3B\u5931\u8CB4\u4F4D|\u4E58\u9F8D\u4E0A\u5C71\u6240\u6C42\u9042|\u9F8D\u5165\u4E95\u4E2D\u5B98\u88AB\u8FB1|\u9F8D\u98DB\u6709\u5B98\u4F4D\u5927\u8CB4|\u4E58\u9F8D\u5165\u5E02\u4E3B\u8CB4\u4F4D|\u9F8D\u86C7\u5165\u9580\u4E3B\u5F97\u8CA1|\u9F8D\u86C7\u5165\u7076\u6709\u5B98\u81F3|\u86C7\u5316\u9F8D\u5F97\u8CB4\u4EBA\u52A9|\u5A66\u4EBA\u898B\u9F8D\u751F\u8CB4\u5B50|\u9F8D\u86C7\u6BBA\u4EBA\u4E3B\u5927\u51F6|\u86C7\u86DF\u4EBA\u4E3B\u5F97\u5927\u8CA1|\u86C7\u5165\u61F7\u4E2D\u751F\u8CB4\u5B50|\u86C7\u884C\u6C34\u5167\u4E3B\u69AE\u9077|\u86C7\u96A8\u4EBA\u53BB\u59BB\u5916\u5FC3|\u86C7\u5165\u8C37\u9053\u4E3B\u53E3\u820C|\u86C7\u9076\u8EAB\u8005\u751F\u8CB4\u5B50|\u86C7\u591A\u8005\u4E3B\u9670\u53F8\u4E8B|\u86C7\u8D64\u9ED1\u53E3\u820C\u9752\u5409|\u86C7\u9EC3\u767D\u4E3B\u6709\u5B98\u4E8B|\u9CF3\u51F0\u4E3B\u6709\u8CB4\u4EBA\u52A9|\u9CF3\u96C6\u638C\u4E0A\u6BCD\u75C5\u81F3|\u5B54\u96C0\u8005\u4E3B\u5927\u5409\u5229|\u9DB4\u4E0A\u5929\u4E3B\u5C0F\u53E3\u707D|\u9DB4\u9CF4\u8005\u797F\u4F4D\u5927\u986F|\u9DB4\u5165\u61F7\u4E2D\u751F\u8CB4\u5B50|\u9DB4\u99D5\u8ECA\u4E3B\u5F81\u4EE3\u4E8B|\u653E\u9DB4\u8005\u4E3B\u5F97\u8CA1\u5409|\u5B54\u96C0\u98DB\u821E\u6709\u6587\u7AE0|\u9E1A\u9D61\u5A66\u4EBA\u4E3B\u53E3\u820C|\u9D1B\u9D26\u6563\u53BB\u4E3B\u59BB\u51F6|\u9CE7\u5165\u5B85\u4E3B\u6709\u5927\u51F6|\u99D5\u9DC2\u8005\u4E3B\u797F\u4F4D\u81F3|\u9CE9\u9CF4\u8005\u5A66\u4EBA\u53E3\u820C|\u71D5\u98DB\u5165\u61F7\u59BB\u8CB4\u5B50|\u71D5\u5B50\u81F3\u6709\u9060\u5BA2\u4F86|\u7A7A\u4E2D\u9CE5\u9CF4\u4E3B\u59BB\u4EA1|\u98DB\u9CE5\u5165\u61F7\u7686\u4E3B\u5409|\u6349\u4F4F\u98DB\u9CE5\u9060\u4FE1\u81F3|\u96C0\u9F20\u722D\u9B25\u6709\u5B98\u4E8B|\u9D09\u96C0\u76F8\u566A\u4E3B\u9152\u98DF|\u9D5D\u9D28\u540C\u6E38\u6DFB\u597D\u59BE|\u9CE5\u8D74\u86C7\u4F86\u4EBA\u5F15\u85A6|\u6D17\u96DE\u5F97\u5B98\u9CF4\u53E3\u820C|\u96DE\u62B1\u5375\u4E3B\u6709\u5927\u559C|\u96DE\u5728\u6A39\u4E0A\u4E3B\u5F97\u8CA1|\u9E92\u9E9F\u8005\u540D\u9707\u5929\u4E0B|\u767D\u8C61\u6C5F\u8C6C\u5B98\u4F4D\u81F3|\u7345\u5B50\u53EB\u543C\u8072\u540D\u9707|\u731B\u864E\u5927\u543C\u4E3B\u5F97\u5B98|\u9A0E\u864E\u884C\u8005\u7121\u60E1\u4E8B|\u864E\u5165\u5B85\u4E2D\u5B98\u8077\u91CD|\u864E\u72FC\u4E0D\u52D5\u898B\u5B98\u5409|\u8C79\u72FC\u60E1\u72D7\u6709\u76DC\u8CCA|\u72FC\u5556\u8173\u8005\u4E3B\u4E0D\u5F97|\u99F1\u99DD\u8C79\u8C78\u5F97\u91CD\u5370|\u718A\u7F86\u4E3B\u8EAB\u751F\u8CB4\u5B50|\u7FA4\u5154\u4E0A\u5929\u5F97\u8CB4\u4F4D|\u7350\u9E7F\u5728\u5BB6\u5F97\u5B98\u797F|\u6D3B\u5154\u5728\u5712\u767E\u6182\u53BB|\u8C93\u6355\u9F20\u8005\u5927\u5F97\u8CA1|\u767D\u9F20\u5F15\u8DEF\u4EBA\u63D0\u651C|\u9F20\u54AC\u4EBA\u8863\u6240\u6C42\u5F97|\u9F20\u5927\u8D70\u4E3B\u6709\u559C\u4E8B|\u5C71\u7334\u4E3B\u6709\u722D\u8A1F\u7AEF|\u767D\u7334\u4E3B\u6709\u797F\u4F4D\u5F97",
+    "\u725B\u99AC\u8C6C\u7F8A\u516D\u755C:\u9EC3\u725B\u4F86\u5BB6\u4E3B\u5BCC\u8CB4|\u6C34\u725B\u4E3B\u5148\u7956\u7D22\u98DF|\u725B\u4E0A\u5C71\u5761\u5927\u5409\u660C|\u727D\u725B\u4E0A\u5C71\u4E3B\u5BCC\u8CB4|\u725B\u89D2\u6709\u8840\u4E3B\u4E09\u516C|\u725B\u89F8\u4EBA\u51E1\u4E8B\u4E0D\u6210|\u725B\u51FA\u9580\u597D\u4E8B\u7ACB\u81F3|\u6C34\u725B\u4F86\u5BB6\u4E3B\u55AA\u4E8B|\u725B\u751F\u72A2\u6240\u6C42\u7686\u5F97|\u9A0E\u725B\u5165\u57CE\u6709\u559C\u81E8|\u99AC\u821E\u5EAD\u524D\u51F6\u4E8B\u6563|\u727D\u725B\u7F8A\u4F86\u5BB6\u6B61\u6A02|\u99AC\u884C\u5343\u91CC\u5927\u559C\u81F3|\u4E58\u99AC\u5FEB\u5409\u920D\u4E3B\u51F6|\u8D70\u99AC\u4F86\u5F80\u6587\u66F8\u4E8B|\u99AC\u99DD\u9322\u7269\u5931\u797F\u4F4D|\u99AC\u5165\u5BA4\u4E3B\u5978\u60C5\u4E8B|\u62AB\u6D17\u653E\u99AC\u7686\u559C\u4E8B|\u7FA4\u99AC\u5954\u9060\u767E\u51F6\u89E3|\u7F6A\u4EBA\u8D70\u99AC\u5384\u4E8B\u53BB|\u88AB\u99AC\u54AC\u6709\u797F\u4F4D\u81F3|\u4E58\u767D\u99AC\u8005\u4E3B\u75BE\u75C5|\u9A0E\u9A62\u9A3E\u4E3B\u5F97\u8CA1\u5409|\u6BBA\u8C6C\u5409\u8C6C\u81EA\u6B7B\u51F6|\u8C6C\u8C5A\u8B8A\u4EBA\u5B98\u4E8B\u81F3|\u7F8A\u4F5C\u8C5A\u884C\u884C\u4EBA\u81F3|\u8C6C\u7F8A\u6414\u7662\u4E3B\u53E3\u820C|\u9A0E\u7F8A\u4E0A\u8857\u4E3B\u5F97\u8CA1|\u5B50\u6BCD\u7F8A\u76CA\u547D\u5927\u5409|\u72AC\u5420\u4EBA\u9B3C\u4F86\u6C42\u98DF|\u72AC\u5420\u4E3B\u4EBA\u5931\u8CA1\u51F6|\u5C4B\u4E2D\u751F\u99AC\u4E3B\u5927\u5409",
+    "\u9F9C\u9C49\u9B5A\u8766\u6606\u87F2:\u9F9C\u5165\u4E95\u5B85\u5BCC\u8CB4\u81F3|\u9F9C\u86C7\u76F8\u540C\u4E3B\u751F\u8CA1|\u898B\u9F9C\u8005\u4E3B\u5973\u4EBA\u8CB4|\u6349\u9F9C\u8005\u4E3B\u55AA\u4E8B\u81F3|\u898B\u9C49\u8005\u4E3B\u6709\u5F97\u8CA1|\u9B5A\u98DB\u6C34\u4E0A\u767E\u4E8B\u6563|\u4E95\u5167\u6709\u9B5A\u9077\u5B98\u81F3|\u5F35\u7DB2\u6355\u9B5A\u5927\u5409\u5229|\u4EBA\u6355\u9B5A\u4E3B\u98DF\u7686\u5409|\u6436\u9B5A\u98DF\u9B5A\u4E3B\u5C0F\u75BE|\u6C34\u4E2D\u91E3\u9B5A\u5927\u5409\u5229|\u6797\u4E2D\u9B5A\u7375\u4E8B\u7121\u6210|\u7FA4\u9B5A\u6E38\u6C34\u4E3B\u6709\u8CA1|\u9BC9\u9B5A\u59BB\u6709\u5B55\u5927\u5409|\u5927\u9B5A\u63DA\u52D5\u4E3B\u8072\u540D|\u5C0F\u9B5A\u751F\u5B50\u5927\u5409\u5229|\u4E7E\u9B5A\u4E0B\u6C34\u547D\u5FA9\u901A|\u8766\u8B8A\u9B5A\u4E3B\u5931\u8CA1\u7269|\u8EAB\u5750\u9B5A\u87F2\u75C5\u60A3\u9664|\u8783\u87F9\u4E3B\u767E\u75C5\u6D88\u6563|\u8766\u86E4\u9CF4\u8D70\u6709\u53E3\u820C|\u6C34\u86ED\u4E3B\u5973\u4EBA\u5931\u8CA1|\u87BA\u8784\u4E3B\u5728\u5916\u4E0D\u5229|\u86E4\u870A\u4E3B\u8001\u4F86\u751F\u5B50|\u98DB\u86FE\u5165\u71C8\u4ED6\u4EBA\u6557|\u86A4\u98DB\u4E0D\u7E6D\u4E3B\u5C0F\u5409|\u8702\u8776\u4EA4\u6232\u4E8B\u4E0D\u6210|\u8702\u87AB\u4EBA\u8173\u6709\u8CA1\u559C|\u8723\u870B\u4F5C\u5806\u4E3B\u5931\u8CA1|\u873B\u8713\u5C0D\u98DB\u7F8E\u4EBA\u4F86|\u4FC3\u7E54\u8072\u7E41\u6709\u5C0F\u60F1|\u8759\u8760\u7FA4\u98DB\u9670\u4E8B\u9577|\u8708\u86A3\u54AC\u4EBA\u58FD\u547D\u5409|\u8713\u86B0\u4E3B\u6709\u5C0F\u8CA1\u5409|\u86AF\u8693\u4E3B\u7530\u5B85\u5927\u5409|\u868A\u5B50\u54AC\u4EBA\u4E3B\u6709\u5931|\u8805\u6C78\u4EBA\u8863\u5FC5\u6709\u8B92|\u87BB\u87C8\u4E3B\u6709\u4E0D\u660E\u4E8B"
+  ];
+  static ENTRIES = [];
+  static CATEGORIES = [];
+  static isInit = false;
+  index;
+  static init() {
+    if (DreamOracle.isInit) {
+      return;
+    }
+    for (let i = 0; i < DreamOracle.CATEGORY_DATA.length; i++) {
+      const item = DreamOracle.CATEGORY_DATA[i];
+      const p = item.indexOf(":");
+      const category = item.substring(0, p);
+      const entries = item.substring(p + 1).split("|");
+      for (let j = 0; j < entries.length; j++) {
+        DreamOracle.CATEGORIES.push(category);
+        DreamOracle.ENTRIES.push(entries[j]);
+      }
+    }
+    DreamOracle.isInit = true;
+  }
+  constructor(index) {
+    super();
+    this.index = index;
+  }
+  /**
+   * 逐日一则，同日同条
+   */
+  static of(solarDay) {
+    DreamOracle.init();
+    const n = (solarDay.getYear() * 373 + solarDay.getMonth() * 37 + solarDay.getDay()) % DreamOracle.ENTRIES.length;
+    return new DreamOracle(n);
+  }
+  static fromIndex(index) {
+    DreamOracle.init();
+    return new DreamOracle(index % DreamOracle.ENTRIES.length);
+  }
+  static getSize() {
+    DreamOracle.init();
+    return DreamOracle.ENTRIES.length;
+  }
+  static getCategories() {
+    DreamOracle.init();
+    return DreamOracle.CATEGORY_DATA.map((item) => item.substring(0, item.indexOf(":")));
+  }
+  getIndex() {
+    return this.index;
+  }
+  getCategory() {
+    DreamOracle.init();
+    return DreamOracle.CATEGORIES[this.index];
+  }
+  /**
+   * 原文断语
+   */
+  getText() {
+    DreamOracle.init();
+    return DreamOracle.ENTRIES[this.index];
+  }
+  getDream() {
+    const text = this.getText();
+    const i = DreamOracle.splitIndex(text);
+    return i < 0 ? text : text.substring(0, i);
+  }
+  getInterpretation() {
+    const text = this.getText();
+    const i = DreamOracle.splitIndex(text);
+    return i < 0 ? "" : text.substring(i);
+  }
+  static splitIndex(text) {
+    let i = text.indexOf("\u4E3B");
+    if (i > 0) {
+      return i;
+    }
+    i = -1;
+    const marks = ["\u5927\u5409", "\u5927\u51F6", "\u5409", "\u51F6"];
+    for (let k = 0; k < marks.length; k++) {
+      const j = text.indexOf(marks[k], 2);
+      if (j > 0 && (i < 0 || j < i)) {
+        i = j;
+      }
+    }
+    return i;
+  }
+  getName() {
+    return this.getText();
+  }
+  toString() {
+    const text = this.getInterpretation();
+    return text ? `\u68A6\u89C1\uFF1A${this.getDream()}\u3000\u89E3\uFF1A${text}` : this.getText();
+  }
+}
+class NameSuggestion extends AbstractCulture {
+  surname;
+  givenName;
+  elements;
+  meaning;
+  constructor(surname, givenName, elements, meaning) {
+    super();
+    this.surname = surname;
+    this.givenName = givenName;
+    this.elements = elements;
+    this.meaning = meaning;
+  }
+  getSurname() {
+    return this.surname;
+  }
+  getGivenName() {
+    return this.givenName;
+  }
+  getFullName() {
+    return this.surname + this.givenName;
+  }
+  getElements() {
+    return this.elements;
+  }
+  getMeaning() {
+    return this.meaning;
+  }
+  getName() {
+    return this.getFullName();
+  }
+  toString() {
+    return `${this.getFullName()}\uFF08${this.meaning}\uFF09`;
+  }
+}
+class Naming {
+  /**
+   * 字|五行|字义|性别（0 通用、1 男、2 女）
+   */
+  static CHARS = [
+    "\u6850|\u6728|\u68A7\u6850\uFF0C\u9AD8\u6D01\u633A\u62D4|0",
+    "\u6960|\u6728|\u6960\u6728\uFF0C\u575A\u5B9E\u8D35\u91CD|0",
+    "\u6977|\u6728|\u6977\u6A21\uFF0C\u7AEF\u6B63\u53EF\u6CD5|1",
+    "\u695A|\u6728|\u695A\u695A\uFF0C\u6E05\u79C0\u660E\u6670|0",
+    "\u67CF|\u6728|\u67CF\u6728\uFF0C\u5C81\u5BD2\u957F\u9752|1",
+    "\u68EE|\u6728|\u6797\u6728\uFF0C\u7E41\u8302\u660C\u76DB|1",
+    "\u8363|\u6728|\u8363\u534E\uFF0C\u663E\u8FBE\u5174\u65FA|1",
+    "\u8431|\u6728|\u8431\u8349\uFF0C\u5FD8\u5FE7\u5B89\u548C|2",
+    "\u82B8|\u6728|\u82B8\u9999\uFF0C\u6E05\u96C5\u81EA\u6301|2",
+    "\u82B7|\u6728|\u767D\u82B7\uFF0C\u82AC\u82B3\u9AD8\u6D01|2",
+    "\u82E5|\u6728|\u675C\u82E5\uFF0C\u6E29\u5A49\u8212\u5F90|2",
+    "\u831C|\u6728|\u831C\u8349\uFF0C\u660E\u8273\u53EF\u4EBA|2",
+    "\u715C|\u706B|\u5149\u8000\uFF0C\u660E\u4EAE\u7167\u4EBA|1",
+    "\u70E8|\u706B|\u706B\u5149\uFF0C\u76DB\u660E\u707F\u70C2|0",
+    "\u714A|\u706B|\u6E29\u6696\uFF0C\u58F0\u52BF\u663E\u8D6B|1",
+    "\u7199|\u706B|\u548C\u4E50\uFF0C\u5149\u660E\u7199\u7136|0",
+    "\u5F64|\u706B|\u6731\u7EA2\uFF0C\u70ED\u70C8\u9C9C\u660E|2",
+    "\u65ED|\u706B|\u671D\u9633\uFF0C\u521D\u5347\u6709\u671B|1",
+    "\u6657|\u706B|\u5929\u5C06\u660E\uFF0C\u542B\u5149|0",
+    "\u6674|\u706B|\u6674\u6717\uFF0C\u5F00\u6717\u660E\u51C0|2",
+    "\u662D|\u706B|\u663E\u8457\uFF0C\u8D24\u660E\u662D\u5F70|0",
+    "\u66DC|\u706B|\u65E5\u6708\u4E4B\u8F89\uFF0C\u5149\u8000|1",
+    "\u66E6|\u706B|\u6668\u5149\uFF0C\u71B9\u5FAE\u521D\u7167|0",
+    "\u7075|\u706B|\u7075\u79C0\uFF0C\u806A\u6167\u654F\u6377|2",
+    "\u5764|\u571F|\u5764\u539A\u8F7D\u7269\uFF0C\u5BBD\u5B8F|1",
+    "\u579A|\u571F|\u5C71\u9AD8\u800C\u7A33\uFF0C\u539A\u91CD|0",
+    "\u57F9|\u571F|\u57F9\u690D\uFF0C\u539A\u5FB7\u8F7D\u7269|1",
+    "\u57CE|\u571F|\u57CE\u6C60\uFF0C\u575A\u56FA\u53EF\u5B88|1",
+    "\u5747|\u571F|\u5747\u5E73\uFF0C\u4E2D\u6B63\u4E0D\u504F|0",
+    "\u58A8|\u571F|\u7FF0\u58A8\uFF0C\u6587\u96C5\u6709\u81F4|1",
+    "\u5723|\u571F|\u5723\u660E\uFF0C\u901A\u8FBE\u4E8B\u7406|0",
+    "\u5C9A|\u571F|\u5C71\u96FE\uFF0C\u6E05\u5E7D\u7F25\u7F08|0",
+    "\u5CF0|\u571F|\u5C71\u5CF0\uFF0C\u9AD8\u8FDC\u72EC\u7ACB|1",
+    "\u5CFB|\u571F|\u5CFB\u62D4\uFF0C\u4E25\u6B63\u4E0D\u963F|1",
+    "\u5D07|\u571F|\u5D07\u9AD8\uFF0C\u666F\u4EF0\u6709\u5FB7|1",
+    "\u5CA9|\u571F|\u5CA9\u77F3\uFF0C\u521A\u6BC5\u4E0D\u79FB|1",
+    "\u94ED|\u91D1|\u94ED\u8BB0\uFF0C\u523B\u9AA8\u4E0D\u5FD8|1",
+    "\u9510|\u91D1|\u9510\u5229\uFF0C\u8FDB\u53D6\u6709\u4E3A|1",
+    "\u9526|\u91D1|\u9526\u7EE3\uFF0C\u534E\u7F8E\u7EDA\u70C2|0",
+    "\u94A7|\u91D1|\u6743\u8861\uFF0C\u7A33\u91CD\u5F97\u4F53|1",
+    "\u94C3|\u91D1|\u6E05\u94C3\uFF0C\u7075\u52A8\u60A6\u8033|2",
+    "\u94CE|\u91D1|\u6728\u94CE\uFF0C\u8B66\u9192\u4E16\u4EBA|1",
+    "\u946B|\u91D1|\u4E09\u91D1\u76F8\u53E0\uFF0C\u5174\u65FA|1",
+    "\u94EE|\u91D1|\u94EE\u7136\uFF0C\u521A\u76F4\u4E0D\u66F2|1",
+    "\u94B0|\u91D1|\u73CD\u5B9D\uFF0C\u575A\u6DA6|0",
+    "\u745C|\u91D1|\u7F8E\u7389\uFF0C\u7455\u4E0D\u63A9\u745C|0",
+    "\u741B|\u91D1|\u73CD\u5B9D\uFF0C\u8D35\u91CD|1",
+    "\u745E|\u91D1|\u7965\u745E\uFF0C\u5409\u5E86|0",
+    "\u6CFD|\u6C34|\u6069\u6CFD\uFF0C\u6DA6\u7269\u65E0\u58F0|1",
+    "\u6D0B|\u6C34|\u6C6A\u6D0B\uFF0C\u5BBD\u5E7F\u65E0\u6DAF|0",
+    "\u6D69|\u6C34|\u6D69\u8361\uFF0C\u6B63\u5927\u5149\u660E|1",
+    "\u6DA6|\u6C34|\u6E29\u6DA6\uFF0C\u6ECB\u517B\u6709\u5EA6|0",
+    "\u6E05|\u6C34|\u6E05\u6F88\uFF0C\u9AD8\u6D01\u81EA\u5B88|0",
+    "\u6DB5|\u6C34|\u6DB5\u517B\uFF0C\u5305\u5BB9\u6DF1\u539A|0",
+    "\u6D01|\u6C34|\u6D01\u767D\uFF0C\u5B88\u8EAB\u5982\u7389|2",
+    "\u6DF3|\u6C34|\u6DF3\u539A\uFF0C\u8D28\u6734\u65E0\u534E|0",
+    "\u6E0A|\u6C34|\u6DF1\u6E0A\uFF0C\u535A\u5B66\u6C89\u9759|1",
+    "\u6EAA|\u6C34|\u6EAA\u6D41\uFF0C\u67D4\u97E7\u4E0D\u7EDD|0",
+    "\u6C50|\u6C34|\u6F6E\u6C50\uFF0C\u5E94\u65F6\u6709\u4FE1|2",
+    "\u6C90|\u6C34|\u6C90\u6D74\uFF0C\u627F\u6069\u53D7\u6DA6|0"
+  ];
+  static ELEMENTS = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
+  /**
+   * 八字五行分析
+   */
+  static analyze(eightChar) {
+    return ElementBalance.fromEightChar(eightChar);
+  }
+  /**
+   * 依喜用五行取双字名
+   *
+   * @param surname 姓氏
+   * @param eightChar 生辰八字
+   * @param gender 性别，用于筛选偏女性或偏男性用字
+   * @param count 返回条数
+   */
+  static suggest(surname, eightChar, gender, count = 6) {
+    const balance = ElementBalance.fromEightChar(eightChar);
+    const favorable = balance.getFavorable();
+    const pools = [];
+    for (let i = 0; i < favorable.length; i++) {
+      pools.push(Naming.getChars(favorable[i], gender));
+    }
+    const l = [];
+    for (let i = 0; i < pools.length && l.length < count; i++) {
+      const secondPool = pools[(i + 1) % pools.length];
+      if (pools[i].length === 0 || secondPool.length === 0) {
         continue;
       }
-      if (line === "END:VEVENT") {
-        if (fields && fields["DTSTART"]) {
-          events.push(IcsCalendar.build(fields));
+      for (let j = 0; j < pools[i].length && l.length < count; j++) {
+        const first = pools[i][j];
+        const second = secondPool[j % secondPool.length];
+        if (second === first || surname.indexOf(first) > -1 || surname.indexOf(second) > -1) {
+          continue;
         }
-        fields = null;
-        continue;
-      }
-      if (!fields) {
-        continue;
-      }
-      const p = line.indexOf(":");
-      if (p < 0) {
-        continue;
-      }
-      const key = line.substring(0, p).split(";")[0].toUpperCase();
-      fields[key] = line.substring(p + 1);
-    }
-    return new IcsCalendar(events);
-  }
-  static build(fields) {
-    return new IcsEvent(
-      IcsCalendar.unescape(fields["SUMMARY"] || ""),
-      IcsCalendar.parseDate(fields["DTSTART"]),
-      fields["DTEND"] ? IcsCalendar.parseDate(fields["DTEND"]) : null,
-      fields["RRULE"] || "",
-      fields["UID"] || "",
-      IcsCalendar.unescape(fields["LOCATION"] || ""),
-      IcsCalendar.unescape(fields["DESCRIPTION"] || "")
-    );
-  }
-  /**
-   * 还原 iCalendar 文本转义
-   */
-  static unescape(text) {
-    return text.replace(/\\n/gi, "\n").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\");
-  }
-  static parseDate(value) {
-    const s = value.replace(/[^0-9]/g, "");
-    return SolarDay.fromYmd(parseInt(s.substring(0, 4), 10), parseInt(s.substring(4, 6), 10), parseInt(s.substring(6, 8), 10));
-  }
-  getEvents() {
-    return this.events;
-  }
-  /**
-   * 可表达为 tyme 循环事件者
-   */
-  toTymeEvents() {
-    const l = [];
-    for (let i = 0; i < this.events.length; i++) {
-      const e = this.toTymeEvent(this.events[i]);
-      if (e) {
-        l.push(e);
+        l.push(Naming.build(surname, first, second));
       }
     }
     return l;
   }
-  toTymeEvent(event) {
-    const start = event.getStart();
-    const rule = {};
-    const rrule = event.getRrule();
-    if (!rrule) {
-      return null;
+  static build(surname, first, second) {
+    const elements = [];
+    const meanings = [];
+    const chars = [first, second];
+    for (let i = 0; i < chars.length; i++) {
+      const data = Naming.getCharData(chars[i]);
+      elements.push(Element.fromName(data[1]));
+      meanings.push(chars[i] + "\uFF1A" + data[2]);
     }
-    const parts = rrule.split(";");
-    for (let i = 0; i < parts.length; i++) {
-      const p = parts[i].indexOf("=");
-      rule[parts[i].substring(0, p).toUpperCase()] = parts[i].substring(p + 1);
-    }
-    if (rule["FREQ"] !== "YEARLY") {
-      return null;
-    }
-    const month = rule["BYMONTH"] ? parseInt(rule["BYMONTH"], 10) : start.getMonth();
-    const monthDay = rule["BYMONTHDAY"] || "";
-    const byDay = rule["BYDAY"] || "";
-    if (byDay) {
-      const m = /^(-?\d)([A-Z]{2})$/.exec(byDay);
-      if (!m) {
-        return null;
+    return new NameSuggestion(surname, first + second, elements, meanings.join("\uFF1B"));
+  }
+  static getCharData(char) {
+    for (let i = 0; i < Naming.CHARS.length; i++) {
+      if (Naming.CHARS[i].charAt(0) === char) {
+        return Naming.CHARS[i].split("|");
       }
-      const weeks = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-      return Event.builder().name(event.getName()).solarWeek(month, parseInt(m[1], 10), weeks.indexOf(m[2])).startYear(start.getYear()).build();
     }
-    const day = monthDay ? parseInt(monthDay.split(",")[0], 10) : start.getDay();
-    if (day < 1 || day > 31) {
-      return null;
+    throw new Error(`illegal char: ${char}`);
+  }
+  static getChars(element, gender) {
+    const l = [];
+    for (let i = 0; i < Naming.CHARS.length; i++) {
+      const data = Naming.CHARS[i].split("|");
+      if (data[1] !== Naming.ELEMENTS[element.getIndex()]) {
+        continue;
+      }
+      const g = parseInt(data[3], 10);
+      if (g !== 0 && g !== (gender === Gender.MAN ? 1 : 2)) {
+        continue;
+      }
+      l.push(data[0]);
     }
-    return Event.builder().name(event.getName()).solarDay(month, day, 0).startYear(start.getYear()).build();
+    return l;
   }
   /**
-   * 无法表达为循环事件者，返回其起始日
+   * 字库规模
    */
-  getOneOffDays() {
+  static getCharCount() {
+    return Naming.CHARS.length;
+  }
+}
+
+class DayAlmanac {
+  solarDay;
+  lunarDayCache;
+  sixtyCycleDayCache;
+  hoursCache;
+  constructor(solarDay) {
+    this.solarDay = solarDay;
+    this.lunarDayCache = null;
+    this.sixtyCycleDayCache = null;
+    this.hoursCache = null;
+  }
+  static fromSolarDay(solarDay) {
+    return new DayAlmanac(solarDay);
+  }
+  static fromYmd(year, month, day) {
+    return new DayAlmanac(SolarDay.fromYmd(year, month, day));
+  }
+  /**
+   * 以本地时区的年月日构造
+   */
+  static fromDate(date) {
+    return new DayAlmanac(SolarDay.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate()));
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getLunarDay() {
+    if (!this.lunarDayCache) {
+      this.lunarDayCache = this.solarDay.getLunarDay();
+    }
+    return this.lunarDayCache;
+  }
+  getSixtyCycleDay() {
+    if (!this.sixtyCycleDayCache) {
+      this.sixtyCycleDayCache = this.solarDay.getSixtyCycleDay();
+    }
+    return this.sixtyCycleDayCache;
+  }
+  /**
+   * 十二时辰，同一实例内复用
+   */
+  getHours() {
+    if (!this.hoursCache) {
+      this.hoursCache = this.getSixtyCycleDay().getHours();
+    }
+    return this.hoursCache;
+  }
+  getDuty() {
+    return this.getSixtyCycleDay().getDuty();
+  }
+  getDutyAdvice() {
+    return DutyAdvice.fromDuty(this.getDuty());
+  }
+  /**
+   * 日冲煞
+   */
+  getClash() {
+    return Clash.fromSixtyCycle(this.getSixtyCycleDay().getSixtyCycle());
+  }
+  /**
+   * 诸葛武侯出行择日
+   */
+  getWuHouDay() {
+    return WuHouDay.fromLunarDay(this.getLunarDay());
+  }
+  /**
+   * 月将
+   */
+  getMonthGeneral() {
+    return MonthGeneral.fromSolarDay(this.solarDay);
+  }
+  /**
+   * 神明诞辰，无则返回 null
+   */
+  getDeityFestival() {
+    return DeityFestival.fromLunarDay(this.getLunarDay());
+  }
+  /**
+   * 年肖号码
+   */
+  getYearZodiacNumbers() {
+    return ZodiacNumbers.fromLunarDay(this.getLunarDay());
+  }
+  /**
+   * 六合生肖号码，如「六合猪 07 19 31 43」
+   */
+  getCombineZodiacNumbers() {
+    const branch = this.getSixtyCycleDay().getSixtyCycle().getEarthBranch();
+    return ZodiacNumbers.of(this.getLunarDay().getYear(), branch.getCombine().getZodiac());
+  }
+  /**
+   * 三合生肖号码
+   */
+  getTriangleZodiacNumbers() {
+    const branches = this.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getTriangle();
     const l = [];
-    for (let i = 0; i < this.events.length; i++) {
-      if (!this.events[i].getRrule()) {
-        l.push(this.events[i].getStart());
+    for (let i = 0; i < branches.length; i++) {
+      l.push(ZodiacNumbers.of(this.getLunarDay().getYear(), branches[i].getZodiac()));
+    }
+    return l;
+  }
+  /**
+   * 旬空（空亡）
+   */
+  getVoidBranches() {
+    return this.getSixtyCycleDay().getSixtyCycle().getExtraEarthBranches();
+  }
+  /**
+   * 贵人时（天乙贵人所在时辰）
+   */
+  getNobleHours() {
+    const nobels = this.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getNoble();
+    const l = [];
+    const hours = this.getHours();
+    for (let i = 0; i < hours.length; i++) {
+      const branch = hours[i].getSixtyCycle().getEarthBranch();
+      for (let j = 0; j < nobels.length; j++) {
+        if (branch.getIndex() === nobels[j].getIndex()) {
+          l.push(hours[i]);
+          break;
+        }
       }
     }
     return l;
   }
   /**
-   * 无法转换为 tyme 事件者（非年度循环或循环规则不受支持）
+   * 吉时（黄道时辰）
    */
-  getUnsupported() {
+  getLuckyHours() {
     const l = [];
-    for (let i = 0; i < this.events.length; i++) {
-      if (!this.toTymeEvent(this.events[i])) {
-        l.push(this.events[i]);
+    const hours = this.getHours();
+    for (let i = 0; i < hours.length; i++) {
+      if (hours[i].getTwelveStar().getEcliptic().getLuck().getIndex() === 0) {
+        l.push(hours[i]);
+      }
+    }
+    return l;
+  }
+  /**
+   * 月破（日支冲月建）
+   */
+  isMonthBreak() {
+    const day = this.getSixtyCycleDay();
+    return day.getSixtyCycle().getEarthBranch().equals(day.getMonth().getEarthBranch().getOpposite());
+  }
+  /**
+   * 岁破（日支冲年支）
+   */
+  isYearBreak() {
+    const day = this.getSixtyCycleDay();
+    return day.getSixtyCycle().getEarthBranch().equals(day.getYear().getEarthBranch().getOpposite());
+  }
+  /**
+   * 天赦日：春月戊寅、夏月甲午、秋月戊申、冬月甲子
+   */
+  isHeavenlyPardon() {
+    const month = this.getSixtyCycleDay().getMonth().getEarthBranch().getIndex();
+    const season = ~~((month + 10) % 12 / 3);
+    return this.getSixtyCycleDay().getSixtyCycle().getName() === ["\u620A\u5BC5", "\u7532\u5348", "\u620A\u7533", "\u7532\u5B50"][season];
+  }
+  /**
+   * 四离日：春分、秋分、夏至、冬至前一日
+   */
+  isFourDeparture() {
+    const termDay = this.solarDay.next(1).getTermDay();
+    return termDay.getDayIndex() === 0 && termDay.getSolarTerm().getIndex() % 6 === 0;
+  }
+  /**
+   * 四绝日：立春、立夏、立秋、立冬前一日
+   */
+  isFourSeverance() {
+    const termDay = this.solarDay.next(1).getTermDay();
+    return termDay.getDayIndex() === 0 && termDay.getSolarTerm().getIndex() % 6 === 3;
+  }
+  /**
+   * 年家九宫飞星
+   */
+  getYearNineStarChart(forward = true) {
+    return NineStarChart.fromCenter(this.getSixtyCycleDay().getSixtyCycleMonth().getSixtyCycleYear().getNineStar(), forward);
+  }
+  /**
+   * 月家九宫飞星
+   */
+  getMonthNineStarChart(forward = true) {
+    return NineStarChart.fromCenter(this.getSixtyCycleDay().getSixtyCycleMonth().getNineStar(), forward);
+  }
+  /**
+   * 日家九宫飞星
+   */
+  getDayNineStarChart(forward = true) {
+    return NineStarChart.fromCenter(this.solarDay.getNineStar(), forward);
+  }
+  /**
+   * 时家九宫飞星
+   */
+  getHourNineStarChart(hour, forward = true) {
+    return NineStarChart.fromCenter(hour.getNineStar(), forward);
+  }
+  /**
+   * 农历月大小
+   */
+  getLunarMonthSize() {
+    return this.getLunarDay().getLunarMonth().getDayCount() === 30 ? "\u5927" : "\u5C0F";
+  }
+  /**
+   * 十二时辰吉凶
+   */
+  getHourFortunes() {
+    const hours = this.getHours();
+    const l = [];
+    for (let i = 0; i < hours.length; i++) {
+      l.push(HourFortune.fromSixtyCycleHour(hours[i]));
+    }
+    return l;
+  }
+  /**
+   * 某年命与今日的关系，对应通胜「日禄」「择日须知」两栏
+   */
+  getLifeRelation(birthYear) {
+    return LifeRelation.fromBirthYear(birthYear, this.getSixtyCycleDay().getSixtyCycle());
+  }
+  /**
+   * 十二生肖流月运程
+   */
+  getZodiacFortunes() {
+    const month = this.getSixtyCycleDay().getMonth();
+    const l = [];
+    for (let i = 0; i < 12; i++) {
+      l.push(ZodiacFortune.fromZodiac(Zodiac.fromIndex(i), month));
+    }
+    return l;
+  }
+  /**
+   * 今日吉数（规则推演，非原版数值）
+   */
+  getDailyNumbers(count = 6) {
+    return DailyNumbers.fromSixtyCycleDay(this.getSixtyCycleDay()).getNumbers(count);
+  }
+  /**
+   * 风水常识
+   */
+  getFengShuiTip() {
+    return FengShuiTip.of(this.solarDay);
+  }
+  /**
+   * 周公解梦，逐日一则
+   */
+  getDreamOracle() {
+    return DreamOracle.of(this.solarDay);
+  }
+  /**
+   * 民俗节日
+   */
+  getFolkFestivals() {
+    return FolkFestival.of(this.solarDay, this.getLunarDay());
+  }
+  /**
+   * 当日节日名（公历、农历、民俗），按名称去重
+   */
+  getFestivalNames() {
+    const l = [];
+    const solar = this.solarDay.getFestival();
+    if (solar) {
+      l.push(solar.getName());
+    }
+    const lunar = this.getLunarDay().getFestival();
+    if (lunar && l.indexOf(lunar.getName()) < 0) {
+      l.push(lunar.getName());
+    }
+    const folk = this.getFolkFestivals().getNames();
+    for (let i = 0; i < folk.length; i++) {
+      if (l.indexOf(folk[i]) < 0) {
+        l.push(folk[i]);
       }
     }
     return l;
