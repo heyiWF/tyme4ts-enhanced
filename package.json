@@ -21,7 +21,8 @@
     "js": "unbuild && node build-js.js",
     "gen:festivals": "python scripts/gen-festival-data.py",
     "verify:festivals": "node scripts/verify-festivals.mjs",
-    "audit:holidays": "node scripts/audit-holidays.mjs"
+    "audit:holidays": "node scripts/audit-holidays.mjs",
+    "gen:conformance": "node scripts/gen-conformance.mjs"
   },
   "homepage": "https://github.com/heyiWF/tyme4ts-enhanced",
   "repository": {

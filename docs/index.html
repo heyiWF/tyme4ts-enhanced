@@ -169,6 +169,12 @@ table.checks td.no{color:var(--red)}
 .sum-no{color:var(--red);font-weight:600}
 footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);font-size:12.5px}
 .hide{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 22px}
+.stats .s{background:var(--paper-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.stats .s b{display:block;font-family:var(--serif);font-size:26px;line-height:1.15}
+.stats .s span{display:block;font-size:11.5px;color:var(--ink-3);margin-top:3px;letter-spacing:.5px}
+.stats .s em{display:block;font-size:11px;color:var(--ink-3);font-style:normal;margin-top:5px;line-height:1.4}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
 .help{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--line);color:var(--ink-3);font-size:10px;cursor:help;margin-left:5px;vertical-align:middle;font-style:normal;line-height:1;user-select:none}
 .help:hover{border-color:var(--ink-3);color:var(--ink);background:#fff}
 #tip{position:fixed;z-index:99;max-width:330px;background:#fffdf6;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:12px 14px;font-size:12.5px;line-height:1.65;display:none}
@@ -438,6 +444,19 @@ const ics = c.toIcs(2025);</pre>
   <section id="page-data" class="doc hide">
     <h2>数据来源与许可</h2>
     <p>本项目只收录可考、可再分发的内容。凡无公开算法的栏目（原版吉数、三级时辰吉凶、出版社运程文案），一律标注为「推演」，不与原版数值混同。</p>
+
+    <div class="stats" id="data-stats"></div>
+
+    <h3>数据管线</h3>
+    <p>节日与节假日数据不是手抄的，而是「上游源码 → 生成 → 逐条比对」三步：</p>
+    <table class="t">
+      <tr><th>步骤</th><th>命令</th><th>作用</th></tr>
+      <tr><td>生成</td><td><code>npm run gen:festivals</code></td><td>解析 6tail/lunar-typescript 的 SolarUtil / LunarUtil / FotoUtil / TaoUtil，产出四张 TS 数据表与 JSON 快照</td></tr>
+      <tr><td>比对</td><td><code>npm run verify:festivals</code></td><td>把生成表与快照逐键逐值比对，缺失或差异即失败</td></tr>
+      <tr><td>审计</td><td><code>npm run audit:holidays</code></td><td>公告日与规则推算逐日比对，算出覆盖率并列出「规则多算」项</td></tr>
+      <tr><td>向量</td><td><code>npm run gen:conformance</code></td><td>生成 252 日 × 23 字段的跨语言验收向量，并由测试反向校验</td></tr>
+    </table>
+    <p class="note">2026-10 的审计结果：158 个公告日中 99 日（63%）可由规则算出；同时发现马来西亚三份公告文件漏列元旦，已修正。</p>
     <table class="t">
       <tr><th>内容</th><th>来源</th><th>许可 / 性质</th></tr>
       <tr><td>公历、农历、干支、节气、藏历、回历</td><td>6tail/tyme4ts；节气引自许剑伟《寿星天文历》</td><td>MIT</td></tr>
@@ -459,10 +478,10 @@ const ics = c.toIcs(2025);</pre>
   </section>
 </main>
 
-<footer><div class="wrap">Tyme Enhanced · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
+<footer><div class="wrap"><span id="ver"></span> · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
 
 <script type="module">
-import {DATASETS} from './holidays-data.js';
+import {DATASETS, VERSION} from './holidays-data.js';
 import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -699,9 +718,15 @@ function renderCards(a) {
 
   const days = HolidayCalendar.of(region).getDays(a.getSolarDay().getYear()).filter((h) => !h.getDay().isBefore(a.getSolarDay())).slice(0, 6);
   decorateHelp();
-  $('holiday').innerHTML = days.length
-    ? days.map((h) => `<div class="row"><b>${h.getDay().getMonth()}月${h.getDay().getDay()}日</b><span>${esc(h.getName())}</span></div>`).join('')
-    : '<span style="color:var(--ink-3);font-size:13px">本年已无更多假日</span>';
+  const rowHtml = (h) => `<div class="row"><b>${h.getDay().getMonth()}月${h.getDay().getDay()}日</b><span>${esc(h.getName())}</span></div>`;
+  if (days.length) {
+    $('holiday').innerHTML = days.map(rowHtml).join('');
+  } else {
+    // 本年已过完，接续显示次年首批
+    const nextYear = current.getFullYear() + 1;
+    const next = HolidayCalendar.of(region).getDays(nextYear).slice(0, 5);
+    $('holiday').innerHTML = `<div class="hint" style="margin-bottom:6px">本年已无更多假日，以下为 ${nextYear} 年首批</div>` + next.map(rowHtml).join('');
+  }
 
   $('numbers').textContent = a.getDailyNumbers().slice().sort((x, y) => x - y).map((n) => pad(n)).join(' ');
 
@@ -1137,6 +1162,24 @@ function renderRegionDetail() {
 }
 
 
+function renderData() {
+  const stat = Festivals.getStat();
+  const regions = HolidayCalendar.getRegions();
+  const stateCount = regions.filter((r) => r.indexOf('-') > -1).length;
+  const cards = [
+    ['节日来源', '8 类', '法定、传统、民俗、纪念、国际、宗教、节气、外历'],
+    ['佛历 / 道历', (stat.buddhist || 0) + ' / ' + (stat.taoist || 0), '因果犯忌与诸神圣诞的日期键数'],
+    ['民俗 / 神诞', (stat.folk || 0) + ' / ' + (stat.deity || 0), '农历月日键数，含《玉匣记》圣诞'],
+    ['公历纪念日', String(stat.anniversary || 0), '国际日与中国行业性纪念日'],
+    ['节假日地区', String(regions.length), '含 ' + stateCount + ' 个州省子地区'],
+    ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 63%，其余须逐年公告'],
+    ['单元测试', '566', '历法、择日、节日、节假日、ICS、取名'],
+    ['数据比对', '7 张表', '与 6tail 上游逐键逐值一致'],
+  ];
+  $('data-stats').innerHTML = cards.map((c) =>
+    `<div class="s"><b>${esc(c[1])}</b><span>${esc(c[0])}</span><em>${esc(c[2])}</em></div>`).join('');
+}
+
 const A = (y, m, d) => DayAlmanac.fromYmd(y, m, d);
 const name = (x) => (x ? x.getName() : '');
 
@@ -1397,6 +1440,7 @@ function activate(page, scroll) {
   if (page === 'regions') { renderRegionCards(); renderRegionDetail(); }
   if (page === 'calendars') { if (!$('cdate').value) $('cdate').value = todayStr(); renderCalendars(); }
   if (page === 'check') renderChecks();
+  if (page === 'data') renderData();
   if (scroll) window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
@@ -1410,6 +1454,7 @@ document.querySelectorAll('nav.tabs button').forEach((b) => {
 window.addEventListener('hashchange', () => activate(hashPage(), true));
 
 loadDatasets();
+if ($('ver')) $('ver').textContent = 'Tyme Enhanced v' + VERSION;
 initRegion();
 activate(hashPage(), false);
 setToday();

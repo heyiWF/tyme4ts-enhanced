@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-566%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-569%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -285,6 +285,16 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ## 十、移植到其他语言
 
+`data/conformance.json` 给出 **252 个日期 × 23 个字段**的固定输出（1900–2100，含基准日、闰月、闰年、世纪交界样本）。移植版读入该文件逐条比对即可验收，不必读 TypeScript 源码：
+
+```bash
+npm run build && npm run gen:conformance   # 重新生成向量
+```
+
+向量同时被 `test/ConformanceTest.ts` 反向校验，任何改动若改变了历史输出，测试立即失败。
+
+详见 [docs/PORTING.md](./docs/PORTING.md)。
+
 设计上刻意避免语言特性：只用整数、字符串、数组与类；无正则回溯依赖、无浮点累加、无本地化 API。`docs/PORTING.md` 给出：
 
 - 数据表编码格式（Event 九字符编码、神煞表、宜忌表、解梦表）；
@@ -305,7 +315,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ```bash
 npm i
-npm test          # 566 项测试
+npm test          # 569 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs

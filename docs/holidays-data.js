@@ -4,6 +4,8 @@
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
  * 覆盖 MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027。
  */
+export const VERSION = "1.8.0";
+
 export const DATASETS = [
  {
   "region": "MY",

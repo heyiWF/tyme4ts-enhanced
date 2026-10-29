@@ -415,3 +415,47 @@ index of 'A' = 10, '_' = 31, 'V' = 32 … 'z' = 62
 3. **闰月**：农历月以负数表示闰月（`-6` 即闰六月），所有按月循环的规则应使用绝对值。
 4. **节气年**：`SolarTerm(year, 0)` 为上一公历年的冬至，这是唯一的跨年错位，涉及「冬至」栏目时须特判。
 5. **精度**：`getSolarDay()` 用粗算值以保证性能，需要精确时刻时用 `getJulianDay().getSolarTime()`。
+
+---
+
+## 九、跨语言一致性向量
+
+`data/conformance.json` 是从 1900-01-01 起每隔 300 天取一个日期，另加基准日、闰月、闰年、世纪交界样本，共 **252 个日期 × 23 个字段**的固定输出。
+
+移植版只需读入该文件，逐条比对即可确认算法一致，无需读 TypeScript 源码：
+
+```json
+{
+ "solar": "2025-04-03",
+ "lunar": "农历乙巳年三月初六",
+ "lunarLeap": false,
+ "ganzhi": "乙巳己卯壬寅",
+ "term": "春分",
+ "termDayIndex": 14,
+ "duty": "闭",
+ "twelveStar": "青龙",
+ "mansion": "角蛟",
+ "nineStar": "九",
+ "clash": "冲猴(丙申)煞北",
+ "fetus": "仓库炉 房内南",
+ "wuhou": "始电",
+ "monthGeneral": "河魁",
+ "voidBranches": "辰巳",
+ "festivals": "寒食节、眼光娘娘圣诞、雷斋日",
+ "hijri": "1446年闪瓦鲁月4日",
+ "hebrew": "5785年尼散月5日",
+ "tithi": 6,
+ "indianMonth": "制怛罗月",
+ "cnHoliday": "",
+ "usHoliday": "",
+ "wuhouDay": "青龙头"
+}
+```
+
+各项语义见文件内 `fields` 说明。重新生成：
+
+```bash
+npm run build && npm run gen:conformance
+```
+
+生成结果由 `test/ConformanceTest.ts` 反向校验，任何改动若改变了这些输出，测试即失败——这也是升级算法时发现「无意改了历史结果」的闸门。

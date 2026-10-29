@@ -18,6 +18,7 @@ const files = readdirSync(DIR)
     .sort();
 
 const datasets = files.map((file) => JSON.parse(readFileSync(join(DIR, file), 'utf8')));
+const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 
 const header = `/**
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
@@ -25,6 +26,8 @@ const header = `/**
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
  * 覆盖 ${datasets.map((d) => d.region + '-' + d.year).join('、')}。
  */
+export const VERSION = ${JSON.stringify(pkg.version)};
+
 export const DATASETS = `;
 
 writeFileSync(OUT, header + JSON.stringify(datasets, null, 1) + ';\n', 'utf8');
@@ -34,4 +37,4 @@ for (const d of datasets) {
     byRegion[d.region] = (byRegion[d.region] || 0) + d.days.length;
 }
 console.log(`${OUT}: ${datasets.length} 个文件，` +
-    Object.keys(byRegion).map((r) => `${r} ${byRegion[r]} 日`).join('，'));
+    Object.keys(byRegion).map((r) => `${r} ${byRegion[r]} 日`).join('，') + `，v${pkg.version}`);

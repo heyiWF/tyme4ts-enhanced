@@ -12,7 +12,10 @@
 8. 新增 `HolidayCalendar.getRuleDays(year)`：只返回规则推算的假日，可与 `getDays()` 对照区分「算出来的」与「公告来的」。
 9. 新增 `scripts/audit-holidays.mjs` 与 `npm run audit:holidays`：对 158 个公告日逐日比对，当前覆盖率 63%；审计发现马来西亚三年公告文件漏列元旦，已补。
 10. 地区页显示本年覆盖率的实时说明。
-11. 测试 566 项通过。
+11. 新增 `data/conformance.json`（252 个日期 × 23 个字段）与 `scripts/gen-conformance.mjs`，作为跨语言移植的验收向量。
+12. 新增 `test/ConformanceTest.ts` 反向校验向量，防止重构无意改变历史输出。
+13. 数据页改为实时看板：八类来源规模、地区数、公告文件数、版本号。
+14. 测试 569 项通过。
 
 
 ## [1.7.1] - 2026-10-29
