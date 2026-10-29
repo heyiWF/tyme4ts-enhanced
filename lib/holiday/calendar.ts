@@ -1,6 +1,16 @@
 import {AbstractCulture} from '../core/base';
 import {LegalHoliday, SolarDay} from '../calendar/core';
 import {HolidayRule} from './rule';
+import {
+    austriaRules, belgiumRules, cyprusRules, czechRules, denmarkRules, finlandRules,
+    greeceRules, hungaryRules, icelandRules, irelandRules, norwayRules, polandRules,
+    portugalRules, romaniaRules, swedenRules, switzerlandRules, turkeyRules, ukraineRules,
+} from './regions/europe';
+import {egyptRules, indonesiaRules, kenyaRules, nigeriaRules, saudiRules, uaeRules} from './regions/asia';
+import {
+    bavariaExtra, californiaExtra, cataloniaExtra, newSouthWalesExtra,
+    newYorkExtra, ontarioExtra, scotlandExtra, texasExtra,
+} from './regions/subregions';
 
 /**
  * 节假日
@@ -118,6 +128,70 @@ export class HolidayCalendar {
                 return new HolidayCalendar(r, HolidayCalendar.indiaRules(), '仅列全国性节日；各邦与宗教节日另计。');
             case 'PH':
                 return new HolidayCalendar(r, HolidayCalendar.philippinesRules(), '全国法定假日核心；宗教节日以公告为准。');
+            case 'PL':
+                return new HolidayCalendar(r, polandRules(), '全国法定假日，含圣体节。');
+            case 'SE':
+                return new HolidayCalendar(r, swedenRules(), '全国法定假日；仲夏节、诸圣节为不早于指定日的星期六。');
+            case 'NO':
+                return new HolidayCalendar(r, norwayRules(), '全国法定假日，含宪法日。');
+            case 'DK':
+                return new HolidayCalendar(r, denmarkRules(), '全国法定假日；大祈祷日自 2024 年起取消。');
+            case 'FI':
+                return new HolidayCalendar(r, finlandRules(), '全国法定假日，含仲夏节与诸圣节。');
+            case 'IS':
+                return new HolidayCalendar(r, icelandRules(), '全国法定假日；夏季首日为四月十九日后的第一个星期四。');
+            case 'IE':
+                return new HolidayCalendar(r, irelandRules(), '公共假日；圣布里吉德节自 2023 年起为二月第一个星期一。');
+            case 'PT':
+                return new HolidayCalendar(r, portugalRules(), '全国法定假日，含圣体节。');
+            case 'CH':
+                return new HolidayCalendar(r, switzerlandRules(), '仅联邦法定假日；二十六州另有差异。');
+            case 'AT':
+                return new HolidayCalendar(r, austriaRules(), '全国法定假日，含圣体节。');
+            case 'BE':
+                return new HolidayCalendar(r, belgiumRules(), '全国法定假日。');
+            case 'CZ':
+                return new HolidayCalendar(r, czechRules(), '全国法定假日；耶稣受难日自 2016 年起。');
+            case 'HU':
+                return new HolidayCalendar(r, hungaryRules(), '全国法定假日；耶稣受难日自 2017 年起。');
+            case 'GR':
+                return new HolidayCalendar(r, greeceRules(), '全国法定假日；复活节相关节日按东正教复活节推算。');
+            case 'CY':
+                return new HolidayCalendar(r, cyprusRules(), '全国法定假日；复活节相关节日按东正教复活节推算。');
+            case 'RO':
+                return new HolidayCalendar(r, romaniaRules(), '全国法定假日；复活节与圣灵降临节按东正教历。');
+            case 'UA':
+                return new HolidayCalendar(r, ukraineRules(), '法定假日；近年节日调整频繁，以官方公告为准。');
+            case 'TR':
+                return new HolidayCalendar(r, turkeyRules(), '法定假日；开斋节、古尔邦节按算术历推算，观月可能差一日。');
+            case 'ID':
+                return new HolidayCalendar(r, indonesiaRules(), '全国法定假日核心；静居日、卫塞节依巴厘历与佛历，按年公布。');
+            case 'EG':
+                return new HolidayCalendar(r, egyptRules(), '全国法定假日；伊斯兰节日按算术历推算，观月可能差一日。');
+            case 'SA':
+                return new HolidayCalendar(r, saudiRules(), '全国法定假日；周末为周五、周六，伊斯兰节日以观月为准。');
+            case 'AE':
+                return new HolidayCalendar(r, uaeRules(), '全国法定假日；伊斯兰节日以观月为准。');
+            case 'NG':
+                return new HolidayCalendar(r, nigeriaRules(), '联邦法定假日；伊斯兰节日以观月为准。');
+            case 'KE':
+                return new HolidayCalendar(r, kenyaRules(), '全国法定假日；开斋节以观月为准。');
+            case 'US-CA':
+                return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(californiaExtra()), '联邦法定假日 + 加州塞萨尔·查韦斯日；县市假另计。', 1);
+            case 'US-NY':
+                return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(newYorkExtra()), '联邦法定假日 + 纽约州林肯诞辰；市假另计。', 1);
+            case 'US-TX':
+                return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(texasExtra()), '联邦法定假日 + 得州独立日与圣哈辛托日。', 1);
+            case 'DE-BY':
+                return new HolidayCalendar(r, HolidayCalendar.germanyRules().concat(bavariaExtra()), '全德法定假日 + 巴伐利亚州宗教节日。');
+            case 'GB-SCT':
+                return new HolidayCalendar(r, HolidayCalendar.britainRules().concat(scotlandExtra()), '苏格兰银行假日，含一月二日与圣安德烈节。', 3);
+            case 'AU-NSW':
+                return new HolidayCalendar(r, HolidayCalendar.australiaRules().concat(newSouthWalesExtra()), '澳大利亚全国假日 + 新南威尔士州银行假日与劳动节。', 3);
+            case 'CA-ON':
+                return new HolidayCalendar(r, HolidayCalendar.canadaRules().concat(ontarioExtra()), '加拿大联邦假日 + 安大略省家庭日与公民假日。', 3);
+            case 'ES-CT':
+                return new HolidayCalendar(r, HolidayCalendar.spainRules().concat(cataloniaExtra()), '西班牙全国假日 + 加泰罗尼亚圣约翰节、加泰罗尼亚日、圣斯蒂芬节。');
             default:
                 throw new Error(`illegal region: ${region}`);
         }
@@ -126,7 +200,11 @@ export class HolidayCalendar {
     static getRegions(): string[] {
         return ['CN', 'HK', 'MO', 'TW', 'JP', 'KR', 'VN', 'SG', 'MY', 'TH',
             'US', 'GB', 'CA', 'AU', 'NZ', 'DE', 'FR', 'IT', 'ES', 'NL',
-            'BR', 'MX', 'RU', 'ZA', 'IN', 'PH'];
+            'BR', 'MX', 'RU', 'ZA', 'IN', 'PH',
+            'PL', 'SE', 'NO', 'DK', 'FI', 'IS', 'IE', 'PT', 'CH', 'AT',
+            'BE', 'CZ', 'HU', 'GR', 'CY', 'RO', 'UA', 'TR',
+            'ID', 'EG', 'SA', 'AE', 'NG', 'KE',
+            'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT'];
     }
 
     /**

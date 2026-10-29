@@ -12,7 +12,8 @@ export enum HolidayType {
     TERM_STEM = 5,
     HEBREW = 6,
     HIJRI = 7,
-    ORTHODOX_EASTER = 8
+    ORTHODOX_EASTER = 8,
+    WEEK_AFTER = 9
 }
 
 /**
@@ -124,9 +125,22 @@ export class HolidayRule extends AbstractCulture {
         return o;
     }
 
-    static easter(offset: number, name: string): HolidayRule {
+    /**
+     * 某月某日之后的第一个星期几，用于仲夏节、诸圣节一类「不早于某日」的节日
+     */
+    static weekAfter(month: number, day: number, week: number, name: string, startYear: number = 1): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.WEEK_AFTER, name);
+        o.month = month;
+        o.day = day;
+        o.week = week;
+        o.startYear = startYear;
+        return o;
+    }
+
+    static easter(offset: number, name: string, startYear: number = 1): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.EASTER, name);
         o.offset = offset;
+        o.startYear = startYear;
         return o;
     }
 
@@ -202,6 +216,10 @@ export class HolidayRule extends AbstractCulture {
                 return HolidayRule.getEasterDay(year).next(this.offset);
             case HolidayType.WEEK:
                 return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+            case HolidayType.WEEK_AFTER: {
+                const start: SolarDay = SolarDay.fromYmd(year, this.month, this.day);
+                return start.next(start.getWeek().stepsTo(this.week));
+            }
             case HolidayType.HEBREW: {
                 let d: SolarDay;
                 if (this.offset === 3) {
