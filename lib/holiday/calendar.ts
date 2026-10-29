@@ -73,7 +73,23 @@ export class HolidayCalendar {
         this.note = note;
     }
 
+    protected static INSTANCES: { [region: string]: HolidayCalendar } = {};
+
+    /**
+     * 取地区日历，实例按地区缓存，避免逐日重复构造
+     */
     static of(region: string): HolidayCalendar {
+        const key: string = region.toUpperCase();
+        const hit: HolidayCalendar = HolidayCalendar.INSTANCES[key];
+        if (hit) {
+            return hit;
+        }
+        const c: HolidayCalendar = HolidayCalendar.create(key);
+        HolidayCalendar.INSTANCES[key] = c;
+        return c;
+    }
+
+    protected static create(region: string): HolidayCalendar {
         const r: string = region.toUpperCase();
         switch (r) {
             case 'CN':
@@ -671,7 +687,7 @@ export class HolidayCalendar {
 
     static fromJson(json: string): HolidayCalendar {
         const o: { region?: string } = JSON.parse(json);
-        const c: HolidayCalendar = HolidayCalendar.of(o.region || 'CN');
+        const c: HolidayCalendar = HolidayCalendar.create(o.region || 'CN');
         c.importJson(json);
         return c;
     }

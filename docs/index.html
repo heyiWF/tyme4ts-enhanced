@@ -167,6 +167,25 @@ table.checks td.no{color:var(--red)}
 .sum-no{color:var(--red);font-weight:600}
 footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);font-size:12.5px}
 .hide{display:none}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.cats label{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:14px;font-size:12.5px;color:var(--ink-3);cursor:pointer;background:var(--paper-2)}
+.cats label.on{color:var(--ink);border-color:var(--ink-3);background:#fff}
+.cat-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;background:#999}
+.cat-dot.c0{background:#b33}.cat-dot.c1{background:#c80}.cat-dot.c2{background:#3a7}
+.cat-dot.c3{background:#36c}.cat-dot.c4{background:#69c}.cat-dot.c5{background:#85a}
+.cat-dot.c6{background:#888}.cat-dot.c7{background:#a63}
+#cal-table td:nth-child(1){width:88px;white-space:nowrap}
+#cal-table td:nth-child(2){width:38%}
+#cal-table td:nth-child(3){width:auto}
+#cal-table td:nth-child(4){width:120px}
+.fest-months{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.fest-months .month{border:1px solid var(--line);border-radius:10px;background:var(--paper-2);padding:10px}
+.fest-months h4{margin:0 0 8px;font-size:13px;letter-spacing:1px;color:var(--ink-3)}
+.fday{display:flex;gap:8px;padding:3px 0;border-top:1px dashed var(--line-2);font-size:12.5px;cursor:pointer}
+.fday b{width:20px;text-align:right;color:var(--ink-3);font-weight:500}
+.fday.empty{cursor:default;color:var(--ink-3)}
+.fest-months .month:nth-child(n+9){break-inside:avoid}
+@media(max-width:900px){.fest-months{grid-template-columns:repeat(2,1fr)}}
 
 @media print{
   header.site,.bar,nav.tabs,footer,.searchbar{display:none}
@@ -185,7 +204,9 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
     <nav class="tabs">
       <button class="on" data-page="almanac">黄历</button>
       <button data-page="fields">字段</button>
+      <button data-page="festivals">节日</button>
       <button data-page="regions">地区</button>
+      <button data-page="calendars">历法</button>
       <button data-page="check">校验</button>
       <button data-page="data">数据</button>
     </nav>
@@ -367,6 +388,28 @@ c.importJson(JSON.stringify({
 const ics = c.toIcs(2025);</pre>
   </section>
 
+  <section id="page-festivals" class="doc hide">
+    <h2>节日总览</h2>
+    <p>按年列出八类节日：法定、传统、民俗、纪念、国际、宗教、节气、外历。点击某日查看备注与出处。</p>
+    <div class="searchbar">
+      <input id="fy" type="number" value="2025" min="1900" max="2100" style="width:90px">
+      <input id="fq" placeholder="搜索节日名或备注">
+      <span class="count" id="fcount"></span>
+      <button id="fexport">导出 JSON</button>
+    </div>
+    <div id="fcats" class="cats"></div>
+    <div id="fest-months" class="fest-months"></div>
+    <div id="fest-detail"></div>
+  </section>
+
+  <section id="page-calendars" class="doc hide">
+    <h2>历法对照</h2>
+    <p>同一公历日期在五种历法中的表示。回历为算术历，与观月结果可能相差一日；印度历的 tithi 以印度标准时间 06:00 计算。</p>
+    <div class="searchbar"><input type="date" id="cdate"><span class="count">选择日期查看对照</span></div>
+    <table class="checks" id="cal-table"></table>
+    <div class="note" id="cal-fest"></div>
+  </section>
+
   <section id="page-check" class="doc hide">
     <h2>实时校验</h2>
     <p>下列断言在浏览器内实时计算，与公开发布的黄历、政府公告逐项比对。任一不符即标红。</p>
@@ -408,7 +451,7 @@ const ics = c.toIcs(2025);</pre>
 <footer><div class="wrap">Tyme Enhanced · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
 
 <script type="module">
-import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival} from './tyme.mjs';
+import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
@@ -419,7 +462,15 @@ const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'T
   'JP': '日本', 'KR': '韩国', 'VN': '越南', 'SG': '新加坡', 'MY': '马来西亚', 'TH': '泰国',
   'US': '美国', 'GB': '英国', 'CA': '加拿大', 'AU': '澳大利亚', 'NZ': '新西兰',
   'DE': '德国', 'FR': '法国', 'IT': '意大利', 'ES': '西班牙', 'NL': '荷兰',
-  'BR': '巴西', 'MX': '墨西哥', 'RU': '俄罗斯', 'ZA': '南非', 'IN': '印度', 'PH': '菲律宾'};
+  'BR': '巴西', 'MX': '墨西哥', 'RU': '俄罗斯', 'ZA': '南非', 'IN': '印度', 'PH': '菲律宾',
+  'PL': '波兰', 'SE': '瑞典', 'NO': '挪威', 'DK': '丹麦', 'FI': '芬兰', 'IS': '冰岛',
+  'IE': '爱尔兰', 'PT': '葡萄牙', 'CH': '瑞士', 'AT': '奥地利', 'BE': '比利时',
+  'CZ': '捷克', 'HU': '匈牙利', 'GR': '希腊', 'CY': '塞浦路斯', 'RO': '罗马尼亚',
+  'UA': '乌克兰', 'TR': '土耳其', 'ID': '印度尼西亚', 'EG': '埃及', 'SA': '沙特阿拉伯',
+  'AE': '阿联酋', 'NG': '尼日利亚', 'KE': '肯尼亚',
+  'US-CA': '美国·加州', 'US-NY': '美国·纽约州', 'US-TX': '美国·得州',
+  'DE-BY': '德国·巴伐利亚', 'GB-SCT': '英国·苏格兰', 'AU-NSW': '澳大利亚·新南威尔士',
+  'CA-ON': '加拿大·安大略', 'ES-CT': '西班牙·加泰罗尼亚'};
 
 let current = new Date();
 let region = 'CN';
@@ -717,6 +768,34 @@ const FIELDS = [
   ['民俗', '诸葛武侯', 'a.getWuHouDay()', (a) => a.getWuHouDay().getYuan().getName() + ' ' + a.getWuHouDay().getName() + ' ' + a.getWuHouDay().getLuck().getName()],
   ['民俗', '生肖号码', 'a.getCombineZodiacNumbers()', (a) => a.getCombineZodiacNumbers().toString()],
   ['民俗', '今日吉数', 'a.getDailyNumbers()', (a) => a.getDailyNumbers().join(' ')],
+
+  ['节日', '节日条目', 'a.getFestivals()', (a) => a.getFestivals().getEntries().map((e) => Festivals.getCategoryName(e.getCategory()) + ':' + e.getName()).join(' | ') || '—'],
+  ['节日', '含外历', 'a.getFestivals(true)', (a) => a.getFestivals(true).getEntries().map((e) => e.getName()).join('、') || '—'],
+  ['节日', '按类取', 'a.getFestivals().getByCategory(5)', (a) => a.getFestivals().getByCategory(5).map((e) => e.getName()).join('、') || '—'],
+  ['节日', '出处合并', 'e.getSource()', (a) => { const l = a.getFestivals().getEntries(); return l.length ? l[0].getSource() : '—'; }],
+  ['节日', '纪念日', 'AnniversaryFestival.of(d)', (a) => { const x = AnniversaryFestival.of(a.getSolarDay()); return x.getName() || '—'; }],
+  ['节日', '佛历', 'BuddhistFestival.of(lunar)', (a) => BuddhistFestival.of(a.getLunarDay()).getName() || '—'],
+  ['节日', '道历', 'TaoistFestival.of(lunar)', (a) => TaoistFestival.of(a.getLunarDay()).getName() || '—'],
+  ['节日', '十斋日', 'BuddhistFestival.isVegetarianDay(lunar, 1)', (a) => BuddhistFestival.isVegetarianDay(a.getLunarDay(), 1) ? '是' : '否'],
+  ['节日', '观音斋', 'BuddhistFestival.isVegetarianDay(lunar, 0)', (a) => BuddhistFestival.isVegetarianDay(a.getLunarDay(), 0) ? '是' : '否'],
+  ['节日', '杨公忌', 'BuddhistFestival.isYangGongDay(lunar)', (a) => BuddhistFestival.isYangGongDay(a.getLunarDay()) ? '是' : '否'],
+  ['节日', '三元日', 'TaoistFestival.isSanYuan(lunar)', (a) => TaoistFestival.isSanYuan(a.getLunarDay()) ? '是' : '否'],
+  ['节日', '五腊日', 'TaoistFestival.isWuLa(lunar)', (a) => TaoistFestival.isWuLa(a.getLunarDay()) ? '是' : '否'],
+  ['节日', '八会日', 'TaoistFestival.isBaHui(sixty)', (a) => TaoistFestival.isBaHui(a.getSixtyCycleDay().getSixtyCycle()) ? '是' : '否'],
+  ['节日', '戊日', 'TaoistFestival.isWuDay(sixty)', (a) => TaoistFestival.isWuDay(a.getSixtyCycleDay().getSixtyCycle()) ? '是' : '否'],
+  ['节日', '节日统计', 'Festivals.getStat()', (a) => Object.keys(Festivals.getStat()).map((k) => k + ':' + Festivals.getStat()[k]).join(' ')],
+  ['节日', '注册事件', 'Festivals.installEvents()', () => '见控制台，幂等'],
+
+  ['外历', '希伯来历', 'HebrewDay.fromSolarDay(d)', (a) => HebrewDay.fromSolarDay(a.getSolarDay()).toString()],
+  ['外历', '希伯来月名', 'h.getMonthName()', (a) => HebrewDay.fromSolarDay(a.getSolarDay()).getMonthName()],
+  ['外历', '希伯来闰年', 'h.isLeapYear()', (a) => HebrewDay.fromSolarDay(a.getSolarDay()).isLeapYear() ? '是' : '否'],
+  ['外历', '希伯来节日', 'HebrewFestival.of(d)', (a) => HebrewFestival.of(a.getSolarDay()).getName() || '—'],
+  ['外历', '印度月名', 'IndianDay.fromSolarDay(d)', (a) => IndianDay.fromSolarDay(a.getSolarDay()).getMonthName()],
+  ['外历', 'tithi', 'IndianDay.getTithi()', (a) => IndianDay.fromSolarDay(a.getSolarDay()).getTithi() + ' ' + Tithi.getName(IndianDay.fromSolarDay(a.getSolarDay()).getTithi())],
+  ['外历', '印度节日', 'IndianFestival.of(d)', (a) => IndianFestival.of(a.getSolarDay()).getName() || '—'],
+  ['外历', '摩羯入宫', 'findSankranti(y, 9)', (a) => findSankranti(a.getSolarDay().getYear(), 9).toString()],
+  ['外历', '东正教复活节', 'HolidayRule.getOrthodoxEasterDay(y)', (a) => HolidayRule.getOrthodoxEasterDay(a.getSolarDay().getYear()).toString()],
+  ['外历', '回历', 'd.getHijriDay()', (a) => a.getSolarDay().getHijriDay().toString()],
   ['民俗', '周公解梦', 'a.getDreamOracle()', (a) => a.getDreamOracle().toString()],
   ['民俗', '风水常识', 'a.getFengShuiTip()', (a) => a.getFengShuiTip().getText()],
   ['民俗', '生肖运程', 'a.getZodiacFortunes()', (a) => a.getZodiacFortunes()[0].toString()],
@@ -836,7 +915,28 @@ const CHECKS = [
     ['韩国 2025 佛诞与儿童节', '5/5 佛诞节、儿童节', () => dayNames(HolidayCalendar.of('KR').getDays(2025).filter((h) => h.getDay().getMonth() === 5 && h.getDay().getDay() === 5))],
     ['荷兰 2025 国王节', '4/26 国王节', () => dayNames(HolidayCalendar.of('NL').getDays(2025).filter((h) => h.getName() === '国王节'))],
     ['南非 2025 自由日补假', '4/28 自由日（补假）', () => dayNames(HolidayCalendar.of('ZA').getDays(2025).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('自由日') === 0))],
-    ['地区总数', '26', () => String(HolidayCalendar.getRegions().length)],
+    ['地区总数', '58', () => String(HolidayCalendar.getRegions().length)],
+  ]],
+  ['节日与历法', [
+    ['2025-04-03 节日', '寒食节、眼光娘娘圣诞、雷斋日', () => A(2025, 4, 3).getFestivals().getNames().join('、')],
+    ['2025-01-29 春节', '春节', () => A(2025, 1, 29).getFestivals().getByCategory(1).map((e) => e.getName()).join('、')],
+    ['2025-10-01 法定', '国庆节', () => A(2025, 10, 1).getFestivals().getByCategory(0).map((e) => e.getName()).join('、')],
+    ['2025-12-13 纪念', '国家公祭日', () => A(2025, 12, 13).getFestivals().getByCategory(3).map((e) => e.getName()).join('、')],
+    ['佛历条目数', '219', () => String(Festivals.getStat()['buddhist'])],
+    ['道历条目数', '96', () => String(Festivals.getStat()['taoist'])],
+    ['纪念日条目数', '139', () => String(Festivals.getStat()['anniversary'])],
+    ['希伯来历换算', '5786年提斯利月1日', () => HebrewDay.fromSolarDay(SolarDay.fromYmd(2025, 9, 23)).toString()],
+    ['希伯来闰年 5784', '是', () => HebrewDay.isLeapYear(5784) ? '是' : '否'],
+    ['2025-09-23 犹太新年', '犹太新年第1日', () => HebrewFestival.of(SolarDay.fromYmd(2025, 9, 23)).getName()],
+    ['2025-05-01 以色列独立日', '独立日', () => HebrewFestival.of(SolarDay.fromYmd(2025, 5, 1)).getName()],
+    ['2025-10-20 排灯节', 'Diwali', () => IndianFestival.of(SolarDay.fromYmd(2025, 10, 20)).getName()],
+    ['Makar Sankranti 2025', '2025年1月14日', () => findSankranti(2025, 9).toString()],
+    ['东正教复活节 2025', '2025年4月20日', () => HolidayRule.getOrthodoxEasterDay(2025).toString()],
+    ['东正教复活节 2024', '2024年5月5日', () => HolidayRule.getOrthodoxEasterDay(2024).toString()],
+    ['波兰 2025 圣体节', '6/19 圣体节', () => dayNames(HolidayCalendar.of('PL').getDays(2025).filter((h) => h.getName() === '圣体节'))],
+    ['希腊 2025 净周一', '3/3 净周一', () => dayNames(HolidayCalendar.of('GR').getDays(2025).filter((h) => h.getName() === '净周一'))],
+    ['瑞典 2025 仲夏节', '6/21 仲夏节', () => dayNames(HolidayCalendar.of('SE').getDays(2025).filter((h) => h.getName() === '仲夏节'))],
+    ['加州 2025 假日数', '12', () => String(HolidayCalendar.of('US-CA').getDays(2025).length)],
   ]],
 ];
 
@@ -895,19 +995,119 @@ $('region').onchange = (e) => {
 $('genname').onclick = () => renderNames(almanac());
 $('q').oninput = () => renderFields();
 
-const TABS = ['almanac', 'fields', 'regions', 'check', 'data'];
+const TABS = ['almanac', 'fields', 'festivals', 'regions', 'calendars', 'check', 'data'];
 
 function hashPage() {
   const h = location.hash.replace('#', '');
   return h.indexOf('tab-') === 0 ? h.slice(4) : '';
 }
 
+
+/* ---------- 节日总览 ---------- */
+const CAT_ALL = [0, 1, 2, 3, 4, 5, 6, 7];
+let festCats = [0, 1, 2, 3, 4, 6];
+let festYear = 2025;
+
+function renderFestCats() {
+  $('fcats').innerHTML = CAT_ALL.map((c) =>
+    `<label class="${festCats.indexOf(c) > -1 ? 'on' : ''}" data-c="${c}"><i class="cat-dot c${c}"></i>${Festivals.getCategoryName(c)}</label>`).join('');
+  $('fcats').querySelectorAll('label').forEach((el) => {
+    el.onclick = () => {
+      const c = Number(el.dataset.c);
+      const i = festCats.indexOf(c);
+      if (i > -1) festCats.splice(i, 1); else festCats.push(c);
+      renderFestCats();
+      renderFestivals();
+    };
+  });
+}
+
+function renderFestivals() {
+  const y = festYear;
+  const q = $('fq').value.trim();
+  let total = 0;
+  const months = [];
+  for (let m = 1; m <= 12; m++) {
+    const days = [];
+    const count = SolarDay.fromYmd(y, m, 1).getSolarMonth().getDayCount();
+    for (let d = 1; d <= count; d++) {
+      const f = DayAlmanac.fromYmd(y, m, d).getFestivals(true);
+      let entries = f.getEntries().filter((e) => festCats.indexOf(e.getCategory()) > -1);
+      if (q) entries = entries.filter((e) => e.getName().indexOf(q) > -1 || e.getNote().indexOf(q) > -1);
+      if (!entries.length) continue;
+      total += entries.length;
+      days.push(`<div class="fday" data-d="${m}-${d}"><b>${d}</b><span>${entries.slice(0, 2).map((e) => `<i class="cat-dot c${e.getCategory()}"></i>${esc(e.getName())}`).join('、')}${entries.length > 2 ? ' +' + (entries.length - 2) : ''}</span></div>`);
+    }
+    months.push(`<div class="month"><h4>${m} 月</h4>${days.join('') || '<div class="fday empty"><span>—</span></div>'}</div>`);
+  }
+  $('fest-months').innerHTML = months.join('');
+  $('fcount').textContent = total + ' 条节日';
+  $('fest-months').querySelectorAll('.fday[data-d]').forEach((el) => {
+    el.onclick = () => {
+      const [m, d] = el.dataset.d.split('-').map(Number);
+      const f = DayAlmanac.fromYmd(y, m, d).getFestivals(true);
+      const rows = f.getEntries().map((e) =>
+        `<tr><td>${Festivals.getCategoryName(e.getCategory())}</td><td>${esc(e.getName())}</td><td>${esc(e.getNote() || '—')}</td><td>${esc(e.getSource())}</td></tr>`).join('');
+      $('fest-detail').innerHTML = `<h3>${y} 年 ${m} 月 ${d} 日</h3><table class="checks"><tr><th>类别</th><th>名称</th><th>备注</th><th>出处</th></tr>${rows || '<tr><td colspan="4">无</td></tr>'}</table>`;
+    };
+  });
+  $('fest-detail').innerHTML = '';
+}
+
+$('fy').onchange = () => { festYear = Number($('fy').value) || 2025; renderFestivals(); };
+$('fq').oninput = () => renderFestivals();
+$('fexport').onclick = () => {
+  const out = [];
+  for (let m = 1; m <= 12; m++) {
+    const count = SolarDay.fromYmd(festYear, m, 1).getSolarMonth().getDayCount();
+    for (let d = 1; d <= count; d++) {
+      const f = DayAlmanac.fromYmd(festYear, m, d).getFestivals(true);
+      for (const e of f.getEntries()) {
+        if (festCats.indexOf(e.getCategory()) < 0) continue;
+        out.push({date: `${festYear}-${pad(m)}-${pad(d)}`, name: e.getName(), category: Festivals.getCategoryName(e.getCategory()), note: e.getNote(), source: e.getSource(), region: e.getRegion()});
+      }
+    }
+  }
+  const blob = new Blob([JSON.stringify({year: festYear, festivals: out}, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `festivals-${festYear}.json`;
+  a.click();
+};
+renderFestCats();
+
+/* ---------- 历法对照 ---------- */
+function renderCalendars() {
+  const v = $('cdate').value || todayStr();
+  const [y, m, d] = v.split('-').map(Number);
+  const s = SolarDay.fromYmd(y, m, d);
+  const lunar = s.getLunarDay();
+  const hijri = s.getHijriDay();
+  const heb = HebrewDay.fromSolarDay(s);
+  const ind = IndianDay.fromSolarDay(s);
+  const rows = [
+    ['公历', `${y} 年 ${m} 月 ${d} 日`, `星期${WEEK[s.getWeek().getIndex()]}`, s.getTerm().getName() + '第' + (s.getTermDay().getDayIndex() + 1) + '天'],
+    ['农历', lunar.toString(), lunar.getSixtyCycleDay().getYear().getName() + '年', lunar.getLunarMonth().getDayCount() + ' 天月'],
+    ['回历', hijri.toString(), hijri.getHijriMonth().getName(), hijri.getYear() + ' 年'],
+    ['希伯来历', heb.getName(), heb.getMonthName(), heb.isLeapYear() ? '闰年 13 月' : '平年 12 月'],
+    ['印度历', ind.getMonthName() + ' ' + ind.getPaksha() + Tithi.getName(ind.getTithi()), ind.getMonthName(), 'tithi ' + ind.getTithi()],
+  ];
+  $('cal-table').innerHTML = '<tr><th>历法</th><th>日期</th><th>月名 / 说明</th><th>补充</th></tr>' +
+    rows.map((r) => `<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('');
+  const hebF = HebrewFestival.of(s).getNames();
+  const indF = IndianFestival.of(s).getNames();
+  $('cal-fest').innerHTML = `<b>希伯来节日</b>：${hebF.join('、') || '—'}<br><b>印度节日</b>：${indF.join('、') || '—'}`;
+}
+$('cdate').onchange = () => renderCalendars();
+
 function activate(page, scroll) {
   if (TABS.indexOf(page) < 0) page = 'almanac';
   document.querySelectorAll('nav.tabs button').forEach((x) => x.classList.toggle('on', x.dataset.page === page));
   TABS.forEach((p) => $('page-' + p).classList.toggle('hide', p !== page));
   if (page === 'fields') renderFields();
+  if (page === 'festivals') { renderFestCats(); renderFestivals(); }
   if (page === 'regions') { renderRegionCards(); renderRegionDetail(); }
+  if (page === 'calendars') { if (!$('cdate').value) $('cdate').value = todayStr(); renderCalendars(); }
   if (page === 'check') renderChecks();
   if (scroll) window.scrollTo({top: 0, behavior: 'smooth'});
 }

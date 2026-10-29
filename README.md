@@ -2,13 +2,13 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-524%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-555%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
 零运行时依赖，单文件产物，全部数据以整数与字符串编码——便于逐行移植到 Kotlin、Swift、Go、Rust、Python。
 
-> 在线演示与文档：[docs/index.html](./docs/index.html)（黄历 / 字段 / 地区 / 校验 / 数据，本地直接打开即可，全部计算在浏览器完成）
+> 在线演示与文档：[docs/index.html](./docs/index.html)（黄历 / 字段 / 节日 / 地区 / 历法 / 校验 / 数据，本地直接打开即可，全部计算在浏览器完成）
 
 ---
 
@@ -16,13 +16,14 @@
 
 | 分类 | 能力 | 依据 |
 | --- | --- | --- |
-| 历法 | 公历、农历（含闰月）、藏历、回历、儒略日、星座、月相、七十二候 | 寿星天文历算法 |
+| 历法 | 公历、农历（含闰月）、藏历、回历、**希伯来历**、**印度阴阳历（tithi）**、儒略日、星座、月相、七十二候 | 寿星天文历算法、molad 算术历 |
 | 干支 | 年月日时四柱、纳音、十神、藏干、人元司令、胎元、命宫、大运流年 | 子平术通行规则 |
 | 神煞 | 吉神宜趋、凶神宜忌、建除十二神、二十八宿、黄黑道十二神、六曜、小六壬、彭祖百忌 | 《协纪辨方书》体系 |
 | 择日 | 宜忌、日冲煞、旬空、月破岁破、天赦日、四离四绝、月将、年命禄贵合、贵人时、时辰吉凶 | 协纪辨方书 + 通书 |
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
-| 民俗数据 | 民俗节日（接神日、人日、天穿节、填仓节、中和节、寒食、春社秋社、天贶节、寒衣节、下元节、尾牙、祭灶等）、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
-| 节假日 | 26 个国家和地区（中国大陆及港/澳/台、日韩越、新马泰、美英加澳新、德法意西荷、巴墨俄南非、印度、菲律宾），含补假规则 | 政府公告、祝日法与银行假日表 |
+| 节日 | 八类来源统一聚合：法定、传统、民俗、公历纪念日与国际日、佛历、道历、节气、外历；共 **480+ 条名称**，同神异写自动归并 | 6tail/lunar-typescript、维基文库、政府公告 |
+| 民俗数据 | 民俗节日、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
+| 节假日 | **58 个地区代码**（含 8 个子地区），覆盖欧亚美非 40 国；支持公历、农历、伊斯兰历、希伯来历、东正教复活节五类规则与三种补假模式 | 政府公告、祝日法与银行假日表 |
 | 互操作 | ICS 订阅解析（年度循环事件转 tyme `Event`）与节假日 ICS 导出 | iCalendar RFC 5545 |
 
 ---
@@ -46,6 +47,10 @@ a.getDeityFestival()!.getName();       // 眼光娘娘等圣诞
 a.getCombineZodiacNumbers().toString();// 猪 07 19 31 43
 a.getMonthGeneral().getName();         // 河魁
 a.getLifeRelation(1983).toString();    // 癸命劫财，互禄，六合
+
+a.getFestivals().getNames();           // ['寒食节', '眼光娘娘圣诞', '雷斋日']
+a.getFestivals().getByCategory(2);     // 民俗类条目
+a.getFestivalNames(true);              // 含希伯来、印度等外历节日
 ```
 
 原有的 `SolarDay` / `LunarDay` / `SixtyCycleDay` / `EightChar` 等 API 全部保留，`DayAlmanac` 只是通胜场景的聚合入口。
@@ -133,9 +138,17 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
-支持 26 个地区：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `US` `GB` `CA` `AU` `NZ` `DE` `FR` `IT` `ES` `NL` `BR` `MX` `RU` `ZA` `IN` `PH`。
+支持 58 个地区代码：
 
-规则类型包括公历月日、农历月日、某月第几个星期几、复活节偏移、节气日，以及「节气后第几个某干日」（春社、秋社）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
+- 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID`
+- 欧洲：`GB` `DE` `FR` `IT` `ES` `NL` `RU` `PL` `SE` `NO` `DK` `FI` `IS` `IE` `PT` `CH` `AT` `BE` `CZ` `HU` `GR` `CY` `RO` `UA` `TR`
+- 美洲：`US` `CA` `BR` `MX`
+- 大洋洲与非洲：`AU` `NZ` `ZA` `EG` `NG` `KE` `SA` `AE`
+- 子地区：`US-CA` `US-NY` `US-TX` `DE-BY` `GB-SCT` `AU-NSW` `CA-ON` `ES-CT`
+
+伊斯兰节日按算术历推算，观月国家可能相差一日，可用 `importJson` 覆盖。
+
+规则类型包括公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历与伊斯兰历。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
@@ -146,7 +159,45 @@ HolidayCalendar.of('VN').getHoliday(SolarDay.fromYmd(2025, 4, 7))!.getName();  /
 
 ---
 
-## 六、ICS 订阅转换
+## 六、节日体系：八类来源与统一去重
+
+```ts
+import {Festivals, DayAlmanac, HebrewDay, IndianDay, Tithi} from 'tyme4ts-enhanced';
+
+const f = DayAlmanac.fromYmd(2025, 4, 3).getFestivals();
+f.getEntries().map((e) => [Festivals.getCategoryName(e.getCategory()), e.getName(), e.getSource()]);
+// [['民俗','寒食节','folk'], ['宗教','眼光娘娘圣诞','taoist'], ['宗教','雷斋日','foto']]
+
+Festivals.getStat();
+// {anniversary:139, folk:29, buddhist:219, buddhistOther:30, guanyin:22, yangGong:13, taoist:96, deity:125}
+```
+
+| 来源 | 类 | 规模 | 说明 |
+| --- | --- | --- | --- |
+| 公历纪念日与国际日 | `AnniversaryFestival` | 139 键 / 161 名 | 上游 137 键，另补中国品牌日、全国生态日等 |
+| 农历民俗 | `FolkFestival` | 29 键 | 含寒食、春社秋社、中国农民丰收节 |
+| 佛历 | `BuddhistFestival` | 219 键 / 358 条 + 30 纪念日 | 因果犯忌带宜忌原文，另有观音斋 22 日、杨公忌 13 日、十斋/六斋/朔望判定 |
+| 道历 | `TaoistFestival` | 96 键 / 119 条 | 诸神圣诞带斋日备注，另有三元、五腊、八节、八会、戊日判定 |
+| 神诞 | `DeityFestival` | 125 键 | 《玉匣记》三元五腊圣诞 |
+| 希伯来 | `HebrewFestival` | 16 条规则 | 含独立日、阵亡将士纪念日、大屠杀纪念日的顺延 |
+| 印度 | `IndianFestival` | 2024–2027 官方日期 | 其余年份不臆造 |
+| 节气 | `SolarTermDay` | 24 | 与「清明」等传统节日自动去重 |
+
+同名条目按「法定 > 传统 > 民俗 > 宗教 > 节气 > 纪念 > 国际」保留一条，出处合并到 `getSource()`；「眼光娘娘圣诞」与「眼光娘娘等圣诞」这类同神异写按归一化名称合并。
+
+```ts
+// 五历对照
+const d = SolarDay.fromYmd(2025, 9, 23);
+HebrewDay.fromSolarDay(d).toString();        // 5786年提斯利月1日
+IndianDay.fromSolarDay(SolarDay.fromYmd(2025, 10, 20)).getMonthName(); // 頞湿缚庾阇月
+Tithi.getTithi(SolarDay.fromYmd(2025, 3, 14), 6);                      // 15（Holi）
+```
+
+印度历的 tithi 以 IST 06:00 判定，湿婆节（夜分）、万寿节（午分）、排灯节（夜分）三项与日出判定相差一分，已在测试中如实记录，节日日期改用官方年份表。
+
+---
+
+## 七、ICS 订阅转换
 
 ```ts
 import {IcsCalendar, EventManager} from 'tyme4ts-enhanced';
@@ -169,7 +220,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 七、准确性：以公开黄历逐项校验
+## 八、准确性：以公开黄历逐项校验
 
 测试以 2025-04-03（乙巳年三月初六，壬寅日）为基准，与多家公开发布的黄历逐项对照，全部一致：
 
@@ -198,7 +249,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 八、年份范围
+## 九、年份范围
 
 | 能力 | 范围 |
 | --- | --- |
@@ -210,7 +261,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 九、移植到其他语言
+## 十、移植到其他语言
 
 设计上刻意避免语言特性：只用整数、字符串、数组与类；无正则回溯依赖、无浮点累加、无本地化 API。`docs/PORTING.md` 给出：
 
@@ -220,7 +271,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十、与 tyme4ts 的关系
+## 十一、与 tyme4ts 的关系
 
 - 100% 保留上游公开 API，可直接替换 `tyme4ts`；
 - 新增二十余个类：`DayAlmanac`、`WuHouDay`、`Clash`、`LifeRelation`、`HourFortune`、`NineStarChart`、`Palace`、`ZodiacNumbers`、`MonthGeneral`、`DeityFestival`、`DreamOracle`、`FengShuiTip`、`Naming`、`ElementBalance`、`ZodiacFortune`、`HolidayCalendar`、`HolidayRule`、`IcsCalendar`、`Era` 等；
@@ -228,11 +279,11 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十一、开发
+## 十二、开发
 
 ```bash
 npm i
-npm test          # 524 项测试
+npm test          # 555 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs
@@ -240,6 +291,6 @@ npm run docs      # 构建并同步 docs/tyme.mjs
 
 数据勘误请附出处（古籍版本、政府公告或公开黄历截图），本库优先采纳可复核的来源。
 
-## 十二、许可与致谢
+## 十三、许可与致谢
 
-MIT。历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本。
+MIT。历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本；公历纪念日、农历民俗、佛历因果犯忌、道历诸神圣诞四张表由 `scripts/gen-festival-data.py` 从 [6tail/lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）源码解析生成，并由 `npm run verify:festivals` 逐条比对。

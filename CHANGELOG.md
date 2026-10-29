@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.7.0] - 2026-10-29
+
+1. 重构：lib 拆为 core / almanac / calendar / festival / holiday / interop / text 共 22 个模块，依赖无环，行为零变更。
+2. 新增 `Festivals` 聚合：法定、传统、民俗、纪念、国际、宗教、节气、外历八类来源，按归一化名称去重并合并出处。
+3. 新增 `AnniversaryFestival`：137 键 158 条公历纪念日，补中国品牌日、全国生态日、全国科技工作者日。
+4. 新增 `BuddhistFestival`：因果犯忌 219 键 358 条、佛菩萨纪念日 30 条、观音斋 22 日、杨公忌 13 日，附十斋/六斋/朔望判定。
+5. 新增 `TaoistFestival`：诸神圣诞 96 键 119 条，附三会、三元、五腊、八节、八会、戊日判定。
+6. 新增 `HebrewDay` 与 `HebrewFestival`：molad 算术历，2025 年以色列 14 个节日与官方表逐条一致。
+7. 新增 `IndianDay`/`Tithi` 与 `IndianFestival`：复用日月黄经算 tithi，2024–2027 官方日期逐年录入。
+8. 新增 `HolidayRule` 的 HEBREW、HIJRI、ORTHODOX_EASTER、WEEK_AFTER 四类规则。
+9. 地区扩至 58 个：欧洲 18 国、伊斯兰 6 国、8 个子地区。
+10. 优化：`HolidayCalendar.of` 实例缓存、`getDays` 年度缓存，CN 逐日查询 325ms → 17ms，US 45ms → 1ms。
+11. 站点：新增「节日总览」与「历法对照」两页，字段速查扩至 96 项，校验扩至 61 项。
+12. 脚本：`gen-festival-data.py` 从上游源码生成四张数据表，`verify-festivals.mjs` 逐条比对，缺失即失败。
+
+
 ## [1.6.1] - 2026-10-29
 
 1. 新增：`FolkFestival` 民俗节日，录接神日、人日、谷日、天日、地日、天穿节、填仓节、正月晦、中和节、分龙节、会龙节、天贶节、观莲节、五谷母节、财神节、地藏节、天灸日、寒衣节、十成节、下元节、驱傩日、尾牙、小年、祭灶日，及情人节、愚人节、万圣夜、平安夜、母亲节、父亲节、感恩节、寒食节、春社、秋社等。

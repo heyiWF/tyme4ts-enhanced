@@ -7956,6 +7956,381 @@ class NineDay extends AbstractCultureDay {
   }
 }
 
+class HebrewMonth {
+  static NAMES = [
+    "\u5C3C\u6563\u6708",
+    "\u4EE5\u73E5\u6708",
+    "\u897F\u5F2F\u6708",
+    "\u642D\u6A21\u65AF\u6708",
+    "\u57C3\u6CE2\u6708",
+    "\u4EE5\u7984\u6708",
+    "\u63D0\u65AF\u5229\u6708",
+    "\u739B\u897F\u73ED\u6708",
+    "\u57FA\u65AF\u6D41\u6708",
+    "\u63D0\u522B\u6708",
+    "\u7EC6\u7F62\u7279\u6708",
+    "\u4E9A\u8FBE\u6708",
+    "\u4E9A\u8FBE\u4E8C\u6708"
+  ];
+  static getName(month) {
+    return HebrewMonth.NAMES[month - 1];
+  }
+  static getCount(year) {
+    return HebrewDay.isLeapYear(year) ? 13 : 12;
+  }
+}
+class HebrewDay extends AbstractCulture {
+  year;
+  month;
+  day;
+  /**
+   * 希伯来历元点：1 提斯利月 1 日的儒略日
+   */
+  static EPOCH = 347997.5;
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  static isLeapYear(year) {
+    return (year * 7 + 1) % 19 < 7;
+  }
+  /**
+   * 自创世起的月数折算出的日数，含第一条 dehiyyot
+   */
+  static elapsedDays(year) {
+    const months = Math.floor((235 * year - 234) / 19);
+    const parts = 12084 + 13753 * months;
+    let day = 29 * months + Math.floor(parts / 25920);
+    if (3 * (day + 1) % 7 < 3) {
+      day++;
+    }
+    return day;
+  }
+  /**
+   * 第二条 dehiyyot：年长修正
+   */
+  static yearCorrection(year) {
+    const last = HebrewDay.elapsedDays(year - 1);
+    const present = HebrewDay.elapsedDays(year);
+    const next = HebrewDay.elapsedDays(year + 1);
+    if (next - present === 356) {
+      return 2;
+    }
+    if (present - last === 382) {
+      return 1;
+    }
+    return 0;
+  }
+  /**
+   * 提斯利月 1 日的儒略日
+   */
+  static newYear(year) {
+    return HebrewDay.EPOCH + HebrewDay.elapsedDays(year) + HebrewDay.yearCorrection(year);
+  }
+  static getYearDays(year) {
+    return HebrewDay.newYear(year + 1) - HebrewDay.newYear(year);
+  }
+  static isLongMarcheshvan(year) {
+    return HebrewDay.getYearDays(year) % 10 === 5;
+  }
+  static isShortKislev(year) {
+    return HebrewDay.getYearDays(year) % 10 === 3;
+  }
+  static getMonthDays(year, month) {
+    if (month === 2 || month === 4 || month === 6 || month === 10 || month === 13) {
+      return 29;
+    }
+    if (month === 12 && !HebrewDay.isLeapYear(year)) {
+      return 29;
+    }
+    if (month === 8 && !HebrewDay.isLongMarcheshvan(year)) {
+      return 29;
+    }
+    if (month === 9 && HebrewDay.isShortKislev(year)) {
+      return 29;
+    }
+    return 30;
+  }
+  /**
+   * 希伯来日期转儒略日
+   */
+  static toJulianDay(year, month, day) {
+    let jd = HebrewDay.newYear(year);
+    if (month < 7) {
+      for (let m = 7; m <= HebrewMonth.getCount(year); m++) {
+        jd += HebrewDay.getMonthDays(year, m);
+      }
+      for (let m = 1; m < month; m++) {
+        jd += HebrewDay.getMonthDays(year, m);
+      }
+    } else {
+      for (let m = 7; m < month; m++) {
+        jd += HebrewDay.getMonthDays(year, m);
+      }
+    }
+    return jd + day - 1;
+  }
+  static fromYmd(year, month, day) {
+    const max = HebrewDay.getMonthDays(year, month);
+    if (day < 1 || day > max) {
+      throw new Error(`illegal hebrew day ${year}-${month}-${day}`);
+    }
+    return new HebrewDay(year, month, day);
+  }
+  static fromJulianDay(jd) {
+    const j = Math.floor(jd) + 0.5;
+    let year = Math.floor((j - HebrewDay.EPOCH) * 98496 / 35975351);
+    while (j >= HebrewDay.newYear(year + 1)) {
+      year++;
+    }
+    while (j < HebrewDay.newYear(year)) {
+      year--;
+    }
+    let month = j < HebrewDay.toJulianDay(year, 1, 1) ? 7 : 1;
+    while (j > HebrewDay.toJulianDay(year, month, HebrewDay.getMonthDays(year, month))) {
+      month++;
+    }
+    const day = Math.floor(j - HebrewDay.toJulianDay(year, month, 1)) + 1;
+    return new HebrewDay(year, month, day);
+  }
+  static fromSolarDay(solarDay) {
+    return HebrewDay.fromJulianDay(solarDay.getJulianDay().getDay());
+  }
+  getSolarDay() {
+    return JulianDay.fromJulianDay(HebrewDay.toJulianDay(this.year, this.month, this.day)).getSolarDay();
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return HebrewMonth.getName(this.month);
+  }
+  isLeapYear() {
+    return HebrewDay.isLeapYear(this.year);
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  getName() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+  next(n) {
+    return HebrewDay.fromJulianDay(HebrewDay.toJulianDay(this.year, this.month, this.day) + n);
+  }
+  toString() {
+    return this.getName();
+  }
+}
+
+class HinduMonth {
+  static NAMES = [
+    "\u5236\u601B\u7F57\u6708",
+    "\u6BD7\u820D\u4F49\u6708",
+    "\u901D\u745F\u5412\u6708",
+    "\u981E\u6C99\u837C\u6708",
+    "\u5BA4\u7F57\u4F10\u62CF\u6708",
+    "\u5A46\u8FBE\u7F57\u94B5\u9640\u6708",
+    "\u981E\u6E7F\u7F1A\u5EBE\u9607\u6708",
+    "\u8FE6\u523A\u5E95\u8FE6\u6708",
+    "\u6469\u63ED\u9640\u6708",
+    "\u62A5\u6C99\u6708",
+    "\u78E8\u4F49\u6708",
+    "\u9887\u52D2\u7AAD\u62CF\u6708"
+  ];
+  static NAMES_EN = [
+    "Chaitra",
+    "Vaishakha",
+    "Jyeshtha",
+    "Ashadha",
+    "Shravana",
+    "Bhadrapada",
+    "Ashwin",
+    "Kartika",
+    "Margashirsha",
+    "Pausha",
+    "Magha",
+    "Phalguna"
+  ];
+  static getName(month) {
+    return HinduMonth.NAMES[month];
+  }
+  static getEnglishName(month) {
+    return HinduMonth.NAMES_EN[month];
+  }
+}
+class Tithi {
+  /**
+   * 印度标准时间与 UTC 的时差
+   */
+  static IST = 5.5;
+  /**
+   * 某日某时（IST）的月亮与太阳视黄经差，单位度，取值 [0, 360)
+   */
+  static getElongation(solarDay, hourIST = 6) {
+    const jd = solarDay.getJulianDay().getDay() + (hourIST - Tithi.IST) / 24;
+    const t = (jd - 2451545) / 36525;
+    const deg = ShouXingUtil.msaLon(t, 20, 10) * 180 / Math.PI;
+    return (deg % 360 + 360) % 360;
+  }
+  /**
+   * 某日某时的 tithi，1–30；1–15 为白分，16–30 为黑分
+   */
+  static getTithi(solarDay, hourIST = 6) {
+    return Math.floor(Tithi.getElongation(solarDay, hourIST) / 12) + 1;
+  }
+  /**
+   * 是否白分（月盈）
+   */
+  static isShukla(tithi) {
+    return tithi <= 15;
+  }
+  static getName(tithi) {
+    const names = [
+      "Pratipada",
+      "Dwitiya",
+      "Tritiya",
+      "Chaturthi",
+      "Panchami",
+      "Shashthi",
+      "Saptami",
+      "Ashtami",
+      "Navami",
+      "Dashami",
+      "Ekadashi",
+      "Dwadashi",
+      "Trayodashi",
+      "Chaturdashi",
+      "Purnima",
+      "Pratipada",
+      "Dwitiya",
+      "Tritiya",
+      "Chaturthi",
+      "Panchami",
+      "Shashthi",
+      "Saptami",
+      "Ashtami",
+      "Navami",
+      "Dashami",
+      "Ekadashi",
+      "Dwadashi",
+      "Trayodashi",
+      "Chaturdashi",
+      "Amavasya"
+    ];
+    return names[tithi - 1].trim();
+  }
+}
+class IndianDay extends AbstractCulture {
+  solarDay;
+  tithi;
+  month;
+  constructor(solarDay, tithi, month) {
+    super();
+    this.solarDay = solarDay;
+    this.tithi = tithi;
+    this.month = month;
+  }
+  /**
+   * 岁差（Lahiri 近似），单位度
+   */
+  static getAyanamsa(year) {
+    return 23.85 + (year - 2e3) * 0.013972;
+  }
+  /**
+   * 太阳视黄经（恒星黄道），单位度
+   */
+  static getSiderealSunLongitude(solarDay) {
+    const jd = solarDay.getJulianDay().getDay() + 0.5;
+    const t = (jd - 2451545) / 36525;
+    const deg = ShouXingUtil.saLon(t, 5) * 180 / Math.PI;
+    return ((deg - IndianDay.getAyanamsa(solarDay.getYear())) % 360 + 360) % 360;
+  }
+  /**
+   * 该日所属朔望月的起始（新月）日
+   *
+   * 由黄经差回绕判定：向前逐日回溯，找到差值由大变小的一日。
+   */
+  static getNewMoonDay(solarDay) {
+    let d = solarDay;
+    let prev = Tithi.getElongation(d, 6);
+    for (let i = 1; i <= 32; i++) {
+      d = d.next(-1);
+      const cur = Tithi.getElongation(d, 6);
+      if (cur > prev) {
+        return d.next(1);
+      }
+      prev = cur;
+    }
+    return solarDay;
+  }
+  /**
+   * 由新月时刻的太阳恒星黄经定月名
+   */
+  static getMonthOfNewMoon(newMoonDay) {
+    const sign = Math.floor(IndianDay.getSiderealSunLongitude(newMoonDay) / 30);
+    return (sign + 1) % 12;
+  }
+  static fromSolarDay(solarDay) {
+    const tithi = Tithi.getTithi(solarDay, 6);
+    const newMoon = IndianDay.getNewMoonDay(solarDay);
+    const month = IndianDay.getMonthOfNewMoon(newMoon);
+    return new IndianDay(solarDay, tithi, month);
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getTithi() {
+    return this.tithi;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getMonthName() {
+    return HinduMonth.getName(this.month);
+  }
+  isShukla() {
+    return Tithi.isShukla(this.tithi);
+  }
+  getPaksha() {
+    return this.isShukla() ? "\u767D\u5206" : "\u9ED1\u5206";
+  }
+  getName() {
+    return `${this.getMonthName()}${this.getPaksha()}${this.tithi > 15 ? this.tithi - 15 : this.tithi}\u65E5`;
+  }
+  toString() {
+    return this.getName();
+  }
+}
+function findSankranti(year, sign) {
+  const target = sign * 30;
+  let low = sign >= 9 ? SolarDay.fromYmd(year, 1, 1).next(Math.floor((sign - 9) * 30.44) - 5) : SolarDay.fromYmd(year, 4, 1).next(Math.floor(sign * 30.44) - 5);
+  let high = low.next(45);
+  const diff = (d) => {
+    const deg = IndianDay.getSiderealSunLongitude(d);
+    return ((deg - target) % 360 + 360) % 360;
+  };
+  while (high.subtract(low) > 1) {
+    const mid = low.next(Math.floor(high.subtract(low) / 2));
+    if (diff(mid) > 180) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return high;
+}
+function getSolarTermDay(year, index) {
+  return SolarTerm.fromIndex(year, index).getJulianDay().getSolarDay();
+}
+
 class IcsEvent extends AbstractCulture {
   summary;
   start;
@@ -8135,6 +8510,10 @@ var HolidayType = /* @__PURE__ */ ((HolidayType2) => {
   HolidayType2[HolidayType2["EASTER"] = 3] = "EASTER";
   HolidayType2[HolidayType2["TERM"] = 4] = "TERM";
   HolidayType2[HolidayType2["TERM_STEM"] = 5] = "TERM_STEM";
+  HolidayType2[HolidayType2["HEBREW"] = 6] = "HEBREW";
+  HolidayType2[HolidayType2["HIJRI"] = 7] = "HIJRI";
+  HolidayType2[HolidayType2["ORTHODOX_EASTER"] = 8] = "ORTHODOX_EASTER";
+  HolidayType2[HolidayType2["WEEK_AFTER"] = 9] = "WEEK_AFTER";
   return HolidayType2;
 })(HolidayType || {});
 class HolidayRule extends AbstractCulture {
@@ -8191,6 +8570,35 @@ class HolidayRule extends AbstractCulture {
     return o;
   }
   /**
+   * @param shift 0 不调整；1 大屠杀纪念日（周五前移、周日后移）；
+   *              2 独立日（周五前移一日、周六前移两日、周一后移一日）；3 阵亡将士纪念日（独立日前一日）
+   */
+  static hebrew(month, day, name, shift = 0) {
+    const o = new HolidayRule(6 /* HEBREW */, name);
+    o.month = month;
+    o.day = day;
+    o.offset = shift;
+    return o;
+  }
+  /**
+   * 伊斯兰历，按算术历推算，观月地区可能差一日
+   */
+  static hijri(month, day, name, offset = 0) {
+    const o = new HolidayRule(7 /* HIJRI */, name);
+    o.month = month;
+    o.day = day;
+    o.offset = offset;
+    return o;
+  }
+  /**
+   * 东正教复活节（儒略历复活节换算为公历）
+   */
+  static orthodoxEaster(offset, name) {
+    const o = new HolidayRule(8 /* ORTHODOX_EASTER */, name);
+    o.offset = offset;
+    return o;
+  }
+  /**
    * @param weekIndex 第几个，负数自月末倒推
    * @param week 星期，0 为周日
    */
@@ -8202,9 +8610,21 @@ class HolidayRule extends AbstractCulture {
     o.startYear = startYear;
     return o;
   }
-  static easter(offset, name) {
+  /**
+   * 某月某日之后的第一个星期几，用于仲夏节、诸圣节一类「不早于某日」的节日
+   */
+  static weekAfter(month, day, week, name, startYear = 1) {
+    const o = new HolidayRule(9 /* WEEK_AFTER */, name);
+    o.month = month;
+    o.day = day;
+    o.week = week;
+    o.startYear = startYear;
+    return o;
+  }
+  static easter(offset, name, startYear = 1) {
     const o = new HolidayRule(3 /* EASTER */, name);
     o.offset = offset;
+    o.startYear = startYear;
     return o;
   }
   static term(termIndex, name, offset = 0) {
@@ -8273,6 +8693,48 @@ class HolidayRule extends AbstractCulture {
         return HolidayRule.getEasterDay(year).next(this.offset);
       case 2 /* WEEK */:
         return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+      case 9 /* WEEK_AFTER */: {
+        const start = SolarDay.fromYmd(year, this.month, this.day);
+        return start.next(start.getWeek().stepsTo(this.week));
+      }
+      case 6 /* HEBREW */: {
+        let d;
+        if (this.offset === 3) {
+          d = HolidayRule.getIndependenceDay(HebrewRuleYear(year, this.month)).next(-1);
+        } else {
+          d = HebrewDay.fromYmd(HebrewRuleYear(year, this.month), this.month, this.day).getSolarDay();
+          if (this.offset === 1) {
+            const w = d.getWeek().getIndex();
+            if (w === 5) {
+              d = d.next(-1);
+            } else if (w === 0) {
+              d = d.next(1);
+            }
+          } else if (this.offset === 2) {
+            const w = d.getWeek().getIndex();
+            if (w === 5) {
+              d = d.next(-1);
+            } else if (w === 6) {
+              d = d.next(-2);
+            } else if (w === 1) {
+              d = d.next(1);
+            }
+          }
+        }
+        return d.getYear() === year ? d : null;
+      }
+      case 7 /* HIJRI */: {
+        const estimate = Math.floor((year - 622) * 33 / 32);
+        for (let i = -1; i <= 1; i++) {
+          const d = HijriDay.fromYmd(estimate + i, this.month, this.day).getSolarDay();
+          if (d.getYear() === year) {
+            return d.next(this.offset);
+          }
+        }
+        return null;
+      }
+      case 8 /* ORTHODOX_EASTER */:
+        return HolidayRule.getOrthodoxEasterDay(year).next(this.offset);
       case 5 /* TERM_STEM */: {
         const start = HolidayRule.getTermDay(year, this.termIndex);
         const stem = SixtyCycle.fromIndex(start.subtract(HolidayRule.EPOCH)).getHeavenStem().getIndex();
@@ -8285,6 +8747,34 @@ class HolidayRule extends AbstractCulture {
     }
     return null;
   }
+  /**
+   * 东正教复活节：儒略历算法后加世纪偏移
+   */
+  static getOrthodoxEasterDay(year) {
+    const g = year % 19;
+    const i = (19 * g + 15) % 30;
+    const j = (year + Math.floor(year / 4) + i) % 7;
+    const l = i - j;
+    const month = 3 + Math.floor((l + 40) / 44);
+    const day = l + 28 - 31 * Math.floor(month / 4);
+    const offset = Math.floor(year / 100) - Math.floor(year / 400) - 2;
+    return SolarDay.fromYmd(year, month, day).next(offset);
+  }
+  /**
+   * 以色列独立日：5 伊雅尔月，逢周五前移一日、逢周六前移两日、逢周一后移一日
+   */
+  static getIndependenceDay(hebrewYear) {
+    let d = HebrewDay.fromYmd(hebrewYear, 2, 5).getSolarDay();
+    const w = d.getWeek().getIndex();
+    if (w === 5) {
+      d = d.next(-1);
+    } else if (w === 6) {
+      d = d.next(-2);
+    } else if (w === 1) {
+      d = d.next(1);
+    }
+    return d;
+  }
   static getWeekDay(year, month, weekIndex, week) {
     const m = SolarMonth.fromYm(year, month);
     if (weekIndex > 0) {
@@ -8294,6 +8784,443 @@ class HolidayRule extends AbstractCulture {
     const last = SolarDay.fromYmd(year, month, m.getDayCount());
     return last.next(last.getWeek().stepsBackTo(week) + 7 * (weekIndex + 1));
   }
+}
+function HebrewRuleYear(gregorianYear, hebrewMonth) {
+  return hebrewMonth >= 7 ? gregorianYear + 3761 : gregorianYear + 3760;
+}
+
+function polandRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 6, "\u4E09\u738B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(5, 3, "\u5BAA\u6CD5\u65E5"),
+    HolidayRule.easter(60, "\u5723\u4F53\u8282"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(11, 11, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function swedenRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.solar(6, 6, "\u56FD\u5E86\u65E5"),
+    HolidayRule.weekAfter(6, 20, 6, "\u4EF2\u590F\u8282"),
+    HolidayRule.weekAfter(10, 31, 6, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function norwayRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-3, "\u6FEF\u8DB3\u8282"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(5, 17, "\u5BAA\u6CD5\u65E5"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function denmarkRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-3, "\u6FEF\u8DB3\u8282"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function finlandRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.weekAfter(6, 20, 6, "\u4EF2\u590F\u8282"),
+    HolidayRule.weekAfter(10, 31, 6, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(12, 6, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function icelandRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-3, "\u6FEF\u8DB3\u8282"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.weekAfter(4, 19, 4, "\u590F\u5B63\u9996\u65E5"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(6, 17, "\u56FD\u5E86\u65E5"),
+    HolidayRule.week(8, 1, 1, "\u5546\u4E1A\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function irelandRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.week(2, 1, 1, "\u5723\u5E03\u91CC\u5409\u5FB7\u8282", 2023),
+    HolidayRule.solar(3, 17, "\u5723\u5E15\u7279\u91CC\u514B\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.week(5, 1, 1, "\u4E94\u6708\u94F6\u884C\u5047\u65E5"),
+    HolidayRule.week(6, 1, 1, "\u516D\u6708\u94F6\u884C\u5047\u65E5"),
+    HolidayRule.week(8, 1, 1, "\u516B\u6708\u94F6\u884C\u5047\u65E5"),
+    HolidayRule.week(10, -1, 1, "\u5341\u6708\u94F6\u884C\u5047\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u65AF\u8482\u82AC\u8282")
+  ];
+}
+function portugalRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.solar(4, 25, "\u81EA\u7531\u65E5"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(60, "\u5723\u4F53\u8282"),
+    HolidayRule.solar(6, 10, "\u8461\u8404\u7259\u65E5"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(10, 5, "\u5171\u548C\u56FD\u65E5"),
+    HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(12, 1, "\u6062\u590D\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(12, 8, "\u5723\u6BCD\u65E0\u539F\u7F6A\u8282"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+  ];
+}
+function switzerlandRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.solar(8, 1, "\u56FD\u5E86\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+  ];
+}
+function austriaRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.easter(60, "\u5723\u4F53\u8282"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(10, 26, "\u56FD\u5E86\u65E5"),
+    HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(12, 8, "\u5723\u6BCD\u65E0\u539F\u7F6A\u8282"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function belgiumRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(7, 21, "\u56FD\u5E86\u65E5"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(11, 11, "\u505C\u6218\u7EAA\u5FF5\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+  ];
+}
+function czechRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5", 2016),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(5, 8, "\u80DC\u5229\u65E5"),
+    HolidayRule.solar(7, 5, "\u5723\u897F\u91CC\u5C14\u4E0E\u7F8E\u591A\u5FB7\u65E5"),
+    HolidayRule.solar(7, 6, "\u80E1\u65AF\u65E5"),
+    HolidayRule.solar(9, 28, "\u56FD\u5BB6\u65E5"),
+    HolidayRule.solar(10, 28, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(11, 17, "\u81EA\u7531\u4E0E\u6C11\u4E3B\u65E5"),
+    HolidayRule.solar(12, 24, "\u5E73\u5B89\u591C"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function hungaryRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(3, 15, "\u9769\u547D\u7EAA\u5FF5\u65E5"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5", 2017),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.easter(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(8, 20, "\u5723\u65AF\u8482\u82AC\u65E5"),
+    HolidayRule.solar(10, 23, "\u5171\u548C\u56FD\u65E5"),
+    HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function greeceRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+    HolidayRule.orthodoxEaster(-48, "\u51C0\u5468\u4E00"),
+    HolidayRule.solar(3, 25, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.orthodoxEaster(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.orthodoxEaster(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.orthodoxEaster(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.orthodoxEaster(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(10, 28, "\u8BF4\u4E0D\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function cyprusRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+    HolidayRule.orthodoxEaster(-48, "\u51C0\u5468\u4E00"),
+    HolidayRule.solar(3, 25, "\u5E0C\u814A\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(4, 1, "\u585E\u6D66\u8DEF\u65AF\u56FD\u5E86\u65E5"),
+    HolidayRule.orthodoxEaster(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.orthodoxEaster(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.orthodoxEaster(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.orthodoxEaster(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(10, 1, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(10, 28, "\u8BF4\u4E0D\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function romaniaRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(1, 2, "\u5143\u65E6\u6B21\u65E5"),
+    HolidayRule.solar(1, 24, "\u7EDF\u4E00\u65E5"),
+    HolidayRule.orthodoxEaster(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.orthodoxEaster(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.orthodoxEaster(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(6, 1, "\u513F\u7AE5\u8282"),
+    HolidayRule.orthodoxEaster(49, "\u5723\u7075\u964D\u4E34\u8282"),
+    HolidayRule.orthodoxEaster(50, "\u5723\u7075\u964D\u4E34\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5B89\u606F\u8282"),
+    HolidayRule.solar(11, 30, "\u5723\u5B89\u5FB7\u70C8\u8282"),
+    HolidayRule.solar(12, 1, "\u56FD\u5E86\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u5723\u8BDE\u8282\u6B21\u65E5")
+  ];
+}
+function ukraineRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(3, 8, "\u5987\u5973\u8282"),
+    HolidayRule.orthodoxEaster(0, "\u590D\u6D3B\u8282"),
+    HolidayRule.orthodoxEaster(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(5, 8, "\u9635\u4EA1\u5C06\u58EB\u7EAA\u5FF5\u65E5", 2023),
+    HolidayRule.solar(6, 28, "\u5BAA\u6CD5\u65E5"),
+    HolidayRule.solar(7, 15, "\u56FD\u5BB6\u65E5", 2022),
+    HolidayRule.solar(8, 24, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(10, 1, "\u4FDD\u536B\u8005\u65E5", 2023),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282", 2017)
+  ];
+}
+function turkeyRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(4, 23, "\u56FD\u5BB6\u4E3B\u6743\u4E0E\u513F\u7AE5\u8282"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(5, 19, "\u9752\u5E74\u4E0E\u4F53\u80B2\u8282"),
+    HolidayRule.solar(7, 15, "\u6C11\u4E3B\u4E0E\u6C11\u65CF\u56E2\u7ED3\u65E5", 2017),
+    HolidayRule.solar(8, 30, "\u80DC\u5229\u65E5"),
+    HolidayRule.solar(10, 29, "\u5171\u548C\u56FD\u65E5"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(10, 3, "\u5F00\u658B\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.hijri(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(12, 12, "\u53E4\u5C14\u90A6\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(12, 13, "\u53E4\u5C14\u90A6\u8282\u7B2C\u56DB\u65E5")
+  ];
+}
+
+function indonesiaRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(6, 1, "\u5EFA\u56FD\u4E94\u539F\u5219\u65E5"),
+    HolidayRule.solar(8, 17, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(39, "\u8036\u7A23\u5347\u5929\u8282"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.hijri(1, 1, "\u4F0A\u65AF\u5170\u65B0\u5E74"),
+    HolidayRule.hijri(3, 12, "\u5723\u7EAA")
+  ];
+}
+function egyptRules() {
+  return [
+    HolidayRule.solar(1, 7, "\u79D1\u666E\u7279\u5723\u8BDE\u8282"),
+    HolidayRule.solar(1, 25, "\u9769\u547D\u7EAA\u5FF5\u65E5"),
+    HolidayRule.solar(4, 25, "\u897F\u5948\u89E3\u653E\u65E5"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(6, 30, "\u516D\u6708\u4E09\u5341\u65E5\u9769\u547D"),
+    HolidayRule.solar(7, 23, "\u4E03\u6708\u4E8C\u5341\u4E09\u65E5\u9769\u547D"),
+    HolidayRule.solar(10, 6, "\u6B66\u88C5\u90E8\u961F\u65E5"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(10, 3, "\u5F00\u658B\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.hijri(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(12, 12, "\u53E4\u5C14\u90A6\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(1, 1, "\u4F0A\u65AF\u5170\u65B0\u5E74"),
+    HolidayRule.hijri(3, 12, "\u5723\u7EAA")
+  ];
+}
+function saudiRules() {
+  return [
+    HolidayRule.solar(2, 22, "\u5EFA\u56FD\u65E5", 2022),
+    HolidayRule.solar(9, 23, "\u56FD\u5E86\u65E5"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(10, 3, "\u5F00\u658B\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.hijri(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(12, 12, "\u53E4\u5C14\u90A6\u8282\u7B2C\u4E09\u65E5")
+  ];
+}
+function uaeRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.solar(11, 30, "\u7EAA\u5FF5\u65E5", 2019),
+    HolidayRule.solar(12, 2, "\u56FD\u5E86\u65E5"),
+    HolidayRule.solar(12, 3, "\u56FD\u5E86\u65E5\u6B21\u65E5"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(10, 3, "\u5F00\u658B\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.hijri(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(12, 12, "\u53E4\u5C14\u90A6\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.hijri(1, 1, "\u4F0A\u65AF\u5170\u65B0\u5E74"),
+    HolidayRule.hijri(3, 12, "\u5723\u7EAA")
+  ];
+}
+function nigeriaRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(6, 12, "\u6C11\u4E3B\u65E5", 2019),
+    HolidayRule.solar(10, 1, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u8282\u793C\u65E5"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.hijri(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
+    HolidayRule.hijri(3, 12, "\u5723\u7EAA")
+  ];
+}
+function kenyaRules() {
+  return [
+    HolidayRule.solar(1, 1, "\u5143\u65E6"),
+    HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
+    HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+    HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+    HolidayRule.solar(6, 1, "\u81EA\u6CBB\u65E5"),
+    HolidayRule.solar(10, 10, "\u80E1\u675C\u9A6C\u65E5"),
+    HolidayRule.solar(10, 20, "\u82F1\u96C4\u65E5"),
+    HolidayRule.solar(12, 12, "\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
+    HolidayRule.solar(12, 26, "\u8282\u793C\u65E5"),
+    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282")
+  ];
+}
+
+function californiaExtra() {
+  return [
+    HolidayRule.solar(3, 31, "\u585E\u8428\u5C14\xB7\u67E5\u97E6\u65AF\u65E5")
+  ];
+}
+function newYorkExtra() {
+  return [
+    HolidayRule.solar(2, 12, "\u6797\u80AF\u8BDE\u8FB0")
+  ];
+}
+function texasExtra() {
+  return [
+    HolidayRule.solar(3, 2, "\u5F97\u514B\u8428\u65AF\u72EC\u7ACB\u65E5"),
+    HolidayRule.solar(4, 21, "\u5723\u54C8\u8F9B\u6258\u65E5")
+  ];
+}
+function bavariaExtra() {
+  return [
+    HolidayRule.solar(1, 6, "\u4E3B\u663E\u8282"),
+    HolidayRule.easter(60, "\u5723\u4F53\u8282"),
+    HolidayRule.solar(8, 15, "\u5723\u6BCD\u5347\u5929\u8282"),
+    HolidayRule.solar(11, 1, "\u8BF8\u5723\u8282")
+  ];
+}
+function scotlandExtra() {
+  return [
+    HolidayRule.solar(1, 2, "\u5143\u65E6\u6B21\u65E5"),
+    HolidayRule.solar(11, 30, "\u5723\u5B89\u5FB7\u70C8\u8282")
+  ];
+}
+function newSouthWalesExtra() {
+  return [
+    HolidayRule.week(8, 1, 1, "\u94F6\u884C\u5047\u65E5"),
+    HolidayRule.week(10, 1, 1, "\u52B3\u52A8\u8282")
+  ];
+}
+function ontarioExtra() {
+  return [
+    HolidayRule.week(2, 3, 1, "\u5BB6\u5EAD\u65E5"),
+    HolidayRule.week(8, 1, 1, "\u516C\u6C11\u5047\u65E5")
+  ];
+}
+function cataloniaExtra() {
+  return [
+    HolidayRule.solar(6, 24, "\u5723\u7EA6\u7FF0\u8282"),
+    HolidayRule.solar(9, 11, "\u52A0\u6CF0\u7F57\u5C3C\u4E9A\u65E5"),
+    HolidayRule.solar(12, 26, "\u5723\u65AF\u8482\u82AC\u8282")
+  ];
 }
 
 class Holiday extends AbstractCulture {
@@ -8329,6 +9256,7 @@ class HolidayCalendar {
   substitute;
   observed;
   note;
+  cache = {};
   constructor(region, rules, note, observed = 0, substitute = false) {
     this.region = region;
     this.rules = rules;
@@ -8337,7 +9265,21 @@ class HolidayCalendar {
     this.observed = observed;
     this.note = note;
   }
+  static INSTANCES = {};
+  /**
+   * 取地区日历，实例按地区缓存，避免逐日重复构造
+   */
   static of(region) {
+    const key = region.toUpperCase();
+    const hit = HolidayCalendar.INSTANCES[key];
+    if (hit) {
+      return hit;
+    }
+    const c = HolidayCalendar.create(key);
+    HolidayCalendar.INSTANCES[key] = c;
+    return c;
+  }
+  static create(region) {
     const r = region.toUpperCase();
     switch (r) {
       case "CN":
@@ -8392,6 +9334,70 @@ class HolidayCalendar {
         return new HolidayCalendar(r, HolidayCalendar.indiaRules(), "\u4EC5\u5217\u5168\u56FD\u6027\u8282\u65E5\uFF1B\u5404\u90A6\u4E0E\u5B97\u6559\u8282\u65E5\u53E6\u8BA1\u3002");
       case "PH":
         return new HolidayCalendar(r, HolidayCalendar.philippinesRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF1B\u5B97\u6559\u8282\u65E5\u4EE5\u516C\u544A\u4E3A\u51C6\u3002");
+      case "PL":
+        return new HolidayCalendar(r, polandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5723\u4F53\u8282\u3002");
+      case "SE":
+        return new HolidayCalendar(r, swedenRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u4EF2\u590F\u8282\u3001\u8BF8\u5723\u8282\u4E3A\u4E0D\u65E9\u4E8E\u6307\u5B9A\u65E5\u7684\u661F\u671F\u516D\u3002");
+      case "NO":
+        return new HolidayCalendar(r, norwayRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5BAA\u6CD5\u65E5\u3002");
+      case "DK":
+        return new HolidayCalendar(r, denmarkRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5927\u7948\u7977\u65E5\u81EA 2024 \u5E74\u8D77\u53D6\u6D88\u3002");
+      case "FI":
+        return new HolidayCalendar(r, finlandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u4EF2\u590F\u8282\u4E0E\u8BF8\u5723\u8282\u3002");
+      case "IS":
+        return new HolidayCalendar(r, icelandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u590F\u5B63\u9996\u65E5\u4E3A\u56DB\u6708\u5341\u4E5D\u65E5\u540E\u7684\u7B2C\u4E00\u4E2A\u661F\u671F\u56DB\u3002");
+      case "IE":
+        return new HolidayCalendar(r, irelandRules(), "\u516C\u5171\u5047\u65E5\uFF1B\u5723\u5E03\u91CC\u5409\u5FB7\u8282\u81EA 2023 \u5E74\u8D77\u4E3A\u4E8C\u6708\u7B2C\u4E00\u4E2A\u661F\u671F\u4E00\u3002");
+      case "PT":
+        return new HolidayCalendar(r, portugalRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5723\u4F53\u8282\u3002");
+      case "CH":
+        return new HolidayCalendar(r, switzerlandRules(), "\u4EC5\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\uFF1B\u4E8C\u5341\u516D\u5DDE\u53E6\u6709\u5DEE\u5F02\u3002");
+      case "AT":
+        return new HolidayCalendar(r, austriaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5723\u4F53\u8282\u3002");
+      case "BE":
+        return new HolidayCalendar(r, belgiumRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\u3002");
+      case "CZ":
+        return new HolidayCalendar(r, czechRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u8036\u7A23\u53D7\u96BE\u65E5\u81EA 2016 \u5E74\u8D77\u3002");
+      case "HU":
+        return new HolidayCalendar(r, hungaryRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u8036\u7A23\u53D7\u96BE\u65E5\u81EA 2017 \u5E74\u8D77\u3002");
+      case "GR":
+        return new HolidayCalendar(r, greeceRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u590D\u6D3B\u8282\u76F8\u5173\u8282\u65E5\u6309\u4E1C\u6B63\u6559\u590D\u6D3B\u8282\u63A8\u7B97\u3002");
+      case "CY":
+        return new HolidayCalendar(r, cyprusRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u590D\u6D3B\u8282\u76F8\u5173\u8282\u65E5\u6309\u4E1C\u6B63\u6559\u590D\u6D3B\u8282\u63A8\u7B97\u3002");
+      case "RO":
+        return new HolidayCalendar(r, romaniaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u590D\u6D3B\u8282\u4E0E\u5723\u7075\u964D\u4E34\u8282\u6309\u4E1C\u6B63\u6559\u5386\u3002");
+      case "UA":
+        return new HolidayCalendar(r, ukraineRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u8FD1\u5E74\u8282\u65E5\u8C03\u6574\u9891\u7E41\uFF0C\u4EE5\u5B98\u65B9\u516C\u544A\u4E3A\u51C6\u3002");
+      case "TR":
+        return new HolidayCalendar(r, turkeyRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5F00\u658B\u8282\u3001\u53E4\u5C14\u90A6\u8282\u6309\u7B97\u672F\u5386\u63A8\u7B97\uFF0C\u89C2\u6708\u53EF\u80FD\u5DEE\u4E00\u65E5\u3002");
+      case "ID":
+        return new HolidayCalendar(r, indonesiaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF1B\u9759\u5C45\u65E5\u3001\u536B\u585E\u8282\u4F9D\u5DF4\u5398\u5386\u4E0E\u4F5B\u5386\uFF0C\u6309\u5E74\u516C\u5E03\u3002");
+      case "EG":
+        return new HolidayCalendar(r, egyptRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u4F0A\u65AF\u5170\u8282\u65E5\u6309\u7B97\u672F\u5386\u63A8\u7B97\uFF0C\u89C2\u6708\u53EF\u80FD\u5DEE\u4E00\u65E5\u3002");
+      case "SA":
+        return new HolidayCalendar(r, saudiRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5468\u672B\u4E3A\u5468\u4E94\u3001\u5468\u516D\uFF0C\u4F0A\u65AF\u5170\u8282\u65E5\u4EE5\u89C2\u6708\u4E3A\u51C6\u3002");
+      case "AE":
+        return new HolidayCalendar(r, uaeRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u4F0A\u65AF\u5170\u8282\u65E5\u4EE5\u89C2\u6708\u4E3A\u51C6\u3002");
+      case "NG":
+        return new HolidayCalendar(r, nigeriaRules(), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\uFF1B\u4F0A\u65AF\u5170\u8282\u65E5\u4EE5\u89C2\u6708\u4E3A\u51C6\u3002");
+      case "KE":
+        return new HolidayCalendar(r, kenyaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5F00\u658B\u8282\u4EE5\u89C2\u6708\u4E3A\u51C6\u3002");
+      case "US-CA":
+        return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(californiaExtra()), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5 + \u52A0\u5DDE\u585E\u8428\u5C14\xB7\u67E5\u97E6\u65AF\u65E5\uFF1B\u53BF\u5E02\u5047\u53E6\u8BA1\u3002", 1);
+      case "US-NY":
+        return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(newYorkExtra()), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5 + \u7EBD\u7EA6\u5DDE\u6797\u80AF\u8BDE\u8FB0\uFF1B\u5E02\u5047\u53E6\u8BA1\u3002", 1);
+      case "US-TX":
+        return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(texasExtra()), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5 + \u5F97\u5DDE\u72EC\u7ACB\u65E5\u4E0E\u5723\u54C8\u8F9B\u6258\u65E5\u3002", 1);
+      case "DE-BY":
+        return new HolidayCalendar(r, HolidayCalendar.germanyRules().concat(bavariaExtra()), "\u5168\u5FB7\u6CD5\u5B9A\u5047\u65E5 + \u5DF4\u4F10\u5229\u4E9A\u5DDE\u5B97\u6559\u8282\u65E5\u3002");
+      case "GB-SCT":
+        return new HolidayCalendar(r, HolidayCalendar.britainRules().concat(scotlandExtra()), "\u82CF\u683C\u5170\u94F6\u884C\u5047\u65E5\uFF0C\u542B\u4E00\u6708\u4E8C\u65E5\u4E0E\u5723\u5B89\u5FB7\u70C8\u8282\u3002", 3);
+      case "AU-NSW":
+        return new HolidayCalendar(r, HolidayCalendar.australiaRules().concat(newSouthWalesExtra()), "\u6FB3\u5927\u5229\u4E9A\u5168\u56FD\u5047\u65E5 + \u65B0\u5357\u5A01\u5C14\u58EB\u5DDE\u94F6\u884C\u5047\u65E5\u4E0E\u52B3\u52A8\u8282\u3002", 3);
+      case "CA-ON":
+        return new HolidayCalendar(r, HolidayCalendar.canadaRules().concat(ontarioExtra()), "\u52A0\u62FF\u5927\u8054\u90A6\u5047\u65E5 + \u5B89\u5927\u7565\u7701\u5BB6\u5EAD\u65E5\u4E0E\u516C\u6C11\u5047\u65E5\u3002", 3);
+      case "ES-CT":
+        return new HolidayCalendar(r, HolidayCalendar.spainRules().concat(cataloniaExtra()), "\u897F\u73ED\u7259\u5168\u56FD\u5047\u65E5 + \u52A0\u6CF0\u7F57\u5C3C\u4E9A\u5723\u7EA6\u7FF0\u8282\u3001\u52A0\u6CF0\u7F57\u5C3C\u4E9A\u65E5\u3001\u5723\u65AF\u8482\u82AC\u8282\u3002");
       default:
         throw new Error(`illegal region: ${region}`);
     }
@@ -8423,7 +9429,39 @@ class HolidayCalendar {
       "RU",
       "ZA",
       "IN",
-      "PH"
+      "PH",
+      "PL",
+      "SE",
+      "NO",
+      "DK",
+      "FI",
+      "IS",
+      "IE",
+      "PT",
+      "CH",
+      "AT",
+      "BE",
+      "CZ",
+      "HU",
+      "GR",
+      "CY",
+      "RO",
+      "UA",
+      "TR",
+      "ID",
+      "EG",
+      "SA",
+      "AE",
+      "NG",
+      "KE",
+      "US-CA",
+      "US-NY",
+      "US-TX",
+      "DE-BY",
+      "GB-SCT",
+      "AU-NSW",
+      "CA-ON",
+      "ES-CT"
     ];
   }
   /**
@@ -8854,11 +9892,12 @@ class HolidayCalendar {
       this.data[d.toString()] = new Holiday(d, item.name, item.work === true);
       n++;
     }
+    this.cache = {};
     return n;
   }
   static fromJson(json) {
     const o = JSON.parse(json);
-    const c = HolidayCalendar.of(o.region || "CN");
+    const c = HolidayCalendar.create(o.region || "CN");
     c.importJson(json);
     return c;
   }
@@ -8872,6 +9911,11 @@ class HolidayCalendar {
    * 一年节假日，含规则推算与导入数据，按日期排序
    */
   getDays(year, includeWork = false) {
+    const cacheKey = year + (includeWork ? "-w" : "");
+    const hit = this.cache[cacheKey];
+    if (hit) {
+      return hit.slice();
+    }
     const map = {};
     const dataKeys = {};
     for (const k in this.data) {
@@ -8919,7 +9963,8 @@ class HolidayCalendar {
       }
     }
     l.sort((a, b) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
-    return l;
+    this.cache[cacheKey] = l;
+    return l.slice();
   }
   /**
    * 顺延至下一个非假日
@@ -9031,38 +10076,937 @@ class HolidayCalendar {
   }
 }
 
+var FestivalCategory = /* @__PURE__ */ ((FestivalCategory2) => {
+  FestivalCategory2[FestivalCategory2["STATUTORY"] = 0] = "STATUTORY";
+  FestivalCategory2[FestivalCategory2["TRADITIONAL"] = 1] = "TRADITIONAL";
+  FestivalCategory2[FestivalCategory2["FOLK"] = 2] = "FOLK";
+  FestivalCategory2[FestivalCategory2["COMMEMORATIVE"] = 3] = "COMMEMORATIVE";
+  FestivalCategory2[FestivalCategory2["INTERNATIONAL"] = 4] = "INTERNATIONAL";
+  FestivalCategory2[FestivalCategory2["RELIGIOUS"] = 5] = "RELIGIOUS";
+  FestivalCategory2[FestivalCategory2["SOLAR_TERM"] = 6] = "SOLAR_TERM";
+  FestivalCategory2[FestivalCategory2["FOREIGN"] = 7] = "FOREIGN";
+  return FestivalCategory2;
+})(FestivalCategory || {});
+class FestivalEntry {
+  name;
+  category;
+  source;
+  note;
+  region;
+  constructor(name, category, source, note = "", region = "") {
+    this.name = name;
+    this.category = category;
+    this.source = source;
+    this.note = note;
+    this.region = region;
+  }
+  getName() {
+    return this.name;
+  }
+  getCategory() {
+    return this.category;
+  }
+  /**
+   * 出处标识，如 6tail、taoist、foto、gov.cn、hebrew
+   */
+  getSource() {
+    return this.source;
+  }
+  /**
+   * 备注：斋忌、宜忌、别称，无则为空串
+   */
+  getNote() {
+    return this.note;
+  }
+  /**
+   * 适用地区，仅外历节日使用
+   */
+  getRegion() {
+    return this.region;
+  }
+  toString() {
+    return this.note ? `${this.name}\uFF08${this.note}\uFF09` : this.name;
+  }
+}
+function getCategoryPriority(category) {
+  switch (category) {
+    case 0 /* STATUTORY */:
+      return 0;
+    case 1 /* TRADITIONAL */:
+      return 1;
+    case 2 /* FOLK */:
+      return 2;
+    case 5 /* RELIGIOUS */:
+      return 3;
+    case 6 /* SOLAR_TERM */:
+      return 4;
+    case 3 /* COMMEMORATIVE */:
+      return 5;
+    case 4 /* INTERNATIONAL */:
+      return 6;
+    default:
+      return 7;
+  }
+}
+
+const ANNIVERSARY = {
+  "1-8": ["\u5468\u6069\u6765\u901D\u4E16\u7EAA\u5FF5\u65E5"],
+  "1-10": ["\u4E2D\u56FD\u4EBA\u6C11\u8B66\u5BDF\u8282"],
+  "1-14": ["\u65E5\u8BB0\u60C5\u4EBA\u8282"],
+  "1-21": ["\u5217\u5B81\u901D\u4E16\u7EAA\u5FF5\u65E5"],
+  "1-26": ["\u56FD\u9645\u6D77\u5173\u65E5"],
+  "1-27": ["\u56FD\u9645\u5927\u5C60\u6740\u7EAA\u5FF5\u65E5"],
+  "2-2": ["\u4E16\u754C\u6E7F\u5730\u65E5"],
+  "2-4": ["\u4E16\u754C\u6297\u764C\u65E5"],
+  "2-7": ["\u4EAC\u6C49\u94C1\u8DEF\u7F62\u5DE5\u7EAA\u5FF5\u65E5"],
+  "2-10": ["\u56FD\u9645\u6C14\u8C61\u8282"],
+  "2-19": ["\u9093\u5C0F\u5E73\u901D\u4E16\u7EAA\u5FF5\u65E5"],
+  "2-20": ["\u4E16\u754C\u793E\u4F1A\u516C\u6B63\u65E5"],
+  "2-21": ["\u56FD\u9645\u6BCD\u8BED\u65E5"],
+  "2-24": ["\u7B2C\u4E09\u4E16\u754C\u9752\u5E74\u65E5"],
+  "3-1": ["\u56FD\u9645\u6D77\u8C79\u65E5"],
+  "3-3": ["\u4E16\u754C\u91CE\u751F\u52A8\u690D\u7269\u65E5", "\u5168\u56FD\u7231\u8033\u65E5"],
+  "3-5": ["\u5468\u6069\u6765\u8BDE\u8FB0\u7EAA\u5FF5\u65E5", "\u4E2D\u56FD\u9752\u5E74\u5FD7\u613F\u8005\u670D\u52A1\u65E5"],
+  "3-6": ["\u4E16\u754C\u9752\u5149\u773C\u65E5"],
+  "3-7": ["\u5973\u751F\u8282"],
+  "3-12": ["\u5B59\u4E2D\u5C71\u901D\u4E16\u7EAA\u5FF5\u65E5"],
+  "3-14": ["\u9A6C\u514B\u601D\u901D\u4E16\u7EAA\u5FF5\u65E5", "\u767D\u8272\u60C5\u4EBA\u8282"],
+  "3-17": ["\u56FD\u9645\u822A\u6D77\u65E5"],
+  "3-18": ["\u5168\u56FD\u79D1\u6280\u4EBA\u624D\u6D3B\u52A8\u65E5", "\u5168\u56FD\u7231\u809D\u65E5"],
+  "3-20": ["\u56FD\u9645\u5E78\u798F\u65E5"],
+  "3-21": ["\u4E16\u754C\u68EE\u6797\u65E5", "\u4E16\u754C\u7761\u7720\u65E5", "\u56FD\u9645\u6D88\u9664\u79CD\u65CF\u6B67\u89C6\u65E5"],
+  "3-22": ["\u4E16\u754C\u6C34\u65E5"],
+  "3-23": ["\u4E16\u754C\u6C14\u8C61\u65E5"],
+  "3-24": ["\u4E16\u754C\u9632\u6CBB\u7ED3\u6838\u75C5\u65E5"],
+  "3-29": ["\u4E2D\u56FD\u9EC4\u82B1\u5C97\u4E03\u5341\u4E8C\u70C8\u58EB\u6B89\u96BE\u7EAA\u5FF5\u65E5"],
+  "4-2": ["\u56FD\u9645\u513F\u7AE5\u56FE\u4E66\u65E5", "\u4E16\u754C\u81EA\u95ED\u75C7\u65E5"],
+  "4-4": ["\u56FD\u9645\u5730\u96F7\u884C\u52A8\u65E5"],
+  "4-7": ["\u4E16\u754C\u536B\u751F\u65E5"],
+  "4-8": ["\u56FD\u9645\u73CD\u7A00\u52A8\u7269\u4FDD\u62A4\u65E5"],
+  "4-12": ["\u4E16\u754C\u822A\u5929\u65E5"],
+  "4-14": ["\u9ED1\u8272\u60C5\u4EBA\u8282"],
+  "4-15": ["\u5168\u6C11\u56FD\u5BB6\u5B89\u5168\u6559\u80B2\u65E5"],
+  "4-22": ["\u4E16\u754C\u5730\u7403\u65E5", "\u5217\u5B81\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"],
+  "4-23": ["\u4E16\u754C\u8BFB\u4E66\u65E5"],
+  "4-24": ["\u4E2D\u56FD\u822A\u5929\u65E5"],
+  "4-25": ["\u513F\u7AE5\u9884\u9632\u63A5\u79CD\u5BA3\u4F20\u65E5"],
+  "4-26": ["\u4E16\u754C\u77E5\u8BC6\u4EA7\u6743\u65E5", "\u5168\u56FD\u759F\u75BE\u65E5"],
+  "4-28": ["\u4E16\u754C\u5B89\u5168\u751F\u4EA7\u4E0E\u5065\u5EB7\u65E5"],
+  "4-30": ["\u5168\u56FD\u4EA4\u901A\u5B89\u5168\u53CD\u601D\u65E5"],
+  "5-2": ["\u4E16\u754C\u91D1\u67AA\u9C7C\u65E5"],
+  "5-3": ["\u4E16\u754C\u65B0\u95FB\u81EA\u7531\u65E5"],
+  "5-5": ["\u9A6C\u514B\u601D\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"],
+  "5-8": ["\u4E16\u754C\u7EA2\u5341\u5B57\u65E5"],
+  "5-11": ["\u4E16\u754C\u80A5\u80D6\u65E5"],
+  "5-12": ["\u5168\u56FD\u9632\u707E\u51CF\u707E\u65E5", "\u62A4\u58EB\u8282"],
+  "5-14": ["\u73AB\u7470\u60C5\u4EBA\u8282"],
+  "5-15": ["\u56FD\u9645\u5BB6\u5EAD\u65E5"],
+  "5-19": ["\u4E2D\u56FD\u65C5\u6E38\u65E5"],
+  "5-20": ["\u7F51\u7EDC\u60C5\u4EBA\u8282"],
+  "5-22": ["\u56FD\u9645\u751F\u7269\u591A\u6837\u6027\u65E5"],
+  "5-25": ["525\u5FC3\u7406\u5065\u5EB7\u8282"],
+  "5-27": ["\u4E0A\u6D77\u89E3\u653E\u65E5"],
+  "5-29": ["\u56FD\u9645\u7EF4\u548C\u4EBA\u5458\u65E5"],
+  "5-30": ["\u4E2D\u56FD\u4E94\u5345\u8FD0\u52A8\u7EAA\u5FF5\u65E5"],
+  "5-31": ["\u4E16\u754C\u65E0\u70DF\u65E5"],
+  "6-3": ["\u4E16\u754C\u81EA\u884C\u8F66\u65E5"],
+  "6-5": ["\u4E16\u754C\u73AF\u5883\u65E5"],
+  "6-6": ["\u5168\u56FD\u7231\u773C\u65E5"],
+  "6-8": ["\u4E16\u754C\u6D77\u6D0B\u65E5"],
+  "6-11": ["\u4E2D\u56FD\u4EBA\u53E3\u65E5"],
+  "6-14": ["\u4E16\u754C\u732E\u8840\u65E5", "\u4EB2\u4EB2\u60C5\u4EBA\u8282"],
+  "6-17": ["\u4E16\u754C\u9632\u6CBB\u8352\u6F20\u5316\u4E0E\u5E72\u65F1\u65E5"],
+  "6-20": ["\u4E16\u754C\u96BE\u6C11\u65E5"],
+  "6-21": ["\u56FD\u9645\u745C\u4F3D\u65E5"],
+  "6-25": ["\u5168\u56FD\u571F\u5730\u65E5"],
+  "6-26": ["\u56FD\u9645\u7981\u6BD2\u65E5", "\u8054\u5408\u56FD\u5BAA\u7AE0\u65E5"],
+  "7-1": ["\u9999\u6E2F\u56DE\u5F52\u7EAA\u5FF5\u65E5"],
+  "7-6": ["\u56FD\u9645\u63A5\u543B\u65E5", "\u6731\u5FB7\u901D\u4E16\u7EAA\u5FF5\u65E5"],
+  "7-7": ["\u4E03\u4E03\u4E8B\u53D8\u7EAA\u5FF5\u65E5"],
+  "7-11": ["\u4E16\u754C\u4EBA\u53E3\u65E5", "\u4E2D\u56FD\u822A\u6D77\u65E5"],
+  "7-14": ["\u94F6\u8272\u60C5\u4EBA\u8282"],
+  "7-18": ["\u66FC\u5FB7\u62C9\u56FD\u9645\u65E5"],
+  "7-30": ["\u56FD\u9645\u53CB\u8C0A\u65E5"],
+  "8-3": ["\u7537\u4EBA\u8282"],
+  "8-5": ["\u6069\u683C\u65AF\u901D\u4E16\u7EAA\u5FF5\u65E5"],
+  "8-6": ["\u56FD\u9645\u7535\u5F71\u8282"],
+  "8-8": ["\u5168\u6C11\u5065\u8EAB\u65E5"],
+  "8-9": ["\u56FD\u9645\u571F\u8457\u4EBA\u65E5"],
+  "8-12": ["\u56FD\u9645\u9752\u5E74\u8282"],
+  "8-14": ["\u7EFF\u8272\u60C5\u4EBA\u8282"],
+  "8-19": ["\u4E16\u754C\u4EBA\u9053\u4E3B\u4E49\u65E5", "\u4E2D\u56FD\u533B\u5E08\u8282"],
+  "8-22": ["\u9093\u5C0F\u5E73\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"],
+  "8-29": ["\u5168\u56FD\u6D4B\u7ED8\u6CD5\u5BA3\u4F20\u65E5"],
+  "9-3": ["\u4E2D\u56FD\u6297\u65E5\u6218\u4E89\u80DC\u5229\u7EAA\u5FF5\u65E5"],
+  "9-5": ["\u4E2D\u534E\u6148\u5584\u65E5"],
+  "9-8": ["\u4E16\u754C\u626B\u76F2\u65E5"],
+  "9-9": ["\u6BDB\u6CFD\u4E1C\u901D\u4E16\u7EAA\u5FF5\u65E5", "\u5168\u56FD\u62D2\u7EDD\u9152\u9A7E\u65E5"],
+  "9-14": ["\u4E16\u754C\u6E05\u6D01\u5730\u7403\u65E5", "\u76F8\u7247\u60C5\u4EBA\u8282"],
+  "9-15": ["\u56FD\u9645\u6C11\u4E3B\u65E5"],
+  "9-16": ["\u56FD\u9645\u81ED\u6C27\u5C42\u4FDD\u62A4\u65E5"],
+  "9-17": ["\u4E16\u754C\u9A91\u884C\u65E5"],
+  "9-18": ["\u4E5D\u4E00\u516B\u4E8B\u53D8\u7EAA\u5FF5\u65E5"],
+  "9-20": ["\u5168\u56FD\u7231\u7259\u65E5"],
+  "9-21": ["\u56FD\u9645\u548C\u5E73\u65E5"],
+  "9-27": ["\u4E16\u754C\u65C5\u6E38\u65E5"],
+  "9-30": ["\u4E2D\u56FD\u70C8\u58EB\u7EAA\u5FF5\u65E5"],
+  "10-1": ["\u56FD\u9645\u8001\u5E74\u4EBA\u65E5"],
+  "10-2": ["\u56FD\u9645\u975E\u66B4\u529B\u65E5"],
+  "10-4": ["\u4E16\u754C\u52A8\u7269\u65E5"],
+  "10-10": ["\u8F9B\u4EA5\u9769\u547D\u7EAA\u5FF5\u65E5"],
+  "10-11": ["\u56FD\u9645\u5973\u7AE5\u65E5"],
+  "10-13": ["\u56FD\u9645\u51CF\u8F7B\u81EA\u7136\u707E\u5BB3\u65E5", "\u4E2D\u56FD\u5C11\u5E74\u5148\u950B\u961F\u8BDE\u8FB0\u65E5"],
+  "10-14": ["\u8461\u8404\u9152\u60C5\u4EBA\u8282"],
+  "10-16": ["\u4E16\u754C\u7CAE\u98DF\u65E5"],
+  "10-17": ["\u5168\u56FD\u6276\u8D2B\u65E5"],
+  "10-20": ["\u4E16\u754C\u7EDF\u8BA1\u65E5"],
+  "10-24": ["\u4E16\u754C\u53D1\u5C55\u4FE1\u606F\u65E5", "\u7A0B\u5E8F\u5458\u8282"],
+  "10-25": ["\u6297\u7F8E\u63F4\u671D\u7EAA\u5FF5\u65E5"],
+  "11-5": ["\u4E16\u754C\u6D77\u5578\u65E5"],
+  "11-8": ["\u8BB0\u8005\u8282"],
+  "11-9": ["\u5168\u56FD\u6D88\u9632\u65E5"],
+  "11-11": ["\u5149\u68CD\u8282"],
+  "11-12": ["\u5B59\u4E2D\u5C71\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"],
+  "11-14": ["\u7535\u5F71\u60C5\u4EBA\u8282"],
+  "11-16": ["\u56FD\u9645\u5BBD\u5BB9\u65E5"],
+  "11-17": ["\u56FD\u9645\u5927\u5B66\u751F\u8282"],
+  "11-19": ["\u4E16\u754C\u5395\u6240\u65E5"],
+  "11-28": ["\u6069\u683C\u65AF\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"],
+  "11-29": ["\u56FD\u9645\u58F0\u63F4\u5DF4\u52D2\u65AF\u5766\u4EBA\u6C11\u65E5"],
+  "12-1": ["\u4E16\u754C\u827E\u6ECB\u75C5\u65E5"],
+  "12-2": ["\u5168\u56FD\u4EA4\u901A\u5B89\u5168\u65E5"],
+  "12-3": ["\u4E16\u754C\u6B8B\u75BE\u4EBA\u65E5"],
+  "12-4": ["\u5168\u56FD\u6CD5\u5236\u5BA3\u4F20\u65E5"],
+  "12-5": ["\u4E16\u754C\u5F31\u80FD\u4EBA\u58EB\u65E5", "\u56FD\u9645\u5FD7\u613F\u4EBA\u5458\u65E5"],
+  "12-7": ["\u56FD\u9645\u6C11\u822A\u65E5"],
+  "12-9": ["\u4E16\u754C\u8DB3\u7403\u65E5", "\u56FD\u9645\u53CD\u8150\u8D25\u65E5"],
+  "12-10": ["\u4E16\u754C\u4EBA\u6743\u65E5"],
+  "12-11": ["\u56FD\u9645\u5C71\u5CB3\u65E5"],
+  "12-12": ["\u897F\u5B89\u4E8B\u53D8\u7EAA\u5FF5\u65E5"],
+  "12-13": ["\u56FD\u5BB6\u516C\u796D\u65E5"],
+  "12-14": ["\u62E5\u62B1\u60C5\u4EBA\u8282"],
+  "12-18": ["\u56FD\u9645\u79FB\u5F99\u8005\u65E5"],
+  "12-26": ["\u6BDB\u6CFD\u4E1C\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"]
+};
+
+const LUNAR_FOLK = {
+  "1-4": ["\u63A5\u795E\u65E5"],
+  "1-5": ["\u9694\u5F00\u65E5"],
+  "1-7": ["\u4EBA\u65E5"],
+  "1-8": ["\u8C37\u65E5", "\u987A\u661F\u8282"],
+  "1-9": ["\u5929\u65E5"],
+  "1-10": ["\u5730\u65E5"],
+  "1-20": ["\u5929\u7A7F\u8282"],
+  "1-25": ["\u586B\u4ED3\u8282"],
+  "1-30": ["\u6B63\u6708\u6666"],
+  "2-1": ["\u4E2D\u548C\u8282"],
+  "2-2": ["\u793E\u65E5\u8282"],
+  "3-3": ["\u4E0A\u5DF3\u8282"],
+  "5-20": ["\u5206\u9F99\u8282"],
+  "5-25": ["\u4F1A\u9F99\u8282"],
+  "6-6": ["\u5929\u8D36\u8282"],
+  "6-24": ["\u89C2\u83B2\u8282"],
+  "6-25": ["\u4E94\u8C37\u6BCD\u8282"],
+  "7-15": ["\u4E2D\u5143\u8282"],
+  "7-22": ["\u8D22\u795E\u8282"],
+  "7-29": ["\u5730\u85CF\u8282"],
+  "8-1": ["\u5929\u7078\u65E5"],
+  "10-1": ["\u5BD2\u8863\u8282"],
+  "10-10": ["\u5341\u6210\u8282"],
+  "10-15": ["\u4E0B\u5143\u8282"],
+  "12-7": ["\u9A71\u50A9\u65E5"],
+  "12-16": ["\u5C3E\u7259"],
+  "12-24": ["\u796D\u7076\u65E5"]
+};
+
+const BUDDHIST = {
+  "1-1": ["\u5929\u814A\uFF0C\u7389\u5E1D\u6821\u4E16\u4EBA\u795E\u6C14\u7984\u547D~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u6708\u6714~~|\u6BCF\u6708"],
+  "1-3": ["\u4E07\u795E\u90FD\u4F1A~\u72AF\u8005\u593A\u7EAA~", "\u6597\u964D~~|\u6BCF\u6708"],
+  "1-5": ["\u4E94\u865A\u5FCC~~"],
+  "1-6": ["\u516D\u8017\u5FCC~~", "\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "1-7": ["\u4E0A\u4F1A\u65E5~\u72AF\u8005\u635F\u5BFF~"],
+  "1-8": ["\u4E94\u6BBF\u960E\u7F57\u5929\u5B50\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "1-9": ["\u7389\u7687\u4E0A\u5E1D\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "1-13": ["\u6768\u516C\u5FCC~~"],
+  "1-14": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "1-15": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~", "\u4E0A\u5143\u795E\u4F1A~\u72AF\u8005\u593A\u7EAA~", "\u6708\u671B~~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "1-16": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~"],
+  "1-19": ["\u957F\u6625\u771F\u4EBA\u8BDE~~"],
+  "1-23": ["\u4E09\u5C38\u795E\u594F\u4E8B~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "1-25": ["\u6708\u6666~~|\u6BCF\u6708", "\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u635F\u5BFF\uFF0C\u5B50\u5E26\u75BE~"],
+  "1-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "1-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "1-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "1-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "2-1": ["\u4E00\u6BBF\u79E6\u5E7F\u738B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6708\u6714~~|\u6BCF\u6708"],
+  "2-2": ["\u4E07\u795E\u90FD\u4F1A~\u72AF\u8005\u593A\u7EAA~", "\u798F\u5FB7\u571F\u5730\u6B63\u795E\u8BDE~\u72AF\u8005\u5F97\u7978~"],
+  "2-3": ["\u6587\u660C\u5E1D\u541B\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u6597\u964D~~|\u6BCF\u6708"],
+  "2-6": ["\u4E1C\u534E\u5E1D\u541B\u8BDE~~", "\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "2-8": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u51FA\u5BB6~\u72AF\u8005\u593A\u7EAA~", "\u4E09\u6BBF\u5B8B\u5E1D\u738B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u5F20\u5927\u5E1D\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "2-11": ["\u6768\u516C\u5FCC~~"],
+  "2-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "2-15": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u6D85\u69C3~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u592A\u4E0A\u8001\u541B\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u6708\u671B~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "2-17": ["\u4E1C\u65B9\u675C\u5C06\u519B\u8BDE~~"],
+  "2-18": ["\u56DB\u6BBF\u4E94\u5B98\u738B\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u81F3\u5723\u5148\u5E08\u5B54\u5B50\u8BB3\u8FB0~\u72AF\u8005\u524A\u7984\u593A\u7EAA~"],
+  "2-19": ["\u89C2\u97F3\u5927\u58EB\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "2-21": ["\u666E\u8D24\u83E9\u8428\u8BDE~~"],
+  "2-23": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "2-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "2-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "2-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "2-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "2-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "3-1": ["\u4E8C\u6BBF\u695A\u6C5F\u738B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6708\u6714~~|\u6BCF\u6708"],
+  "3-3": ["\u7384\u5929\u4E0A\u5E1D\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6597\u964D~~|\u6BCF\u6708"],
+  "3-6": ["\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "3-8": ["\u516D\u6BBF\u535E\u57CE\u738B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "3-9": ["\u725B\u9B3C\u795E\u51FA~\u72AF\u8005\u4EA7\u6076\u80CE~", "\u6768\u516C\u5FCC~~"],
+  "3-12": ["\u4E2D\u592E\u4E94\u9053\u8BDE~~"],
+  "3-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "3-15": ["\u660A\u5929\u4E0A\u5E1D\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u7384\u575B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6708\u671B~~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "3-16": ["\u51C6\u63D0\u83E9\u8428\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "3-19": ["\u4E2D\u5CB3\u5927\u5E1D\u8BDE~~", "\u540E\u571F\u5A18\u5A18\u8BDE~~", "\u4E09\u8305\u964D~~"],
+  "3-20": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u635F\u5BFF~", "\u5B50\u5B59\u5A18\u5A18\u8BDE~~"],
+  "3-23": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "3-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "3-27": ["\u4E03\u6BBF\u6CF0\u5C71\u738B\u8BDE~~", "\u6597\u964D~~|\u6BCF\u6708"],
+  "3-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708", "\u82CD\u9889\u81F3\u5723\u5148\u5E08\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u4E1C\u5CB3\u5927\u5E1D\u8BDE~~"],
+  "3-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "3-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "4-1": ["\u516B\u6BBF\u90FD\u5E02\u738B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6708\u6714~~|\u6BCF\u6708"],
+  "4-3": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "4-4": ["\u4E07\u795E\u5584\u4F1A~\u72AF\u8005\u5931\u763C\u592D\u80CE~", "\u6587\u6B8A\u83E9\u8428\u8BDE~~"],
+  "4-6": ["\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "4-7": ["\u5357\u6597\u3001\u5317\u6597\u3001\u897F\u6597\u540C\u964D~\u72AF\u8005\u51CF\u5BFF~", "\u6768\u516C\u5FCC~~"],
+  "4-8": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u4E07\u795E\u5584\u4F1A~\u72AF\u8005\u5931\u763C\u592D\u80CE~", "\u5584\u6076\u7AE5\u5B50\u964D~\u72AF\u8005\u8840\u6B7B~", "\u4E5D\u6BBF\u5E73\u7B49\u738B\u8BDE~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "4-14": ["\u7EAF\u9633\u7956\u5E08\u8BDE~\u72AF\u8005\u51CF\u5BFF~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "4-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u949F\u79BB\u7956\u5E08\u8BDE~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "4-16": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u635F\u5BFF~"],
+  "4-17": ["\u5341\u6BBF\u8F6C\u8F6E\u738B\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "4-18": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u635F\u5BFF~", "\u7D2B\u5FBD\u5927\u5E1D\u8BDE~\u72AF\u8005\u635F\u5BFF~"],
+  "4-20": ["\u773C\u5149\u5723\u6BCD\u8BDE~~"],
+  "4-23": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "4-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "4-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "4-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "4-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "4-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "5-1": ["\u5357\u6781\u957F\u751F\u5927\u5E1D\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6708\u6714~~|\u6BCF\u6708"],
+  "5-3": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "5-5": ["\u5730\u814A~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u4E94\u5E1D\u6821\u5B9A\u751F\u4EBA\u5B98\u7235~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~", "\u6768\u516C\u5FCC~~"],
+  "5-6": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~", "\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "5-7": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~"],
+  "5-8": ["\u5357\u65B9\u4E94\u9053\u8BDE~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "5-11": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u635F\u5BFF~", "\u5929\u4E0B\u90FD\u57CE\u968D\u8BDE~~"],
+  "5-12": ["\u70B3\u7075\u516C\u8BDE~~"],
+  "5-13": ["\u5173\u5723\u964D~\u72AF\u8005\u524A\u7984\u593A\u7EAA~"],
+  "5-14": ["\u591C\u5B50\u65F6\u4E3A\u5929\u5730\u4EA4\u6CF0~\u72AF\u8005\u4E09\u5E74\u5185\u592B\u5987\u4FF1\u4EA1~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "5-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "5-16": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u4E09\u5E74\u5185\u592B\u5987\u4FF1\u4EA1~", "\u5929\u5730\u5143\u6C14\u9020\u5316\u4E07\u7269\u4E4B\u8FB0~\u72AF\u8005\u4E09\u5E74\u5185\u592B\u5987\u4FF1\u4EA1~"],
+  "5-17": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~"],
+  "5-18": ["\u5F20\u5929\u5E08\u8BDE~~"],
+  "5-22": ["\u5B5D\u5A25\u795E\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "5-23": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "5-25": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~", "\u6708\u6666~~|\u6BCF\u6708"],
+  "5-26": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~"],
+  "5-27": ["\u4E5D\u6BD2\u65E5~\u72AF\u8005\u592D\u4EA1\uFF0C\u5947\u7978\u4E0D\u6D4B~", "\u6597\u964D~~|\u6BCF\u6708"],
+  "5-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "5-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "5-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "6-1": ["\u6708\u6714~~|\u6BCF\u6708"],
+  "6-3": ["\u97E6\u9A6E\u83E9\u8428\u5723\u8BDE~~", "\u6597\u964D~~|\u6BCF\u6708", "\u6768\u516C\u5FCC~~"],
+  "6-5": ["\u5357\u8D61\u90E8\u6D32\u8F6C\u5927\u8F6E~\u72AF\u8005\u635F\u5BFF~"],
+  "6-6": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u635F\u5BFF~", "\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "6-8": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "6-10": ["\u91D1\u7C9F\u5982\u6765\u8BDE~~"],
+  "6-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "6-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "6-19": ["\u89C2\u4E16\u97F3\u83E9\u8428\u6210\u9053~\u72AF\u8005\u593A\u7EAA~"],
+  "6-23": ["\u5357\u65B9\u706B\u795E\u8BDE~\u72AF\u8005\u906D\u56DE\u7984~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "6-24": ["\u96F7\u7956\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u5173\u5E1D\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~"],
+  "6-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "6-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "6-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "6-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "6-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "7-1": ["\u6708\u6714~~|\u6BCF\u6708", "\u6768\u516C\u5FCC~~"],
+  "7-3": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "7-5": ["\u4E2D\u4F1A\u65E5~\u72AF\u8005\u635F\u5BFF~\u4E00\u4F5C\u521D\u4E03"],
+  "7-6": ["\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "7-7": ["\u9053\u5FB7\u814A~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u4E94\u5E1D\u6821\u751F\u4EBA\u5584\u6076~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u9B41\u661F\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~"],
+  "7-8": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "7-10": ["\u9634\u6BD2\u65E5~~\u5927\u5FCC"],
+  "7-12": ["\u957F\u771F\u8C2D\u771F\u4EBA\u8BDE~~"],
+  "7-13": ["\u5927\u52BF\u81F3\u83E9\u8428\u8BDE~\u72AF\u8005\u51CF\u5BFF~"],
+  "7-14": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "7-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u4E09\u5143\u964D~\u72AF\u8005\u593A\u7EAA~", "\u5730\u5B98\u6821\u7C4D~\u72AF\u8005\u593A\u7EAA~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "7-16": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~"],
+  "7-18": ["\u897F\u738B\u6BCD\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "7-19": ["\u592A\u5C81\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "7-22": ["\u589E\u798F\u8D22\u795E\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~"],
+  "7-23": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "7-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "7-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "7-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "7-29": ["\u6768\u516C\u5FCC~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "7-30": ["\u5730\u85CF\u83E9\u8428\u8BDE~\u72AF\u8005\u593A\u7EAA~", "\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "8-1": ["\u6708\u6714~~|\u6BCF\u6708", "\u8BB8\u771F\u541B\u8BDE~~"],
+  "8-3": ["\u6597\u964D~~|\u6BCF\u6708", "\u5317\u6597\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u53F8\u547D\u7076\u541B\u8BDE~\u72AF\u8005\u906D\u56DE\u7984~"],
+  "8-5": ["\u96F7\u58F0\u5927\u5E1D\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "8-6": ["\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "8-8": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "8-10": ["\u5317\u6597\u5927\u5E1D\u8BDE~~"],
+  "8-12": ["\u897F\u65B9\u4E94\u9053\u8BDE~~"],
+  "8-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "8-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u592A\u660E\u671D\u5143~\u72AF\u8005\u66B4\u4EA1~\u5B9C\u711A\u9999\u5B88\u591C", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "8-16": ["\u5929\u66F9\u63A0\u5237\u771F\u541B\u964D~\u72AF\u8005\u8D2B\u592D~"],
+  "8-18": ["\u5929\u4EBA\u5174\u798F\u4E4B\u8FB0~~\u5B9C\u658B\u6212\uFF0C\u5B58\u60F3\u5409\u4E8B"],
+  "8-23": ["\u6C49\u6052\u5019\u5F20\u663E\u738B\u8BDE~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "8-24": ["\u7076\u541B\u592B\u4EBA\u8BDE~~"],
+  "8-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "8-27": ["\u6597\u964D~~|\u6BCF\u6708", "\u81F3\u5723\u5148\u5E08\u5B54\u5B50\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u6768\u516C\u5FCC~~"],
+  "8-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708", "\u56DB\u5929\u4F1A\u4E8B~~"],
+  "8-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "8-30": ["\u8BF8\u795E\u8003\u6821~\u72AF\u8005\u593A\u7B97~", "\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "9-1": ["\u6708\u6714~~|\u6BCF\u6708", "\u5357\u6597\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u5317\u6597\u4E5D\u661F\u964D\u4E16~\u72AF\u8005\u593A\u7EAA~\u6B64\u4E5D\u65E5\u4FF1\u5B9C\u658B\u6212"],
+  "9-3": ["\u6597\u964D~~|\u6BCF\u6708", "\u4E94\u761F\u795E\u8BDE~~"],
+  "9-6": ["\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "9-8": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "9-9": ["\u6597\u6BCD\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~", "\u9146\u90FD\u5927\u5E1D\u8BDE~~", "\u7384\u5929\u4E0A\u5E1D\u98DE\u5347~~"],
+  "9-10": ["\u6597\u6BCD\u964D~\u72AF\u8005\u593A\u7EAA~"],
+  "9-11": ["\u5B9C\u6212~~"],
+  "9-13": ["\u5B5F\u5A46\u5C0A\u795E\u8BDE~~"],
+  "9-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "9-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "9-17": ["\u91D1\u9F99\u56DB\u5927\u738B\u8BDE~\u72AF\u8005\u906D\u6C34\u5384~"],
+  "9-19": ["\u65E5\u5BAB\u6708\u5BAB\u4F1A\u5408~\u72AF\u8005\u51CF\u5BFF~", "\u89C2\u4E16\u97F3\u83E9\u8428\u8BDE~\u72AF\u8005\u51CF\u5BFF~"],
+  "9-23": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "9-25": ["\u6708\u6666~~|\u6BCF\u6708", "\u6768\u516C\u5FCC~~"],
+  "9-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "9-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "9-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "9-30": ["\u836F\u5E08\u7409\u7483\u5149\u4F5B\u8BDE~\u72AF\u8005\u5371\u75BE~", "\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-1": ["\u6708\u6714~~|\u6BCF\u6708", "\u6C11\u5C81\u814A~\u72AF\u8005\u593A\u7EAA~", "\u56DB\u5929\u738B\u964D~\u72AF\u8005\u4E00\u5E74\u5185\u6B7B~"],
+  "10-3": ["\u6597\u964D~~|\u6BCF\u6708", "\u4E09\u8305\u8BDE~~"],
+  "10-5": ["\u4E0B\u4F1A\u65E5~\u72AF\u8005\u51CF\u5BFF~", "\u8FBE\u6469\u7956\u5E08\u8BDE~\u72AF\u8005\u51CF\u5BFF~"],
+  "10-6": ["\u96F7\u658B\u65E5~~|\u6BCF\u6708", "\u5929\u66F9\u8003\u5BDF~\u72AF\u8005\u593A\u7EAA~"],
+  "10-8": ["\u4F5B\u6D85\u69C3\u65E5~~\u5927\u5FCC\u8272\u6B32", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-10": ["\u56DB\u5929\u738B\u964D~\u72AF\u8005\u4E00\u5E74\u5185\u6B7B~"],
+  "10-11": ["\u5B9C\u6212~~"],
+  "10-14": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u4E09\u5143\u964D~\u72AF\u8005\u593A\u7EAA~", "\u4E0B\u5143\u6C34\u5E9C\u6821\u7C4D~\u72AF\u8005\u593A\u7EAA~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-16": ["\u4E09\u5143\u964D~\u72AF\u8005\u51CF\u5BFF~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-23": ["\u6768\u516C\u5FCC~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-25": ["\u6708\u6666~~|\u6BCF\u6708"],
+  "10-27": ["\u6597\u964D~~|\u6BCF\u6708", "\u5317\u6781\u7D2B\u5FBD\u5927\u5E1D\u964D~~"],
+  "10-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "10-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "10-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "11-1": ["\u6708\u6714~~|\u6BCF\u6708"],
+  "11-3": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "11-4": ["\u81F3\u5723\u5148\u5E08\u5B54\u5B50\u8BDE~\u72AF\u8005\u524A\u7984\u593A\u7EAA~"],
+  "11-6": ["\u897F\u5CB3\u5927\u5E1D\u8BDE~~"],
+  "11-8": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "11-11": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u593A\u7EAA~", "\u592A\u4E59\u6551\u82E6\u5929\u5C0A\u8BDE~\u72AF\u8005\u593A\u7EAA~"],
+  "11-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "11-15": ["\u6708\u671B~\u4E0A\u534A\u591C\u72AF\u7537\u6B7B \u4E0B\u534A\u591C\u72AF\u5973\u6B7B~", "\u56DB\u5929\u738B\u5DE1\u884C~\u4E0A\u534A\u591C\u72AF\u7537\u6B7B \u4E0B\u534A\u591C\u72AF\u5973\u6B7B~"],
+  "11-17": ["\u963F\u5F25\u9640\u4F5B\u8BDE~~"],
+  "11-19": ["\u592A\u9633\u65E5\u5BAB\u8BDE~\u72AF\u8005\u5F97\u5947\u7978~"],
+  "11-21": ["\u6768\u516C\u5FCC~~"],
+  "11-23": ["\u5F20\u4ED9\u8BDE~\u72AF\u8005\u7EDD\u55E3~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "11-25": ["\u63A0\u5237\u5927\u592B\u964D~\u72AF\u8005\u906D\u5927\u51F6~", "\u6708\u6666~~|\u6BCF\u6708"],
+  "11-26": ["\u5317\u65B9\u4E94\u9053\u8BDE~~"],
+  "11-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "11-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "11-29": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "11-30": ["\u6708\u6666~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u53F8\u547D\u594F\u4E8B~\u5982\u6708\u5C0F\uFF0C\u5373\u6212\u5EFF\u4E5D~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "12-1": ["\u6708\u6714~~|\u6BCF\u6708"],
+  "12-3": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "12-6": ["\u5929\u5730\u4ED3\u5F00\u65E5~\u72AF\u8005\u51CF\u5BFF~", "\u96F7\u658B\u65E5~~|\u6BCF\u6708"],
+  "12-7": ["\u63A0\u5237\u5927\u592B\u964D~\u72AF\u8005\u5F97\u6076\u75BE~"],
+  "12-8": ["\u738B\u4FAF\u814A~\u72AF\u8005\u593A\u7EAA~", "\u91CA\u8FE6\u5982\u6765\u6210\u4F5B\u4E4B\u8FB0~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708", "\u521D\u65EC\u5185\u620A\u65E5\uFF0C\u4EA6\u540D\u738B\u4FAF\u814A~\u72AF\u8005\u593A\u7EAA~"],
+  "12-12": ["\u592A\u7D20\u4E09\u5143\u541B\u671D\u771F~~"],
+  "12-14": ["\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "12-15": ["\u6708\u671B~~|\u6BCF\u6708", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "12-16": ["\u5357\u5CB3\u5927\u5E1D\u8BDE~~"],
+  "12-19": ["\u6768\u516C\u5FCC~~"],
+  "12-20": ["\u5929\u5730\u4EA4\u9053~\u72AF\u8005\u4FC3\u5BFF~"],
+  "12-21": ["\u5929\u7337\u4E0A\u5E1D\u8BDE~~"],
+  "12-23": ["\u4E94\u5CB3\u8BDE\u964D~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "12-24": ["\u53F8\u4ECA\u671D\u5929\u594F\u4EBA\u5584\u6076~\u72AF\u8005\u5F97\u5927\u7978~"],
+  "12-25": ["\u4E09\u6E05\u7389\u5E1D\u540C\u964D\uFF0C\u8003\u5BDF\u5584\u6076~\u72AF\u8005\u5F97\u5947\u7978~", "\u6708\u6666~~|\u6BCF\u6708"],
+  "12-27": ["\u6597\u964D~~|\u6BCF\u6708"],
+  "12-28": ["\u4EBA\u795E\u5728\u9634~\u72AF\u8005\u5F97\u75C5~\u5B9C\u5148\u4E00\u65E5\u5373\u6212|\u6BCF\u6708"],
+  "12-29": ["\u534E\u4E25\u83E9\u8428\u8BDE~~", "\u56DB\u5929\u738B\u5DE1\u884C~~|\u6BCF\u6708"],
+  "12-30": ["\u8BF8\u795E\u4E0B\u964D\uFF0C\u5BDF\u8BBF\u5584\u6076~\u72AF\u8005\u7537\u5973\u4FF1\u4EA1~"]
+};
+const BUDDHIST_OTHER = {
+  "1-1": ["\u5F25\u52D2\u83E9\u8428\u5723\u8BDE"],
+  "1-6": ["\u5B9A\u5149\u4F5B\u5723\u8BDE"],
+  "2-8": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u51FA\u5BB6"],
+  "2-15": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u6D85\u69C3"],
+  "2-19": ["\u89C2\u4E16\u97F3\u83E9\u8428\u5723\u8BDE"],
+  "2-21": ["\u666E\u8D24\u83E9\u8428\u5723\u8BDE"],
+  "3-16": ["\u51C6\u63D0\u83E9\u8428\u5723\u8BDE"],
+  "4-4": ["\u6587\u6B8A\u83E9\u8428\u5723\u8BDE"],
+  "4-8": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u5723\u8BDE"],
+  "4-15": ["\u4F5B\u5409\u7965\u65E5"],
+  "4-28": ["\u836F\u738B\u83E9\u8428\u5723\u8BDE"],
+  "5-13": ["\u4F3D\u84DD\u83E9\u8428\u5723\u8BDE"],
+  "6-3": ["\u97E6\u9A6E\u83E9\u8428\u5723\u8BDE"],
+  "6-19": ["\u89C2\u97F3\u83E9\u8428\u6210\u9053"],
+  "7-13": ["\u5927\u52BF\u81F3\u83E9\u8428\u5723\u8BDE"],
+  "7-15": ["\u4F5B\u6B22\u559C\u65E5"],
+  "7-24": ["\u9F99\u6811\u83E9\u8428\u5723\u8BDE"],
+  "7-30": ["\u5730\u85CF\u83E9\u8428\u5723\u8BDE"],
+  "8-15": ["\u6708\u5149\u83E9\u8428\u5723\u8BDE"],
+  "8-22": ["\u71C3\u706F\u4F5B\u5723\u8BDE"],
+  "9-9": ["\u6469\u5229\u652F\u5929\u83E9\u8428\u5723\u8BDE"],
+  "9-19": ["\u89C2\u4E16\u97F3\u83E9\u8428\u51FA\u5BB6"],
+  "9-30": ["\u836F\u5E08\u7409\u7483\u5149\u4F5B\u5723\u8BDE"],
+  "10-5": ["\u8FBE\u6469\u7956\u5E08\u5723\u8BDE"],
+  "10-20": ["\u6587\u6B8A\u83E9\u8428\u51FA\u5BB6"],
+  "11-17": ["\u963F\u5F25\u9640\u4F5B\u5723\u8BDE"],
+  "11-19": ["\u65E5\u5149\u83E9\u8428\u5723\u8BDE"],
+  "12-8": ["\u91CA\u8FE6\u725F\u5C3C\u4F5B\u6210\u9053"],
+  "12-23": ["\u76D1\u658B\u83E9\u8428\u5723\u8BDE"],
+  "12-29": ["\u534E\u4E25\u83E9\u8428\u5723\u8BDE"]
+};
+const GUANYIN = ["1-8", "2-7", "2-9", "2-19", "3-3", "3-6", "3-13", "4-22", "5-3", "5-17", "6-16", "6-18", "6-19", "6-23", "7-13", "8-16", "9-19", "9-23", "10-2", "11-19", "11-24", "12-25"];
+const YANG_GONG = ["1-13", "2-11", "3-9", "4-7", "5-5", "6-3", "7-1", "7-29", "8-27", "9-25", "10-23", "11-21", "12-19"];
+
+const TAOIST = {
+  "1-1": ["\u5929\u814A\u4E4B\u8FB0~\u5929\u814A\uFF0C\u6B64\u65E5\u4E94\u5E1D\u4F1A\u4E8E\u4E1C\u65B9\u4E5D\u7081\u9752\u5929"],
+  "1-3": ["\u90DD\u771F\u4EBA\u5723\u8BDE~", "\u5B59\u771F\u4EBA\u5723\u8BDE~"],
+  "1-5": ["\u5B59\u7956\u6E05\u9759\u5143\u541B\u8BDE~"],
+  "1-7": ["\u4E3E\u8FC1\u8D4F\u4F1A~\u6B64\u65E5\u4E0A\u5143\u8D50\u798F\uFF0C\u5929\u5B98\u540C\u5730\u6C34\u4E8C\u5B98\u8003\u6821\u7F6A\u798F"],
+  "1-9": ["\u7389\u7687\u4E0A\u5E1D\u5723\u8BDE~"],
+  "1-13": ["\u5173\u5723\u5E1D\u541B\u98DE\u5347~"],
+  "1-15": ["\u4E0A\u5143\u5929\u5B98\u5723\u8BDE~", "\u8001\u7956\u5929\u5E08\u5723\u8BDE~"],
+  "1-19": ["\u957F\u6625\u90B1\u771F\u4EBA(\u90B1\u5904\u673A)\u5723\u8BDE~"],
+  "1-28": ["\u8BB8\u771F\u541B(\u8BB8\u900A\u5929\u5E08)\u5723\u8BDE~"],
+  "2-1": ["\u52FE\u9648\u5929\u7687\u5927\u5E1D\u5723\u8BDE~", "\u957F\u6625\u5218\u771F\u4EBA(\u5218\u6E0A\u7136)\u5723\u8BDE~"],
+  "2-2": ["\u571F\u5730\u6B63\u795E\u8BDE~", "\u59DC\u592A\u516C\u5723\u8BDE~"],
+  "2-3": ["\u6587\u660C\u6893\u6F7C\u5E1D\u541B\u5723\u8BDE~"],
+  "2-6": ["\u4E1C\u534E\u5E1D\u541B\u5723\u8BDE~"],
+  "2-13": ["\u5EA6\u4EBA\u65E0\u91CF\u845B\u771F\u541B\u5723\u8BDE~"],
+  "2-15": ["\u592A\u6E05\u9053\u5FB7\u5929\u5C0A(\u592A\u4E0A\u8001\u541B)\u5723\u8BDE~"],
+  "2-19": ["\u6148\u822A\u771F\u4EBA\u5723\u8BDE~"],
+  "3-1": ["\u8C2D\u7956(\u8C2D\u5904\u7AEF)\u957F\u771F\u771F\u4EBA\u5723\u8BDE~"],
+  "3-3": ["\u7384\u5929\u4E0A\u5E1D\u5723\u8BDE~"],
+  "3-6": ["\u773C\u5149\u5A18\u5A18\u5723\u8BDE~"],
+  "3-15": ["\u5929\u5E08\u5F20\u5927\u771F\u4EBA\u5723\u8BDE~", "\u8D22\u795E\u8D75\u516C\u5143\u5E05\u5723\u8BDE~"],
+  "3-16": ["\u4E09\u8305\u771F\u541B\u5F97\u9053\u4E4B\u8FB0~", "\u4E2D\u5CB3\u5927\u5E1D\u5723\u8BDE~"],
+  "3-18": ["\u738B\u7956(\u738B\u5904\u4E00)\u7389\u9633\u771F\u4EBA\u5723\u8BDE~", "\u540E\u571F\u5A18\u5A18\u5723\u8BDE~"],
+  "3-19": ["\u592A\u9633\u661F\u541B\u5723\u8BDE~"],
+  "3-20": ["\u5B50\u5B59\u5A18\u5A18\u5723\u8BDE~"],
+  "3-23": ["\u5929\u540E\u5988\u7956\u5723\u8BDE~"],
+  "3-26": ["\u9B3C\u8C37\u5148\u5E08\u8BDE~"],
+  "3-28": ["\u4E1C\u5CB3\u5927\u5E1D\u5723\u8BDE~"],
+  "4-1": ["\u957F\u751F\u8C2D\u771F\u541B\u6210\u9053\u4E4B\u8FB0~"],
+  "4-10": ["\u4F55\u4ED9\u59D1\u5723\u8BDE~"],
+  "4-14": ["\u5415\u7956\u7EAF\u9633\u7956\u5E08\u5723\u8BDE~"],
+  "4-15": ["\u949F\u79BB\u7956\u5E08\u5723\u8BDE~"],
+  "4-18": ["\u5317\u6781\u7D2B\u5FAE\u5927\u5E1D\u5723\u8BDE~", "\u6CF0\u5C71\u5723\u6BCD\u78A7\u971E\u5143\u541B\u8BDE~", "\u534E\u4F57\u795E\u533B\u5148\u5E08\u8BDE~"],
+  "4-20": ["\u773C\u5149\u5723\u6BCD\u5A18\u5A18\u8BDE~"],
+  "4-28": ["\u795E\u519C\u5148\u5E1D\u8BDE~"],
+  "5-1": ["\u5357\u6781\u957F\u751F\u5927\u5E1D\u5723\u8BDE~"],
+  "5-5": ["\u5730\u814A\u4E4B\u8FB0~\u5730\u814A\uFF0C\u6B64\u65E5\u4E94\u5E1D\u4F1A\u4E8E\u5357\u65B9\u4E09\u7081\u4E39\u5929", "\u5357\u65B9\u96F7\u7956\u5723\u8BDE~", "\u5730\u7957\u6E29\u5143\u5E05\u5723\u8BDE~", "\u96F7\u9706\u9093\u5929\u541B\u5723\u8BDE~"],
+  "5-11": ["\u57CE\u968D\u7237\u5723\u8BDE~"],
+  "5-13": ["\u5173\u5723\u5E1D\u541B\u964D\u795E~", "\u5173\u5E73\u592A\u5B50\u5723\u8BDE~"],
+  "5-18": ["\u5F20\u5929\u5E08\u5723\u8BDE~"],
+  "5-20": ["\u9A6C\u7956\u4E39\u9633\u771F\u4EBA\u5723\u8BDE~"],
+  "5-29": ["\u7D2B\u9752\u767D\u7956\u5E08\u5723\u8BDE~"],
+  "6-1": ["\u5357\u6597\u661F\u541B\u4E0B\u964D~"],
+  "6-2": ["\u5357\u6597\u661F\u541B\u4E0B\u964D~"],
+  "6-3": ["\u5357\u6597\u661F\u541B\u4E0B\u964D~"],
+  "6-4": ["\u5357\u6597\u661F\u541B\u4E0B\u964D~"],
+  "6-5": ["\u5357\u6597\u661F\u541B\u4E0B\u964D~"],
+  "6-6": ["\u5357\u6597\u661F\u541B\u4E0B\u964D~"],
+  "6-10": ["\u5218\u6D77\u87FE\u7956\u5E08\u5723\u8BDE~"],
+  "6-15": ["\u7075\u5B98\u738B\u5929\u541B\u5723\u8BDE~"],
+  "6-19": ["\u6148\u822A(\u89C2\u97F3)\u6210\u9053\u65E5~"],
+  "6-23": ["\u706B\u795E\u5723\u8BDE~"],
+  "6-24": ["\u5357\u6781\u5927\u5E1D\u4E2D\u65B9\u96F7\u7956\u5723\u8BDE~", "\u5173\u5723\u5E1D\u541B\u5723\u8BDE~"],
+  "6-26": ["\u4E8C\u90CE\u771F\u541B\u5723\u8BDE~"],
+  "7-7": ["\u9053\u5FB7\u814A\u4E4B\u8FB0~\u9053\u5FB7\u814A\uFF0C\u6B64\u65E5\u4E94\u5E1D\u4F1A\u4E8E\u897F\u65B9\u4E03\u7081\u7D20\u5929", "\u5E86\u751F\u4E2D\u4F1A~\u6B64\u65E5\u4E2D\u5143\u8D66\u7F6A\uFF0C\u5730\u5B98\u540C\u5929\u6C34\u4E8C\u5B98\u8003\u6821\u7F6A\u798F"],
+  "7-12": ["\u897F\u65B9\u96F7\u7956\u5723\u8BDE~"],
+  "7-15": ["\u4E2D\u5143\u5730\u5B98\u5927\u5E1D\u5723\u8BDE~"],
+  "7-18": ["\u738B\u6BCD\u5A18\u5A18\u5723\u8BDE~"],
+  "7-20": ["\u5218\u7956(\u5218\u5904\u7384)\u957F\u751F\u771F\u4EBA\u5723\u8BDE~"],
+  "7-22": ["\u8D22\u5E1B\u661F\u541B\u6587\u8D22\u795E\u589E\u798F\u76F8\u516C\u674E\u8BE1\u7956\u5723\u8BDE~"],
+  "7-26": ["\u5F20\u4E09\u4E30\u7956\u5E08\u5723\u8BDE~"],
+  "8-1": ["\u8BB8\u771F\u541B\u98DE\u5347\u65E5~"],
+  "8-3": ["\u4E5D\u5929\u53F8\u547D\u7076\u541B\u8BDE~"],
+  "8-5": ["\u5317\u65B9\u96F7\u7956\u5723\u8BDE~"],
+  "8-10": ["\u5317\u5CB3\u5927\u5E1D\u8BDE\u8FB0~"],
+  "8-15": ["\u592A\u9634\u661F\u541B\u8BDE~"],
+  "9-1": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-2": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-3": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-4": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-5": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-6": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-7": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-8": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~"],
+  "9-9": ["\u5317\u6597\u4E5D\u7687\u964D\u4E16\u4E4B\u8FB0~", "\u6597\u59E5\u5143\u541B\u5723\u8BDE~", "\u91CD\u9633\u5E1D\u541B\u5723\u8BDE~", "\u7384\u5929\u4E0A\u5E1D\u98DE\u5347~", "\u9146\u90FD\u5927\u5E1D\u5723\u8BDE~"],
+  "9-22": ["\u589E\u798F\u8D22\u795E\u8BDE~"],
+  "9-23": ["\u8428\u7FC1\u771F\u541B\u5723\u8BDE~"],
+  "9-28": ["\u4E94\u663E\u7075\u5B98\u9A6C\u5143\u5E05\u5723\u8BDE~"],
+  "10-1": ["\u6C11\u5C81\u814A\u4E4B\u8FB0~\u6C11\u5C81\u814A\uFF0C\u6B64\u65E5\u4E94\u5E1D\u4F1A\u4E8E\u5317\u65B9\u4E94\u7081\u9ED1\u5929", "\u4E1C\u7687\u5927\u5E1D\u5723\u8BDE~"],
+  "10-3": ["\u4E09\u8305\u5E94\u5316\u771F\u541B\u5723\u8BDE~"],
+  "10-6": ["\u5929\u66F9\u8BF8\u53F8\u4E94\u5CB3\u4E94\u5E1D\u5723\u8BDE~"],
+  "10-15": ["\u4E0B\u5143\u6C34\u5B98\u5927\u5E1D\u5723\u8BDE~", "\u5EFA\u751F\u5927\u4F1A~\u6B64\u65E5\u4E0B\u5143\u89E3\u5384\uFF0C\u6C34\u5B98\u540C\u5929\u5730\u4E8C\u5B98\u8003\u6821\u7F6A\u798F"],
+  "10-18": ["\u5730\u6BCD\u5A18\u5A18\u5723\u8BDE~"],
+  "10-19": ["\u957F\u6625\u90B1\u771F\u541B\u98DE\u5347~"],
+  "10-20": ["\u865A\u9756\u5929\u5E08(\u5373\u4E09\u5341\u4EE3\u5929\u5E08\u5F18\u609F\u5F20\u771F\u4EBA)\u8BDE~"],
+  "11-6": ["\u897F\u5CB3\u5927\u5E1D\u5723\u8BDE~"],
+  "11-9": ["\u6E58\u5B50\u97E9\u7956\u5723\u8BDE~"],
+  "11-11": ["\u592A\u4E59\u6551\u82E6\u5929\u5C0A\u5723\u8BDE~"],
+  "11-26": ["\u5317\u65B9\u4E94\u9053\u5723\u8BDE~"],
+  "12-8": ["\u738B\u4FAF\u814A\u4E4B\u8FB0~\u738B\u4FAF\u814A\uFF0C\u6B64\u65E5\u4E94\u5E1D\u4F1A\u4E8E\u4E0A\u65B9\u7384\u90FD\u7389\u4EAC"],
+  "12-16": ["\u5357\u5CB3\u5927\u5E1D\u5723\u8BDE~", "\u798F\u5FB7\u6B63\u795E\u8BDE~"],
+  "12-20": ["\u9C81\u73ED\u5148\u5E08\u5723\u8BDE~"],
+  "12-21": ["\u5929\u7337\u4E0A\u5E1D\u5723\u8BDE~"],
+  "12-22": ["\u91CD\u9633\u7956\u5E08\u5723\u8BDE~"],
+  "12-23": ["\u796D\u7076\u738B~\u6700\u9002\u5B9C\u8C22\u65E7\u5E74\u592A\u5C81\uFF0C\u5F00\u542F\u62DC\u65B0\u5E74\u592A\u5C81"],
+  "12-25": ["\u7389\u5E1D\u5DE1\u5929~", "\u5929\u795E\u4E0B\u964D~"],
+  "12-29": ["\u6E05\u9759\u5B59\u771F\u541B(\u5B59\u4E0D\u4E8C)\u6210\u9053~"]
+};
+
+class AnniversaryFestival extends AbstractCulture {
+  solarDay;
+  entries;
+  /**
+   * 上游未收的中国纪念日，逐条附设立依据
+   */
+  static CHINA_EXTRA = {
+    // 国务院 2017 年 4 月 24 日批复，自 2017 年起每年 5 月 10 日
+    "5-10": ["\u4E2D\u56FD\u54C1\u724C\u65E5"],
+    // 国务院 2016 年 11 月 25 日批复，自 2017 年起每年 5 月 30 日
+    "5-30": ["\u5168\u56FD\u79D1\u6280\u5DE5\u4F5C\u8005\u65E5"],
+    // 全国人大常委会 2023 年 6 月 28 日决定，每年 8 月 15 日
+    "8-15": ["\u5168\u56FD\u751F\u6001\u65E5"]
+  };
+  constructor(solarDay, entries) {
+    super();
+    this.solarDay = solarDay;
+    this.entries = entries;
+  }
+  /**
+   * 国际日优先按名称判定，其余归入纪念日
+   */
+  static classify(name) {
+    return /世界|国际|联合国|全球/.test(name) ? FestivalCategory.INTERNATIONAL : FestivalCategory.COMMEMORATIVE;
+  }
+  static of(solarDay) {
+    const key = solarDay.getMonth() + "-" + solarDay.getDay();
+    const names = [];
+    const add = (list) => {
+      if (!list) {
+        return;
+      }
+      for (let i = 0; i < list.length; i++) {
+        if (names.indexOf(list[i]) < 0) {
+          names.push(list[i]);
+        }
+      }
+    };
+    add(ANNIVERSARY[key]);
+    add(AnniversaryFestival.CHINA_EXTRA[key]);
+    const entries = [];
+    for (let i = 0; i < names.length; i++) {
+      const isChinaExtra = !!AnniversaryFestival.CHINA_EXTRA[key] && AnniversaryFestival.CHINA_EXTRA[key].indexOf(names[i]) > -1;
+      entries.push(new FestivalEntry(
+        names[i],
+        AnniversaryFestival.classify(names[i]),
+        isChinaExtra ? "gov.cn" : "6tail"
+      ));
+    }
+    return new AnniversaryFestival(solarDay, entries);
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getNames() {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      l.push(this.entries[i].getName());
+    }
+    return l;
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  /**
+   * 日期键数，用于完整性校验
+   */
+  /**
+   * 上游未收的中国纪念日表，供事件注册与文档使用
+   */
+  static getChinaExtra() {
+    return AnniversaryFestival.CHINA_EXTRA;
+  }
+  static getSize() {
+    let n = Object.keys(ANNIVERSARY).length;
+    for (const k in AnniversaryFestival.CHINA_EXTRA) {
+      if (!ANNIVERSARY[k]) {
+        n++;
+      }
+    }
+    return n;
+  }
+  toString() {
+    return this.getName();
+  }
+}
+
+var VegetarianType = /* @__PURE__ */ ((VegetarianType2) => {
+  VegetarianType2[VegetarianType2["GUANYIN"] = 0] = "GUANYIN";
+  VegetarianType2[VegetarianType2["SHIZHAI"] = 1] = "SHIZHAI";
+  VegetarianType2[VegetarianType2["LIUZHAI"] = 2] = "LIUZHAI";
+  VegetarianType2[VegetarianType2["SHUOWANG"] = 3] = "SHUOWANG";
+  return VegetarianType2;
+})(VegetarianType || {});
+class BuddhistFestival extends AbstractCulture {
+  lunarDay;
+  entries;
+  static SHIZHAI = [1, 8, 14, 15, 18, 23, 24, 28, 29, 30];
+  static LIUZHAI = [8, 14, 15, 23, 29, 30];
+  static SHUOWANG = [1, 15];
+  constructor(lunarDay, entries) {
+    super();
+    this.lunarDay = lunarDay;
+    this.entries = entries;
+  }
+  /**
+   * 解析「名称~宜忌~备注」与「|每月」标记
+   */
+  static parse(raw) {
+    const parts = raw.split("~");
+    const name = parts[0] || "";
+    const desc = parts[1] || "";
+    let note = parts[2] || "";
+    const monthly = note.indexOf("|\u6BCF\u6708") > -1;
+    note = note.replace("|\u6BCF\u6708", "");
+    const notes = [];
+    if (desc) {
+      notes.push(desc);
+    }
+    if (note) {
+      notes.push(note);
+    }
+    if (monthly) {
+      notes.push("\u9010\u6708");
+    }
+    return new FestivalEntry(name, FestivalCategory.RELIGIOUS, "foto", notes.join("\uFF1B"));
+  }
+  static of(lunarDay) {
+    const entries = [];
+    if (lunarDay.getMonth() > 0) {
+      const key = lunarDay.getMonth() + "-" + lunarDay.getDay();
+      const rows = BUDDHIST[key];
+      if (rows) {
+        for (let i = 0; i < rows.length; i++) {
+          entries.push(BuddhistFestival.parse(rows[i]));
+        }
+      }
+      const other = BUDDHIST_OTHER[key];
+      if (other) {
+        for (let i = 0; i < other.length; i++) {
+          entries.push(new FestivalEntry(other[i], FestivalCategory.RELIGIOUS, "foto"));
+        }
+      }
+    }
+    return new BuddhistFestival(lunarDay, entries);
+  }
+  /**
+   * 是否斋日
+   */
+  static isVegetarianDay(lunarDay, type = 1 /* SHIZHAI */) {
+    if (lunarDay.getMonth() < 0) {
+      return false;
+    }
+    const key = lunarDay.getMonth() + "-" + lunarDay.getDay();
+    switch (type) {
+      case 0 /* GUANYIN */:
+        return GUANYIN.indexOf(key) > -1;
+      case 2 /* LIUZHAI */:
+        return BuddhistFestival.LIUZHAI.indexOf(lunarDay.getDay()) > -1;
+      case 3 /* SHUOWANG */:
+        return BuddhistFestival.SHUOWANG.indexOf(lunarDay.getDay()) > -1;
+      default:
+        return BuddhistFestival.SHIZHAI.indexOf(lunarDay.getDay()) > -1;
+    }
+  }
+  /**
+   * 是否杨公忌
+   */
+  static isYangGongDay(lunarDay) {
+    if (lunarDay.getMonth() < 0) {
+      return false;
+    }
+    return YANG_GONG.indexOf(lunarDay.getMonth() + "-" + lunarDay.getDay()) > -1;
+  }
+  getLunarDay() {
+    return this.lunarDay;
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getNames() {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      l.push(this.entries[i].getName());
+    }
+    return l;
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  static getFestivalSize() {
+    return Object.keys(BUDDHIST).length;
+  }
+  static getOtherSize() {
+    return Object.keys(BUDDHIST_OTHER).length;
+  }
+  static getGuanyinSize() {
+    return GUANYIN.length;
+  }
+  static getYangGongSize() {
+    return YANG_GONG.length;
+  }
+  toString() {
+    return this.getName();
+  }
+}
+
+class TaoistFestival extends AbstractCulture {
+  lunarDay;
+  entries;
+  static SAN_HUI = ["1-7", "7-7", "10-15"];
+  static SAN_YUAN = ["1-15", "7-15", "10-15"];
+  static WU_LA = ["1-1", "5-5", "7-7", "10-1", "12-8"];
+  /**
+   * 八节日对应的节气序号：立春、春分、立夏、夏至、立秋、秋分、立冬、冬至
+   */
+  static BA_JIE = [3, 6, 9, 12, 15, 18, 21, 0];
+  /**
+   * 八会日：天会丙午、地会壬午、人会壬子、日会庚午、月会庚申、星辰会辛酉、五行会甲辰、四时会甲戌
+   */
+  static BA_HUI = {
+    "\u4E19\u5348": "\u5929\u4F1A",
+    "\u58EC\u5348": "\u5730\u4F1A",
+    "\u58EC\u5B50": "\u4EBA\u4F1A",
+    "\u5E9A\u5348": "\u65E5\u4F1A",
+    "\u5E9A\u7533": "\u6708\u4F1A",
+    "\u8F9B\u9149": "\u661F\u8FB0\u4F1A",
+    "\u7532\u8FB0": "\u4E94\u884C\u4F1A",
+    "\u7532\u620C": "\u56DB\u65F6\u4F1A"
+  };
+  constructor(lunarDay, entries) {
+    super();
+    this.lunarDay = lunarDay;
+    this.entries = entries;
+  }
+  static of(lunarDay) {
+    const entries = [];
+    if (lunarDay.getMonth() > 0) {
+      const rows = TAOIST[lunarDay.getMonth() + "-" + lunarDay.getDay()];
+      if (rows) {
+        for (let i = 0; i < rows.length; i++) {
+          const parts = rows[i].split("~");
+          entries.push(new FestivalEntry(parts[0], FestivalCategory.RELIGIOUS, "taoist", parts[1] || ""));
+        }
+      }
+    }
+    return new TaoistFestival(lunarDay, entries);
+  }
+  static match(lunarDay, table) {
+    if (lunarDay.getMonth() < 0) {
+      return false;
+    }
+    return table.indexOf(lunarDay.getMonth() + "-" + lunarDay.getDay()) > -1;
+  }
+  /**
+   * 三会日：正月七日、七月七日、十月十五日
+   */
+  static isSanHui(lunarDay) {
+    return TaoistFestival.match(lunarDay, TaoistFestival.SAN_HUI);
+  }
+  /**
+   * 三元日：正月十五、七月十五、十月十五
+   */
+  static isSanYuan(lunarDay) {
+    return TaoistFestival.match(lunarDay, TaoistFestival.SAN_YUAN);
+  }
+  /**
+   * 五腊日：天腊正月初一、地腊五月初五、道德腊七月初七、民岁腊十月初一、王侯腊十二月初八
+   */
+  static isWuLa(lunarDay) {
+    return TaoistFestival.match(lunarDay, TaoistFestival.WU_LA);
+  }
+  /**
+   * 八节日：立春、春分、立夏、夏至、立秋、秋分、立冬、冬至
+   */
+  static isBaJie(termIndex) {
+    return TaoistFestival.BA_JIE.indexOf(termIndex) > -1;
+  }
+  /**
+   * 八会日，按当日干支判定
+   */
+  static isBaHui(sixtyCycle) {
+    return !!TaoistFestival.BA_HUI[sixtyCycle.getName()];
+  }
+  static getBaHuiName(sixtyCycle) {
+    return TaoistFestival.BA_HUI[sixtyCycle.getName()] || "";
+  }
+  /**
+   * 戊日：天干为戊，道观此日不焚香、不诵经
+   */
+  static isWuDay(sixtyCycle) {
+    return sixtyCycle.getHeavenStem().getName() === "\u620A";
+  }
+  getLunarDay() {
+    return this.lunarDay;
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getNames() {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      l.push(this.entries[i].getName());
+    }
+    return l;
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  static getSize() {
+    return Object.keys(TAOIST).length;
+  }
+  toString() {
+    return this.getName();
+  }
+}
+
 class FolkFestival extends AbstractCulture {
   solarDay;
   names;
   /**
-   * 农历月日
+   * 上游未收的补充条目，逐条说明依据：
+   * - 12-23 小年（北方）：祭灶前一日，北方以腊月廿三为小年
+   * - 4-8 浴佛节：佛诞日浴佛，民间亦称龙华会
+   * - 6-6 晒经节：六月六曝晒经书衣物的旧俗，与天贶节同日
    */
-  static LUNAR = {
-    "1-4": ["\u63A5\u795E\u65E5"],
-    "1-5": ["\u9694\u5F00\u65E5"],
-    "1-7": ["\u4EBA\u65E5"],
-    "1-8": ["\u8C37\u65E5", "\u987A\u661F\u8282"],
-    "1-9": ["\u5929\u65E5"],
-    "1-10": ["\u5730\u65E5"],
-    "1-20": ["\u5929\u7A7F\u8282"],
-    "1-25": ["\u586B\u4ED3\u8282"],
-    "1-30": ["\u6B63\u6708\u6666"],
-    "2-1": ["\u4E2D\u548C\u8282"],
-    "5-20": ["\u5206\u9F99\u8282"],
-    "5-25": ["\u4F1A\u9F99\u8282"],
-    "6-6": ["\u5929\u8D36\u8282"],
-    "6-24": ["\u89C2\u83B2\u8282"],
-    "6-25": ["\u4E94\u8C37\u6BCD\u8282"],
-    "7-22": ["\u8D22\u795E\u8282"],
-    "7-29": ["\u5730\u85CF\u8282"],
-    "8-1": ["\u5929\u7078\u65E5"],
-    "10-1": ["\u5BD2\u8863\u8282"],
-    "10-10": ["\u5341\u6210\u8282"],
-    "10-15": ["\u4E0B\u5143\u8282"],
-    "12-7": ["\u9A71\u50A9\u65E5"],
-    "12-16": ["\u5C3E\u7259"],
+  static LUNAR_EXTRA = {
     "12-23": ["\u5C0F\u5E74\uFF08\u5317\u65B9\uFF09"],
-    "12-24": ["\u796D\u7076\u65E5"]
+    "4-8": ["\u6D74\u4F5B\u8282"],
+    "6-6": ["\u6652\u7ECF\u8282"]
   };
   /**
    * 公历月日，已见于公历节日表者不再重复
@@ -9092,7 +11036,9 @@ class FolkFestival extends AbstractCulture {
    * 节气日偏移
    */
   static TERM_RULES = [
-    HolidayRule.term(7, "\u5BD2\u98DF\u8282", -1)
+    HolidayRule.term(7, "\u5BD2\u98DF\u8282", -1),
+    // 国务院 2018 年 6 月 21 日批复，自 2018 年起每年秋分
+    HolidayRule.term(18, "\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282")
   ];
   /**
    * 节气后第几个某干日
@@ -9101,6 +11047,10 @@ class FolkFestival extends AbstractCulture {
     HolidayRule.termStem(3, 4, 5, "\u6625\u793E"),
     HolidayRule.termStem(15, 4, 5, "\u79CB\u793E")
   ];
+  /**
+   * 规则日期按年缓存，值为「月-日」，避免逐日重复推算
+   */
+  static DATE_CACHE = {};
   constructor(solarDay, names) {
     super();
     this.solarDay = solarDay;
@@ -9110,17 +11060,17 @@ class FolkFestival extends AbstractCulture {
     const names = [];
     const lunar = lunarDay || solarDay.getLunarDay();
     const year = solarDay.getYear();
-    FolkFestival.append(names, FolkFestival.LUNAR[Math.abs(lunar.getMonth()) + "-" + lunar.getDay()]);
+    if (lunar.getMonth() > 0) {
+      const key = lunar.getMonth() + "-" + lunar.getDay();
+      FolkFestival.append(names, LUNAR_FOLK[key]);
+      FolkFestival.append(names, FolkFestival.LUNAR_EXTRA[key]);
+    }
     FolkFestival.append(names, FolkFestival.SOLAR[solarDay.getMonth() + "-" + solarDay.getDay()]);
     FolkFestival.appendByRules(names, FolkFestival.WEEK_RULES, solarDay, year, "w");
     FolkFestival.appendByRules(names, FolkFestival.TERM_RULES, solarDay, year, "t");
     FolkFestival.appendByRules(names, FolkFestival.TERM_STEM_RULES, solarDay, year, "s");
     return new FolkFestival(solarDay, names);
   }
-  /**
-   * 规则日期按年缓存，值为「月-日」，避免逐日重复推算
-   */
-  static DATE_CACHE = {};
   static appendByRules(target, rules, solarDay, year, prefix) {
     const md = solarDay.getMonth() + "-" + solarDay.getDay();
     for (let i = 0; i < rules.length; i++) {
@@ -9131,7 +11081,7 @@ class FolkFestival extends AbstractCulture {
         value = d ? d.getMonth() + "-" + d.getDay() : "";
         FolkFestival.DATE_CACHE[key] = value;
       }
-      if (value === md) {
+      if (value === md && target.indexOf(rules[i].getName()) < 0) {
         target.push(rules[i].getName());
       }
     }
@@ -9141,7 +11091,9 @@ class FolkFestival extends AbstractCulture {
       return;
     }
     for (let i = 0; i < source.length; i++) {
-      target.push(source[i]);
+      if (target.indexOf(source[i]) < 0) {
+        target.push(source[i]);
+      }
     }
   }
   getSolarDay() {
@@ -9152,6 +11104,18 @@ class FolkFestival extends AbstractCulture {
   }
   getName() {
     return this.names.join("\u3001");
+  }
+  /**
+   * 农历日期键数，用于完整性校验
+   */
+  static getLunarSize() {
+    let n = Object.keys(LUNAR_FOLK).length;
+    for (const k in FolkFestival.LUNAR_EXTRA) {
+      if (!LUNAR_FOLK[k]) {
+        n++;
+      }
+    }
+    return n;
   }
   toString() {
     return this.getName();
@@ -9189,6 +11153,12 @@ class DeityFestival extends AbstractCulture {
   }
   toString() {
     return `${LunarMonth.NAMES[this.month - 1]}${LunarDay.NAMES[this.day - 1]} ${this.getName()}`;
+  }
+  /**
+   * 月日键数，用于完整性校验
+   */
+  static getSize() {
+    return Object.keys(DeityFestival.DATA).length;
   }
   static DATA = {
     "0101": ["\u5929\u814A\u4E4B\u8FB0\xB7\u5F25\u52D2\u4F5B\u5723\u8BDE"],
@@ -9317,6 +11287,486 @@ class DeityFestival extends AbstractCulture {
     "1229": ["\u534E\u4E25\u83E9\u8428\u5723\u8BDE"],
     "1230": ["\u8BF8\u4F5B\u4E0B\u754C\u63A2\u8BBF\u5584\u6076"]
   };
+}
+
+class HebrewFestival extends AbstractCulture {
+  solarDay;
+  entries;
+  /**
+   * 固定月日节日：希伯来月、日、名称、持续天数
+   */
+  static RULES = [
+    { month: 7, day: 1, name: "\u72B9\u592A\u65B0\u5E74", days: 2 },
+    { month: 7, day: 10, name: "\u8D4E\u7F6A\u65E5", days: 1 },
+    { month: 7, day: 15, name: "\u4F4F\u68DA\u8282", days: 7 },
+    { month: 7, day: 22, name: "\u7B2C\u516B\u65E5\u96C6\u4F1A\uFF08\u6B22\u5E86\u59A5\u62C9\u8282\uFF09", days: 1 },
+    { month: 9, day: 25, name: "\u5149\u660E\u8282", days: 8 },
+    { month: 11, day: 15, name: "\u6811\u6728\u65B0\u5E74", days: 1 },
+    { month: 1, day: 15, name: "\u903E\u8D8A\u8282", days: 7 },
+    { month: 2, day: 18, name: "\u7BDD\u706B\u8282", days: 1 },
+    { month: 3, day: 6, name: "\u4E94\u65EC\u8282", days: 1 },
+    { month: 5, day: 9, name: "\u5723\u6BBF\u88AB\u6BC1\u65E5", days: 1 }
+  ];
+  constructor(solarDay, entries) {
+    super();
+    this.solarDay = solarDay;
+    this.entries = entries;
+  }
+  static of(solarDay) {
+    const entries = [];
+    const h = HebrewDay.fromSolarDay(solarDay);
+    const jd = solarDay.getJulianDay().getDay();
+    for (let i = 0; i < HebrewFestival.RULES.length; i++) {
+      const r = HebrewFestival.RULES[i];
+      const start = HebrewDay.toJulianDay(h.getYear(), r.month, r.day);
+      const diff = jd - start;
+      if (diff >= 0 && diff < r.days) {
+        const suffix = r.days > 1 ? `\u7B2C${diff + 1}\u65E5` : "";
+        entries.push(new FestivalEntry(r.name + suffix, FestivalCategory.FOREIGN, "hebrew", "", "IL"));
+      }
+    }
+    const purimMonth = HebrewDay.isLeapYear(h.getYear()) ? 13 : 12;
+    if (h.getMonth() === purimMonth && h.getDay() === 14) {
+      entries.push(new FestivalEntry("\u666E\u73E5\u8282", FestivalCategory.FOREIGN, "hebrew", "", "IL"));
+    }
+    const shoah = HebrewFestival.getYomHaShoah(h.getYear());
+    if (shoah.equals(solarDay)) {
+      entries.push(new FestivalEntry("\u5927\u5C60\u6740\u7EAA\u5FF5\u65E5", FestivalCategory.FOREIGN, "hebrew", "", "IL"));
+    }
+    const independence = HolidayRule.getIndependenceDay(h.getYear());
+    if (independence.equals(solarDay)) {
+      entries.push(new FestivalEntry("\u72EC\u7ACB\u65E5", FestivalCategory.FOREIGN, "hebrew", "", "IL"));
+    }
+    if (independence.next(-1).equals(solarDay)) {
+      entries.push(new FestivalEntry("\u9635\u4EA1\u5C06\u58EB\u7EAA\u5FF5\u65E5", FestivalCategory.FOREIGN, "hebrew", "", "IL"));
+    }
+    return new HebrewFestival(solarDay, entries);
+  }
+  /**
+   * 大屠杀纪念日：27 尼散月，逢周五前移、逢周日后移
+   */
+  static getYomHaShoah(hebrewYear) {
+    let d = HebrewDay.fromYmd(hebrewYear, 1, 27).getSolarDay();
+    const w = d.getWeek().getIndex();
+    if (w === 5) {
+      d = d.next(-1);
+    } else if (w === 0) {
+      d = d.next(1);
+    }
+    return d;
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getNames() {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      l.push(this.entries[i].getName());
+    }
+    return l;
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  toString() {
+    return this.getName();
+  }
+}
+class IndianFestival extends AbstractCulture {
+  solarDay;
+  entries;
+  /**
+   * 官方公布的逐年日期，键为「年-月-日」
+   */
+  static TABLE = {
+    "2024-1-14": ["Makar Sankranti"],
+    "2024-2-14": ["Vasant Panchami"],
+    "2024-3-8": ["Maha Shivaratri"],
+    "2024-3-25": ["Holi"],
+    "2024-4-17": ["Rama Navami"],
+    "2024-4-21": ["Mahavir Jayanti"],
+    "2024-5-23": ["Buddha Purnima"],
+    "2024-7-7": ["Rath Yatra"],
+    "2024-7-21": ["Guru Purnima"],
+    "2024-8-19": ["Raksha Bandhan"],
+    "2024-8-26": ["Janmashtami"],
+    "2024-9-7": ["Ganesh Chaturthi"],
+    "2024-10-3": ["Navratri"],
+    "2024-10-12": ["Dussehra"],
+    "2024-10-31": ["Diwali"],
+    "2024-11-2": ["Govardhan Puja"],
+    "2024-11-3": ["Bhai Duj"],
+    "2024-11-7": ["Chhath Puja"],
+    "2024-11-15": ["Guru Nanak Jayanti"],
+    "2025-1-14": ["Makar Sankranti"],
+    "2025-2-2": ["Vasant Panchami"],
+    "2025-2-26": ["Maha Shivaratri"],
+    "2025-3-14": ["Holi"],
+    "2025-4-6": ["Rama Navami"],
+    "2025-4-10": ["Mahavir Jayanti"],
+    "2025-5-12": ["Buddha Purnima"],
+    "2025-6-27": ["Rath Yatra"],
+    "2025-7-10": ["Guru Purnima"],
+    "2025-8-9": ["Raksha Bandhan"],
+    "2025-8-16": ["Janmashtami"],
+    "2025-8-27": ["Ganesh Chaturthi"],
+    "2025-9-22": ["Navratri"],
+    "2025-10-2": ["Dussehra"],
+    "2025-10-20": ["Diwali"],
+    "2025-10-22": ["Govardhan Puja"],
+    "2025-10-23": ["Bhai Duj"],
+    "2025-10-28": ["Chhath Puja"],
+    "2025-11-5": ["Guru Nanak Jayanti"],
+    "2026-1-14": ["Makar Sankranti"],
+    "2026-1-23": ["Vasant Panchami"],
+    "2026-2-15": ["Maha Shivaratri"],
+    "2026-3-4": ["Holi"],
+    "2026-3-26": ["Rama Navami"],
+    "2026-3-31": ["Mahavir Jayanti"],
+    "2026-5-1": ["Buddha Purnima"],
+    "2026-7-16": ["Rath Yatra"],
+    "2026-7-29": ["Guru Purnima"],
+    "2026-8-28": ["Raksha Bandhan"],
+    "2026-9-4": ["Janmashtami"],
+    "2026-9-14": ["Ganesh Chaturthi"],
+    "2026-10-11": ["Navratri"],
+    "2026-10-20": ["Dussehra"],
+    "2026-11-8": ["Diwali"],
+    "2026-11-9": ["Govardhan Puja"],
+    "2026-11-11": ["Bhai Duj"],
+    "2026-11-15": ["Chhath Puja"],
+    "2026-11-24": ["Guru Nanak Jayanti"],
+    "2027-1-14": ["Makar Sankranti"],
+    "2027-2-11": ["Vasant Panchami"],
+    "2027-3-6": ["Maha Shivaratri"],
+    "2027-3-22": ["Holi"],
+    "2027-4-15": ["Rama Navami"],
+    "2027-4-19": ["Mahavir Jayanti"],
+    "2027-5-20": ["Buddha Purnima"],
+    "2027-7-5": ["Rath Yatra"],
+    "2027-8-17": ["Raksha Bandhan"],
+    "2027-8-25": ["Janmashtami"],
+    "2027-9-4": ["Ganesh Chaturthi"],
+    "2027-9-30": ["Navratri"],
+    "2027-10-9": ["Dussehra"],
+    "2027-10-29": ["Diwali"],
+    "2027-10-30": ["Govardhan Puja"],
+    "2027-10-31": ["Bhai Duj"],
+    "2027-11-4": ["Chhath Puja"],
+    "2027-11-14": ["Guru Nanak Jayanti"]
+  };
+  constructor(solarDay, entries) {
+    super();
+    this.solarDay = solarDay;
+    this.entries = entries;
+  }
+  static of(solarDay) {
+    const entries = [];
+    const key = solarDay.getYear() + "-" + solarDay.getMonth() + "-" + solarDay.getDay();
+    const rows = IndianFestival.TABLE[key];
+    if (rows) {
+      for (let i = 0; i < rows.length; i++) {
+        entries.push(new FestivalEntry(rows[i], FestivalCategory.FOREIGN, "timeanddate", "", "IN"));
+      }
+    }
+    return new IndianFestival(solarDay, entries);
+  }
+  /**
+   * 已录入的年份范围
+   */
+  static getYears() {
+    return [2024, 2025, 2026, 2027];
+  }
+  static getSize() {
+    return Object.keys(IndianFestival.TABLE).length;
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getNames() {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      l.push(this.entries[i].getName());
+    }
+    return l;
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  toString() {
+    return this.getName();
+  }
+}
+
+class Festivals extends AbstractCulture {
+  solarDay;
+  entries;
+  /**
+   * 公历节日中属于法定节假日的名称
+   */
+  static STATUTORY_SOLAR = ["\u5143\u65E6", "\u52B3\u52A8\u8282", "\u56FD\u5E86\u8282"];
+  static CATEGORY_NAMES = ["\u6CD5\u5B9A", "\u4F20\u7EDF", "\u6C11\u4FD7", "\u7EAA\u5FF5", "\u56FD\u9645", "\u5B97\u6559", "\u8282\u6C14", "\u5916\u5386"];
+  constructor(solarDay, entries) {
+    super();
+    this.solarDay = solarDay;
+    this.entries = entries;
+  }
+  static of(solarDay, includeForeign = false) {
+    const raw = [];
+    const lunar = solarDay.getLunarDay();
+    const solarFestival = solarDay.getFestival();
+    if (solarFestival) {
+      const name = solarFestival.getName();
+      const category = Festivals.STATUTORY_SOLAR.indexOf(name) > -1 ? FestivalCategory.STATUTORY : FestivalCategory.COMMEMORATIVE;
+      raw.push(new FestivalEntry(name, category, "tyme"));
+    }
+    const lunarFestival = lunar.getFestival();
+    if (lunarFestival) {
+      raw.push(new FestivalEntry(lunarFestival.getName(), FestivalCategory.TRADITIONAL, "tyme"));
+    }
+    const folk = FolkFestival.of(solarDay, lunar);
+    const folkEntries = folk.getNames().map((n) => new FestivalEntry(n, FestivalCategory.FOLK, "folk"));
+    for (let i = 0; i < folkEntries.length; i++) {
+      raw.push(folkEntries[i]);
+    }
+    const anniversary = AnniversaryFestival.of(solarDay);
+    const anniversaryEntries = anniversary.getEntries();
+    for (let i = 0; i < anniversaryEntries.length; i++) {
+      raw.push(anniversaryEntries[i]);
+    }
+    const buddhist = BuddhistFestival.of(lunar);
+    const buddhistEntries = buddhist.getEntries();
+    for (let i = 0; i < buddhistEntries.length; i++) {
+      raw.push(buddhistEntries[i]);
+    }
+    const taoist = TaoistFestival.of(lunar);
+    const taoistEntries = taoist.getEntries();
+    for (let i = 0; i < taoistEntries.length; i++) {
+      raw.push(taoistEntries[i]);
+    }
+    const deity = DeityFestival.fromLunarDay(lunar);
+    if (deity) {
+      for (let i = 0; i < deity.getNames().length; i++) {
+        const parts = deity.getNames()[i].split(/[·、]/);
+        for (let j = 0; j < parts.length; j++) {
+          if (parts[j]) {
+            const canon = Festivals.ALIAS[parts[j]] || parts[j];
+            raw.push(new FestivalEntry(canon, FestivalCategory.RELIGIOUS, "yuxiaji"));
+          }
+        }
+      }
+    }
+    if (includeForeign) {
+      const hebrew = HebrewFestival.of(solarDay).getEntries();
+      for (let i = 0; i < hebrew.length; i++) {
+        raw.push(hebrew[i]);
+      }
+      const indian = IndianFestival.of(solarDay).getEntries();
+      for (let i = 0; i < indian.length; i++) {
+        raw.push(indian[i]);
+      }
+    }
+    const termDay = solarDay.getTermDay();
+    if (termDay.getDayIndex() === 0) {
+      const termName = termDay.getSolarTerm().getName();
+      let exists = false;
+      for (let i = 0; i < raw.length; i++) {
+        if (raw[i].getName() === termName || raw[i].getName() === termName + "\u8282") {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        raw.push(new FestivalEntry(termName, FestivalCategory.SOLAR_TERM, "tyme"));
+      }
+    }
+    return new Festivals(solarDay, Festivals.dedupe(raw));
+  }
+  /**
+   * 归一化名称，用于合并同神异写
+   *
+   * 「眼光娘娘圣诞」「眼光娘娘等圣诞」同归一为「眼光娘娘」；
+   * 「北岳大帝诞辰」「北岳大帝圣诞」同归一为「北岳大帝」。
+   */
+  /**
+   * 同神异写别名，仅收已核实的写法差异
+   */
+  static ALIAS = {
+    // 《玉匣记》传本作「走光佛」，通行本作「定光佛」
+    "\u8D70\u5149\u4F5B\u5723\u8BDE": "\u5B9A\u5149\u4F5B\u5723\u8BDE",
+    // 弥勒一处作佛、一处作菩萨
+    "\u5F25\u52D2\u4F5B\u5723\u8BDE": "\u5F25\u52D2\u83E9\u8428\u5723\u8BDE",
+    // 释迦文佛即释迦牟尼佛
+    "\u91CA\u8FE6\u6587\u4F5B\u5723\u8BDE": "\u91CA\u8FE6\u725F\u5C3C\u4F5B\u5723\u8BDE"
+  };
+  static normalize(name) {
+    const alias = Festivals.ALIAS[name];
+    let s = alias || name;
+    const comma = s.indexOf("\uFF0C");
+    if (comma > 0 && comma <= 4) {
+      s = s.substring(0, comma);
+    }
+    return s.replace(/等圣诞$/, "").replace(/圣诞$/, "").replace(/诞辰$/, "").replace(/之辰$/, "").replace(/诞$/, "").replace(/（.*?）/g, "");
+  }
+  /**
+   * 同名去重，保留优先级最高者，并合并出处与备注
+   *
+   * 同级时优先取不带「等」字的单一名号，再取较短者。
+   */
+  static dedupe(raw) {
+    const order = [];
+    const best = {};
+    const sources = {};
+    const notes = {};
+    const better = (a, b) => {
+      const pa = getCategoryPriority(a.getCategory());
+      const pb = getCategoryPriority(b.getCategory());
+      if (pa !== pb) {
+        return pa < pb;
+      }
+      const ea = a.getName().indexOf("\u7B49") > -1 ? 1 : 0;
+      const eb = b.getName().indexOf("\u7B49") > -1 ? 1 : 0;
+      if (ea !== eb) {
+        return ea < eb;
+      }
+      return a.getName().length < b.getName().length;
+    };
+    for (let i = 0; i < raw.length; i++) {
+      const e = raw[i];
+      const name = e.getName();
+      if (!name) {
+        continue;
+      }
+      const key = Festivals.normalize(name);
+      if (!best[key]) {
+        order.push(key);
+        best[key] = e;
+        sources[key] = [e.getSource()];
+        notes[key] = e.getNote() ? [e.getNote()] : [];
+        continue;
+      }
+      if (better(e, best[key])) {
+        best[key] = e;
+      }
+      if (sources[key].indexOf(e.getSource()) < 0) {
+        sources[key].push(e.getSource());
+      }
+      const note = e.getNote();
+      if (note && notes[key].indexOf(note) < 0) {
+        notes[key].push(note);
+      }
+    }
+    const l = [];
+    for (let i = 0; i < order.length; i++) {
+      const e = best[order[i]];
+      l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join("\u3001"), notes[order[i]].join("\uFF1B"), e.getRegion()));
+    }
+    l.sort((a, b) => {
+      const p = getCategoryPriority(a.getCategory()) - getCategoryPriority(b.getCategory());
+      return p !== 0 ? p : a.getName() < b.getName() ? -1 : a.getName() > b.getName() ? 1 : 0;
+    });
+    return l;
+  }
+  /**
+   * 把内置节日注册进 EventManager，使 Event.fromSolarDay() 可反查
+   *
+   * 名称统一加「节日:」前缀，避免与用户自定义事件冲突；重复调用为幂等更新。
+   * 返回注册条数。
+   */
+  static installEvents() {
+    let n = 0;
+    const put = (name, e) => {
+      EventManager.update("\u8282\u65E5:" + name, e);
+      n++;
+    };
+    const solarTable = (table) => {
+      for (const key in table) {
+        const md = key.split("-");
+        for (let i = 0; i < table[key].length; i++) {
+          put(table[key][i], Event.builder().solarDay(parseInt(md[0], 10), parseInt(md[1], 10), 0).build());
+        }
+      }
+    };
+    solarTable(ANNIVERSARY);
+    solarTable(AnniversaryFestival.getChinaExtra());
+    const lunarTable = (table, strip) => {
+      for (const key in table) {
+        const md = key.split("-");
+        for (let i = 0; i < table[key].length; i++) {
+          const name = strip ? table[key][i].split("~")[0] : table[key][i];
+          put(name, Event.builder().lunarDay(parseInt(md[0], 10), parseInt(md[1], 10), 0).build());
+        }
+      }
+    };
+    lunarTable(LUNAR_FOLK, false);
+    lunarTable(BUDDHIST_OTHER, false);
+    lunarTable(TAOIST, true);
+    return n;
+  }
+  getSolarDay() {
+    return this.solarDay;
+  }
+  getEntries() {
+    return this.entries;
+  }
+  getByCategory(category) {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      if (this.entries[i].getCategory() === category) {
+        l.push(this.entries[i]);
+      }
+    }
+    return l;
+  }
+  getNames() {
+    const l = [];
+    for (let i = 0; i < this.entries.length; i++) {
+      l.push(this.entries[i].getName());
+    }
+    return l;
+  }
+  getName() {
+    return this.getNames().join("\u3001");
+  }
+  static getCategories() {
+    return [
+      FestivalCategory.STATUTORY,
+      FestivalCategory.TRADITIONAL,
+      FestivalCategory.FOLK,
+      FestivalCategory.COMMEMORATIVE,
+      FestivalCategory.INTERNATIONAL,
+      FestivalCategory.RELIGIOUS,
+      FestivalCategory.SOLAR_TERM,
+      FestivalCategory.FOREIGN
+    ];
+  }
+  static getCategoryName(category) {
+    return Festivals.CATEGORY_NAMES[category];
+  }
+  /**
+   * 各数据表规模，供测试与文档展示
+   */
+  static getStat() {
+    return {
+      anniversary: AnniversaryFestival.getSize(),
+      folk: FolkFestival.getLunarSize(),
+      buddhist: BuddhistFestival.getFestivalSize(),
+      buddhistOther: BuddhistFestival.getOtherSize(),
+      guanyin: BuddhistFestival.getGuanyinSize(),
+      yangGong: BuddhistFestival.getYangGongSize(),
+      taoist: TaoistFestival.getSize(),
+      deity: DeityFestival.getSize()
+    };
+  }
+  toString() {
+    return this.getName();
+  }
 }
 
 class DutyAdvice extends AbstractCulture {
@@ -10779,24 +13229,18 @@ class DayAlmanac {
   /**
    * 当日节日名（公历、农历、民俗），按名称去重
    */
-  getFestivalNames() {
-    const l = [];
-    const solar = this.solarDay.getFestival();
-    if (solar) {
-      l.push(solar.getName());
-    }
-    const lunar = this.getLunarDay().getFestival();
-    if (lunar && l.indexOf(lunar.getName()) < 0) {
-      l.push(lunar.getName());
-    }
-    const folk = this.getFolkFestivals().getNames();
-    for (let i = 0; i < folk.length; i++) {
-      if (l.indexOf(folk[i]) < 0) {
-        l.push(folk[i]);
-      }
-    }
-    return l;
+  /**
+   * 当日节日聚合，含法定、传统、民俗、纪念、宗教、节气
+   */
+  getFestivals(includeForeign = false) {
+    return Festivals.of(this.solarDay, includeForeign);
+  }
+  /**
+   * 当日节日名，按分类排序并去重
+   */
+  getFestivalNames(includeForeign = false) {
+    return this.getFestivals(includeForeign).getNames();
   }
 }
 
-export { AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, Beast, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, Gender, God, HeavenStem, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, JulianDay, KitchenGodSteed, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, Taboo, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, TwelveStar, Twenty, TwentyEightStar, Week, WeekUnit, WuHouDay, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone };
+export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };
