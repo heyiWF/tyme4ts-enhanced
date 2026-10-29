@@ -15,7 +15,8 @@
 11. 新增 `data/conformance.json`（252 个日期 × 23 个字段）与 `scripts/gen-conformance.mjs`，作为跨语言移植的验收向量。
 12. 新增 `test/ConformanceTest.ts` 反向校验向量，防止重构无意改变历史输出。
 13. 数据页改为实时看板：八类来源规模、地区数、公告文件数、版本号。
-14. 测试 569 项通过。
+14. 新增 `test/SolarTermPrecisionTest.ts`：把节气粗算与精算的 5 处差异固化成清单，上游若修正会立即失败。
+15. 测试 572 项通过。
 
 
 ## [1.7.1] - 2026-10-29

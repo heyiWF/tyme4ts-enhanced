@@ -4835,6 +4835,12 @@ class SolarTerm extends LoopTyme {
   getJulianDay() {
     return JulianDay.fromJulianDay(ShouXingUtil.qiAccurate2(this.cursoryJulianDay) + JulianDay.J2000);
   }
+  /**
+   * 交节日期，沿用 6tail 各语言版本的粗算值，保证跨语言结果一致
+   *
+   * 需要精算值时用 getJulianDay().getSolarDay()；两者在 1912–1928 年间有 5 处相差一日，
+   * 见 test/SolarTermPrecisionTest.ts。
+   */
   getSolarDay() {
     return JulianDay.fromJulianDay(this.cursoryJulianDay + JulianDay.J2000).getSolarDay();
   }

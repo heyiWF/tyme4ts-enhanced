@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-569%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-572%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -265,7 +265,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 **已知边界**（如实记录，不做修饰）：
 
 1. 回历为算术历，与观月历可能相差一日；
-2. `SolarTerm.getSolarDay()` 沿用上游粗算值，1930 年前有 5 例节气日与精算结果跨日（1900–2100 年区间仅此 5 例，现代日期无影响）；需精确到秒时用 `getJulianDay().getSolarTime()`；
+2. `SolarTerm.getSolarDay()` 沿用 6tail 各语言版本的粗算值，以保证 Kotlin、Java、Python、JavaScript 各移植版结果逐字一致。1900–2100 年间它与精算值只有 5 处跨日，全部落在 1912–1928（1912 小雪、1913 秋分、1917 大雪、1927 白露、1928 夏至），现代日期无影响。需要精算日或交节时刻时用 `getJulianDay()`，清单见 `test/SolarTermPrecisionTest.ts`；
 3. 宜忌、神煞各流派互有出入，本库采用《协纪辨方书》体系；
 4. 「今日吉数」「时辰吉凶三级」「生肖运程判词」无公开算法，本库给出**可复算的推演值**并在文档中标明，不与原版数值混同。
 
@@ -315,7 +315,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm i
-npm test          # 569 项测试
+npm test          # 572 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs
