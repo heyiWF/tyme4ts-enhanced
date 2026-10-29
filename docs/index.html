@@ -1198,27 +1198,32 @@ function renderData() {
   const stat = Festivals.getStat();
   const regions = HolidayCalendar.getRegions();
   const stateCount = regions.filter((r) => r.indexOf('-') > -1).length;
+  const announced = DATASETS.filter((d) => typeof d.year === 'number');
+  const total = announced.reduce((n, d) => n + d.days.length, 0);
+  let hit = 0;
+  for (const d of announced) {
+    const excluded = new Set((d.exclude || []).map((x) => Number(x.slice(5, 7)) + '-' + Number(x.slice(8, 10))));
+    const ruleKeys = new Set(HolidayCalendar.of(d.region).getRuleDays(d.year)
+      .map((h) => h.getDay().getMonth() + '-' + h.getDay().getDay())
+      .filter((k) => !excluded.has(k)));
+    hit += d.days.filter((x) => {
+      const md = Number(x.date.slice(5, 7)) + '-' + Number(x.date.slice(8, 10));
+      return ruleKeys.has(md);
+    }).length;
+  }
+  const coverage = total ? Math.round(hit / total * 100) : 0;
   const cards = [
     ['节日来源', '8 类', '法定、传统、民俗、纪念、国际、宗教、节气、外历'],
     ['佛历 / 道历', (stat.buddhist || 0) + ' / ' + (stat.taoist || 0), '因果犯忌与诸神圣诞的日期键数'],
     ['民俗 / 神诞', (stat.folk || 0) + ' / ' + (stat.deity || 0), '农历月日键数，含《玉匣记》圣诞'],
     ['公历纪念日', String(stat.anniversary || 0), '国际日与中国行业性纪念日'],
     ['节假日地区', String(regions.length), '含 ' + stateCount + ' 个州省子地区'],
-    ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 63%，其余须逐年公告'],
-    ['单元测试', '566', '历法、择日、节日、节假日、ICS、取名'],
+    ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 ' + coverage + '%，其余须逐年公告'],
+    ['单元测试', '602', '历法、择日、节日、节假日、ICS、取名'],
     ['数据比对', '7 张表', '与 6tail 上游逐键逐值一致'],
   ];
-  const announced = DATASETS.filter((d) => typeof d.year === 'number');
-  const total = announced.reduce((n, d) => n + d.days.length, 0);
-  let hit = 0;
-  for (const d of announced) {
-    const ruleKeys = new Set(HolidayCalendar.of(d.region).getRuleDays(d.year).map((h) => h.getDay().getMonth() + '-' + h.getDay().getDay()));
-    hit += d.days.filter((x) => {
-      const md = Number(x.date.slice(5, 7)) + '-' + Number(x.date.slice(8, 10));
-      return ruleKeys.has(md);
-    }).length;
-  }
-  $('audit-note').textContent = `公告数据共 ${total} 日，其中 ${hit} 日（${Math.round(hit / total * 100)}%）可由规则算出；`
+  const stateDays = DATASETS.filter((d) => typeof d.year !== 'number').reduce((n, d) => n + d.days.length, 0);
+  $('audit-note').textContent = `全国性公告 ${total} 日（另有州级增补 ${stateDays} 日），其中 ${hit} 日（${coverage}%）可由规则算出；`
     + `其余为回历、印历、佛历节日与临时公休，只能逐年公告。审计同时会列出「规则多算」项，此前即由此发现马来西亚三份文件漏列元旦。`;
 
   $('data-stats').innerHTML = cards.map((c) =>

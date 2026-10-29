@@ -36,12 +36,14 @@ for (const file of files) {
     }
     const calendar = HolidayCalendar.of(data.region);
     const ruleDays = calendar.getRuleDays(data.year);
-    const ruleKeys = new Set(ruleDays.map((h) => key(h.getDay())));
+    // 公告文件里 exclude 的日期已被官方日期取代，不应再算作「规则多出」
+    const excluded = new Set(data.exclude || []);
+    const ruleKeys = new Set(ruleDays.map((h) => key(h.getDay())).filter((k) => !excluded.has(k)));
 
     const announced = data.days.map((d) => d.date);
     const hit = announced.filter((d) => ruleKeys.has(d));
     const missing = announced.filter((d) => !ruleKeys.has(d));
-    const extra = ruleDays.map((h) => key(h.getDay())).filter((k) => announced.indexOf(k) < 0);
+    const extra = Array.from(ruleKeys).filter((k) => announced.indexOf(k) < 0);
 
     totalAnnounced += announced.length;
     totalHit += hit.length;
