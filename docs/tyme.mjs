@@ -9380,6 +9380,10 @@ class HolidayCalendar {
   observed;
   note;
   cache = {};
+  /**
+   * 被排除的日期键，用于表达「全国性节日但某几州不过」或临时取消
+   */
+  removed = {};
   constructor(region, rules, note, observed = 0, substitute = false) {
     this.region = region;
     this.rules = rules;
@@ -10052,6 +10056,9 @@ class HolidayCalendar {
   importJson(json) {
     const o = JSON.parse(json);
     const days = o.days || [];
+    if (o.exclude && o.exclude.length) {
+      this.excludeDays(o.exclude);
+    }
     let n = 0;
     for (let i = 0; i < days.length; i++) {
       const item = days[i];
@@ -10125,8 +10132,9 @@ class HolidayCalendar {
       this.applyObserved(year, map);
     }
     const l = [];
+    const removed = this.removed;
     for (const k in map) {
-      if (map[k].getDay().getYear() !== year) {
+      if (map[k].getDay().getYear() !== year || removed[k]) {
         continue;
       }
       if (includeWork || !map[k].isWork()) {
@@ -10240,6 +10248,36 @@ class HolidayCalendar {
    *
    * 与 getDays() 对照，即可看出哪些节日能算、哪些只能靠逐年公告。
    */
+  /**
+   * 排除指定日期，使其不再出现在日历中
+   *
+   * 用于「全国性节日但某几州不过」或官方临时取消的情形。日期格式 `YYYY-MM-DD`。
+   * 返回实际记录的条数。
+   */
+  excludeDays(dates) {
+    let n = 0;
+    for (let i = 0; i < dates.length; i++) {
+      const parts = dates[i].split("-");
+      if (parts.length !== 3) {
+        continue;
+      }
+      const day = SolarDay.fromYmd(
+        parseInt(parts[0], 10),
+        parseInt(parts[1], 10),
+        parseInt(parts[2], 10)
+      );
+      this.removed[HolidayCalendar.getKey(day)] = true;
+      n++;
+    }
+    this.cache = {};
+    return n;
+  }
+  /**
+   * 已排除的日期数，便于自检
+   */
+  getExcludedCount() {
+    return Object.keys(this.removed).length;
+  }
   getRuleDays(year) {
     const map = {};
     for (let i = 0; i < this.rules.length; i++) {

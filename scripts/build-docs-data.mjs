@@ -24,7 +24,7 @@ const header = `/**
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
  *
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
- * 覆盖 ${datasets.map((d) => d.region + '-' + d.year).join('、')}。
+ * 覆盖 ${datasets.filter((d) => d.year).map((d) => d.region + '-' + d.year).join('、')}，另有马来西亚 ${datasets.filter((d) => d.years).length} 个州级增补文件。
  */
 export const VERSION = ${JSON.stringify(pkg.version)};
 
@@ -34,6 +34,9 @@ writeFileSync(OUT, header + JSON.stringify(datasets, null, 1) + ';\n', 'utf8');
 
 const byRegion = {};
 for (const d of datasets) {
+    if (typeof d.year !== 'number') {
+        continue;
+    }
     byRegion[d.region] = (byRegion[d.region] || 0) + d.days.length;
 }
 console.log(`${OUT}: ${datasets.length} 个文件，` +

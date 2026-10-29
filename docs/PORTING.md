@@ -316,6 +316,8 @@ tithi = floor(elongation / 12) + 1        // 1–30，1–15 白分、16–30 �
 
 吉打、吉兰丹、登嘉楼的周末为周五周六，副假 `observed` 置 0，其余州置 2（周日顺延至周一）。
 
+固定日期由规则给出，回历节日与大宝森节由 `data/holidays/MY-<州>.json` 逐年补。州级文件含 `years` 与 `exclude` 两个字段：`exclude` 中的日期（如六州不过的古兰经降示日）会在 `getDays()` 中被扣掉。
+
 **未纳入**：州级回历节日（Israk & Mikraj、Awal Ramadan、Nuzul Al-Quran、Hari Arafah、哈芝节次日）与大宝森节。前者依赖观月，后者按泰米尔历泰月满月但各年公布口径不一（2028 年三家来源分别给出 1-11、2-9、2-13），算法推算会与官方相差一日，故不写入规则，交由 `data/holidays/` 逐年补充。
 
 补假三种模式：
@@ -418,6 +420,18 @@ index of 'A' = 10, '_' = 31, 'V' = 32 … 'z' = 62
 3. **闰月**：农历月以负数表示闰月（`-6` 即闰六月），所有按月循环的规则应使用绝对值。
 4. **节气年**：`SolarTerm(year, 0)` 为上一公历年的冬至，这是唯一的跨年错位，涉及「冬至」栏目时须特判。
 5. **精度**：`getSolarDay()` 用粗算值以保证性能，需要精确时刻时用 `getJulianDay().getSolarTime()`。
+
+---
+
+### 排除日
+
+```
+excluded = Set<dateKey>()          // dateKey 为 SolarDay.toString()，如 "2026年3月7日"
+excludeDays(dates): 对每个 YYYY-MM-DD 求 SolarDay 并加入 excluded
+getDays(year): 组装完成后跳过 excluded 中的键
+```
+
+用于「全国性节日但某几州不过」与「官方临时取消」。移植时只需在输出前做一次集合过滤。
 
 ---
 

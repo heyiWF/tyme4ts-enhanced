@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-573%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-580%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -156,11 +156,26 @@ cn.importJson(JSON.stringify({
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-新加坡、马来西亚、泰国只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)（新加坡与马来西亚 2025–2027、泰国 2025–2027，共 9 个文件）：
+新加坡、马来西亚、泰国只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)——新加坡 3 份、泰国 3 份、马来西亚联邦 3 份、马来西亚州级 13 份，共 22 个文件：
 
 ```ts
 import {readFileSync} from 'node:fs';
 HolidayCalendar.of('SG').importJson(readFileSync('data/holidays/SG-2026.json', 'utf8'));
+```
+
+马来西亚是「联邦 + 州」两层，州级日历要导入两次；州级文件里的 `exclude` 会扣掉该州不过的全国性节日：
+
+```ts
+const jhr = HolidayCalendar.of('MY-JHR');
+jhr.importJson(readFileSync('data/holidays/MY-2026.json', 'utf8'));   // 联邦
+jhr.importJson(readFileSync('data/holidays/MY-JHR.json', 'utf8'));     // 州级增补 + 排除
+jhr.getExcludedCount();   // 3
+```
+
+也可以直接用 API 扣减，适用于任何地区：
+
+```ts
+HolidayCalendar.of('TH').excludeDays(['2024-05-22']);   // 官方宣布取消的佛诞节
 ```
 
 ```ts
@@ -316,7 +331,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm i
-npm test          # 573 项测试
+npm test          # 580 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs

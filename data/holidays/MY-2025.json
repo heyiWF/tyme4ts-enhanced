@@ -1,7 +1,7 @@
 {
  "region": "MY",
  "year": 2025,
- "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+ "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
  "days": [
   {
    "date": "2025-01-01",
@@ -14,6 +14,10 @@
   {
    "date": "2025-01-30",
    "name": "农历新年次日"
+  },
+  {
+   "date": "2025-03-18",
+   "name": "古兰经降示日"
   },
   {
    "date": "2025-03-31",

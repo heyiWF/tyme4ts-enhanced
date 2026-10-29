@@ -1,0 +1,24 @@
+{
+ "region": "MY-KUL",
+ "years": [
+  2025,
+  2026,
+  2027
+ ],
+ "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+ "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+ "days": [
+  {
+   "date": "2025-02-11",
+   "name": "大宝森节"
+  },
+  {
+   "date": "2026-02-01",
+   "name": "大宝森节"
+  },
+  {
+   "date": "2027-01-22",
+   "name": "大宝森节"
+  }
+ ]
+}

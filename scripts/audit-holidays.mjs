@@ -18,6 +18,9 @@ const DIR = 'data/holidays';
 
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json')).sort();
 
+// 州级增补文件（含 years 字段）不参与覆盖率统计：它们本身就是联邦表之外的部分
+const isPrimary = (data) => typeof data.year === 'number';
+
 const pad = (n) => (n < 10 ? '0' + n : String(n));
 const key = (d) => `${d.getYear()}-${pad(d.getMonth())}-${pad(d.getDay())}`;
 
@@ -28,6 +31,9 @@ const rows = [];
 
 for (const file of files) {
     const data = JSON.parse(readFileSync(join(DIR, file), 'utf8'));
+    if (!isPrimary(data)) {
+        continue;
+    }
     const calendar = HolidayCalendar.of(data.region);
     const ruleDays = calendar.getRuleDays(data.year);
     const ruleKeys = new Set(ruleDays.map((h) => key(h.getDay())));

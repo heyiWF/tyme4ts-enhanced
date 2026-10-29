@@ -12,11 +12,15 @@ class HolidayDataFilesTest {
     test0(): void {
         // 逐年公告文件均可解析并导入
         const files: string[] = readdirSync(HolidayDataFilesTest.DIR).filter((f: string) => f.slice(-5) === '.json').sort();
-        equal(files.length, 9);
+        equal(files.length, 22);
         for (let i: number = 0; i < files.length; i++) {
             const text: string = readFileSync(join(HolidayDataFilesTest.DIR, files[i]), 'utf8');
-            const o: { region: string, year: number, days: { date: string, name: string }[] } = JSON.parse(text);
-            ok(o.region && o.year && o.days.length > 0, files[i]);
+            const o: {
+                region: string, year?: number, years?: number[],
+                days: { date: string, name: string }[], exclude?: string[]
+            } = JSON.parse(text);
+            ok(o.region, files[i] + ' 缺 region');
+            ok(o.year || (o.years && o.years.length), files[i] + ' 缺年份');
             const c: HolidayCalendar = HolidayCalendar.fromJson(text);
             equal(c.getRegion(), o.region);
             for (let j: number = 0; j < o.days.length; j++) {
@@ -25,6 +29,13 @@ class HolidayDataFilesTest {
                 ok(h, files[i] + ' 缺 ' + o.days[j].date);
                 equal(h!.getName(), o.days[j].name, files[i] + ' ' + o.days[j].date);
             }
+            // exclude 中的日期必须被扣掉
+            const ex: string[] = o.exclude || [];
+            for (let j: number = 0; j < ex.length; j++) {
+                const [y, m, d] = ex[j].split('-').map((x: string) => parseInt(x, 10));
+                equal(c.getHoliday(SolarDay.fromYmd(y, m, d)), null, files[i] + ' 应排除 ' + ex[j]);
+            }
+            equal(c.getExcludedCount(), ex.length, files[i] + ' 排除数');
         }
     }
 

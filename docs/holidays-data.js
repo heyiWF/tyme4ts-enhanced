@@ -2,15 +2,15 @@
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
  *
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
- * 覆盖 MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027。
+ * 覆盖 MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027，另有马来西亚 13 个州级增补文件。
  */
-export const VERSION = "1.8.0";
+export const VERSION = "1.9.0";
 
 export const DATASETS = [
  {
   "region": "MY",
   "year": 2025,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
   "days": [
    {
     "date": "2025-01-01",
@@ -23,6 +23,10 @@ export const DATASETS = [
    {
     "date": "2025-01-30",
     "name": "农历新年次日"
+   },
+   {
+    "date": "2025-03-18",
+    "name": "古兰经降示日"
    },
    {
     "date": "2025-03-31",
@@ -73,7 +77,7 @@ export const DATASETS = [
  {
   "region": "MY",
   "year": 2026,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
   "days": [
    {
     "date": "2026-01-01",
@@ -86,6 +90,10 @@ export const DATASETS = [
    {
     "date": "2026-02-18",
     "name": "农历新年次日"
+   },
+   {
+    "date": "2026-03-07",
+    "name": "古兰经降示日"
    },
    {
     "date": "2026-03-20",
@@ -148,7 +156,7 @@ export const DATASETS = [
  {
   "region": "MY",
   "year": 2027,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
   "days": [
    {
     "date": "2027-01-01",
@@ -165,6 +173,10 @@ export const DATASETS = [
    {
     "date": "2027-02-08",
     "name": "农历新年补假"
+   },
+   {
+    "date": "2027-02-24",
+    "name": "古兰经降示日"
    },
    {
     "date": "2027-03-10",
@@ -217,6 +229,446 @@ export const DATASETS = [
    {
     "date": "2027-12-25",
     "name": "圣诞节"
+   }
+  ]
+ },
+ {
+  "region": "MY-JHR",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "days": [
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2025-03-02",
+    "name": "斋戒月首日"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-02-19",
+    "name": "斋戒月首日"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-02-08",
+    "name": "斋戒月首日"
+   }
+  ],
+  "exclude": [
+   "2025-03-18",
+   "2026-03-07",
+   "2027-02-24"
+  ]
+ },
+ {
+  "region": "MY-KDH",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "days": [
+   {
+    "date": "2025-01-27",
+    "name": "登霄节"
+   },
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2025-03-02",
+    "name": "斋戒月首日"
+   },
+   {
+    "date": "2025-06-08",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2026-01-17",
+    "name": "登霄节"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-02-19",
+    "name": "斋戒月首日"
+   },
+   {
+    "date": "2026-05-28",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-01-06",
+    "name": "登霄节"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-02-08",
+    "name": "斋戒月首日"
+   },
+   {
+    "date": "2027-05-18",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-12-26",
+    "name": "登霄节"
+   }
+  ],
+  "exclude": [
+   "2025-03-18",
+   "2026-03-07",
+   "2027-02-24"
+  ]
+ },
+ {
+  "region": "MY-KTN",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-06-06",
+    "name": "阿拉法日"
+   },
+   {
+    "date": "2025-06-08",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2026-05-26",
+    "name": "阿拉法日"
+   },
+   {
+    "date": "2026-05-28",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-05-16",
+    "name": "阿拉法日"
+   },
+   {
+    "date": "2027-05-18",
+    "name": "哈芝节次日"
+   }
+  ]
+ },
+ {
+  "region": "MY-KUL",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   }
+  ]
+ },
+ {
+  "region": "MY-MLK",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "days": [
+   {
+    "date": "2025-04-02",
+    "name": "开斋节第三日"
+   },
+   {
+    "date": "2027-03-12",
+    "name": "开斋节第三日"
+   }
+  ],
+  "exclude": [
+   "2025-03-18",
+   "2026-03-07",
+   "2027-02-24"
+  ]
+ },
+ {
+  "region": "MY-NSN",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "days": [
+   {
+    "date": "2025-01-27",
+    "name": "登霄节"
+   },
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-01-17",
+    "name": "登霄节"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-01-06",
+    "name": "登霄节"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-12-26",
+    "name": "登霄节"
+   }
+  ],
+  "exclude": [
+   "2025-03-18",
+   "2026-03-07",
+   "2027-02-24"
+  ]
+ },
+ {
+  "region": "MY-PLS",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-01-27",
+    "name": "登霄节"
+   },
+   {
+    "date": "2025-06-08",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2026-01-17",
+    "name": "登霄节"
+   },
+   {
+    "date": "2026-05-28",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-01-06",
+    "name": "登霄节"
+   },
+   {
+    "date": "2027-05-18",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-12-26",
+    "name": "登霄节"
+   }
+  ]
+ },
+ {
+  "region": "MY-PNG",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   }
+  ]
+ },
+ {
+  "region": "MY-PRK",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   }
+  ]
+ },
+ {
+  "region": "MY-SBH",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "days": [],
+  "exclude": [
+   "2025-03-18",
+   "2026-03-07",
+   "2027-02-24"
+  ]
+ },
+ {
+  "region": "MY-SGR",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-02-11",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2026-02-01",
+    "name": "大宝森节"
+   },
+   {
+    "date": "2027-01-22",
+    "name": "大宝森节"
+   }
+  ]
+ },
+ {
+  "region": "MY-SWK",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "days": [],
+  "exclude": [
+   "2025-03-18",
+   "2026-03-07",
+   "2027-02-24"
+  ]
+ },
+ {
+  "region": "MY-TRG",
+  "years": [
+   2025,
+   2026,
+   2027
+  ],
+  "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "days": [
+   {
+    "date": "2025-01-27",
+    "name": "登霄节"
+   },
+   {
+    "date": "2025-06-06",
+    "name": "阿拉法日"
+   },
+   {
+    "date": "2025-06-08",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2026-01-17",
+    "name": "登霄节"
+   },
+   {
+    "date": "2026-03-08",
+    "name": "古兰经降示日补假"
+   },
+   {
+    "date": "2026-05-26",
+    "name": "阿拉法日"
+   },
+   {
+    "date": "2026-05-28",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-01-06",
+    "name": "登霄节"
+   },
+   {
+    "date": "2027-05-16",
+    "name": "阿拉法日"
+   },
+   {
+    "date": "2027-05-18",
+    "name": "哈芝节次日"
+   },
+   {
+    "date": "2027-12-26",
+    "name": "登霄节"
    }
   ]
  },

@@ -1,7 +1,7 @@
 {
  "region": "MY",
  "year": 2027,
- "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+ "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
  "days": [
   {
    "date": "2027-01-01",
@@ -18,6 +18,10 @@
   {
    "date": "2027-02-08",
    "name": "农历新年补假"
+  },
+  {
+   "date": "2027-02-24",
+   "name": "古兰经降示日"
   },
   {
    "date": "2027-03-10",
