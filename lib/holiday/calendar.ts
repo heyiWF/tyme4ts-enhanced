@@ -198,7 +198,7 @@ export class HolidayCalendar {
             case 'UA':
                 return new HolidayCalendar(r, ukraineRules(), '法定假日；近年节日调整频繁，以官方公告为准。');
             case 'TR':
-                return new HolidayCalendar(r, turkeyRules(), '法定假日；开斋节、古尔邦节按算术历推算，观月可能差一日。');
+                return new HolidayCalendar(r, turkeyRules(), '法定假日；开斋节、古尔邦节按宗教事务局（Diyanet）历推算，以新月在安卡拉日没时高于地平线为月首判据；节前一日下午半日假未计入。');
             case 'ID':
                 return new HolidayCalendar(r, indonesiaRules(), '全国法定假日核心；静居日、卫塞节依巴厘历与佛历，按年公布。');
             case 'EG':

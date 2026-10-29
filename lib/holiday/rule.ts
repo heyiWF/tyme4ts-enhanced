@@ -3,6 +3,7 @@ import {SixtyCycle} from '../almanac/basic';
 import {HijriDay, LunarDay, SolarDay, SolarMonth, SolarTerm} from '../calendar/core';
 import {HebrewDay} from '../calendar/hebrew';
 import {UmmAlQuraDay} from '../calendar/ummalqura';
+import {DiyanetDay} from '../calendar/diyanet';
 
 export enum HolidayType {
     SOLAR = 0,
@@ -16,7 +17,8 @@ export enum HolidayType {
     ORTHODOX_EASTER = 8,
     WEEK_AFTER = 9,
     TABLE = 10,
-    UMM_AL_QURA = 11
+    UMM_AL_QURA = 11,
+    DIYANET = 12
 }
 
 /**
@@ -127,6 +129,17 @@ export class HolidayRule extends AbstractCulture {
      */
     static ummAlQura(month: number, day: number, name: string, offset: number = 0): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.UMM_AL_QURA, name);
+        o.month = month;
+        o.day = day;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * 土耳其宗教事务局历，按「新月在安卡拉日没时位于地平线之上」逐月计算
+     */
+    static diyanet(month: number, day: number, name: string, offset: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.DIYANET, name);
         o.month = month;
         o.day = day;
         o.offset = offset;
@@ -305,6 +318,20 @@ export class HolidayRule extends AbstractCulture {
                         continue;
                     }
                     const d: SolarDay = UmmAlQuraDay.fromYmd(hy, this.month, this.day).getSolarDay();
+                    if (d.getYear() === year) {
+                        return d.next(this.offset);
+                    }
+                }
+                return null;
+            }
+            case HolidayType.DIYANET: {
+                const estimate: number = Math.floor((year - 622) * 33 / 32);
+                for (let i: number = -1; i <= 1; i++) {
+                    const hy: number = estimate + i;
+                    if (this.day > DiyanetDay.getMonthDays(hy, this.month)) {
+                        continue;
+                    }
+                    const d: SolarDay = DiyanetDay.fromYmd(hy, this.month, this.day).getSolarDay();
                     if (d.getYear() === year) {
                         return d.next(this.offset);
                     }

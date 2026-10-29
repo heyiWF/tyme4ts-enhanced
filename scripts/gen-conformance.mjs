@@ -9,7 +9,7 @@
  */
 import {writeFileSync} from 'node:fs';
 import {
-    DayAlmanac, HebrewDay, HolidayCalendar, IndianDay, SolarDay, Tithi, UmmAlQuraDay,
+    DayAlmanac, DiyanetDay, HebrewDay, HolidayCalendar, IndianDay, SolarDay, Tithi, UmmAlQuraDay,
 } from '../dist/lib/index.mjs';
 
 const START = SolarDay.fromYmd(1900, 1, 1);
@@ -72,6 +72,7 @@ for (const day of dates) {
         hijri: day.getHijriDay().toString(),
         hebrew: HebrewDay.fromSolarDay(day).toString(),
         ummAlQura: UmmAlQuraDay.inRange(day) ? UmmAlQuraDay.fromSolarDay(day).toString() : '',
+        diyanet: DiyanetDay.fromSolarDay(day).toString(),
         tithi: Tithi.getTithi(day, 6),
         indianMonth: IndianDay.fromSolarDay(day).getMonthName(),
         cnHoliday: (HolidayCalendar.of('CN').getHoliday(day) || {getName: () => ''}).getName(),
@@ -104,6 +105,7 @@ const doc = {
         hijri: '伊斯兰算术历',
         hebrew: '希伯来历',
         ummAlQura: '乌姆库拉历，1937–2077 年有效，区间外为空串',
+        diyanet: '土耳其 Diyanet 历，按安卡拉日没判据逐月推算',
         tithi: '印度历 tithi（IST 06:00）',
         indianMonth: '印度历月名',
         cnHoliday: '中国大陆法定节假日名，空串表示无',

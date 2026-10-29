@@ -10200,6 +10200,278 @@ class UmmAlQuraDay extends AbstractCulture {
   }
 }
 
+const DEG = Math.PI / 180;
+const RAD = 180 / Math.PI;
+const PI2 = Math.PI * 2;
+const ANKARA_LATITUDE = 39.9334;
+const ANKARA_LONGITUDE = 32.8597;
+const SUNSET_ALTITUDE = -0.833;
+class DiyanetDay extends AbstractCulture {
+  year;
+  month;
+  day;
+  /**
+   * 锚点月：1440 年穆哈兰姆月（2018 年 9 月 11 日），自此逐月顺推或逆推
+   */
+  static ANCHOR_YEAR = 1440;
+  /**
+   * 月首缓存，键为「年 * 12 + 月」
+   */
+  static START_CACHE = {};
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  /**
+   * 公历日 0 时（UT）的儒略日
+   */
+  static midnightJd(solarDay) {
+    return solarDay.getJulianDay().getDay();
+  }
+  /**
+   * 平黄赤交角
+   */
+  static obliquity(t) {
+    return (23.439291 - 0.0130042 * t) * DEG;
+  }
+  /**
+   * 太阳视黄经（弧度，已归一）
+   */
+  static sunLongitude(t) {
+    return DiyanetDay.norm(ShouXingUtil.saLon(t, 10));
+  }
+  /**
+   * 月亮视黄经（弧度，已归一）
+   */
+  static moonLongitude(t) {
+    return DiyanetDay.norm(ShouXingUtil.mLon(t, 20));
+  }
+  /**
+   * 月亮黄纬（度）
+   *
+   * 寿星天文历只提供黄经，黄纬取 Meeus《天文算法》第 47 章主项，精度约 0.1 度，
+   * 对「地平线之上」这一判据足够。
+   */
+  static moonLatitude(t) {
+    const d = 297.8501921 + 445267.1114034 * t - 18819e-7 * t * t;
+    const mp = 134.9633964 + 477198.8675055 * t + 87414e-7 * t * t;
+    const f = 93.272095 + 483202.0175233 * t - 36539e-7 * t * t;
+    return 5.128122 * Math.sin(f * DEG) + 0.280602 * Math.sin((mp + f) * DEG) + 0.277693 * Math.sin((mp - f) * DEG) + 0.173237 * Math.sin((2 * d - f) * DEG) + 0.055413 * Math.sin((2 * d - mp + f) * DEG) + 0.046271 * Math.sin((2 * d - mp - f) * DEG) + 0.032573 * Math.sin((2 * d + f) * DEG) + 0.017198 * Math.sin((2 * mp + f) * DEG) + 9266e-6 * Math.sin((2 * d + mp - f) * DEG) + 8822e-6 * Math.sin((2 * mp - f) * DEG);
+  }
+  /**
+   * 归一化到 [0, 2π)
+   */
+  static norm(x) {
+    return (x % PI2 + PI2) % PI2;
+  }
+  /**
+   * 赤经赤纬（弧度）
+   */
+  static toEquatorial(lon, lat, t) {
+    const e = DiyanetDay.obliquity(t);
+    const l = lon;
+    const b = lat * DEG;
+    const ra = Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l));
+    const dec = Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l));
+    return [ra, dec];
+  }
+  /**
+   * 格林尼治平恒星时（度）
+   */
+  static gmst(jd) {
+    const t = (jd - 2451545) / 36525;
+    return DiyanetDay.norm((280.46061837 + 360.98564736629 * (jd - 2451545) + 387933e-9 * t * t - t * t * t / 3871e4) * DEG) * RAD;
+  }
+  /**
+   * 安卡拉某日日落时刻的儒略日
+   */
+  static sunsetJd(solarDay) {
+    const jd0 = DiyanetDay.midnightJd(solarDay);
+    const noon = jd0 + (12 - ANKARA_LONGITUDE / 15) / 24;
+    let jd = noon;
+    for (let i = 0; i < 4; i++) {
+      const t = (jd - 2451545) / 36525;
+      const eq = DiyanetDay.toEquatorial(DiyanetDay.sunLongitude(t), 0, t);
+      const cosH = (Math.sin(SUNSET_ALTITUDE * DEG) - Math.sin(ANKARA_LATITUDE * DEG) * Math.sin(eq[1])) / (Math.cos(ANKARA_LATITUDE * DEG) * Math.cos(eq[1]));
+      const h = Math.acos(Math.max(-1, Math.min(1, cosH))) * RAD;
+      jd = noon + h / 360;
+    }
+    return jd;
+  }
+  /**
+   * 安卡拉日没时月亮的地平高度（度）
+   */
+  static moonAltitude(solarDay) {
+    const jd = DiyanetDay.sunsetJd(solarDay);
+    const t = (jd - 2451545) / 36525;
+    const eq = DiyanetDay.toEquatorial(DiyanetDay.moonLongitude(t), DiyanetDay.moonLatitude(t), t);
+    const hourAngle = (DiyanetDay.gmst(jd) + ANKARA_LONGITUDE - eq[0] * RAD) * DEG;
+    return Math.asin(Math.sin(ANKARA_LATITUDE * DEG) * Math.sin(eq[1]) + Math.cos(ANKARA_LATITUDE * DEG) * Math.cos(eq[1]) * Math.cos(hourAngle)) * RAD;
+  }
+  /**
+   * 合朔时刻（儒略日），以日月视黄经差由负转正为准
+   */
+  static conjunctionJd(estimateJd) {
+    let jd = estimateJd;
+    for (let i = 0; i < 8; i++) {
+      const t = (jd - 2451545) / 36525;
+      let diff = (DiyanetDay.moonLongitude(t) - DiyanetDay.sunLongitude(t)) * RAD;
+      if (diff > 180) {
+        diff -= 360;
+      } else if (diff < -180) {
+        diff += 360;
+      }
+      jd -= diff / 12.19;
+      if (Math.abs(diff) < 1e-4) {
+        break;
+      }
+    }
+    return jd;
+  }
+  /**
+   * 该月月首（公历日）
+   *
+   * 以「合朔后第一个安卡拉日没时月亮在地平线上的傍晚」定出原始月首，再相对相邻月夹到 29 或 30 日，
+   * 避免逐月独立判定出现 31 日的月份。自锚点月（1440 年穆哈兰姆月）逐月推进，整条链写入缓存。
+   */
+  static getMonthStart(year, month) {
+    const key = year * 12 + month;
+    const cached = DiyanetDay.START_CACHE[key];
+    if (cached) {
+      return cached;
+    }
+    const anchorKey = DiyanetDay.ANCHOR_YEAR * 12 + 1;
+    let index = anchorKey;
+    let start = DiyanetDay.rawMonthStart(DiyanetDay.ANCHOR_YEAR, 1);
+    DiyanetDay.START_CACHE[anchorKey] = start;
+    while (index !== key) {
+      if (key > index) {
+        index++;
+        const hit = DiyanetDay.START_CACHE[index];
+        start = hit ? hit : DiyanetDay.advance(index, start);
+      } else {
+        index--;
+        const hit = DiyanetDay.START_CACHE[index];
+        start = hit ? hit : DiyanetDay.retreat(index, start);
+      }
+      DiyanetDay.START_CACHE[index] = start;
+    }
+    return start;
+  }
+  /**
+   * 由上一月首推进到本月首
+   */
+  static advance(key, prev) {
+    const y = Math.floor((key - 1) / 12);
+    const m = key - y * 12;
+    const raw = DiyanetDay.rawMonthStart(y, m);
+    return prev.next(raw.subtract(prev) <= 29 ? 29 : 30);
+  }
+  /**
+   * 由下一月首回推到本月首
+   */
+  static retreat(key, next) {
+    const y = Math.floor((key - 1) / 12);
+    const m = key - y * 12;
+    const raw = DiyanetDay.rawMonthStart(y, m);
+    return next.next(next.subtract(raw) <= 29 ? -29 : -30);
+  }
+  /**
+   * 原始月首：合朔后第一个「安卡拉日没时月亮在地平线上」的傍晚，其次日为月首
+   */
+  static rawMonthStart(year, month) {
+    const estimate = HijriDay.fromYmd(year, month, 1).getSolarDay();
+    const conjunction = DiyanetDay.conjunctionJd(DiyanetDay.midnightJd(estimate));
+    for (let i = -3; i <= 4; i++) {
+      const evening = estimate.next(i);
+      if (DiyanetDay.sunsetJd(evening) <= conjunction) {
+        continue;
+      }
+      if (DiyanetDay.moonAltitude(evening) > 0) {
+        return evening.next(1);
+      }
+    }
+    throw new Error(`cannot locate diyanet month start: ${year}-${month}`);
+  }
+  /**
+   * 该月天数
+   */
+  static getMonthDays(year, month) {
+    const nextYear = month === 12 ? year + 1 : year;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    return DiyanetDay.getMonthStart(nextYear, nextMonth).subtract(DiyanetDay.getMonthStart(year, month));
+  }
+  /**
+   * 由公历日反查
+   */
+  static fromSolarDay(solarDay) {
+    const hijri = solarDay.getHijriDay();
+    let year = hijri.getYear();
+    let month = hijri.getMonth();
+    for (let i = 0; i < 3; i++) {
+      const start = DiyanetDay.getMonthStart(year, month);
+      const diff = solarDay.subtract(start);
+      if (diff < 0) {
+        month -= 1;
+        if (month < 1) {
+          month = 12;
+          year -= 1;
+        }
+      } else if (diff >= DiyanetDay.getMonthDays(year, month)) {
+        month += 1;
+        if (month > 12) {
+          month = 1;
+          year += 1;
+        }
+      } else {
+        return new DiyanetDay(year, month, diff + 1);
+      }
+    }
+    throw new Error(`cannot resolve diyanet day: ${solarDay.toString()}`);
+  }
+  static fromYmd(year, month, day) {
+    const y = DiyanetDay.numeric(year, "diyanet year");
+    const m = DiyanetDay.numeric(month, "diyanet month");
+    const d = DiyanetDay.numeric(day, "diyanet day");
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal diyanet month: ${m}`);
+    }
+    if (d < 1 || d > DiyanetDay.getMonthDays(y, m)) {
+      throw new Error(`illegal diyanet day: ${y}-${m}-${d}`);
+    }
+    return new DiyanetDay(y, m, d);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return HijriMonth.NAMES[this.month - 1];
+  }
+  getName() {
+    return this.day + "\u65E5";
+  }
+  getSolarDay() {
+    return DiyanetDay.getMonthStart(this.year, this.month).next(this.day - 1);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getDayCount() {
+    return DiyanetDay.getMonthDays(this.year, this.month);
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
 class IcsEvent extends AbstractCulture {
   summary;
   start;
@@ -10385,6 +10657,7 @@ var HolidayType = /* @__PURE__ */ ((HolidayType2) => {
   HolidayType2[HolidayType2["WEEK_AFTER"] = 9] = "WEEK_AFTER";
   HolidayType2[HolidayType2["TABLE"] = 10] = "TABLE";
   HolidayType2[HolidayType2["UMM_AL_QURA"] = 11] = "UMM_AL_QURA";
+  HolidayType2[HolidayType2["DIYANET"] = 12] = "DIYANET";
   return HolidayType2;
 })(HolidayType || {});
 class HolidayRule extends AbstractCulture {
@@ -10481,6 +10754,16 @@ class HolidayRule extends AbstractCulture {
    */
   static ummAlQura(month, day, name, offset = 0) {
     const o = new HolidayRule(11 /* UMM_AL_QURA */, name);
+    o.month = month;
+    o.day = day;
+    o.offset = offset;
+    return o;
+  }
+  /**
+   * 土耳其宗教事务局历，按「新月在安卡拉日没时位于地平线之上」逐月计算
+   */
+  static diyanet(month, day, name, offset = 0) {
+    const o = new HolidayRule(12 /* DIYANET */, name);
     o.month = month;
     o.day = day;
     o.offset = offset;
@@ -10648,6 +10931,20 @@ class HolidayRule extends AbstractCulture {
             continue;
           }
           const d = UmmAlQuraDay.fromYmd(hy, this.month, this.day).getSolarDay();
+          if (d.getYear() === year) {
+            return d.next(this.offset);
+          }
+        }
+        return null;
+      }
+      case 12 /* DIYANET */: {
+        const estimate = Math.floor((year - 622) * 33 / 32);
+        for (let i = -1; i <= 1; i++) {
+          const hy = estimate + i;
+          if (this.day > DiyanetDay.getMonthDays(hy, this.month)) {
+            continue;
+          }
+          const d = DiyanetDay.fromYmd(hy, this.month, this.day).getSolarDay();
           if (d.getYear() === year) {
             return d.next(this.offset);
           }
@@ -10988,13 +11285,13 @@ function turkeyRules() {
     HolidayRule.solar(7, 15, "\u6C11\u4E3B\u4E0E\u6C11\u65CF\u56E2\u7ED3\u65E5", 2017),
     HolidayRule.solar(8, 30, "\u80DC\u5229\u65E5"),
     HolidayRule.solar(10, 29, "\u5171\u548C\u56FD\u65E5"),
-    HolidayRule.hijri(10, 1, "\u5F00\u658B\u8282"),
-    HolidayRule.hijri(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
-    HolidayRule.hijri(10, 3, "\u5F00\u658B\u8282\u7B2C\u4E09\u65E5"),
-    HolidayRule.hijri(12, 10, "\u53E4\u5C14\u90A6\u8282"),
-    HolidayRule.hijri(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
-    HolidayRule.hijri(12, 12, "\u53E4\u5C14\u90A6\u8282\u7B2C\u4E09\u65E5"),
-    HolidayRule.hijri(12, 13, "\u53E4\u5C14\u90A6\u8282\u7B2C\u56DB\u65E5")
+    HolidayRule.diyanet(10, 1, "\u5F00\u658B\u8282"),
+    HolidayRule.diyanet(10, 2, "\u5F00\u658B\u8282\u6B21\u65E5"),
+    HolidayRule.diyanet(10, 3, "\u5F00\u658B\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.diyanet(12, 10, "\u53E4\u5C14\u90A6\u8282"),
+    HolidayRule.diyanet(12, 11, "\u53E4\u5C14\u90A6\u8282\u6B21\u65E5"),
+    HolidayRule.diyanet(12, 12, "\u53E4\u5C14\u90A6\u8282\u7B2C\u4E09\u65E5"),
+    HolidayRule.diyanet(12, 13, "\u53E4\u5C14\u90A6\u8282\u7B2C\u56DB\u65E5")
   ];
 }
 
@@ -11396,7 +11693,7 @@ class HolidayCalendar {
       case "UA":
         return new HolidayCalendar(r, ukraineRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u8FD1\u5E74\u8282\u65E5\u8C03\u6574\u9891\u7E41\uFF0C\u4EE5\u5B98\u65B9\u516C\u544A\u4E3A\u51C6\u3002");
       case "TR":
-        return new HolidayCalendar(r, turkeyRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5F00\u658B\u8282\u3001\u53E4\u5C14\u90A6\u8282\u6309\u7B97\u672F\u5386\u63A8\u7B97\uFF0C\u89C2\u6708\u53EF\u80FD\u5DEE\u4E00\u65E5\u3002");
+        return new HolidayCalendar(r, turkeyRules(), "\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5F00\u658B\u8282\u3001\u53E4\u5C14\u90A6\u8282\u6309\u5B97\u6559\u4E8B\u52A1\u5C40\uFF08Diyanet\uFF09\u5386\u63A8\u7B97\uFF0C\u4EE5\u65B0\u6708\u5728\u5B89\u5361\u62C9\u65E5\u6CA1\u65F6\u9AD8\u4E8E\u5730\u5E73\u7EBF\u4E3A\u6708\u9996\u5224\u636E\uFF1B\u8282\u524D\u4E00\u65E5\u4E0B\u5348\u534A\u65E5\u5047\u672A\u8BA1\u5165\u3002");
       case "ID":
         return new HolidayCalendar(r, indonesiaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\u6838\u5FC3\uFF1B\u9759\u5C45\u65E5\u3001\u536B\u585E\u8282\u4F9D\u5DF4\u5398\u5386\u4E0E\u4F5B\u5386\uFF0C\u6309\u5E74\u516C\u5E03\u3002");
       case "EG":
@@ -15391,4 +15688,4 @@ class DayAlmanac {
   }
 }
 
-export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };
+export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };

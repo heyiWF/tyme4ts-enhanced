@@ -421,7 +421,7 @@ const ics = c.toIcs(2025);</pre>
 
   <section id="page-calendars" class="doc hide">
     <h2>历法对照</h2>
-    <p>同一公历日期在六种历法中的表示。回历为算术历，与观月结果可能相差一日；乌姆库拉历按 KACST 月首表逐月取值，是沙特、阿联酋的官方民用历；印度历的 tithi 以印度标准时间 06:00 计算。</p>
+    <p>同一公历日期在七种历法中的表示。回历为算术历，与观月结果可能相差一日；乌姆库拉历按 KACST 月首表逐月取值，是沙特、阿联酋的官方民用历；Diyanet 历按「新月在安卡拉日没时高于地平线」计算，是土耳其的官方口径；印度历的 tithi 以印度标准时间 06:00 计算。</p>
     <div class="searchbar"><input type="date" id="cdate"><span class="count">选择日期查看对照</span></div>
     <table class="checks" id="cal-table"></table>
     <div class="note" id="cal-fest"></div>
@@ -454,7 +454,7 @@ const ics = c.toIcs(2025);</pre>
       <tr><td>生成</td><td><code>npm run gen:festivals</code></td><td>解析 6tail/lunar-typescript 的 SolarUtil / LunarUtil / FotoUtil / TaoUtil，产出四张 TS 数据表与 JSON 快照</td></tr>
       <tr><td>比对</td><td><code>npm run verify:festivals</code></td><td>把生成表与快照逐键逐值比对，缺失或差异即失败</td></tr>
       <tr><td>审计</td><td><code>npm run audit:holidays</code></td><td>公告日与规则推算逐日比对，算出覆盖率并列出「规则多算」项</td></tr>
-      <tr><td>向量</td><td><code>npm run gen:conformance</code></td><td>生成 252 日 × 23 字段的跨语言验收向量，并由测试反向校验</td></tr>
+      <tr><td>向量</td><td><code>npm run gen:conformance</code></td><td>生成 252 日 × 25 字段的跨语言验收向量，并由测试反向校验</td></tr>
     </table>
     <p class="note" id="audit-note"></p>
     <table class="t">
@@ -482,7 +482,7 @@ const ics = c.toIcs(2025);</pre>
 
 <script type="module">
 import {DATASETS, VERSION} from './holidays-data.js';
-import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
+import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
@@ -1296,6 +1296,9 @@ const CHECKS = [
     ['Makar Sankranti 2025', '2025年1月14日', () => findSankranti(2025, 9).toString()],
     ['东正教复活节 2025', '2025年4月20日', () => HolidayRule.getOrthodoxEasterDay(2025).toString()],
     ['东正教复活节 2024', '2024年5月5日', () => HolidayRule.getOrthodoxEasterDay(2024).toString()],
+    ['Diyanet 1446 开斋节', '2025年3月30日', () => DiyanetDay.fromYmd(1446, 10, 1).getSolarDay().toString()],
+    ['Diyanet 1447 宰牲节', '2026年5月27日', () => DiyanetDay.fromYmd(1447, 12, 10).getSolarDay().toString()],
+    ['土耳其 2025 开斋节', '3/30 开斋节', () => dayNames(HolidayCalendar.of('TR').getDays(2025).filter((h) => h.getName() === '开斋节'))],
     ['乌姆库拉 1446 开斋节', '2025年3月30日', () => UmmAlQuraDay.fromYmd(1446, 10, 1).getSolarDay().toString()],
     ['乌姆库拉 1447 宰牲节', '2026年5月27日', () => UmmAlQuraDay.fromYmd(1447, 12, 10).getSolarDay().toString()],
     ['沙特 2026 开斋节', '3/20 开斋节', () => dayNames(HolidayCalendar.of('SA').getDays(2026).filter((h) => h.getName() === '开斋节'))],
@@ -1461,6 +1464,8 @@ function renderCalendars() {
     ['乌姆库拉历', UmmAlQuraDay.inRange(s) ? UmmAlQuraDay.fromSolarDay(s).toString() : '—（表外年份）',
       UmmAlQuraDay.inRange(s) ? '沙特、阿联酋官方民用历' : '有效区间 1937–2077',
       UmmAlQuraDay.inRange(s) ? (UmmAlQuraDay.fromSolarDay(s).isLeapYear() ? '闰年 355 天' : '平年 354 天') : '—'],
+    ['Diyanet 历', DiyanetDay.fromSolarDay(s).toString(), '土耳其宗教事务局口径',
+      DiyanetDay.fromSolarDay(s).getDayCount() === 30 ? '大月 30 天' : '小月 29 天'],
   ];
   $('cal-table').innerHTML = '<tr><th>历法</th><th>日期</th><th>月名 / 说明</th><th>补充</th></tr>' +
     rows.map((r) => `<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('');
