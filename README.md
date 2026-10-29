@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-572%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-573%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -23,7 +23,7 @@
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
 | 节日 | 八类来源统一聚合：法定、传统、民俗、公历纪念日与国际日、佛历、道历、节气、外历；共 **480+ 条名称**，同神异写自动归并 | 6tail/lunar-typescript、维基文库、政府公告 |
 | 民俗数据 | 民俗节日、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
-| 节假日 | **72 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区），覆盖欧亚美非 40 国；支持公历、农历、伊斯兰历、希伯来历、东正教复活节五类规则、11 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
+| 节假日 | **73 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区、中国广西），覆盖欧亚美非 40 国；支持公历、农历、伊斯兰历、希伯来历、东正教复活节五类规则、11 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
 | 互操作 | ICS 订阅解析（年度循环事件转 tyme `Event`）与节假日 ICS 导出 | iCalendar RFC 5545 |
 
 ---
@@ -138,13 +138,14 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
-支持 72 个地区代码：
+支持 73 个地区代码：
 
 - 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID`
 - 欧洲：`GB` `DE` `FR` `IT` `ES` `NL` `RU` `PL` `SE` `NO` `DK` `FI` `IS` `IE` `PT` `CH` `AT` `BE` `CZ` `HU` `GR` `CY` `RO` `UA` `TR`
 - 美洲：`US` `CA` `BR` `MX`
 - 大洋洲与非洲：`AU` `NZ` `ZA` `EG` `NG` `KE` `SA` `AE`
 - 子地区：`US-CA` `US-NY` `US-TX` `DE-BY` `GB-SCT` `AU-NSW` `CA-ON` `ES-CT`
+- 中国省级：`CN-GX`（广西：国家法定节假日 + 农历三月三、初四）
 - 马来西亚州级：`MY-JHR` `MY-KDH` `MY-KTN` `MY-MLK` `MY-NSN` `MY-PHG` `MY-PNG` `MY-PRK` `MY-PLS` `MY-SBH` `MY-SWK` `MY-SGR` `MY-TRG` `MY-KUL`
 
 马来西亚州级日历在联邦假日之上叠加州苏丹或州元首诞辰、州庆、丰收节与达雅节等。这些日期分三类实现：固定月日（如柔佛 3 月 23 日）、某月第几个星期几（如槟城州元首诞辰为七月第二个周六、霹雳苏丹诞辰为十一月第一个周五、彭亨为七月最后一个周五）、以及「某日后的第一个周日」（吉打苏丹诞辰为 6 月 18 日后的第一个周日）。已故苏丹忌日等无固定公式者用 `HolidayRule.table()` 逐年列表，表外年份返回 `null`，不臆造。吉打、吉兰丹、登嘉楼的周末为周五周六，因此不作周日顺延。
@@ -315,7 +316,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm i
-npm test          # 572 项测试
+npm test          # 573 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs

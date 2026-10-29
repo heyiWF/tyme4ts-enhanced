@@ -56,6 +56,19 @@ class HolidayRegion2Test {
     }
 
     @test
+    test7(): void {
+        // 广西：国家法定节假日 + 农历三月三、初四
+        const gx: HolidayCalendar = HolidayCalendar.of('CN-GX');
+        equal(gx.getHoliday(SolarDay.fromYmd(2025, 3, 31))!.getName(), '三月三');
+        equal(gx.getHoliday(SolarDay.fromYmd(2025, 4, 1))!.getName(), '三月三');
+        equal(gx.getHoliday(SolarDay.fromYmd(2026, 4, 19))!.getName(), '三月三');
+        equal(gx.getHoliday(SolarDay.fromYmd(2027, 4, 9))!.getName(), '三月三');
+        // 国家法定节假日照常，如 2025 年国庆
+        ok(gx.getHoliday(SolarDay.fromYmd(2025, 10, 1))!.getName().indexOf('国庆') > -1);
+        ok(gx.getDays(2025).length > HolidayCalendar.of('CN').getDays(2025).length - 1);
+    }
+
+    @test
     test5(): void {
         // 全部地区均可按年推算
         const regions: string[] = HolidayCalendar.getRegions();

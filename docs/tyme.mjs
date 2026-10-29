@@ -9407,6 +9407,11 @@ class HolidayCalendar {
     switch (r) {
       case "CN":
         return HolidayCalendar.china();
+      case "CN-GX":
+        return HolidayCalendar.china("CN-GX", [
+          HolidayRule.lunar(3, 3, "\u4E09\u6708\u4E09"),
+          HolidayRule.lunar(3, 4, "\u4E09\u6708\u4E09")
+        ], "\u5E7F\u897F\u58EE\u65CF\u81EA\u6CBB\u533A\uFF1A\u56FD\u5BB6\u6CD5\u5B9A\u8282\u5047\u65E5 + \u519C\u5386\u4E09\u6708\u4E09\u3001\u521D\u56DB\uFF1B\u8C03\u4F11\u968F\u56FD\u52A1\u9662\u901A\u77E5\u3002");
       case "HK":
         return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), "\u516C\u4F17\u5047\u671F\uFF0C\u519C\u5386\u4E0E\u590D\u6D3B\u8282\u4E3A\u4E3B\uFF1B\u4E2A\u522B\u5E74\u5EA6\u8C03\u6574\u4EE5\u653F\u5E9C\u516C\u544A\u4E3A\u51C6\u3002");
       case "MO":
@@ -9626,14 +9631,15 @@ class HolidayCalendar {
       "MY-SWK",
       "MY-SGR",
       "MY-TRG",
-      "MY-KUL"
+      "MY-KUL",
+      "CN-GX"
     ];
   }
   /**
    * 中国大陆：内置 2001 年起国务院公告数据
    */
-  static china() {
-    const c = new HolidayCalendar("CN", [
+  static china(region = "CN", extra = [], note = "") {
+    const c = new HolidayCalendar(region, [
       HolidayRule.solar(1, 1, "\u5143\u65E6"),
       HolidayRule.lunar(1, 1, "\u6625\u8282"),
       HolidayRule.term(7, "\u6E05\u660E\u8282"),
@@ -9641,7 +9647,7 @@ class HolidayCalendar {
       HolidayRule.lunar(5, 5, "\u7AEF\u5348\u8282"),
       HolidayRule.lunar(8, 15, "\u4E2D\u79CB\u8282"),
       HolidayRule.solar(10, 1, "\u56FD\u5E86\u8282")
-    ], "\u6CD5\u5B9A\u8282\u5047\u65E5\u4E0E\u8C03\u4F11\u4EE5\u56FD\u52A1\u9662\u529E\u516C\u5385\u9010\u5E74\u901A\u77E5\u4E3A\u51C6\uFF0C\u5DF2\u5185\u7F6E\u516C\u544A\u6570\u636E\uFF0C\u53EF\u6309\u5E74\u8FFD\u52A0\u3002");
+    ].concat(extra), note || "\u6CD5\u5B9A\u8282\u5047\u65E5\u4E0E\u8C03\u4F11\u4EE5\u56FD\u52A1\u9662\u529E\u516C\u5385\u9010\u5E74\u901A\u77E5\u4E3A\u51C6\uFF0C\u5DF2\u5185\u7F6E\u516C\u544A\u6570\u636E\uFF0C\u53EF\u6309\u5E74\u8FFD\u52A0\u3002");
     const days = HolidayCalendar.getLegalHolidays();
     for (let i = 0; i < days.length; i++) {
       const d = days[i];

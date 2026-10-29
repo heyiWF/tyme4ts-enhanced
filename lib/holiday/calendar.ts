@@ -99,6 +99,12 @@ export class HolidayCalendar {
         switch (r) {
             case 'CN':
                 return HolidayCalendar.china();
+            case 'CN-GX':
+                // 《广西壮族自治区少数民族习惯节日放假办法》：农历三月初三、初四放假两天
+                return HolidayCalendar.china('CN-GX', [
+                    HolidayRule.lunar(3, 3, '三月三'),
+                    HolidayRule.lunar(3, 4, '三月三'),
+                ], '广西壮族自治区：国家法定节假日 + 农历三月三、初四；调休随国务院通知。');
             case 'HK':
                 return new HolidayCalendar(r, HolidayCalendar.hongKongRules(), '公众假期，农历与复活节为主；个别年度调整以政府公告为准。');
             case 'MO':
@@ -255,14 +261,15 @@ export class HolidayCalendar {
             'ID', 'EG', 'SA', 'AE', 'NG', 'KE',
             'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT',
             'MY-JHR', 'MY-KDH', 'MY-KTN', 'MY-MLK', 'MY-NSN', 'MY-PHG', 'MY-PNG',
-            'MY-PRK', 'MY-PLS', 'MY-SBH', 'MY-SWK', 'MY-SGR', 'MY-TRG', 'MY-KUL'];
+            'MY-PRK', 'MY-PLS', 'MY-SBH', 'MY-SWK', 'MY-SGR', 'MY-TRG', 'MY-KUL',
+            'CN-GX'];
     }
 
     /**
      * 中国大陆：内置 2001 年起国务院公告数据
      */
-    protected static china(): HolidayCalendar {
-        const c: HolidayCalendar = new HolidayCalendar('CN', [
+    protected static china(region: string = 'CN', extra: HolidayRule[] = [], note: string = ''): HolidayCalendar {
+        const c: HolidayCalendar = new HolidayCalendar(region, [
             HolidayRule.solar(1, 1, '元旦'),
             HolidayRule.lunar(1, 1, '春节'),
             HolidayRule.term(7, '清明节'),
@@ -270,7 +277,7 @@ export class HolidayCalendar {
             HolidayRule.lunar(5, 5, '端午节'),
             HolidayRule.lunar(8, 15, '中秋节'),
             HolidayRule.solar(10, 1, '国庆节'),
-        ], '法定节假日与调休以国务院办公厅逐年通知为准，已内置公告数据，可按年追加。');
+        ].concat(extra), note || '法定节假日与调休以国务院办公厅逐年通知为准，已内置公告数据，可按年追加。');
         const days: LegalHoliday[] = HolidayCalendar.getLegalHolidays();
         for (let i: number = 0; i < days.length; i++) {
             const d: LegalHoliday = days[i];
