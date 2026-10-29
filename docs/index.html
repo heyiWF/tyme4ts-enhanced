@@ -164,6 +164,9 @@ table.checks td{padding:7px 10px;border-top:1px solid var(--line-2);vertical-ali
 table.checks td:nth-child(1){width:44%}
 table.checks td:nth-child(3){width:56px;text-align:center;font-weight:700}
 table.checks td.ok{color:var(--green)}
+table.spec td:nth-child(1){width:96px;white-space:nowrap}
+table.spec td:nth-child(3){width:118px;text-align:left;font-weight:400;white-space:nowrap}
+table.spec td:nth-child(4){width:34%}
 table.checks td.no{color:var(--red)}
 .sum-ok{color:var(--green);font-weight:600}
 .sum-no{color:var(--red);font-weight:600}
@@ -425,6 +428,18 @@ const ics = c.toIcs(2025);</pre>
     <div class="searchbar"><input type="date" id="cdate"><span class="count">选择日期查看对照</span></div>
     <table class="checks" id="cal-table"></table>
     <div class="note" id="cal-fest"></div>
+    <h3>各历法口径与已知边界</h3>
+    <table class="checks spec">
+      <tr><th>历法</th><th>判据</th><th>已验证范围</th><th>已知边界</th></tr>
+      <tr><td>公历</td><td>格里高利历，四年一闰、百年不闰、四百年再闰</td><td>1582 年起</td><td>—</td></tr>
+      <tr><td>农历</td><td>朔望月定月，无中气之月置闰，节气按太阳黄经</td><td>1900–2100</td><td>与紫金山天文台历书在少数历史年份差一日，源于时区口径</td></tr>
+      <tr><td>回历（算术）</td><td>30 年 11 闰</td><td>全区间</td><td>不观月，与观月国家差 1–2 日，仅作近似</td></tr>
+      <tr><td>乌姆库拉历</td><td>沙特 KACST 月首表</td><td>1356–1500 AH</td><td>1937–2077 年有效，表外不支持；1364 年原表有一处笔误，如实保留</td></tr>
+      <tr><td>Diyanet 历</td><td>合朔后第一个安卡拉日没时月亮高于地平线的傍晚</td><td>26 个官方日期</td><td>2015–2027 年，24 个吻合；2016 年两处差一日</td></tr>
+      <tr><td>波斯历</td><td>春分在德黑兰正午之前则当日为岁首</td><td>1401–1411 年</td><td>11 个诺鲁孜全部吻合；33 年 8 闰的算术近似在 1404 年差一日，本库不用</td></tr>
+      <tr><td>希伯来历</td><td>molad 定月首 + 四条 dehiyyot</td><td>全区间</td><td>只实现 9 个法定节日与 3 个纪念日</td></tr>
+      <tr><td>印度历</td><td>恒星黄道定月，tithi 为日月黄经差 12° 的 1/30</td><td>全区间</td><td>部分节日按夜分或午分判定，与日出判定差一分</td></tr>
+    </table>
   </section>
 
   <section id="page-check" class="doc hide">
