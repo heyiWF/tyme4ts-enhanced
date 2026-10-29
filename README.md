@@ -1,14 +1,20 @@
-# Tyme Enhanced · 开源通胜（老黄历）引擎
+<p align="center">
+  <img src="./docs/wiki-icon.svg" alt="Tyme Enhanced Wiki 图标" width="120">
+</p>
+
+# Tyme Enhanced · 开源多历法、节日与通胜引擎
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-580%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-606%20passing-1f6b46?style=flat-square)
 
-在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
+在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把多种历法、八类节日、多地区法定节假日与传统通胜，统一为可计算、可复现、可考证的 TypeScript API。
+
+它不只是老黄历：既能查宜忌、神煞与择日，也能做历法转换、节日聚合、节假日推算和 ICS 日历交换。通胜只是其中一层，节假日、外历与 ICS 都可以脱离 `DayAlmanac` 独立使用。
 
 零运行时依赖，单文件产物，全部数据以整数与字符串编码——便于逐行移植到 Kotlin、Swift、Go、Rust、Python。
 
-> 在线演示与文档：[docs/index.html](./docs/index.html)（黄历 / 字段 / 节日 / 地区 / 历法 / 校验 / 数据，本地直接打开即可，全部计算在浏览器完成）。页面上各类名词——字段、历法、地区代码、**宜忌事项**——都带 `?` 问号，悬停或点击可看「指什么活动、依据什么规则」的浮窗说明。
+> 在线演示与文档：[docs/index.html](./docs/index.html)（黄历 / 字段 / 节日 / 地区 / 历法 / 校验 / 数据，本地直接打开即可，全部计算在浏览器完成）· [项目 Wiki](https://github.com/heyiWF/tyme4ts-enhanced/wiki)。页面上各类名词——字段、历法、地区代码、**宜忌事项**——都带 `?` 问号，悬停或点击可看「指什么活动、依据什么规则」的浮窗说明。
 
 ---
 
@@ -396,7 +402,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm i
-npm test          # 580 项测试
+npm test          # 606 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs
