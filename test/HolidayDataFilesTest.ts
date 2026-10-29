@@ -12,7 +12,7 @@ class HolidayDataFilesTest {
     test0(): void {
         // 逐年公告文件均可解析并导入
         const files: string[] = readdirSync(HolidayDataFilesTest.DIR).filter((f: string) => f.slice(-5) === '.json').sort();
-        equal(files.length, 26);
+        equal(files.length, 28);
         for (let i: number = 0; i < files.length; i++) {
             const text: string = readFileSync(join(HolidayDataFilesTest.DIR, files[i]), 'utf8');
             const o: {
@@ -49,5 +49,18 @@ class HolidayDataFilesTest {
         const my: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'MY-2026.json'), 'utf8'));
         equal(my.getHoliday(SolarDay.fromYmd(2026, 3, 21))!.getName(), '开斋节');
         ok(my.getDays(2026).length >= 16);
+        // 印度尼西亚 2026：公告数据覆盖算术历差一日者，并扣掉被取代的规则日期
+        const id: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'ID-2026.json'), 'utf8'));
+        equal(id.getHoliday(SolarDay.fromYmd(2026, 3, 21))!.getName(), '开斋节');
+        equal(id.getHoliday(SolarDay.fromYmd(2026, 3, 22))!.getName(), '开斋节次日');
+        equal(id.getHoliday(SolarDay.fromYmd(2026, 3, 20)), null);
+        equal(id.getHoliday(SolarDay.fromYmd(2026, 6, 16))!.getName(), '伊斯兰新年');
+        equal(id.getHoliday(SolarDay.fromYmd(2026, 6, 17)), null);
+        equal(id.getDays(2026).length, 17);
+        // 2027 年因回历年短于公历年，登霄日出现两次（01-05、12-26）
+        const id27: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'ID-2027.json'), 'utf8'));
+        equal(id27.getHoliday(SolarDay.fromYmd(2027, 1, 5))!.getName(), '先知登霄日');
+        equal(id27.getHoliday(SolarDay.fromYmd(2027, 12, 26))!.getName(), '先知登霄日');
+        equal(id27.getDays(2027).length, 18);
     }
 }

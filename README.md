@@ -156,7 +156,7 @@ cn.importJson(JSON.stringify({
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-新加坡、马来西亚、泰国只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)——新加坡 3 份、泰国 3 份、马来西亚联邦 3 份、马来西亚州级 13 份、中国新疆 2 份、宁夏 2 份，共 26 个文件：
+新加坡、马来西亚、泰国、印度尼西亚只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)——新加坡 3 份、泰国 3 份、马来西亚联邦 3 份、马来西亚州级 13 份、印度尼西亚 2 份、中国新疆 2 份、宁夏 2 份，共 28 个文件：
 
 ```ts
 import {readFileSync} from 'node:fs';
@@ -170,6 +170,14 @@ const jhr = HolidayCalendar.of('MY-JHR');
 jhr.importJson(readFileSync('data/holidays/MY-2026.json', 'utf8'));   // 联邦
 jhr.importJson(readFileSync('data/holidays/MY-JHR.json', 'utf8'));     // 州级增补 + 排除
 jhr.getExcludedCount();   // 3
+```
+
+印尼 2026 年的开斋节比算术历晚一日，公告文件除了写入官方 17 日，还用 `exclude` 扣掉被取代的三个规则日期（3-20、6-17、8-26），避免同一年多出三天假：
+
+```ts
+const id = HolidayCalendar.of('ID');
+id.importJson(readFileSync('data/holidays/ID-2026.json', 'utf8'));
+id.getDays(2026).length;   // 17，与 SKB 三部长联合决定一致
 ```
 
 也可以直接用 API 扣减，适用于任何地区：
