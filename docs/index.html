@@ -507,7 +507,7 @@ const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'T
   'MY-PNG': '马来西亚·槟城', 'MY-PRK': '马来西亚·霹雳', 'MY-PLS': '马来西亚·玻璃市',
   'MY-SBH': '马来西亚·沙巴', 'MY-SWK': '马来西亚·砂拉越', 'MY-SGR': '马来西亚·雪兰莪',
   'MY-TRG': '马来西亚·登嘉楼', 'MY-KUL': '马来西亚·联邦直辖区',
-  'CN-GX': '中国·广西'};
+  'CN-GX': '中国·广西', 'CN-XJ': '中国·新疆', 'CN-NX': '中国·宁夏'};
 
 let current = new Date();
 let region = 'CN';
@@ -1050,6 +1050,8 @@ const REGION_BASIS = {
   'MY-TRG': '《1951 年假期法令》 + 登嘉楼州宪报（周末周五周六）',
   'MY-KUL': '《1951 年假期法令》 + 联邦直辖区公告',
   'CN-GX': '国务院办公厅通知 + 《广西壮族自治区少数民族习惯节日放假办法》',
+  'CN-XJ': '国务院办公厅通知 + 《新疆维吾尔自治区少数民族习惯节日放假办法》（政府令第 174 号）',
+  'CN-NX': '国务院办公厅通知 + 宁夏回族自治区人民政府办公厅年度通知',
 };
 
 const HELP_GROUP = {
@@ -1268,7 +1270,7 @@ const CHECKS = [
     ['韩国 2025 佛诞与儿童节', '5/5 佛诞节、儿童节', () => dayNames(HolidayCalendar.of('KR').getDays(2025).filter((h) => h.getDay().getMonth() === 5 && h.getDay().getDay() === 5))],
     ['荷兰 2025 国王节', '4/26 国王节', () => dayNames(HolidayCalendar.of('NL').getDays(2025).filter((h) => h.getName() === '国王节'))],
     ['南非 2025 自由日补假', '4/28 自由日（补假）', () => dayNames(HolidayCalendar.of('ZA').getDays(2025).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('自由日') === 0))],
-    ['地区总数', '73', () => String(HolidayCalendar.getRegions().length)],
+    ['地区总数', '75', () => String(HolidayCalendar.getRegions().length)],
     ['马来西亚州级代码', '14', () => String(HolidayCalendar.getRegions().filter((x) => x.indexOf('MY-') === 0).length)],
     ['柔佛 2025 苏丹诞辰补假', '3/24 苏丹诞辰（补假）', () => dayNames(HolidayCalendar.of('MY-JHR').getDays(2025).filter((h) => h.getName() === '苏丹诞辰（补假）'))],
     ['吉打 2026 苏丹诞辰', '6/21 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-KDH').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],

@@ -9411,6 +9411,10 @@ class HolidayCalendar {
     switch (r) {
       case "CN":
         return HolidayCalendar.china();
+      case "CN-XJ":
+        return HolidayCalendar.china("CN-XJ", [], "\u65B0\u7586\u7EF4\u543E\u5C14\u81EA\u6CBB\u533A\uFF1A\u56FD\u5BB6\u6CD5\u5B9A\u8282\u5047\u65E5 + \u8089\u5B5C\u8282\u3001\u53E4\u5C14\u90A6\u8282\uFF0C\u6309\u81EA\u6CBB\u533A\u4EBA\u6C11\u653F\u5E9C\u9010\u5E74\u516C\u544A\uFF1B2025\u30012026 \u5E74\u5DF2\u5185\u7F6E\u3002");
+      case "CN-NX":
+        return HolidayCalendar.china("CN-NX", [], "\u5B81\u590F\u56DE\u65CF\u81EA\u6CBB\u533A\uFF1A\u56FD\u5BB6\u6CD5\u5B9A\u8282\u5047\u65E5 + \u5F00\u658B\u8282\u3001\u53E4\u5C14\u90A6\u8282\uFF0C\u6309\u81EA\u6CBB\u533A\u4EBA\u6C11\u653F\u5E9C\u9010\u5E74\u516C\u544A\uFF1B2025\u30012026 \u5E74\u5DF2\u5185\u7F6E\u3002");
       case "CN-GX":
         return HolidayCalendar.china("CN-GX", [
           HolidayRule.lunar(3, 3, "\u4E09\u6708\u4E09"),
@@ -9636,7 +9640,9 @@ class HolidayCalendar {
       "MY-SGR",
       "MY-TRG",
       "MY-KUL",
-      "CN-GX"
+      "CN-GX",
+      "CN-XJ",
+      "CN-NX"
     ];
   }
   /**

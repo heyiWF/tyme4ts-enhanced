@@ -103,6 +103,10 @@ export class HolidayCalendar {
         switch (r) {
             case 'CN':
                 return HolidayCalendar.china();
+            case 'CN-XJ':
+                return HolidayCalendar.china('CN-XJ', [], '新疆维吾尔自治区：国家法定节假日 + 肉孜节、古尔邦节，按自治区人民政府逐年公告；2025、2026 年已内置。');
+            case 'CN-NX':
+                return HolidayCalendar.china('CN-NX', [], '宁夏回族自治区：国家法定节假日 + 开斋节、古尔邦节，按自治区人民政府逐年公告；2025、2026 年已内置。');
             case 'CN-GX':
                 // 《广西壮族自治区少数民族习惯节日放假办法》：农历三月初三、初四放假两天
                 return HolidayCalendar.china('CN-GX', [
@@ -266,7 +270,7 @@ export class HolidayCalendar {
             'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT',
             'MY-JHR', 'MY-KDH', 'MY-KTN', 'MY-MLK', 'MY-NSN', 'MY-PHG', 'MY-PNG',
             'MY-PRK', 'MY-PLS', 'MY-SBH', 'MY-SWK', 'MY-SGR', 'MY-TRG', 'MY-KUL',
-            'CN-GX'];
+            'CN-GX', 'CN-XJ', 'CN-NX'];
     }
 
     /**
