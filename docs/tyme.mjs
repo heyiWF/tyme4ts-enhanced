@@ -10223,6 +10223,48 @@ class HolidayCalendar {
   static escape(text) {
     return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
   }
+  /**
+   * 仅用规则推算某年假日，不含 importJson 导入的公告数据
+   *
+   * 与 getDays() 对照，即可看出哪些节日能算、哪些只能靠逐年公告。
+   */
+  getRuleDays(year) {
+    const map = {};
+    for (let i = 0; i < this.rules.length; i++) {
+      const d = this.rules[i].getDay(year);
+      if (!d) {
+        continue;
+      }
+      const key = HolidayCalendar.getKey(d);
+      const old = map[key];
+      const name = this.rules[i].getName();
+      if (!old) {
+        map[key] = new Holiday(d, name);
+      } else if (!old.isWork() && old.getName().indexOf(name) < 0) {
+        map[key] = new Holiday(d, old.getName() + "\u3001" + name);
+      }
+    }
+    if (this.observed === 1) {
+      const nextNewYear = SolarDay.fromYmd(year + 1, 1, 1);
+      if (nextNewYear.getWeek().getIndex() === 6) {
+        const eve = nextNewYear.next(-1);
+        if (!map[HolidayCalendar.getKey(eve)]) {
+          map[HolidayCalendar.getKey(eve)] = new Holiday(eve, "\u5143\u65E6\uFF08\u8865\u5047\uFF09");
+        }
+      }
+    }
+    if (this.observed !== 0) {
+      this.applyObserved(year, map);
+    }
+    const l = [];
+    for (const k in map) {
+      if (map[k].getDay().getYear() === year && !map[k].isWork()) {
+        l.push(map[k]);
+      }
+    }
+    l.sort((a, b) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
+    return l;
+  }
   getHoliday(solarDay) {
     const days = this.getDays(solarDay.getYear(), true);
     const key = HolidayCalendar.getKey(solarDay);

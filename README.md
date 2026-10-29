@@ -207,6 +207,18 @@ Tithi.getTithi(SolarDay.fromYmd(2025, 3, 14), 6);                      // 15（H
 
 ---
 
+### 规则覆盖率审计
+
+```bash
+npm run build && npm run audit:holidays
+```
+
+对 `data/holidays/` 的 158 个公告日逐日比对：99 日（63%）可由规则算出，其余 59 日为回历、印历、佛历节日与临时公休。审计同时会列出「规则多算但公告未列」的日子——本次即由此发现马来西亚三年公告文件漏了元旦，已补。
+
+`HolidayCalendar.getRuleDays(year)` 返回仅由规则推算的假日，可与 `getDays(year)` 对照，判断某个节日是「算出来的」还是「公告来的」。
+
+---
+
 ## 七、ICS 订阅转换
 
 ```ts

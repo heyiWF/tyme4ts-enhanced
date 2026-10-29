@@ -20,7 +20,8 @@
     "docs": "npm run build && node -e \"require('fs').copyFileSync('dist/lib/index.mjs','docs/tyme.mjs')\" && node scripts/build-docs-data.mjs",
     "js": "unbuild && node build-js.js",
     "gen:festivals": "python scripts/gen-festival-data.py",
-    "verify:festivals": "node scripts/verify-festivals.mjs"
+    "verify:festivals": "node scripts/verify-festivals.mjs",
+    "audit:holidays": "node scripts/audit-holidays.mjs"
   },
   "homepage": "https://github.com/heyiWF/tyme4ts-enhanced",
   "repository": {

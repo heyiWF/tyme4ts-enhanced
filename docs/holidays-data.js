@@ -11,6 +11,10 @@ export const DATASETS = [
   "source": "MOM Singapore / kabinet.gov.my / timeanddate",
   "days": [
    {
+    "date": "2025-01-01",
+    "name": "元旦"
+   },
+   {
     "date": "2025-01-29",
     "name": "农历新年"
    },
@@ -69,6 +73,10 @@ export const DATASETS = [
   "year": 2026,
   "source": "MOM Singapore / kabinet.gov.my / timeanddate",
   "days": [
+   {
+    "date": "2026-01-01",
+    "name": "元旦"
+   },
    {
     "date": "2026-02-17",
     "name": "农历新年"
@@ -140,6 +148,10 @@ export const DATASETS = [
   "year": 2027,
   "source": "MOM Singapore / kabinet.gov.my / timeanddate",
   "days": [
+   {
+    "date": "2027-01-01",
+    "name": "元旦"
+   },
    {
     "date": "2027-02-06",
     "name": "农历新年"

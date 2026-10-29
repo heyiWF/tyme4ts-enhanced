@@ -385,6 +385,7 @@ a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
     <h3 id="region-title">法定节假日</h3>
     <div class="note" id="region-desc"></div>
     <div class="hol-list" id="region-list"></div>
+    <div class="note" id="region-audit"></div>
     <h3>追加数据</h3>
 <pre>import {HolidayCalendar} from 'tyme4ts-enhanced';
 
@@ -1127,6 +1128,12 @@ function renderRegionDetail() {
   const list = c.getDays(current.getFullYear());
   $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}</span></div>`).join('')
     || '<div><b>本年暂无</b><span></span></div>';
+  const rule = c.getRuleDays(current.getFullYear());
+  const ruleKeys = new Set(rule.map((h) => h.getDay().getMonth() + '-' + h.getDay().getDay()));
+  const hit = list.filter((h) => ruleKeys.has(h.getDay().getMonth() + '-' + h.getDay().getDay())).length;
+  $('region-audit').textContent = list.length
+    ? `本年 ${list.length} 日，其中 ${hit} 日可由规则算出（${Math.round(hit / list.length * 100)}%），其余为回历、印历、佛历节日、调休安排与临时公休，只能逐年公告。`
+    : '';
 }
 
 

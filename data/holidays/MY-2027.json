@@ -4,6 +4,10 @@
  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
  "days": [
   {
+   "date": "2027-01-01",
+   "name": "元旦"
+  },
+  {
    "date": "2027-02-06",
    "name": "农历新年"
   },
