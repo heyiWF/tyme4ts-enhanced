@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-555%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-557%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把一张纸质通胜的每一栏，变成可计算、可复现、可考证的 API。
 
@@ -152,6 +152,13 @@ cn.importJson(JSON.stringify({
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
+新加坡、马来西亚、泰国只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)：
+
+```ts
+import {readFileSync} from 'node:fs';
+HolidayCalendar.of('SG').importJson(readFileSync('data/holidays/SG-2026.json', 'utf8'));
+```
+
 ```ts
 HolidayCalendar.of('JP').getHoliday(SolarDay.fromYmd(2025, 2, 24))!.getName(); // 振替休日
 HolidayCalendar.of('VN').getHoliday(SolarDay.fromYmd(2025, 4, 7))!.getName();  // 雄王忌日
@@ -283,7 +290,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ```bash
 npm i
-npm test          # 555 项测试
+npm test          # 557 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs

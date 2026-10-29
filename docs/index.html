@@ -167,6 +167,13 @@ table.checks td.no{color:var(--red)}
 .sum-no{color:var(--red);font-weight:600}
 footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);font-size:12.5px}
 .hide{display:none}
+.help{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--line);color:var(--ink-3);font-size:10px;cursor:help;margin-left:5px;vertical-align:middle;font-style:normal;line-height:1;user-select:none}
+.help:hover{border-color:var(--ink-3);color:var(--ink);background:#fff}
+#tip{position:fixed;z-index:99;max-width:330px;background:#fffdf6;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:12px 14px;font-size:12.5px;line-height:1.65;display:none}
+#tip b{display:block;font-size:13px;margin-bottom:4px}
+#tip dl{margin:0}
+#tip dt{color:var(--ink-3);font-size:11px;letter-spacing:1px;margin-top:6px}
+#tip dd{margin:0;color:var(--ink)}
 .cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .cats label{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:14px;font-size:12.5px;color:var(--ink-3);cursor:pointer;background:var(--paper-2)}
 .cats label.on{color:var(--ink);border-color:var(--ink-3);background:#fff}
@@ -214,6 +221,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
 </header>
 
 <main class="wrap">
+  <div id="tip"></div>
   <section id="page-almanac">
     <div class="bar">
       <button id="prev">← 前一日</button>
@@ -669,6 +677,7 @@ function renderCards(a) {
     : '<span style="color:var(--ink-3);font-size:13px">今日无载</span>';
 
   const days = HolidayCalendar.of(region).getDays(a.getSolarDay().getYear()).filter((h) => !h.getDay().isBefore(a.getSolarDay())).slice(0, 6);
+  decorateHelp();
   $('holiday').innerHTML = days.length
     ? days.map((h) => `<div class="row"><b>${h.getDay().getMonth()}月${h.getDay().getDay()}日</b><span>${esc(h.getName())}</span></div>`).join('')
     : '<span style="color:var(--ink-3);font-size:13px">本年已无更多假日</span>';
@@ -803,6 +812,167 @@ const FIELDS = [
   ['民俗', '节假日', 'HolidayCalendar.of(region).getHoliday(day)', (a) => { const h = HolidayCalendar.of(region).getHoliday(a.getSolarDay()); return h ? h.getName() : '—'; }],
 ];
 
+
+/* ---------- 字段科普 ---------- */
+const HELP = {
+  '农历日': ['农历日期', '以朔为初一、望为十五或十六，用朔望月定月，用无中气之月置闰。', 'GB/T 33661-2017《农历的编算和颁行》'],
+  '农历月大小': ['月建大小', '连续两个朔之间的日数，29 天为小月、30 天为大月。', '朔望月平均 29.5306 日'],
+  '农历月干支': ['月柱干支', '以节气换月（立春起寅月），不是以农历初一换月。', '五虎遁：甲己之年丙作首'],
+  '是否闰月': ['闰月判定', '19 年 7 闰，一个朔望月内无中气则置为闰月。', '《农历的编算和颁行》'],
+  '星期': ['公历星期', '由儒略日对 7 取余得出，与历法改革无关。', '儒略日连续纪日'],
+  '节气': ['二十四节气', '太阳视黄经每 15° 为一个节气，冬至为 0°。', '《寿星天文历》'],
+  '节气第几天': ['节气序数', '当日距最近一个节气交节日的天数，交节当日为第 1 天。', '节气定气法'],
+  '节气时刻': ['交节时刻', '用天文算法求太阳视黄经达到节气度数的瞬间，东八区。', '《寿星天文历》'],
+  '下一节气': ['下一节气', '按黄经顺序的下一个节气及其交节日期。', '节气定气法'],
+  '物候': ['七十二候', '每个节气分三候，共七十二候，记动植物与气候现象。', '《月令七十二候》'],
+  '月相': ['月相', '按日月黄经差判定朔、上弦、望、下弦。', '日月黄经差 0°/90°/180°/270°'],
+  '伊斯兰历': ['回历日期', '算术历（表历），以 30 年 11 闰循环推算，非观月历。', '伊斯兰历法（tabular）'],
+  '伊斯兰月名': ['回历月名', '穆哈兰姆、色法尔……十二个月名。', '伊斯兰历法'],
+  '藏历': ['藏历日期', '绕迥纪年，月日与农历接近，但闰月与望日规则不同。', '《时轮历》体系'],
+  '日本年号': ['日本年号', '明治、大正、昭和、平成、令和，按改元日切换。', '日本《元号法》'],
+  '佛历': ['佛历纪年', '佛灭纪年，通行口径为公元 + 543（泰历）。', '泰国历法'],
+  '民国纪年': ['民国纪年', '公元年份减 1911。', '中华民国纪年'],
+  '年干支': ['年柱', '八字以立春换年，命理口径与农历正月初一不同。', '《三命通会》'],
+  '月干支': ['月柱', '以节气换月，月干由年干按五虎遁推出。', '五虎遁诀'],
+  '日干支': ['日柱', '连续纪日，六十甲子循环，2000-01-07 为甲子日。', '干支纪日'],
+  '时干支': ['时柱', '两小时一辰，时干由日干按五鼠遁推出。', '五鼠遁诀'],
+  '纳音': ['六十甲子纳音', '每两个干支共用一个纳音五行，如壬寅癸卯金箔金。', '《三命通会》'],
+  '纳音五行': ['纳音五行', '纳音所属五行，用于命理与择日。', '《三命通会》'],
+  '八字': ['四柱八字', '年、月、日、时四组干支，按立春、交节、子时换柱。', '子平术'],
+  '旬空': ['旬空（空亡）', '六十甲子每旬十日，配十二支余二支为旬空。', '《协纪辨方书》'],
+  '三合': ['地支三合', '申子辰合水、亥卯未合木、寅午戌合火、巳酉丑合金。', '地支关系'],
+  '六合': ['地支六合', '子丑、寅亥、卯戌、辰酉、巳申、午未六组。', '地支关系'],
+  '相冲': ['地支六冲', '子午、丑未、寅申、卯酉、辰戌、巳亥。', '地支关系'],
+  '相刑': ['地支相刑', '子卯相刑、寅巳申三刑、丑戌未三刑、辰午酉亥自刑。', '《协纪辨方书》'],
+  '相破': ['地支相破', '子酉、丑辰、寅亥、卯午、巳申、未戌六组。', '地支关系'],
+  '禄': ['十干禄位', '甲禄寅、乙禄卯……壬禄亥、癸禄子，即临官之位。', '《三命通会》'],
+  '天乙贵人': ['天乙贵人', '甲戊庚牛羊、乙己鼠猴乡、丙丁猪鸡位、壬癸兔蛇藏、六辛逢马虎。', '《渊海子平》'],
+  '福神方位': ['福神方位', '按日干查福神所在方位，用于出行与安神。', '通行通书方位表'],
+  '宜': ['当日所宜', '综合建除、神煞、二十八宿与干支关系裁决。', '《协纪辨方书》'],
+  '忌': ['当日所忌', '与宜相对，由同一套神煞体系推出。', '《协纪辨方书》'],
+  '吉神宜趋': ['吉神', '当日值事的吉神，宜顺势而为。', '《协纪辨方书》神煞篇'],
+  '凶神宜忌': ['凶神', '当日值事的凶神，宜避其锋芒。', '《协纪辨方书》神煞篇'],
+  '建除十二神': ['建除十二神', '以月建与日支的关系定建、除、满、平、定、执、破、危、成、收、开、闭。', '《协纪辨方书》'],
+  '建除宜忌': ['建除宜忌', '十二神各有宜忌，如建日宜出行、破日宜破屋。', '《协纪辨方书》'],
+  '值神（黄黑道）': ['十二值神', '青龙、明堂、金匮、天德、玉堂、司命为黄道，其余为黑道。', '黄黑道十二神'],
+  '二十八宿': ['二十八宿', '角亢氐房心尾箕……按日轮流值宿，分吉凶。', '《协纪辨方书》'],
+  '六曜': ['六曜', '先胜、友引、先负、佛灭、大安、赤口，六日循环。', '日本民间历'],
+  '小六壬': ['小六壬', '大安、留连、速喜、赤口、小吉、空亡，按月日时推算。', '民间占法'],
+  '彭祖百忌': ['彭祖百忌', '天干地支各自的禁忌口诀，如甲不开仓、子不问卜。', '《彭祖百忌》'],
+  '胎神': ['胎神方位', '按六十甲子推胎神所在方位，孕妇宜避。', '通行通书胎神表'],
+  '冲煞': ['日冲煞', '日支六冲之生肖为冲，煞方按三合局定。', '《协纪辨方书》'],
+  '月破': ['月破', '日支与月建相冲，诸事不宜。', '《协纪辨方书》'],
+  '岁破': ['岁破', '日支与太岁相冲。', '《协纪辨方书》'],
+  '天赦日': ['天赦日', '春戊寅、夏甲午、秋戊申、冬甲子，四时之赦。', '《协纪辨方书》'],
+  '四离': ['四离日', '春分、秋分、夏至、冬至前一日。', '《协纪辨方书》'],
+  '四绝': ['四绝日', '立春、立夏、立秋、立冬前一日。', '《协纪辨方书》'],
+  '月将': ['月将', '太阳过宫所在，雨水后用亥将，逐月中气换将。', '六壬月将'],
+  '年命十神': ['年命十神', '以年干支与日干的关系定十神，判财官印比。', '子平术'],
+  '贵人时': ['贵人时', '天乙贵人所属的时辰，宜求人办事。', '《渊海子平》'],
+  '吉时': ['吉时', '黄道时辰与贵人、禄马叠加的时段。', '黄黑道十二神'],
+  '时辰吉凶': ['十二时辰吉凶', '每个时辰配黄黑道与贵禄，分三级。', '通书择时法'],
+  '九星': ['日家九星', '洛书九星按日飞布，一白至九紫。', '紫白飞星'],
+  '九宫飞星': ['九宫飞星', '九星入中宫后按洛书顺逆飞布八宫。', '紫白飞星'],
+  '方位五神': ['五神方位', '喜神、财神、福神、阳贵、阴贵五个方位。', '通行通书方位表'],
+  '神明诞辰': ['神明诞辰', '《玉匣记》所载三元五腊与十殿阎君圣诞。', '《玉匣记》'],
+  '民俗节日': ['民俗节日', '接神日、人日、天穿节、寒食、春社秋社等。', '通行历书'],
+  '节日合集': ['节日聚合', '法定、传统、民俗、纪念、国际、宗教、节气、外历八类合并去重。', '本项目 Festivals'],
+  '诸葛武侯': ['诸葛武侯择日', '按孟仲季月与日序循环，青龙头上吉、白虎头上凶。', '传统通书「武侯出行图」'],
+  '生肖号码': ['六合生肖号码', '日支六合生肖对应 49 个号码中的四个，12 数一循环。', '港澳通胜生肖号码'],
+  '今日吉数': ['今日吉数', '按日干、日支、纳音五行取河图数，依次补足六位。', '河图数（一六水、二七火、三八木、四九金、五十土）'],
+  '周公解梦': ['周公解梦', '按日期确定性轮播，同日同条。', '维基文库公有领域本'],
+  '风水常识': ['风水常识', '阳宅气口、明堂、坐向等基础条目，逐日轮换。', '阳宅常识'],
+  '生肖运程': ['生肖流月运程', '以月建与十二生肖的六合、三合、冲、刑、害、破关系推演。', '地支关系'],
+  '取名': ['出生取名', '按八字五行旺衰取喜用神，再从字库中选同五行字。', '子平术 + 字库'],
+  '节假日': ['法定节假日', '规则引擎加逐年公告数据，公告优先。', '国务院办公厅通知等'],
+  '节日条目': ['节日条目', '当日全部节日，按类别排序并去重。', '本项目 Festivals'],
+  '含外历': ['含外历节日', '在八类基础上并入希伯来、印度节日。', 'HebrewFestival / IndianFestival'],
+  '按类取': ['按类筛选', '用 FestivalCategory 过滤，0 法定、2 民俗、5 宗教等。', 'FestivalCategory'],
+  '出处合并': ['出处', '同名条目合并后保留全部来源，便于溯源。', 'FestivalEntry.getSource'],
+  '纪念日': ['公历纪念日', '6tail 公历纪念日表加中国补充条目。', 'lunar-typescript（MIT）'],
+  '佛历': ['佛历节日', '因果犯忌与佛菩萨纪念日，带宜忌原文。', '《法苑珠林》体系，经 FotoUtil 整理'],
+  '道历': ['道历节日', '诸神圣诞与斋日，带斋日说明。', '《道藏》圣诞体系，经 TaoUtil 整理'],
+  '十斋日': ['十斋日', '每月初一、八、十四、十五、十八、二十三、二十四、二十八、二十九、三十。', '《地藏经》'],
+  '观音斋': ['观音斋', '全年二十二个斋日。', '民间观音斋表'],
+  '杨公忌': ['杨公忌', '全年十三个忌日，忌出行动土。', '《杨公忌日》'],
+  '三元日': ['三元日', '正月十五上元、七月十五中元、十月十五下元。', '道教三元'],
+  '五腊日': ['五腊日', '天腊、地腊、道德腊、民岁腊、王侯腊。', '《赤松子章历》'],
+  '八会日': ['八会日', '丙午天会、壬午地会、壬子人会、庚午日会、庚申月会、辛酉星辰会、甲辰五行会、甲戌四时会。', '道教八会'],
+  '戊日': ['戊日', '天干为戊之日，道观不焚香诵经。', '道教戊日'],
+  '节日统计': ['数据表规模', '各来源的键数与条目数，用于完整性校验。', 'Festivals.getStat'],
+  '注册事件': ['事件注册', '把内置节日写入 EventManager，可用 Event.fromSolarDay 反查。', 'tyme Event 编码'],
+  '希伯来历': ['希伯来历', 'molad 加四条 dehiyyot 的算术历，19 年 7 闰。', 'Calendrical Calculations'],
+  '希伯来月名': ['希伯来月名', '尼散、以珥……提斯利……亚达，闰年另有亚达二月。', '希伯来历'],
+  '希伯来闰年': ['希伯来闰年', '(7y+1) mod 19 < 7 为闰年，共 13 个月。', '希伯来历'],
+  '希伯来节日': ['希伯来节日', '按希伯来历推算，含独立日等顺延规则。', '以色列官方假日表'],
+  '印度月名': ['印度月名', '以新月时刻太阳所在恒星黄道宫定月名。', '印度阴阳历（Amanta）'],
+  'tithi': ['月相分', '日月黄经差每 12° 为一分，1–30，白分与黑分各十五。', '印度历法'],
+  '印度节日': ['印度节日', '2024–2027 采用官方日期，其余年份不推演。', 'timeanddate 印度节假日表'],
+  '摩羯入宫': ['摩羯入宫', '太阳视黄经进入摩羯宫（270°）之日，即 Makar Sankranti。', '恒星黄道 + Lahiri 岁差'],
+  '东正教复活节': ['东正教复活节', '儒略历复活节算法，再加世纪偏移换算为公历。', 'Meeus 复活节算法'],
+  '回历': ['回历', '算术历日期，观月国家可能差一日。', '伊斯兰算术历'],
+};
+
+const HELP_GROUP = {
+  '农历': ['农历', '以朔望月定月、太阳黄经定节气，属阴阳合历。', 'GB/T 33661-2017'],
+  '干支': ['干支', '十天干配十二地支，六十甲子循环纪年月日时。', '干支纪法'],
+  '神煞': ['神煞', '《协纪辨方书》体系下的吉神凶煞与宜忌裁决。', '《协纪辨方书》'],
+  '择日': ['择日', '综合建除、神煞、冲煞、方位与时辰的择吉方法。', '通书择日体系'],
+  '民俗': ['民俗', '通行历书与民俗资料，非严格天文推算。', '通行历书'],
+  '节日': ['节日', '八类来源统一聚合，按归一化名称去重。', '本项目 Festivals'],
+  '外历': ['外历', '希伯来、印度、伊斯兰等非中国历法。', '各历法原始规则'],
+};
+
+function helpOf(key, group) {
+  if (HELP[key]) return HELP[key];
+  if (HELP_GROUP[group]) return HELP_GROUP[group];
+  return [key, '按对应历法或规则推算。', '详见 docs/PORTING.md'];
+}
+
+function showTip(el, key, group) {
+  const tip = $('tip');
+  const h = helpOf(key, group);
+  tip.innerHTML = `<b>${esc(h[0])}</b><dl><dt>用途</dt><dd>${esc(h[1])}</dd><dt>依据</dt><dd>${esc(h[2])}</dd></dl>`;
+  const r = el.getBoundingClientRect();
+  tip.style.display = 'block';
+  const w = tip.offsetWidth;
+  let left = r.left + r.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  let top = r.bottom + 8;
+  if (top + tip.offsetHeight > window.innerHeight - 8) top = r.top - tip.offsetHeight - 8;
+  tip.style.left = left + 'px';
+  tip.style.top = Math.max(8, top) + 'px';
+}
+
+function hideTip() {
+  $('tip').style.display = 'none';
+}
+
+function decorateHelp() {
+  document.querySelectorAll('.card h3').forEach((h) => {
+    if (h.querySelector('.help')) return;
+    const key = (h.firstChild && h.firstChild.textContent || '').trim();
+    if (!HELP[key]) return;
+    const s = document.createElement('span');
+    s.className = 'help';
+    s.textContent = '?';
+    s.dataset.k = key;
+    h.appendChild(s);
+  });
+}
+
+document.addEventListener('mouseover', (e) => {
+  const el = e.target.closest ? e.target.closest('.help') : null;
+  if (el) showTip(el, el.dataset.k, el.dataset.g);
+});
+document.addEventListener('mouseout', (e) => {
+  if (e.target.closest && e.target.closest('.help')) hideTip();
+});
+document.addEventListener('click', (e) => {
+  const el = e.target.closest ? e.target.closest('.help') : null;
+  if (el) { showTip(el, el.dataset.k, el.dataset.g); e.stopPropagation(); } else { hideTip(); }
+});
+
 function renderFields() {
   const q = ($('q').value || '').trim().toLowerCase();
   const order = [];
@@ -821,7 +991,8 @@ function renderFields() {
     for (const f of groups[g]) {
       let sample = '—';
       try { sample = String(f[3](a)); } catch (e) { sample = '—'; }
-      html += `<tr><td>${esc(f[1])}</td><td>${esc(f[2])}</td><td>${esc(sample)}</td></tr>`;
+      const hk = HELP[f[1]] ? `<span class="help" data-k="${esc(f[1])}" data-g="${esc(f[0])}">?</span>` : `<span class="help" data-k="${esc(f[1])}" data-g="${esc(f[0])}">?</span>`;
+      html += `<tr><td>${esc(f[1])}${hk}</td><td>${esc(f[2])}</td><td>${esc(sample)}</td></tr>`;
     }
     html += '</table></div>';
   }
