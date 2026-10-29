@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.10.0] - 2026-10-29
+
+1. 新增 `UmmAlQuraDay` 乌姆库拉历：KACST 月首表 1356–1500 年（1937–2077），1741 项，逐月查表，可精确还原沙特、阿联酋的官方节日。
+2. 数据由 `scripts/gen-ummalqura.py` 从 moment-hijri（MIT）提取，已用沙特官方 2025/2026 开斋节、宰牲节核对。
+3. 新增 `HolidayRule.ummAlQura()` 与 `HolidayType.UMM_AL_QURA`，沙特、阿联酋改用它，取代此前的算术回历。
+4. 一致性向量加入乌姆库拉字段，23 → 24 个字段。
+5. 站点「历法对照」页加入第六种历法。
+6. 新增 `test/UmmAlQuraTest.ts`：往返换算、表完整性、月长与年长校验、越界报错。
+7. 测试 592 项通过。
+
+
+
 ## [1.9.0] - 2026-10-29
 
 1. 新增 `HolidayCalendar.excludeDays()` 与 JSON 的 `exclude` 字段：可扣掉「全国性但某几州不过」或官方临时取消的日期。

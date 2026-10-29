@@ -8,6 +8,7 @@ export * from './almanac/basic';
 export * from './calendar/core';
 export * from './calendar/hebrew';
 export * from './calendar/indian';
+export * from './calendar/ummalqura';
 export * from './interop/ics';
 export * from './holiday/rule';
 export * from './holiday/calendar';

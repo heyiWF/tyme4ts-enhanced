@@ -16,7 +16,7 @@
 
 | 分类 | 能力 | 依据 |
 | --- | --- | --- |
-| 历法 | 公历、农历（含闰月）、藏历、回历、**希伯来历**、**印度阴阳历（tithi）**、儒略日、星座、月相、七十二候 | 寿星天文历算法、molad 算术历 |
+| 历法 | 公历、农历（含闰月）、藏历、回历、希伯来历、印度阴阳历（tithi）、**乌姆库拉历**、儒略日、星座、月相、七十二候 | 寿星天文历算法、molad 算术历、KACST 月首表 |
 | 干支 | 年月日时四柱、纳音、十神、藏干、人元司令、胎元、命宫、大运流年 | 子平术通行规则 |
 | 神煞 | 吉神宜趋、凶神宜忌、建除十二神、二十八宿、黄黑道十二神、六曜、小六壬、彭祖百忌 | 《协纪辨方书》体系 |
 | 择日 | 宜忌、日冲煞、旬空、月破岁破、天赦日、四离四绝、月将、年命禄贵合、贵人时、时辰吉凶 | 协纪辨方书 + 通书 |
@@ -152,7 +152,7 @@ cn.importJson(JSON.stringify({
 
 伊斯兰节日按算术历推算，观月国家可能相差一日，可用 `importJson` 覆盖。
 
-规则类型共 11 种：公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历、伊斯兰历、逐年表（`table`）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
+规则类型共 12 种：公历月日、农历月日、某月第几个星期几、某月某日后的第一个星期几、复活节偏移、东正教复活节、节气日、「节气后第几个某干日」（春社、秋社）、希伯来历、伊斯兰算术历、乌姆库拉历、逐年表（`table`）。补假规则分三种：美国周六前移、周日后移；英国、加拿大、澳大利亚、新西兰顺延至下一工作日；日本、南非、新加坡周日顺延。日本另算振替休日与国民の休日。
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
@@ -185,7 +185,27 @@ HolidayCalendar.of('VN').getHoliday(SolarDay.fromYmd(2025, 4, 7))!.getName();  /
 
 ---
 
-## 六、节日体系：八类来源与统一去重
+## 六、回历的两种口径：算术历与乌姆库拉历
+
+回历有两种互不相同的算法，本项目都提供：
+
+| 类 | 口径 | 适用 | 误差 |
+| --- | --- | --- | --- |
+| `HijriDay` | 30 年 11 闰的算术历（Kuwaiti algorithm） | 埃及、尼日利亚、肯尼亚等观月国家的近似值 | 与观月结果可差 1–2 日 |
+| `UmmAlQuraDay` | 沙特 KACST 逐月月首表，1356–1500 年（1937–2077） | 沙特、阿联酋的官方民用历 | 与官方公布日期一致 |
+
+```ts
+UmmAlQuraDay.fromSolarDay(SolarDay.fromYmd(2025, 3, 30)).toString();  // 1446年闪瓦鲁月1日
+UmmAlQuraDay.fromYmd(1446, 12, 10).getSolarDay().toString();          // 2025年6月6日
+UmmAlQuraDay.getRange();       // [1356, 1500]
+UmmAlQuraDay.inRange(day);     // 表外年份返回 false，避免静默给出错误结果
+```
+
+核对记录：1446 年开斋节 2025-03-30、宰牲节 2025-06-06、1447 年开斋节 2026-03-20、宰牲节 2026-05-27 与沙特官方公告逐日一致。原表在 1364 年舍尔邦月有一处 28 日的笔误（1945 年），已如实保留并由测试锁定，未擅自改动累计值。
+
+---
+
+## 七、节日体系：八类来源与统一去重
 
 ```ts
 import {Festivals, DayAlmanac, HebrewDay, IndianDay, Tithi} from 'tyme4ts-enhanced';
@@ -235,7 +255,7 @@ npm run build && npm run audit:holidays
 
 ---
 
-## 七、ICS 订阅转换
+## 八、ICS 订阅转换
 
 ```ts
 import {IcsCalendar, EventManager} from 'tyme4ts-enhanced';
@@ -258,7 +278,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 八、准确性：以公开黄历逐项校验
+## 九、准确性：以公开黄历逐项校验
 
 测试以 2025-04-03（乙巳年三月初六，壬寅日）为基准，与多家公开发布的黄历逐项对照，全部一致：
 
@@ -287,7 +307,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 九、年份范围
+## 十、年份范围
 
 | 能力 | 范围 |
 | --- | --- |
@@ -299,9 +319,9 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十、移植到其他语言
+## 十一、移植到其他语言
 
-`data/conformance.json` 给出 **252 个日期 × 23 个字段**的固定输出（1900–2100，含基准日、闰月、闰年、世纪交界样本）。移植版读入该文件逐条比对即可验收，不必读 TypeScript 源码：
+`data/conformance.json` 给出 **252 个日期 × 24 个字段**的固定输出（1900–2100，含基准日、闰月、闰年、世纪交界样本）。移植版读入该文件逐条比对即可验收，不必读 TypeScript 源码：
 
 ```bash
 npm run build && npm run gen:conformance   # 重新生成向量
@@ -319,7 +339,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ---
 
-## 十一、与 tyme4ts 的关系
+## 十二、与 tyme4ts 的关系
 
 - 100% 保留上游公开 API，可直接替换 `tyme4ts`；
 - 新增二十余个类：`DayAlmanac`、`WuHouDay`、`Clash`、`LifeRelation`、`HourFortune`、`NineStarChart`、`Palace`、`ZodiacNumbers`、`MonthGeneral`、`DeityFestival`、`DreamOracle`、`FengShuiTip`、`Naming`、`ElementBalance`、`ZodiacFortune`、`HolidayCalendar`、`HolidayRule`、`IcsCalendar`、`Era` 等；
@@ -327,7 +347,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ---
 
-## 十二、开发
+## 十三、开发
 
 ```bash
 npm i
@@ -339,6 +359,6 @@ npm run docs      # 构建并同步 docs/tyme.mjs
 
 数据勘误请附出处（古籍版本、政府公告或公开黄历截图），本库优先采纳可复核的来源。
 
-## 十三、许可与致谢
+## 十四、许可与致谢
 
 MIT。历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本；公历纪念日、农历民俗、佛历因果犯忌、道历诸神圣诞四张表由 `scripts/gen-festival-data.py` 从 [6tail/lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）源码解析生成，并由 `npm run verify:festivals` 逐条比对。

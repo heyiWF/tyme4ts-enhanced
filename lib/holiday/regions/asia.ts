@@ -49,12 +49,12 @@ export function saudiRules(): HolidayRule[] {
     return [
         HolidayRule.solar(2, 22, '建国日', 2022),
         HolidayRule.solar(9, 23, '国庆日'),
-        HolidayRule.hijri(10, 1, '开斋节'),
-        HolidayRule.hijri(10, 2, '开斋节次日'),
-        HolidayRule.hijri(10, 3, '开斋节第三日'),
-        HolidayRule.hijri(12, 10, '古尔邦节'),
-        HolidayRule.hijri(12, 11, '古尔邦节次日'),
-        HolidayRule.hijri(12, 12, '古尔邦节第三日'),
+        HolidayRule.ummAlQura(10, 1, '开斋节'),
+        HolidayRule.ummAlQura(10, 2, '开斋节次日'),
+        HolidayRule.ummAlQura(10, 3, '开斋节第三日'),
+        HolidayRule.ummAlQura(12, 10, '古尔邦节'),
+        HolidayRule.ummAlQura(12, 11, '古尔邦节次日'),
+        HolidayRule.ummAlQura(12, 12, '古尔邦节第三日'),
     ];
 }
 
@@ -64,14 +64,14 @@ export function uaeRules(): HolidayRule[] {
         HolidayRule.solar(11, 30, '纪念日', 2019),
         HolidayRule.solar(12, 2, '国庆日'),
         HolidayRule.solar(12, 3, '国庆日次日'),
-        HolidayRule.hijri(10, 1, '开斋节'),
-        HolidayRule.hijri(10, 2, '开斋节次日'),
-        HolidayRule.hijri(10, 3, '开斋节第三日'),
-        HolidayRule.hijri(12, 10, '古尔邦节'),
-        HolidayRule.hijri(12, 11, '古尔邦节次日'),
-        HolidayRule.hijri(12, 12, '古尔邦节第三日'),
-        HolidayRule.hijri(1, 1, '伊斯兰新年'),
-        HolidayRule.hijri(3, 12, '圣纪'),
+        HolidayRule.ummAlQura(10, 1, '开斋节'),
+        HolidayRule.ummAlQura(10, 2, '开斋节次日'),
+        HolidayRule.ummAlQura(10, 3, '开斋节第三日'),
+        HolidayRule.ummAlQura(12, 10, '古尔邦节'),
+        HolidayRule.ummAlQura(12, 11, '古尔邦节次日'),
+        HolidayRule.ummAlQura(12, 12, '古尔邦节第三日'),
+        HolidayRule.ummAlQura(1, 1, '伊斯兰新年'),
+        HolidayRule.ummAlQura(3, 12, '圣纪'),
     ];
 }
 

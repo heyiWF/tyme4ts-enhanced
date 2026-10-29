@@ -2,6 +2,7 @@ import {AbstractCulture} from '../core/base';
 import {SixtyCycle} from '../almanac/basic';
 import {HijriDay, LunarDay, SolarDay, SolarMonth, SolarTerm} from '../calendar/core';
 import {HebrewDay} from '../calendar/hebrew';
+import {UmmAlQuraDay} from '../calendar/ummalqura';
 
 export enum HolidayType {
     SOLAR = 0,
@@ -14,7 +15,8 @@ export enum HolidayType {
     HIJRI = 7,
     ORTHODOX_EASTER = 8,
     WEEK_AFTER = 9,
-    TABLE = 10
+    TABLE = 10,
+    UMM_AL_QURA = 11
 }
 
 /**
@@ -114,6 +116,17 @@ export class HolidayRule extends AbstractCulture {
      */
     static hijri(month: number, day: number, name: string, offset: number = 0): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.HIJRI, name);
+        o.month = month;
+        o.day = day;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * 乌姆库拉历，沙特与阿联酋的官方民用历，逐月查表，不依赖观月
+     */
+    static ummAlQura(month: number, day: number, name: string, offset: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.UMM_AL_QURA, name);
         o.month = month;
         o.day = day;
         o.offset = offset;
@@ -275,6 +288,23 @@ export class HolidayRule extends AbstractCulture {
                 const estimate: number = Math.floor((year - 622) * 33 / 32);
                 for (let i: number = -1; i <= 1; i++) {
                     const d: SolarDay = HijriDay.fromYmd(estimate + i, this.month, this.day).getSolarDay();
+                    if (d.getYear() === year) {
+                        return d.next(this.offset);
+                    }
+                }
+                return null;
+            }
+            case HolidayType.UMM_AL_QURA: {
+                const estimate: number = Math.floor((year - 622) * 33 / 32);
+                for (let i: number = -1; i <= 1; i++) {
+                    const hy: number = estimate + i;
+                    if (hy < UmmAlQuraDay.getRange()[0] || hy > UmmAlQuraDay.getRange()[1]) {
+                        continue;
+                    }
+                    if (this.day > UmmAlQuraDay.getMonthDays(hy, this.month)) {
+                        continue;
+                    }
+                    const d: SolarDay = UmmAlQuraDay.fromYmd(hy, this.month, this.day).getSolarDay();
                     if (d.getYear() === year) {
                         return d.next(this.offset);
                     }

@@ -7,3 +7,4 @@ package-lock.json
 .workbuddy/
 docs/_*.png
 .tmp-up/
+.tmp-mh.js

@@ -204,9 +204,9 @@ export class HolidayCalendar {
             case 'EG':
                 return new HolidayCalendar(r, egyptRules(), '全国法定假日；伊斯兰节日按算术历推算，观月可能差一日。');
             case 'SA':
-                return new HolidayCalendar(r, saudiRules(), '全国法定假日；周末为周五、周六，伊斯兰节日以观月为准。');
+                return new HolidayCalendar(r, saudiRules(), '全国法定假日；周末为周五、周六，伊斯兰节日按乌姆库拉历（KACST 月首表）推算。');
             case 'AE':
-                return new HolidayCalendar(r, uaeRules(), '全国法定假日；伊斯兰节日以观月为准。');
+                return new HolidayCalendar(r, uaeRules(), '全国法定假日；伊斯兰节日按乌姆库拉历推算，圣纪等宗教节日各酋长国公告可能差一日。');
             case 'NG':
                 return new HolidayCalendar(r, nigeriaRules(), '联邦法定假日；伊斯兰节日以观月为准。');
             case 'KE':
