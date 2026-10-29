@@ -1,6 +1,7 @@
 import {AbstractCulture} from '../core/base';
 import {SixtyCycle} from '../almanac/basic';
-import {LunarDay, SolarDay, SolarMonth, SolarTerm} from '../calendar/core';
+import {HijriDay, LunarDay, SolarDay, SolarMonth, SolarTerm} from '../calendar/core';
+import {HebrewDay} from '../calendar/hebrew';
 
 export enum HolidayType {
     SOLAR = 0,
@@ -8,7 +9,10 @@ export enum HolidayType {
     WEEK = 2,
     EASTER = 3,
     TERM = 4,
-    TERM_STEM = 5
+    TERM_STEM = 5,
+    HEBREW = 6,
+    HIJRI = 7,
+    ORTHODOX_EASTER = 8
 }
 
 /**
@@ -71,6 +75,38 @@ export class HolidayRule extends AbstractCulture {
         const o: HolidayRule = new HolidayRule(HolidayType.LUNAR, name);
         o.month = month;
         o.day = day;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * @param shift 0 不调整；1 大屠杀纪念日（周五前移、周日后移）；
+     *              2 独立日（周五前移一日、周六前移两日、周一后移一日）；3 阵亡将士纪念日（独立日前一日）
+     */
+    static hebrew(month: number, day: number, name: string, shift: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.HEBREW, name);
+        o.month = month;
+        o.day = day;
+        o.offset = shift;
+        return o;
+    }
+
+    /**
+     * 伊斯兰历，按算术历推算，观月地区可能差一日
+     */
+    static hijri(month: number, day: number, name: string, offset: number = 0): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.HIJRI, name);
+        o.month = month;
+        o.day = day;
+        o.offset = offset;
+        return o;
+    }
+
+    /**
+     * 东正教复活节（儒略历复活节换算为公历）
+     */
+    static orthodoxEaster(offset: number, name: string): HolidayRule {
+        const o: HolidayRule = new HolidayRule(HolidayType.ORTHODOX_EASTER, name);
         o.offset = offset;
         return o;
     }
@@ -166,6 +202,44 @@ export class HolidayRule extends AbstractCulture {
                 return HolidayRule.getEasterDay(year).next(this.offset);
             case HolidayType.WEEK:
                 return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+            case HolidayType.HEBREW: {
+                let d: SolarDay;
+                if (this.offset === 3) {
+                    d = HolidayRule.getIndependenceDay(HebrewRuleYear(year, this.month)).next(-1);
+                } else {
+                    d = HebrewDay.fromYmd(HebrewRuleYear(year, this.month), this.month, this.day).getSolarDay();
+                    if (this.offset === 1) {
+                        const w: number = d.getWeek().getIndex();
+                        if (w === 5) {
+                            d = d.next(-1);
+                        } else if (w === 0) {
+                            d = d.next(1);
+                        }
+                    } else if (this.offset === 2) {
+                        const w: number = d.getWeek().getIndex();
+                        if (w === 5) {
+                            d = d.next(-1);
+                        } else if (w === 6) {
+                            d = d.next(-2);
+                        } else if (w === 1) {
+                            d = d.next(1);
+                        }
+                    }
+                }
+                return d.getYear() === year ? d : null;
+            }
+            case HolidayType.HIJRI: {
+                const estimate: number = Math.floor((year - 622) * 33 / 32);
+                for (let i: number = -1; i <= 1; i++) {
+                    const d: SolarDay = HijriDay.fromYmd(estimate + i, this.month, this.day).getSolarDay();
+                    if (d.getYear() === year) {
+                        return d.next(this.offset);
+                    }
+                }
+                return null;
+            }
+            case HolidayType.ORTHODOX_EASTER:
+                return HolidayRule.getOrthodoxEasterDay(year).next(this.offset);
             case HolidayType.TERM_STEM: {
                 const start: SolarDay = HolidayRule.getTermDay(year, this.termIndex);
                 // 干支纪日与农历无关，直接按距甲子日的天数推算，避免农历换算
@@ -181,6 +255,36 @@ export class HolidayRule extends AbstractCulture {
         return null;
     }
 
+    /**
+     * 东正教复活节：儒略历算法后加世纪偏移
+     */
+    static getOrthodoxEasterDay(year: number): SolarDay {
+        const g: number = year % 19;
+        const i: number = (19 * g + 15) % 30;
+        const j: number = (year + Math.floor(year / 4) + i) % 7;
+        const l: number = i - j;
+        const month: number = 3 + Math.floor((l + 40) / 44);
+        const day: number = l + 28 - 31 * Math.floor(month / 4);
+        const offset: number = Math.floor(year / 100) - Math.floor(year / 400) - 2;
+        return SolarDay.fromYmd(year, month, day).next(offset);
+    }
+
+    /**
+     * 以色列独立日：5 伊雅尔月，逢周五前移一日、逢周六前移两日、逢周一后移一日
+     */
+    static getIndependenceDay(hebrewYear: number): SolarDay {
+        let d: SolarDay = HebrewDay.fromYmd(hebrewYear, 2, 5).getSolarDay();
+        const w: number = d.getWeek().getIndex();
+        if (w === 5) {
+            d = d.next(-1);
+        } else if (w === 6) {
+            d = d.next(-2);
+        } else if (w === 1) {
+            d = d.next(1);
+        }
+        return d;
+    }
+
     protected static getWeekDay(year: number, month: number, weekIndex: number, week: number): SolarDay {
         const m: SolarMonth = SolarMonth.fromYm(year, month);
         if (weekIndex > 0) {
@@ -190,4 +294,13 @@ export class HolidayRule extends AbstractCulture {
         const last: SolarDay = SolarDay.fromYmd(year, month, m.getDayCount());
         return last.next(last.getWeek().stepsBackTo(week) + 7 * (weekIndex + 1));
     }
+}
+
+/**
+ * 由公历年与希伯来月序推算对应的希伯来年
+ *
+ * 提斯利月及以后属当年，尼散月至以禄月属上一年。
+ */
+function HebrewRuleYear(gregorianYear: number, hebrewMonth: number): number {
+    return hebrewMonth >= 7 ? gregorianYear + 3761 : gregorianYear + 3760;
 }

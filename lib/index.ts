@@ -6,6 +6,8 @@
 export * from './core/base';
 export * from './almanac/basic';
 export * from './calendar/core';
+export * from './calendar/hebrew';
+export * from './calendar/indian';
 export * from './interop/ics';
 export * from './holiday/rule';
 export * from './holiday/calendar';
@@ -18,6 +20,7 @@ export * from './festival/anniversary';
 export * from './festival/buddhist';
 export * from './festival/taoist';
 export * from './festival/lunar';
+export * from './festival/foreign';
 export * from './festival/catalog';
 export * from './almanac/extra';
 export * from './text/folk';

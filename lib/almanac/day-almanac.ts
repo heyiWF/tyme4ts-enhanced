@@ -311,14 +311,14 @@ export class DayAlmanac {
     /**
      * 当日节日聚合，含法定、传统、民俗、纪念、宗教、节气
      */
-    getFestivals(): Festivals {
-        return Festivals.of(this.solarDay);
+    getFestivals(includeForeign: boolean = false): Festivals {
+        return Festivals.of(this.solarDay, includeForeign);
     }
 
     /**
      * 当日节日名，按分类排序并去重
      */
-    getFestivalNames(): string[] {
-        return this.getFestivals().getNames();
+    getFestivalNames(includeForeign: boolean = false): string[] {
+        return this.getFestivals(includeForeign).getNames();
     }
 }

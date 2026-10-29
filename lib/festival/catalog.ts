@@ -5,6 +5,7 @@ import {LUNAR_FOLK} from './data-lunar-folk';
 import {BUDDHIST_OTHER} from './data-buddhist';
 import {TAOIST} from './data-taoist';
 import {AnniversaryFestival} from './anniversary';
+import {HebrewFestival, IndianFestival} from './foreign';
 import {BuddhistFestival} from './buddhist';
 import {DeityFestival, FolkFestival} from './lunar';
 import {TaoistFestival} from './taoist';
@@ -37,7 +38,7 @@ export class Festivals extends AbstractCulture {
         this.entries = entries;
     }
 
-    static of(solarDay: SolarDay): Festivals {
+    static of(solarDay: SolarDay, includeForeign: boolean = false): Festivals {
         const raw: FestivalEntry[] = [];
         const lunar: LunarDay = solarDay.getLunarDay();
 
@@ -96,6 +97,18 @@ export class Festivals extends AbstractCulture {
                         raw.push(new FestivalEntry(canon, FestivalCategory.RELIGIOUS, 'yuxiaji'));
                     }
                 }
+            }
+        }
+
+        // 外历节日，默认不并入，避免中文通胜场景出现无关条目
+        if (includeForeign) {
+            const hebrew: FestivalEntry[] = HebrewFestival.of(solarDay).getEntries();
+            for (let i: number = 0; i < hebrew.length; i++) {
+                raw.push(hebrew[i]);
+            }
+            const indian: FestivalEntry[] = IndianFestival.of(solarDay).getEntries();
+            for (let i: number = 0; i < indian.length; i++) {
+                raw.push(indian[i]);
             }
         }
 
