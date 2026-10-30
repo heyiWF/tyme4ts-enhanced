@@ -8,13 +8,11 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-606%20passing-1f6b46?style=flat-square)
 
-在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把多种历法、八类节日、多地区法定节假日与传统通胜，统一为可计算、可复现、可考证的 TypeScript API。
+把多种历法、八类节日、多地区法定节假日与传统通胜，统一为可计算、可复现、可考证的 TypeScript API。
 
-它不只是老黄历：既能查宜忌、神煞与择日，也能做历法转换、节日聚合、节假日推算和 ICS 日历交换。通胜只是其中一层，节假日、外历与 ICS 都可以脱离 `DayAlmanac` 独立使用。
+它不只是老黄历：既能查宜忌、神煞与择日，也能做历法转换、节日聚合、节假日推算和 ICS 日历交换。
 
 零运行时依赖，单文件产物，全部数据以整数与字符串编码——便于逐行移植到 Kotlin、Swift、Go、Rust、Python。
-
-> 在线演示与文档：[docs/index.html](./docs/index.html)（黄历 / 字段 / 节日 / 地区 / 历法 / 校验 / 数据，本地直接打开即可，全部计算在浏览器完成）· [项目 Wiki](https://github.com/heyiWF/tyme4ts-enhanced/wiki)。页面上各类名词——字段、历法、地区代码、**宜忌事项**——都带 `?` 问号，悬停或点击可看「指什么活动、依据什么规则」的浮窗说明。
 
 ---
 
@@ -63,9 +61,9 @@ a.getFestivalNames(true);              // 含希伯来、印度等外历节日
 
 ---
 
-## 三、一张通胜的每一栏，对应哪个 API
+## 三、API 对应关系
 
-以 2025 年 4 月 3 日（农历三月初六）的纸质通胜为例：
+以 2025 年 4 月 3 日（农历三月初六）为例：
 
 | 通胜栏目 | API | 本例输出 |
 | --- | --- | --- |
@@ -125,7 +123,7 @@ a.getHourFortunes().map((h) => h.toString());
 
 ## 五、节假日：规则 + 逐年数据
 
-法定节假日的调休安排只能等国务院逐年公布，因此设计为「规则引擎 + 数据导入」两层：
+法定节假日的调休安排依赖逐年公布的官方数据，因此设计为「规则引擎 + 数据导入」两层：
 
 ```ts
 import {HolidayCalendar, SolarDay} from 'tyme4ts-enhanced';
@@ -349,7 +347,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 **已修正的上游问题**：庚日阳贵神应为丑（东北）、阴贵神应为未（西南），tyme4ts 原表作南/东北，与《甲戊庚牛羊》及多家黄历不符，本库已改正。
 
-**已知边界**（如实记录，不做修饰）：
+**已知边界**：
 
 1. 回历为算术历，与观月历可能相差一日；
 2. `SolarTerm.getSolarDay()` 沿用 6tail 各语言版本的粗算值，以保证 Kotlin、Java、Python、JavaScript 各移植版结果逐字一致。1900–2100 年间它与精算值只有 5 处跨日，全部落在 1912–1928（1912 小雪、1913 秋分、1917 大雪、1927 白露、1928 夏至），现代日期无影响。需要精算日或交节时刻时用 `getJulianDay()`，清单见 `test/SolarTermPrecisionTest.ts`；
@@ -412,4 +410,4 @@ npm run docs      # 构建并同步 docs/tyme.mjs
 
 ## 十五、许可与致谢
 
-MIT。历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本；公历纪念日、农历民俗、佛历因果犯忌、道历诸神圣诞四张表由 `scripts/gen-festival-data.py` 从 [6tail/lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）源码解析生成，并由 `npm run verify:festivals` 逐条比对。
+历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本；公历纪念日、农历民俗、佛历因果犯忌、道历诸神圣诞四张表由 `scripts/gen-festival-data.py` 从 [6tail/lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）源码解析生成，并由 `npm run verify:festivals` 逐条比对。
