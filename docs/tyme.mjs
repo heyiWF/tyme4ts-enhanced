@@ -10200,7 +10200,7 @@ class UmmAlQuraDay extends AbstractCulture {
   }
 }
 
-const DEG = Math.PI / 180;
+const DEG$1 = Math.PI / 180;
 const RAD = 180 / Math.PI;
 const PI2 = Math.PI * 2;
 const ANKARA_LATITUDE = 39.9334;
@@ -10234,7 +10234,7 @@ class DiyanetDay extends AbstractCulture {
    * 平黄赤交角
    */
   static obliquity(t) {
-    return (23.439291 - 0.0130042 * t) * DEG;
+    return (23.439291 - 0.0130042 * t) * DEG$1;
   }
   /**
    * 太阳视黄经（弧度，已归一）
@@ -10258,7 +10258,7 @@ class DiyanetDay extends AbstractCulture {
     const d = 297.8501921 + 445267.1114034 * t - 18819e-7 * t * t;
     const mp = 134.9633964 + 477198.8675055 * t + 87414e-7 * t * t;
     const f = 93.272095 + 483202.0175233 * t - 36539e-7 * t * t;
-    return 5.128122 * Math.sin(f * DEG) + 0.280602 * Math.sin((mp + f) * DEG) + 0.277693 * Math.sin((mp - f) * DEG) + 0.173237 * Math.sin((2 * d - f) * DEG) + 0.055413 * Math.sin((2 * d - mp + f) * DEG) + 0.046271 * Math.sin((2 * d - mp - f) * DEG) + 0.032573 * Math.sin((2 * d + f) * DEG) + 0.017198 * Math.sin((2 * mp + f) * DEG) + 9266e-6 * Math.sin((2 * d + mp - f) * DEG) + 8822e-6 * Math.sin((2 * mp - f) * DEG);
+    return 5.128122 * Math.sin(f * DEG$1) + 0.280602 * Math.sin((mp + f) * DEG$1) + 0.277693 * Math.sin((mp - f) * DEG$1) + 0.173237 * Math.sin((2 * d - f) * DEG$1) + 0.055413 * Math.sin((2 * d - mp + f) * DEG$1) + 0.046271 * Math.sin((2 * d - mp - f) * DEG$1) + 0.032573 * Math.sin((2 * d + f) * DEG$1) + 0.017198 * Math.sin((2 * mp + f) * DEG$1) + 9266e-6 * Math.sin((2 * d + mp - f) * DEG$1) + 8822e-6 * Math.sin((2 * mp - f) * DEG$1);
   }
   /**
    * 归一化到 [0, 2π)
@@ -10272,7 +10272,7 @@ class DiyanetDay extends AbstractCulture {
   static toEquatorial(lon, lat, t) {
     const e = DiyanetDay.obliquity(t);
     const l = lon;
-    const b = lat * DEG;
+    const b = lat * DEG$1;
     const ra = Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l));
     const dec = Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l));
     return [ra, dec];
@@ -10282,7 +10282,7 @@ class DiyanetDay extends AbstractCulture {
    */
   static gmst(jd) {
     const t = (jd - 2451545) / 36525;
-    return DiyanetDay.norm((280.46061837 + 360.98564736629 * (jd - 2451545) + 387933e-9 * t * t - t * t * t / 3871e4) * DEG) * RAD;
+    return DiyanetDay.norm((280.46061837 + 360.98564736629 * (jd - 2451545) + 387933e-9 * t * t - t * t * t / 3871e4) * DEG$1) * RAD;
   }
   /**
    * 安卡拉某日日落时刻的儒略日
@@ -10294,7 +10294,7 @@ class DiyanetDay extends AbstractCulture {
     for (let i = 0; i < 4; i++) {
       const t = (jd - 2451545) / 36525;
       const eq = DiyanetDay.toEquatorial(DiyanetDay.sunLongitude(t), 0, t);
-      const cosH = (Math.sin(SUNSET_ALTITUDE * DEG) - Math.sin(ANKARA_LATITUDE * DEG) * Math.sin(eq[1])) / (Math.cos(ANKARA_LATITUDE * DEG) * Math.cos(eq[1]));
+      const cosH = (Math.sin(SUNSET_ALTITUDE * DEG$1) - Math.sin(ANKARA_LATITUDE * DEG$1) * Math.sin(eq[1])) / (Math.cos(ANKARA_LATITUDE * DEG$1) * Math.cos(eq[1]));
       const h = Math.acos(Math.max(-1, Math.min(1, cosH))) * RAD;
       jd = noon + h / 360;
     }
@@ -10307,8 +10307,8 @@ class DiyanetDay extends AbstractCulture {
     const jd = DiyanetDay.sunsetJd(solarDay);
     const t = (jd - 2451545) / 36525;
     const eq = DiyanetDay.toEquatorial(DiyanetDay.moonLongitude(t), DiyanetDay.moonLatitude(t), t);
-    const hourAngle = (DiyanetDay.gmst(jd) + ANKARA_LONGITUDE - eq[0] * RAD) * DEG;
-    return Math.asin(Math.sin(ANKARA_LATITUDE * DEG) * Math.sin(eq[1]) + Math.cos(ANKARA_LATITUDE * DEG) * Math.cos(eq[1]) * Math.cos(hourAngle)) * RAD;
+    const hourAngle = (DiyanetDay.gmst(jd) + ANKARA_LONGITUDE - eq[0] * RAD) * DEG$1;
+    return Math.asin(Math.sin(ANKARA_LATITUDE * DEG$1) * Math.sin(eq[1]) + Math.cos(ANKARA_LATITUDE * DEG$1) * Math.cos(eq[1]) * Math.cos(hourAngle)) * RAD;
   }
   /**
    * 合朔时刻（儒略日），以日月视黄经差由负转正为准
@@ -10611,6 +10611,3442 @@ class PersianDay extends AbstractCulture {
   }
   toString() {
     return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
+class SakaDay extends AbstractCulture {
+  static NAMES = HinduMonth.NAMES;
+  year;
+  month;
+  day;
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  static isGregorianLeapYear(year) {
+    return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+  }
+  static isLeapYear(year) {
+    return SakaDay.isGregorianLeapYear(year + 78);
+  }
+  static getMonthDays(year, month) {
+    if (month === 1) {
+      return SakaDay.isLeapYear(year) ? 31 : 30;
+    }
+    return month <= 6 ? 31 : 30;
+  }
+  static getYearStart(year) {
+    const gregorianYear = year + 78;
+    return SolarDay.fromYmd(gregorianYear, 3, SakaDay.isLeapYear(year) ? 21 : 22);
+  }
+  static fromYmd(year, month, day) {
+    const y = SakaDay.numeric(year, "saka year");
+    const m = SakaDay.numeric(month, "saka month");
+    const d = SakaDay.numeric(day, "saka day");
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal saka month: ${m}`);
+    }
+    if (d < 1 || d > SakaDay.getMonthDays(y, m)) {
+      throw new Error(`illegal saka day: ${y}-${m}-${d}`);
+    }
+    return new SakaDay(y, m, d);
+  }
+  static fromSolarDay(solarDay) {
+    let year = solarDay.getYear() - 78;
+    if (solarDay.isBefore(SakaDay.getYearStart(year))) {
+      year--;
+    } else if (!solarDay.isBefore(SakaDay.getYearStart(year + 1))) {
+      year++;
+    }
+    let rest = solarDay.subtract(SakaDay.getYearStart(year));
+    let month = 1;
+    while (month < 12) {
+      const days = SakaDay.getMonthDays(year, month);
+      if (rest < days) {
+        break;
+      }
+      rest -= days;
+      month++;
+    }
+    return new SakaDay(year, month, rest + 1);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return SakaDay.NAMES[this.month - 1];
+  }
+  getName() {
+    return `${this.day}\u65E5`;
+  }
+  getSolarDay() {
+    let rest = this.day - 1;
+    for (let m = 1; m < this.month; m++) {
+      rest += SakaDay.getMonthDays(this.year, m);
+    }
+    return SakaDay.getYearStart(this.year).next(rest);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  isLeapYear() {
+    return SakaDay.isLeapYear(this.year);
+  }
+  getDayCount() {
+    return SakaDay.getMonthDays(this.year, this.month);
+  }
+  next(n) {
+    return SakaDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
+class BanglaDay extends AbstractCulture {
+  static NAMES = [
+    "\u535A\u4F0A\u6C99\u514B\u6708",
+    "\u4E54\u4F0A\u4EC0\u6258\u6708",
+    "\u963F\u8428\u5C14\u6708",
+    "\u65AF\u62C9\u90A6\u6708",
+    "\u5DF4\u5FB7\u7F57\u6708",
+    "\u963F\u4EC0\u6E29\u6708",
+    "\u5361\u5C14\u8482\u514B\u6708",
+    "\u963F\u683C\u62C9\u54C8\u626C\u6708",
+    "\u6CE2\u4E4C\u4EC0\u6708",
+    "\u9A6C\u683C\u6708",
+    "\u6CD5\u5C14\u8D21\u6708",
+    "\u67E5\u4F0A\u7279\u62C9\u6708"
+  ];
+  static MIN_YEAR = 1426;
+  year;
+  month;
+  day;
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  static isGregorianLeapYear(year) {
+    return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+  }
+  static isLeapYear(year) {
+    return BanglaDay.isGregorianLeapYear(year + 594);
+  }
+  static getMonthDays(year, month) {
+    if (month <= 6) {
+      return 31;
+    }
+    if (month === 11) {
+      return BanglaDay.isLeapYear(year) ? 30 : 29;
+    }
+    return 30;
+  }
+  static getYearStart(year) {
+    if (year < BanglaDay.MIN_YEAR) {
+      throw new Error(`bangla year ${year} is before supported year ${BanglaDay.MIN_YEAR}`);
+    }
+    return SolarDay.fromYmd(year + 593, 4, 14);
+  }
+  static fromYmd(year, month, day) {
+    const y = BanglaDay.numeric(year, "bangla year");
+    const m = BanglaDay.numeric(month, "bangla month");
+    const d = BanglaDay.numeric(day, "bangla day");
+    if (y < BanglaDay.MIN_YEAR) {
+      throw new Error(`bangla year ${y} is before supported year ${BanglaDay.MIN_YEAR}`);
+    }
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal bangla month: ${m}`);
+    }
+    if (d < 1 || d > BanglaDay.getMonthDays(y, m)) {
+      throw new Error(`illegal bangla day: ${y}-${m}-${d}`);
+    }
+    return new BanglaDay(y, m, d);
+  }
+  static fromSolarDay(solarDay) {
+    let year = solarDay.getYear() - 593;
+    if (solarDay.isBefore(BanglaDay.getYearStart(year))) {
+      year--;
+    } else if (!solarDay.isBefore(BanglaDay.getYearStart(year + 1))) {
+      year++;
+    }
+    let rest = solarDay.subtract(BanglaDay.getYearStart(year));
+    let month = 1;
+    while (month < 12) {
+      const days = BanglaDay.getMonthDays(year, month);
+      if (rest < days) {
+        break;
+      }
+      rest -= days;
+      month++;
+    }
+    return new BanglaDay(year, month, rest + 1);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return BanglaDay.NAMES[this.month - 1];
+  }
+  getName() {
+    return `${this.day}\u65E5`;
+  }
+  getSolarDay() {
+    let rest = this.day - 1;
+    for (let m = 1; m < this.month; m++) {
+      rest += BanglaDay.getMonthDays(this.year, m);
+    }
+    return BanglaDay.getYearStart(this.year).next(rest);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  isLeapYear() {
+    return BanglaDay.isLeapYear(this.year);
+  }
+  getDayCount() {
+    return BanglaDay.getMonthDays(this.year, this.month);
+  }
+  next(n) {
+    return BanglaDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
+class EthiopianDay extends AbstractCulture {
+  static NAMES = [
+    "\u6885\u65AF\u51EF\u96F7\u59C6\u6708",
+    "\u7279\u514B\u59C6\u7279\u6708",
+    "\u5E0C\u8FBE\u5C14\u6708",
+    "\u5854\u8D6B\u8428\u65AF\u6708",
+    "\u63D0\u5C14\u6708",
+    "\u4E9A\u5361\u63D0\u7279\u6708",
+    "\u9A6C\u52A0\u6BD4\u7279\u6708",
+    "\u7C73\u4E9A\u9F50\u4E9A\u6708",
+    "\u91D1\u535A\u7279\u6708",
+    "\u585E\u5185\u6708",
+    "\u54C8\u59C6\u83B1\u6708",
+    "\u5185\u54C8\u585E\u6708",
+    "\u5E15\u53E4\u6885\u6708"
+  ];
+  /**
+   * 1 Amete Mihret 的儒略日序数
+   */
+  static EPOCH = 1724221;
+  year;
+  month;
+  day;
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  static isLeapYear(year) {
+    return year % 4 === 3;
+  }
+  static getMonthDays(year, month) {
+    if (month < 13) {
+      return 30;
+    }
+    return EthiopianDay.isLeapYear(year) ? 6 : 5;
+  }
+  static getYearStartJdn(year) {
+    return EthiopianDay.EPOCH + 365 * (year - 1) + Math.floor(year / 4);
+  }
+  static fromYmd(year, month, day) {
+    const y = EthiopianDay.numeric(year, "ethiopian year");
+    const m = EthiopianDay.numeric(month, "ethiopian month");
+    const d = EthiopianDay.numeric(day, "ethiopian day");
+    if (y < 1) {
+      throw new Error(`illegal ethiopian year: ${y}`);
+    }
+    if (m < 1 || m > 13) {
+      throw new Error(`illegal ethiopian month: ${m}`);
+    }
+    if (d < 1 || d > EthiopianDay.getMonthDays(y, m)) {
+      throw new Error(`illegal ethiopian day: ${y}-${m}-${d}`);
+    }
+    return new EthiopianDay(y, m, d);
+  }
+  static fromSolarDay(solarDay) {
+    const jdn = Math.floor(solarDay.getJulianDay().getDay() + 0.5);
+    return EthiopianDay.fromJdn(jdn);
+  }
+  static fromJdn(jdn) {
+    let year = Math.floor((jdn - EthiopianDay.EPOCH) / 365.25) + 1;
+    while (jdn < EthiopianDay.getYearStartJdn(year)) {
+      year--;
+    }
+    while (jdn >= EthiopianDay.getYearStartJdn(year + 1)) {
+      year++;
+    }
+    const rest = jdn - EthiopianDay.getYearStartJdn(year);
+    return new EthiopianDay(year, Math.floor(rest / 30) + 1, rest % 30 + 1);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return EthiopianDay.NAMES[this.month - 1];
+  }
+  getName() {
+    return `${this.day}\u65E5`;
+  }
+  getJdn() {
+    let rest = this.day - 1;
+    for (let m = 1; m < this.month; m++) {
+      rest += EthiopianDay.getMonthDays(this.year, m);
+    }
+    return EthiopianDay.getYearStartJdn(this.year) + rest;
+  }
+  getSolarDay() {
+    return JulianDay.fromJulianDay(this.getJdn() - 0.5).getSolarDay();
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  isLeapYear() {
+    return EthiopianDay.isLeapYear(this.year);
+  }
+  getDayCount() {
+    return EthiopianDay.getMonthDays(this.year, this.month);
+  }
+  next(n) {
+    return EthiopianDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
+const KOREAN_LUNAR_DATA = [
+  2194016855,
+  2197734699,
+  2193886506,
+  2194017621,
+  3271595437,
+  2193884522,
+  2194016621,
+  2197837021,
+  3267626157,
+  2193885773,
+  2197827149,
+  2193885990,
+  3271600982,
+  2194016981,
+  2193883994,
+  2197842298,
+  3267758427,
+  2193884315,
+  2197834395,
+  2193885771,
+  3271674533,
+  2193884842,
+  2194016981,
+  2197852893,
+  3267625653,
+  2194016599,
+  2197705902,
+  2194017431,
+  3267626571,
+  2197759306,
+  2194017705,
+  2197857974,
+  3267757677,
+  2193883758,
+  2197907758,
+  2193885486,
+  3267628182,
+  2197835157,
+  2193886538,
+  2197867881,
+  3267627864,
+  2194148715,
+  2197918315,
+  2193883741,
+  3267627307,
+  2197838507,
+  2193885845,
+  2193886026,
+  3271696043,
+  2193883861,
+  2197927258,
+  2194015419,
+  3267625563,
+  2197845303,
+  2193884459,
+  2193884821,
+  3271571285,
+  2193884842,
+  2198063797,
+  2193883765,
+  3267626166,
+  2197850718,
+  2193885782,
+  2193886502,
+  3271581350,
+  2194017621,
+  2193884586,
+  2197822826,
+  3267758445,
+  2197861551,
+  2193884317,
+  2193885773,
+  3271589165,
+  2193885862,
+  2194017109,
+  2197833173,
+  3267625818,
+  2194016605,
+  2197885299,
+  2193884251,
+  3271596623,
+  2193884747,
+  2193885861,
+  2197842793,
+  3267757749,
+  2193883866,
+  2197826230,
+  2194016567,
+  3271476375,
+  2194017431,
+  2193884747,
+  2197718698,
+  3267759525,
+  2193884596,
+  2198030957,
+  2193883822,
+  3267628641,
+  2197826862,
+  2193886358,
+  2197855565,
+  2193886538,
+  2194017637,
+  2197906837,
+  2194015581,
+  3267625581,
+  2197826141,
+  2193885483,
+  2197858967,
+  3267627669,
+  2193886026,
+  2197850970,
+  2194016981,
+  3267757403,
+  2197832375,
+  2193884247,
+  2193884459,
+  3271564587,
+  2193884821,
+  2197853997,
+  2193884586,
+  3267758773,
+  2197837037,
+  2193884342,
+  2194016855,
+  3271504974,
+  2193886502,
+  2197929618,
+  2194017621,
+  3267626410,
+  2197850554,
+  2194016621,
+  2193884334,
+  3271576221,
+  2193885773,
+  2193886501,
+  2197827365,
+  3267627860,
+  2198056297,
+  2193883866,
+  2194016605,
+  3271648411,
+  2193884315,
+  2193885771,
+  2197834571,
+  3267626661,
+  2197863251,
+  2193884852,
+  2194016950,
+  3271657814,
+  2194016663,
+  2193884311,
+  2197833367,
+  3267626315,
+  2197735077,
+  2194017701,
+  2193884588,
+  3271797429,
+  2193883758,
+  2193885486,
+  2197843118,
+  3267628182,
+  2193886538,
+  2197827402,
+  2194017621,
+  3271603563,
+  2194015579,
+  2193883741,
+  2197846333,
+  3267627303,
+  2193885845,
+  2197904661,
+  2193886026,
+  3267758933,
+  2197885653,
+  2194015451,
+  2197721694,
+  3267758679,
+  2193884459,
+  2197842603,
+  2193884821,
+  3267626666,
+  2197830570,
+  2194016949,
+  2197861559,
+  3267626158,
+  2194016855,
+  2197714222,
+  2193886502,
+  3267759763,
+  2197837525,
+  2193884586,
+  2194016693,
+  3271566701,
+  2193884334,
+  2197924429,
+  2193885773,
+  3267628326,
+  2197843301,
+  2193886034,
+  2194017642,
+  3271567066,
+  2194016605,
+  2197931165,
+  2193884315,
+  3267627595,
+  2197850795,
+  2193884837,
+  2193886036,
+  3271576500,
+  2194016950,
+  2194016603,
+  2197824823,
+  3267626135,
+  2197853775,
+  2193884491,
+  2193884837,
+  3271653061,
+  2193884588,
+  2194016950,
+  2197895278,
+  3267627310,
+  2197867671,
+  2193886358,
+  2193886538,
+  3271593386,
+  2194017109,
+  2193884522,
+  2197969627,
+  3267625565,
+  2193885486,
+  2197826859,
+  2193885845,
+  3271597389,
+  2193885994,
+  2194017109,
+  2197845365,
+  3267626202,
+  2194016859,
+  2197833047,
+  2193884459,
+  3271674515,
+  2193884819,
+  2193884842,
+  2197850842,
+  3267758821,
+  2193884342,
+  2197834414,
+  2194016855,
+  3267626279,
+  2197759270,
+  2194017875,
+  2197857995,
+  3267626410,
+  2194015661,
+  2197906605,
+  2193884334,
+  3267627598,
+  2197835085,
+  2193886502,
+  2197863763,
+  3267627858,
+  2194017130,
+  2197919082,
+  2194015575,
+  3267626141,
+  2197903899,
+  2193885771,
+  2193885861,
+  3271564965,
+  2193886034,
+  2197863258,
+  2194016950,
+  3267758427,
+  2197841079,
+  2193884311,
+  2193884747,
+  3271571275,
+  2193884837,
+  2197862067,
+  2193884588,
+  3267758774,
+  2197914285,
+  2193884318,
+  2193885773,
+  3271581003,
+  2193885989,
+  2193886034,
+  2197892690,
+  3267758938,
+  2197858654,
+  2194016603,
+  2193884315,
+  3271584343,
+  2193885771,
+  2193885861,
+  2197834661,
+  3267626708,
+  2197867222,
+  2194016950,
+  2194016567,
+  2197849247,
+  2193884311,
+  2193884747,
+  2197706442,
+  3267759525,
+  2193884586,
+  2197822828,
+  2194016878,
+  3271604527,
+  2193885486,
+  2193886358,
+  2197847381,
+  3267628362,
+  2194017621,
+  2197894485,
+  2193884522,
+  3267758701,
+  2197822045,
+  2193885483,
+  2197850715,
+  3267627669,
+  2193885994,
+  2197904170,
+  2194016981,
+  3267626202,
+  2197822650,
+  2194016855,
+  2197853487,
+  3267626279,
+  2193884819,
+  2197845683,
+  2193884842,
+  3267758773,
+  2197828981,
+  2193884342,
+  2197867111,
+  3267627566,
+  2193886486,
+  2197851798,
+  2193886538,
+  3267759530,
+  2197837290,
+  2194015597,
+  2193884334,
+  3271632989,
+  2193885741,
+  2197859607,
+  2193885861,
+  3267627858,
+  2197847412,
+  2194016986,
+  2194015581,
+  3271570747,
+  2193884251,
+  2193885739,
+  2197887531,
+  3267627685,
+  2197855061,
+  2193884850,
+  2194016982,
+  3271644470,
+  2194016567,
+  2193884247,
+  2197830231,
+  3267626283,
+  2197727910,
+  2194017685,
+  2193884586,
+  3271654060,
+  2194016878,
+  2193884462,
+  2197830830,
+  3267627606,
+  2197863723,
+  2193886506,
+  2194017621,
+  3271595437,
+  2193884522,
+  2194016877,
+  2197837149,
+  3267626283,
+  2193885837,
+  2197827157,
+  2193885994,
+  3271600982,
+  2194016981,
+  2193884378,
+  2197842554,
+  3267758679,
+  2193884443,
+  2197899799,
+  2193884755,
+  3271673513,
+  2193884586,
+  2194016949,
+  2197852861,
+  3267625654,
+  2194016823,
+  2197706030,
+  2193886486,
+  2194017867,
+  2197698386,
+  2194017706,
+  2197927348,
+  3267757421,
+  2193883822,
+  2197846589,
+  2193885741,
+  3267628309,
+  2197835157,
+  2193886034,
+  2197867369,
+  3267758810,
+  2194015581,
+  2197918299,
+  2193884251,
+  3267627563,
+  2197838507,
+  2193885845,
+  2193886034,
+  3271564970,
+  2194016950,
+  2197865819,
+  2194015415,
+  3267626071,
+  2197845303,
+  2193884459,
+  2193884821,
+  3271640725,
+  2193884586,
+  2197867189,
+  2194016878,
+  3267626158,
+  2197850718,
+  2193885782,
+  2193886506,
+  3271585450,
+  2194017621,
+  2193884522,
+  2197891418,
+  3267758429,
+  2197861551,
+  2193884315,
+  2193885773,
+  3271589165,
+  2193885994,
+  2194017109,
+  2197833173,
+  3267625690,
+  2194016603,
+  2197885271,
+  2193884315,
+  3271596623,
+  2193884747,
+  2193884841,
+  2197842666,
+  3267757749,
+  2193883830,
+  2197826222,
+  2194016567,
+  3271537814,
+  2193886358,
+  2194017867,
+  2197714610,
+  3267759530,
+  2194015661,
+  2197828461,
+  2193883758,
+  3267627310,
+  2197826861,
+  2193886357,
+  2197855565,
+  3267627850,
+  2194017129,
+  2197906778,
+  2194015579,
+  3267625565,
+  2197826139,
+  2193885483,
+  2197858967,
+  3267626645,
+  2193885002,
+  2197850970,
+  2194016950,
+  3267757371,
+  2197832375,
+  2193883735,
+  2193884459,
+  3271564587,
+  2193884821,
+  2197853869,
+  2193884586,
+  3267758773,
+  2197837037,
+  2193884334,
+  2194016855,
+  3271504974,
+  2193886506,
+  2197929364,
+  2194017109,
+  2193884522,
+  2197846394,
+  2194016605,
+  2193884334,
+  3271576219,
+  2193885773,
+  2193886501,
+  2197887658,
+  3267758933,
+  2197853549,
+  2193883866,
+  2194016603,
+  3271578807,
+  2193884311,
+  2193885771,
+  2197834571,
+  3267626665,
+  2197867221,
+  2194015669,
+  2193883830,
+  3271592286,
+  2194016559,
+  2193884311,
+  2197702294,
+  3267628362,
+  2197868197,
+  2194017641,
+  2194015597,
+  3271664309,
+  2193883758,
+  2193885486,
+  2197843117,
+  3267628181,
+  2193886538,
+  2197827402,
+  2194017113,
+  3271607661,
+  2194015579,
+  2193883741,
+  2197846331,
+  3267627307,
+  2193885845,
+  2197904149,
+  2193884874,
+  3267758805,
+  2197885622,
+  2194015419,
+  2197852767,
+  3267625559,
+  2193884459,
+  2197711530,
+  2194017941,
+  3267626666,
+  2197830570,
+  2194016949,
+  2197861559,
+  3267626158,
+  2194016855,
+  2197714221,
+  2193886502,
+  3267759509,
+  2197837269,
+  2193884522,
+  2194016621,
+  3271566685,
+  2193884334,
+  2197858895,
+  2193885773,
+  3267628325,
+  2197843305,
+  2194017109,
+  2193883994,
+  3271568058,
+  2194016603,
+  2197931163,
+  2193884311,
+  3267627595,
+  2197850923,
+  2193884837,
+  2193884884,
+  3271772853,
+  2193883830,
+  2194016567,
+  2197824815,
+  3267626135,
+  2197722702,
+  2193886538,
+  2194017957,
+  3271648937,
+  2194015597,
+  2193883830,
+  2197895262,
+  3267627310,
+  2197863575,
+  2193885845,
+  2193886538,
+  3271593386,
+  2194017101,
+  2194015595,
+  2197832411,
+  3267625565,
+  2193885485,
+  2197826859,
+  2193885845,
+  3271596877,
+  2193884842,
+  2194016981,
+  2197841269,
+  3267757243,
+  2193883739,
+  2197894231,
+  2193884459,
+  3271539348,
+  2194017941,
+  2193884842,
+  2197850842,
+  3267758517,
+  2193884342,
+  2197834414,
+  2194016847,
+  3267495206,
+  2197892390,
+  2194017621,
+  2197923241,
+  3267626346,
+  2194016621,
+  2197906589,
+  2193884318,
+  3267627597,
+  2197835085,
+  2193886501,
+  2197863763,
+  3267627860,
+  2194017114,
+  2197915994,
+  2194016603,
+  3267626139,
+  2197834391,
+  2193885771,
+  2193885861,
+  3271564965,
+  2193884884,
+  2197994203,
+  2193883830,
+  3267758391,
+  2197841071,
+  2193884311,
+  2193884747,
+  3271440202,
+  2194017701,
+  2197862069,
+  2194015597,
+  3267625646,
+  2197846334,
+  2193885486,
+  2193886358,
+  3271646485,
+  2193886538,
+  2194017701,
+  2197894485,
+  3267626346,
+  2197846650,
+  2194016861,
+  2193885485,
+  3271584427,
+  2193885845,
+  2193886026,
+  2197834666,
+  3267758805,
+  2193884506,
+  2197891258,
+  2194016859,
+  3271587127,
+  2193884459,
+  2193884819,
+  2197903125,
+  3267626666,
+  2194016981,
+  2197829045,
+  2193884342,
+  3271592542,
+  2193885774,
+  2193886502,
+  2197843622,
+  3267628370,
+  2194017706,
+  2197898858,
+  2194015597,
+  3267626158,
+  2197830301,
+  2193885773,
+  2197847339,
+  3267627813,
+  2193886546,
+  2197904724,
+  2194017114,
+  3267757405,
+  2197828955,
+  2193884315,
+  2197845591,
+  2193885771,
+  2193885861,
+  2197842789,
+  2193884882,
+  3267758810,
+  2197833142,
+  2194016567,
+  2193884311,
+  3271571095,
+  2193884749,
+  2197714602,
+  2194017701,
+  3267626410,
+  2197838572,
+  2194016942,
+  2193885486,
+  3271572782,
+  2193886358,
+  2197916997,
+  2193886538,
+  3267759445,
+  2197906837,
+  2193884522,
+  2194016877,
+  3271574877,
+  2193884461,
+  2193885845,
+  2197896341,
+  3267627850,
+  2197912394,
+  2194016981,
+  2193884506,
+  3271645754,
+  2194016859,
+  2193884459,
+  2197899799,
+  3267626643,
+  2197853867,
+  2193884842,
+  2194016949,
+  3271582965,
+  2193884342,
+  2194016855,
+  2197701934,
+  3267628310,
+  2194017939,
+  2197698386,
+  2194017706,
+  3271652778,
+  2194015597,
+  2193884334,
+  2197903901,
+  3267627565,
+  2193886485,
+  2197835173,
+  2193886034,
+  3271597418,
+  2194016986,
+  2194015581,
+  2197906075,
+  3267626075,
+  2193885739,
+  2197838635,
+  2193885845,
+  3267627858,
+  2197891762,
+  2194016982,
+  2197910870,
+  3267757367,
+  2193884247,
+  2197837399,
+  2193884459,
+  3267626645,
+  2197829525,
+  2193884586,
+  2197858998,
+  3267758701,
+  2193884334,
+  2197842542,
+  2193885782,
+  3267628330,
+  2197839530,
+  2194017621,
+  2193884586,
+  3271572330,
+  2194016877,
+  2197845181,
+  2193884331,
+  3267627661,
+  2197839189,
+  2193885994,
+  2194017109,
+  3271574997,
+  2193884378,
+  2194016605,
+  2197824855,
+  3267626139,
+  2197842583,
+  2193884747,
+  2193884841,
+  2197834666,
+  2194015925,
+  2193883834,
+  2197826230,
+  3267758391,
+  2197710126,
+  2193886486,
+  2194017867,
+  3271448274,
+  2194017705,
+  2194015669,
+  2197828461,
+  3267625646,
+  2193885742,
+  2197827117,
+  2193886357,
+  3271585109,
+  2193886034,
+  2194017129,
+  2197833178,
+  3267757405,
+  2193883741,
+  2197830235,
+  2193885739,
+  3271654027,
+  2193885845,
+  2193886026,
+  2197904170,
+  3267758805,
+  2194015579,
+  2197832375,
+  2193883735,
+  3271595311,
+  2193884459,
+  2193884821,
+  2197841621,
+  3267626410,
+  2194016949,
+  2197833069,
+  2193884334,
+  3267758679,
+  2197763158,
+  2193886506,
+  2197913226,
+  3267759445,
+  2193884586,
+  2197838554,
+  2194016605,
+  3267626158,
+  2197834411,
+  2193885773,
+  2197851435,
+  3267627817,
+  2194017109,
+  2197845365,
+  2193883866,
+  3267758429,
+  2197837015,
+  2193884315,
+  2193885771,
+  3271637579,
+  2193884841,
+  2197850841,
+  2194015925,
+  3267625654,
+  2197903670,
+  2194016567,
+  2193884311,
+  3271444118,
+  2193886794,
+  2197860006,
+  2194017705,
+  3267757485,
+  2197906093,
+  2193883822,
+  2193885486,
+  3271580845,
+  2193886357,
+  2193886538,
+  2197896522,
+  3267758953,
+  2197845370,
+  2194015579,
+  2193883741,
+  3271579995,
+  2193885483,
+  2193885845,
+  2197835157,
+  3267627850,
+  2194017109,
+  2197825237,
+  2194015579,
+  3271582327,
+  2193883735,
+  2193884459,
+  2197707434,
+  3267759765,
+  2193884842,
+  2197830570,
+  2194016949,
+  2197849277,
+  2193884334,
+  2194016855,
+  2197706061,
+  3267628326,
+  2194017685,
+  2197898837,
+  2193884522,
+  3267758509,
+  2197824861,
+  2193884334,
+  2197842523,
+  3267627597,
+  2193886501,
+  2197839273,
+  2194017109,
+  3267626346,
+  2197826266,
+  2194016605,
+  2197845179,
+  3267626139,
+  2193885771,
+  2197838667,
+  2193884841,
+  3267627732,
+  2197965749,
+  2193883830,
+  2194016603,
+  3271566647,
+  2193884311,
+  2197710422,
+  2193886794,
+  3267759781,
+  2197903017,
+  2194015669,
+  2193883830,
+  3271637166,
+  2193885486,
+  2197912717,
+  2193886357,
+  3267628362,
+  2197908874,
+  2194017129,
+  2194015597,
+  3271639643,
+  2193883741,
+  2193885485,
+  2197826859,
+  3267627669,
+  2197847381,
+  2193886026,
+  2194017109,
+  3271644501,
+  2194015451,
+  2193883739,
+  2197895255,
+  3267626283,
+  2197850779,
+  2193884821,
+  2193884842,
+  3271584490,
+  2194016949,
+  2193884342,
+  2197834414,
+  3267758679,
+  2193884455,
+  2197698342,
+  2194017685,
+  3271587509,
+  2193884522,
+  2194016685,
+  2197837021,
+  3267626158,
+  2193885774,
+  2197835085,
+  2193886501,
+  3271593305,
+  2193886036,
+  2194017642,
+  2197907802,
+  3267758427,
+  2193884315,
+  2197834395,
+  2193885771,
+  3271600935,
+  2193884837,
+  2193884884,
+  2197973877,
+  3267625654,
+  2194016603,
+  2197836983,
+  2193884311,
+  3267626571,
+  2197698378,
+  2194017957,
+  2197849817,
+  3267757485,
+  2193883830,
+  2197838190,
+  2193885486,
+  3267628182,
+  2197835413,
+  2193886538,
+  2194017701,
+  3271567189,
+  2193884524,
+  2197977787,
+  2193883741,
+  3267627309,
+  2197839019,
+  2193885845,
+  2193886026,
+  3271637834,
+  2194017109,
+  2197853533,
+  2193884346,
+  3267758683,
+  2197837143,
+  2193884459,
+  2193885845,
+  3271576469,
+  2193884842,
+  2194016981,
+  2197825205,
+  3267626166,
+  2197842542,
+  2194016855,
+  2193884455,
+  3271448230,
+  2194017683,
+  2193884586,
+  2197830506,
+  3267758445,
+  2197861551,
+  2193884334,
+  2193885773,
+  3271650573,
+  2193886501,
+  2193886546,
+  2197839316,
+  3267758954,
+  2194016621,
+  2197824859,
+  2193884315,
+  3271588439,
+  2193885771,
+  2193885989,
+  2197904165,
+  3267626708,
+  2194016986,
+  2197895350
+];
+
+class KoreanLunarDay extends AbstractCulture {
+  static MIN_YEAR = 1899;
+  static MAX_YEAR = 2050;
+  static BASE_YEAR = 1e3;
+  static BASE_SOLAR = SolarDay.fromYmd(1900, 1, 1);
+  static MAX_SOLAR = SolarDay.fromYmd(2050, 12, 31);
+  /**
+   * 1900-01-01 在本类 1899 年起的日序号中对应的位置
+   */
+  static BASE_ABS = 326;
+  static MAX_ABS = 55477;
+  static YEAR_OFFSETS = null;
+  year;
+  month;
+  day;
+  leap;
+  constructor(year, month, day, leap) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+    this.leap = leap;
+  }
+  static getData(year) {
+    if (year < KoreanLunarDay.MIN_YEAR || year > KoreanLunarDay.MAX_YEAR) {
+      throw new Error(`korean lunar year out of range: ${year}`);
+    }
+    return KOREAN_LUNAR_DATA[year - KoreanLunarDay.BASE_YEAR];
+  }
+  static getLeapMonth(year) {
+    return KoreanLunarDay.getData(year) >> 12 & 15;
+  }
+  static getYearDays(year) {
+    return KoreanLunarDay.getData(year) >> 17 & 511;
+  }
+  static getMonthDays(year, month, leap = false) {
+    const data = KoreanLunarDay.getData(year);
+    if (month < 1 || month > 12) {
+      throw new Error(`illegal korean lunar month: ${month}`);
+    }
+    if (leap) {
+      if (KoreanLunarDay.getLeapMonth(year) !== month) {
+        throw new Error(`korean lunar year ${year} has no leap month ${month}`);
+      }
+      return (data >> 16 & 1) > 0 ? 30 : 29;
+    }
+    return (data >> 12 - month & 1) > 0 ? 30 : 29;
+  }
+  static getYearOffsets() {
+    if (KoreanLunarDay.YEAR_OFFSETS) {
+      return KoreanLunarDay.YEAR_OFFSETS;
+    }
+    const offsets = [0];
+    for (let y = KoreanLunarDay.MIN_YEAR; y < KoreanLunarDay.MAX_YEAR; y++) {
+      offsets.push(offsets[offsets.length - 1] + KoreanLunarDay.getYearDays(y));
+    }
+    KoreanLunarDay.YEAR_OFFSETS = offsets;
+    return offsets;
+  }
+  static getYearOffset(year) {
+    KoreanLunarDay.getData(year);
+    return KoreanLunarDay.getYearOffsets()[year - KoreanLunarDay.MIN_YEAR];
+  }
+  static getAbsDays(year, month, day, leap) {
+    let days = KoreanLunarDay.getYearOffset(year);
+    for (let m = 1; m < month; m++) {
+      days += KoreanLunarDay.getMonthDays(year, m, false);
+      if (KoreanLunarDay.getLeapMonth(year) === m) {
+        days += KoreanLunarDay.getMonthDays(year, m, true);
+      }
+    }
+    if (leap) {
+      days += KoreanLunarDay.getMonthDays(year, month, false);
+    }
+    return days + day;
+  }
+  static fromAbsDays(absDays) {
+    if (absDays < KoreanLunarDay.BASE_ABS || absDays > KoreanLunarDay.MAX_ABS) {
+      throw new Error(`korean lunar date out of supported solar range: ${absDays}`);
+    }
+    let year = KoreanLunarDay.MIN_YEAR;
+    let rest = absDays - KoreanLunarDay.getYearOffset(year);
+    while (year < KoreanLunarDay.MAX_YEAR && rest > KoreanLunarDay.getYearDays(year)) {
+      rest -= KoreanLunarDay.getYearDays(year);
+      year++;
+    }
+    const leapMonth = KoreanLunarDay.getLeapMonth(year);
+    for (let month = 1; month <= 12; month++) {
+      const regular = KoreanLunarDay.getMonthDays(year, month, false);
+      if (rest <= regular) {
+        return new KoreanLunarDay(year, month, rest, false);
+      }
+      rest -= regular;
+      if (month === leapMonth) {
+        const leapDays = KoreanLunarDay.getMonthDays(year, month, true);
+        if (rest <= leapDays) {
+          return new KoreanLunarDay(year, month, rest, true);
+        }
+        rest -= leapDays;
+      }
+    }
+    throw new Error(`illegal korean lunar abs day: ${absDays}`);
+  }
+  static fromYmd(year, month, day, leap = false) {
+    const y = KoreanLunarDay.numeric(year, "korean lunar year");
+    const m = KoreanLunarDay.numeric(month, "korean lunar month");
+    const d = KoreanLunarDay.numeric(day, "korean lunar day");
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal korean lunar month: ${m}`);
+    }
+    if (d < 1 || d > KoreanLunarDay.getMonthDays(y, m, leap)) {
+      throw new Error(`illegal korean lunar day: ${y}-${m}-${d}${leap ? " leap" : ""}`);
+    }
+    const absDays = KoreanLunarDay.getAbsDays(y, m, d, leap);
+    return KoreanLunarDay.fromAbsDays(absDays);
+  }
+  static fromSolarDay(solarDay) {
+    if (solarDay.isBefore(KoreanLunarDay.BASE_SOLAR) || solarDay.isAfter(KoreanLunarDay.MAX_SOLAR)) {
+      throw new Error(`solar date out of Korean lunar range: ${solarDay}`);
+    }
+    return KoreanLunarDay.fromAbsDays(KoreanLunarDay.BASE_ABS + solarDay.subtract(KoreanLunarDay.BASE_SOLAR));
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  isLeapMonth() {
+    return this.leap;
+  }
+  getMonthName() {
+    return (this.leap ? "\u95F0" : "") + LunarMonth.NAMES[this.month - 1];
+  }
+  getName() {
+    return this.getMonthName() + LunarDay.NAMES[this.day - 1];
+  }
+  getDayCount() {
+    return KoreanLunarDay.getMonthDays(this.year, this.month, this.leap);
+  }
+  getSolarDay() {
+    return KoreanLunarDay.BASE_SOLAR.next(KoreanLunarDay.getAbsDays(this.year, this.month, this.day, this.leap) - KoreanLunarDay.BASE_ABS);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  next(n) {
+    return KoreanLunarDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getName()}`;
+  }
+}
+
+class MyanmarDay extends AbstractCulture {
+  static NAMES = [
+    "\u9996\u74E6\u68AD\u6708",
+    "\u5F97\u56FA\u6708",
+    "\u845B\u5B8B\u6708",
+    "\u7EB3\u96CD\u6708",
+    "\u74E6\u68AD\u6708",
+    "\u74E6\u5188\u6708",
+    "\u9053\u8FBE\u6797\u6708",
+    "\u4E01\u56FA\u6708",
+    "\u5FB7\u6851\u8499\u6708",
+    "\u7EB3\u591A\u6708",
+    "\u6BD4\u4E9A\u5353\u6708",
+    "\u8FBE\u6CE2\u5151\u6708",
+    "\u8FBE\u90A6\u6708",
+    "\u540E\u5F97\u56FA\u6708",
+    "\u540E\u845B\u5B8B\u6708"
+  ];
+  static SY = 1577917828 / 432e4;
+  static LM = 1577917828 / 53433336;
+  static MO = 1954168050623e-6;
+  my;
+  mm;
+  md;
+  myt;
+  constructor(my, mm, md, myt) {
+    super();
+    this.my = my;
+    this.mm = mm;
+    this.md = md;
+    this.myt = myt;
+  }
+  static getMyConst(my) {
+    let EI;
+    let WO;
+    let NM;
+    let EW = 0;
+    let fme = [];
+    let wte = [];
+    if (my >= 1312) {
+      EI = 3;
+      WO = -0.5;
+      NM = 8;
+      fme = [[1377, 1]];
+      wte = [1344, 1345];
+    } else if (my >= 1217) {
+      EI = 2;
+      WO = -1;
+      NM = 4;
+      fme = [[1234, 1], [1261, -1]];
+      wte = [1263, 1264];
+    } else if (my >= 1100) {
+      EI = 1.3;
+      WO = -0.85;
+      NM = -1;
+      fme = [[1120, 1], [1126, -1], [1150, 1], [1172, -1], [1207, 1]];
+      wte = [1201, 1202];
+    } else if (my >= 798) {
+      EI = 1.2;
+      WO = -1.1;
+      NM = -1;
+      fme = [
+        [813, -1],
+        [849, -1],
+        [851, -1],
+        [854, -1],
+        [927, -1],
+        [933, -1],
+        [936, -1],
+        [938, -1],
+        [949, -1],
+        [952, -1],
+        [963, -1],
+        [968, -1],
+        [1039, -1]
+      ];
+    } else {
+      EI = 1.1;
+      WO = -1.1;
+      NM = -1;
+      fme = [
+        [205, 1],
+        [246, 1],
+        [471, 1],
+        [572, -1],
+        [651, 1],
+        [653, 2],
+        [656, 1],
+        [672, 1],
+        [729, 1],
+        [767, -1]
+      ];
+    }
+    for (let i = 0; i < fme.length; i++) {
+      if (fme[i][0] === my) {
+        WO += fme[i][1];
+        break;
+      }
+    }
+    for (let i = 0; i < wte.length; i++) {
+      if (wte[i] === my) {
+        EW = 1;
+        break;
+      }
+    }
+    return { EI, WO, NM, EW };
+  }
+  static calWatat(my) {
+    const c = MyanmarDay.getMyConst(my);
+    const TA = (MyanmarDay.SY / 12 - MyanmarDay.LM) * (12 - c.NM);
+    let ed = MyanmarDay.SY * (my + 3739) % MyanmarDay.LM;
+    if (ed < TA) {
+      ed += MyanmarDay.LM;
+    }
+    const fm = Math.round(MyanmarDay.SY * my + MyanmarDay.MO - ed + 4.5 * MyanmarDay.LM + c.WO);
+    let watat;
+    if (c.EI >= 2) {
+      const TW = MyanmarDay.LM - (MyanmarDay.SY / 12 - MyanmarDay.LM) * c.NM;
+      watat = ed >= TW ? 1 : 0;
+    } else {
+      watat = (my * 7 + 2) % 19;
+      if (watat < 0) {
+        watat += 19;
+      }
+      watat = Math.floor(watat / 12);
+    }
+    watat ^= c.EW;
+    return { fm, watat };
+  }
+  static calMy(my) {
+    let yd = 0;
+    let y1;
+    const y2 = MyanmarDay.calWatat(my);
+    let myt = y2.watat;
+    do {
+      yd++;
+      y1 = MyanmarDay.calWatat(my - yd);
+    } while (y1.watat === 0 && yd < 3);
+    let fm = 0;
+    let werr = 0;
+    if (myt) {
+      const nd = (y2.fm - y1.fm) % 354;
+      myt = Math.floor(nd / 31) + 1;
+      fm = y2.fm;
+      if (nd !== 30 && nd !== 31) {
+        werr = 1;
+      }
+    } else {
+      fm = y1.fm + 354 * yd;
+    }
+    const tg1 = y1.fm + 354 * yd - 102;
+    return { myt, tg1, fm, werr };
+  }
+  static getMonthDays(mm, myt) {
+    let mml = 30 - mm % 2;
+    if (mm === 3) {
+      mml += Math.floor(myt / 2);
+    }
+    return mml;
+  }
+  static getYearDays(myt) {
+    return 354 + (1 - Math.floor(1 / (myt + 1))) * 30 + Math.floor(myt / 2);
+  }
+  static getMoonPhase(md, mm, myt) {
+    const mml = MyanmarDay.getMonthDays(mm, myt);
+    return Math.floor((md + 1) / 16) + Math.floor(md / 16) + Math.floor(md / mml);
+  }
+  static getFortnightDay(md) {
+    return md - 15 * Math.floor(md / 16);
+  }
+  static fromYmd(my, mm, md) {
+    const y = MyanmarDay.numeric(my, "myanmar year");
+    const m = MyanmarDay.numeric(mm, "myanmar month");
+    const d = MyanmarDay.numeric(md, "myanmar day");
+    if (y < 0) {
+      throw new Error(`illegal myanmar year: ${y}`);
+    }
+    if (m < 0 || m > 14) {
+      throw new Error(`illegal myanmar month: ${m}`);
+    }
+    const jdn = MyanmarDay.toJdn(y, m, d);
+    const x = MyanmarDay.fromJdn(jdn);
+    if (x.getYear() !== y || x.getMonth() !== m || x.getDay() !== d) {
+      throw new Error(`illegal myanmar date: ${y}-${m}-${d}`);
+    }
+    return x;
+  }
+  static fromSolarDay(solarDay) {
+    return MyanmarDay.fromJdn(Math.round(solarDay.getJulianDay().getDay()));
+  }
+  static fromJdn(jdn) {
+    const jd = Math.round(jdn);
+    let my = Math.floor((jd - 0.5 - MyanmarDay.MO) / MyanmarDay.SY);
+    let yo = MyanmarDay.calMy(my);
+    let dd = jd - yo.tg1 + 1;
+    if (dd < 1) {
+      my--;
+      yo = MyanmarDay.calMy(my);
+      dd = jd - yo.tg1 + 1;
+    }
+    const b = Math.floor(yo.myt / 2);
+    const c = Math.floor(1 / (yo.myt + 1));
+    const myl = 354 + (1 - c) * 30 + b;
+    const mmt = Math.floor((dd - 1) / myl);
+    dd -= mmt * myl;
+    const a = Math.floor((dd + 423) / 512);
+    let mm = Math.floor((dd - b * a + c * a * 30 + 29.26) / 29.544);
+    const e = Math.floor((mm + 12) / 16);
+    const f = Math.floor((mm + 11) / 16);
+    const md = dd - Math.floor(29.544 * mm - 29.26) - b * e + c * f * 30;
+    mm += f * 3 - e * 4 + 12 * mmt;
+    return new MyanmarDay(my, mm, md, yo.myt);
+  }
+  static toJdn(my, mm, md) {
+    const yo = MyanmarDay.calMy(my);
+    const mmt = Math.floor(mm / 13);
+    const m = mm % 13 + mmt;
+    const b = Math.floor(yo.myt / 2);
+    const c = 1 - Math.floor((yo.myt + 1) / 2);
+    let n = m;
+    n += 4 - Math.floor((n + 15) / 16) * 4 + Math.floor((n + 12) / 16);
+    let dd = md + Math.floor(29.544 * n - 29.26) - c * Math.floor((n + 11) / 16) * 30 + b * Math.floor((n + 12) / 16);
+    dd += mmt * MyanmarDay.getYearDays(yo.myt);
+    return dd + yo.tg1 - 1;
+  }
+  getYear() {
+    return this.my;
+  }
+  getMonth() {
+    return this.mm;
+  }
+  getDay() {
+    return this.md;
+  }
+  getYearType() {
+    return this.myt;
+  }
+  getMonthName() {
+    return MyanmarDay.NAMES[this.mm];
+  }
+  getName() {
+    return `${this.getMonthName()}${this.md}\u65E5`;
+  }
+  getMonthDays() {
+    return MyanmarDay.getMonthDays(this.mm, this.myt);
+  }
+  getYearDays() {
+    return MyanmarDay.getYearDays(this.myt);
+  }
+  getMoonPhase() {
+    return MyanmarDay.getMoonPhase(this.md, this.mm, this.myt);
+  }
+  getMoonPhaseName() {
+    return ["\u767D\u5206", "\u671B", "\u9ED1\u5206", "\u6714"][this.getMoonPhase()];
+  }
+  getFortnightDay() {
+    return MyanmarDay.getFortnightDay(this.md);
+  }
+  isWatat() {
+    return this.myt > 0;
+  }
+  isBigWatat() {
+    return this.myt === 2;
+  }
+  getJdn() {
+    return MyanmarDay.toJdn(this.my, this.mm, this.md);
+  }
+  getSolarDay() {
+    return JulianDay.fromJulianDay(this.getJdn() - 0.5).getSolarDay();
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  next(n) {
+    return MyanmarDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.my}\u5E74${this.getMonthName()}${this.md}\u65E5`;
+  }
+}
+
+const BIKRAM_SAMBAT_DATA = {
+  1975: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  1976: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  1977: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  1978: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1979: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  1980: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  1981: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  1982: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1983: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  1984: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  1985: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  1986: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1987: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  1988: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  1989: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  1990: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1991: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  1992: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  1993: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1994: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1995: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  1996: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  1997: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1998: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  1999: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2e3: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2001: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2002: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2003: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2004: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2005: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2006: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2007: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2008: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31],
+  2009: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2010: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2011: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2012: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  2013: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2014: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2015: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2016: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  2017: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2018: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2019: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2020: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+  2021: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2022: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  2023: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2024: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+  2025: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2026: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2027: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2028: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2029: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30],
+  2030: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2031: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2032: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2033: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2034: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2035: [30, 32, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31],
+  2036: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2037: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2038: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2039: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  2040: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2041: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2042: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2043: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  2044: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2045: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2046: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2047: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+  2048: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2049: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  2050: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2051: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+  2052: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2053: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  2054: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2055: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2056: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30],
+  2057: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2058: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2059: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2060: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2061: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2062: [31, 31, 31, 32, 31, 31, 29, 30, 29, 30, 29, 31],
+  2063: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2064: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2065: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2066: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31],
+  2067: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2068: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2069: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2070: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+  2071: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2072: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+  2073: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+  2074: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+  2075: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2076: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  2077: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2078: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+  2079: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2080: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+  2081: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+  2082: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2083: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+  2084: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30]
+};
+const BIKRAM_SAMBAT_VERIFIED_MAX = 2083;
+
+class BikramSambatDay extends AbstractCulture {
+  static NAMES = [
+    "\u62DC\u6C99\u514B\u6708",
+    "\u6770\u65AF\u5854\u6708",
+    "\u963F\u6C99\u5FB7\u6708",
+    "\u65AF\u62C9\u4E07\u6708",
+    "\u5DF4\u5FB7\u62C9\u6708",
+    "\u963F\u4EC0\u6E29\u6708",
+    "\u5361\u5C14\u8482\u514B\u6708",
+    "\u66FC\u897F\u5C14\u6708",
+    "\u6CE2\u4EC0\u6708",
+    "\u9A6C\u683C\u6708",
+    "\u6CD5\u5C14\u8D21\u6708",
+    "\u67E5\u4F0A\u7279\u62C9\u6708"
+  ];
+  static ANCHOR_YEAR = 1975;
+  static ANCHOR_SOLAR = SolarDay.fromYmd(1918, 4, 13);
+  static VERIFIED_MAX = BIKRAM_SAMBAT_VERIFIED_MAX;
+  static YEAR_OFFSETS = null;
+  static VERIFIED = (() => {
+    const result = {};
+    for (let y = 1975; y <= BIKRAM_SAMBAT_VERIFIED_MAX; y++) {
+      result[y] = true;
+    }
+    return result;
+  })();
+  year;
+  month;
+  day;
+  constructor(year, month, day) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+  static getYears() {
+    return Object.keys(BIKRAM_SAMBAT_DATA).map(Number).sort((a, b) => a - b);
+  }
+  static getMinYear() {
+    return BikramSambatDay.getYears()[0];
+  }
+  static getMaxYear() {
+    const years = BikramSambatDay.getYears();
+    return years[years.length - 1];
+  }
+  static isVerified(year) {
+    return !!BIKRAM_SAMBAT_DATA[year] && !!BikramSambatDay.VERIFIED[year];
+  }
+  static getMonthDays(year, month) {
+    const row = BIKRAM_SAMBAT_DATA[year];
+    if (!row) {
+      throw new Error(`bikram sambat year ${year} is not loaded`);
+    }
+    if (month < 1 || month > 12) {
+      throw new Error(`illegal bikram sambat month: ${month}`);
+    }
+    return row[month - 1];
+  }
+  static getYearDays(year) {
+    let days = 0;
+    for (let m = 1; m <= 12; m++) {
+      days += BikramSambatDay.getMonthDays(year, m);
+    }
+    return days;
+  }
+  static getYearOffsets() {
+    if (BikramSambatDay.YEAR_OFFSETS) {
+      return BikramSambatDay.YEAR_OFFSETS;
+    }
+    const years = BikramSambatDay.getYears();
+    const offsets = {};
+    let days = 0;
+    for (let i = 0; i < years.length; i++) {
+      offsets[years[i]] = days;
+      days += BikramSambatDay.getYearDays(years[i]);
+    }
+    BikramSambatDay.YEAR_OFFSETS = offsets;
+    return offsets;
+  }
+  static getYearStart(year) {
+    const offsets = BikramSambatDay.getYearOffsets();
+    if (offsets[year] === void 0) {
+      throw new Error(`bikram sambat year ${year} is not loaded`);
+    }
+    return BikramSambatDay.ANCHOR_SOLAR.next(offsets[year]);
+  }
+  static getMaxSolarDay() {
+    const max = BikramSambatDay.getMaxYear();
+    return BikramSambatDay.getYearStart(max).next(BikramSambatDay.getYearDays(max) - 1);
+  }
+  static fromYmd(year, month, day) {
+    const y = BikramSambatDay.numeric(year, "bikram sambat year");
+    const m = BikramSambatDay.numeric(month, "bikram sambat month");
+    const d = BikramSambatDay.numeric(day, "bikram sambat day");
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal bikram sambat month: ${m}`);
+    }
+    if (d < 1 || d > BikramSambatDay.getMonthDays(y, m)) {
+      throw new Error(`illegal bikram sambat day: ${y}-${m}-${d}`);
+    }
+    return new BikramSambatDay(y, m, d);
+  }
+  static fromSolarDay(solarDay) {
+    const min = BikramSambatDay.ANCHOR_SOLAR;
+    const max = BikramSambatDay.getMaxSolarDay();
+    if (solarDay.isBefore(min) || solarDay.isAfter(max)) {
+      throw new Error(`solar date out of Bikram Sambat range: ${solarDay}`);
+    }
+    const years = BikramSambatDay.getYears();
+    let year = years[years.length - 1];
+    for (let i = 0; i < years.length; i++) {
+      if (solarDay.isBefore(BikramSambatDay.getYearStart(years[i]))) {
+        year = years[i - 1];
+        break;
+      }
+    }
+    let rest = solarDay.subtract(BikramSambatDay.getYearStart(year));
+    let month = 1;
+    while (month < 12) {
+      const days = BikramSambatDay.getMonthDays(year, month);
+      if (rest < days) {
+        break;
+      }
+      rest -= days;
+      month++;
+    }
+    return new BikramSambatDay(year, month, rest + 1);
+  }
+  /**
+   * 导入或覆盖年度月长。格式：
+   * `{"years":[{"year":2085,"months":[...12 个数...],"verified":true}]}`
+   * 也接受 `{"2085":[...]}`。导入后年份必须与现有表连续。
+   */
+  static importJson(json) {
+    const parsed = JSON.parse(json);
+    const list = [];
+    if (Array.isArray(parsed)) {
+      for (let i = 0; i < parsed.length; i++) {
+        list.push(parsed[i]);
+      }
+    } else if (parsed && typeof parsed === "object") {
+      const root = parsed;
+      const years2 = root.years;
+      if (Array.isArray(years2)) {
+        for (let i = 0; i < years2.length; i++) {
+          list.push(years2[i]);
+        }
+      } else if (years2 && typeof years2 === "object") {
+        const map = years2;
+        const keys = Object.keys(map);
+        for (let i = 0; i < keys.length; i++) {
+          list.push({ year: Number(keys[i]), months: map[keys[i]] });
+        }
+      } else {
+        const keys = Object.keys(root);
+        for (let i = 0; i < keys.length; i++) {
+          list.push({ year: Number(keys[i]), months: root[keys[i]] });
+        }
+      }
+    } else {
+      throw new Error("invalid Bikram Sambat data");
+    }
+    const staged = [];
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const year = Number(item.year);
+      const monthsValue = item.months !== void 0 ? item.months : item.days;
+      if (!Number.isInteger(year) || year < 1975 || !Array.isArray(monthsValue) || monthsValue.length !== 12) {
+        throw new Error(`invalid Bikram Sambat year entry at index ${i}`);
+      }
+      const months = monthsValue;
+      let total = 0;
+      const row = [];
+      for (let m = 0; m < 12; m++) {
+        const n = Number(months[m]);
+        if (!Number.isInteger(n) || n < 29 || n > 32) {
+          throw new Error(`invalid month length ${String(months[m])} for year ${year}`);
+        }
+        row.push(n);
+        total += n;
+      }
+      if (total !== 365 && total !== 366) {
+        throw new Error(`Bikram Sambat year ${year} totals ${total} days`);
+      }
+      staged.push({ year, months: row, verified: item.verified !== false });
+    }
+    if (!staged.length) {
+      throw new Error("no Bikram Sambat years to import");
+    }
+    const future = {};
+    const existing = BikramSambatDay.getYears();
+    for (let i = 0; i < existing.length; i++) {
+      future[existing[i]] = true;
+    }
+    for (let i = 0; i < staged.length; i++) {
+      future[staged[i].year] = true;
+    }
+    const years = Object.keys(future).map(Number).sort((a, b) => a - b);
+    for (let i = 1; i < years.length; i++) {
+      if (years[i] !== years[i - 1] + 1) {
+        throw new Error(`Bikram Sambat years are not contiguous at ${years[i - 1]} -> ${years[i]}`);
+      }
+    }
+    for (let i = 0; i < staged.length; i++) {
+      BIKRAM_SAMBAT_DATA[staged[i].year] = staged[i].months;
+      if (staged[i].verified) {
+        BikramSambatDay.VERIFIED[staged[i].year] = true;
+      } else {
+        delete BikramSambatDay.VERIFIED[staged[i].year];
+      }
+    }
+    BikramSambatDay.YEAR_OFFSETS = null;
+    return staged.length;
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  getMonthName() {
+    return BikramSambatDay.NAMES[this.month - 1];
+  }
+  getName() {
+    return `${this.day}\u65E5`;
+  }
+  getMonthDays() {
+    return BikramSambatDay.getMonthDays(this.year, this.month);
+  }
+  getYearDays() {
+    return BikramSambatDay.getYearDays(this.year);
+  }
+  getSolarDay() {
+    let rest = this.day - 1;
+    for (let m = 1; m < this.month; m++) {
+      rest += BikramSambatDay.getMonthDays(this.year, m);
+    }
+    return BikramSambatDay.getYearStart(this.year).next(rest);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  isVerified() {
+    return BikramSambatDay.isVerified(this.year);
+  }
+  next(n) {
+    return BikramSambatDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
+const Y0 = 1754;
+const MONTH0 = 3;
+const BETA_STAR = 2;
+const M0 = 2361807 + 52 / 707;
+const M1$1 = 167025 / 5656;
+const M2$1 = M1$1 / 30;
+const S0 = 1 / 67;
+const S1$1 = 65 / 804;
+const S2$1 = S1$1 / 30;
+const A0 = 17 / 147;
+const A1$1 = 253 / 3528;
+const A2$1 = 1 / 28;
+const MOON_TAB = [0, 5, 10, 15, 19, 22, 24, 25];
+const SUN_TAB = [0, 6, 10, 11];
+function frac(x) {
+  return x - Math.floor(x);
+}
+function mod(a, b) {
+  return (a % b + b) % b;
+}
+function moonTabInt(i) {
+  i = mod(i, 28);
+  if (i <= 7) return MOON_TAB[i];
+  if (i <= 14) return MOON_TAB[14 - i];
+  if (i <= 21) return -MOON_TAB[i - 14];
+  return -MOON_TAB[28 - i];
+}
+function sunTabInt(i) {
+  i = mod(i, 12);
+  if (i <= 3) return SUN_TAB[i];
+  if (i <= 6) return SUN_TAB[6 - i];
+  if (i <= 9) return -SUN_TAB[i - 6];
+  return -SUN_TAB[12 - i];
+}
+function interpolate(fn, x) {
+  const lo = Math.floor(x);
+  const t = x - lo;
+  return fn(lo) + t * (fn(lo + 1) - fn(lo));
+}
+function meanSun(day, n) {
+  return frac(n * S1$1 + day * S2$1 + S0);
+}
+function trueDate(day, n) {
+  const mean = n * M1$1 + day * M2$1 + M0;
+  const anomalyMoon = frac(n * A1$1 + day * A2$1 + A0);
+  const moonEqu = interpolate(moonTabInt, 28 * anomalyMoon);
+  const anomalySun = frac(meanSun(day, n) - 1 / 4);
+  const sunEqu = interpolate(sunTabInt, 12 * anomalySun);
+  return mean + moonEqu / 60 - sunEqu / 60 + 1e-9;
+}
+function jdOfLunarDay(day, n) {
+  return Math.floor(trueDate(day, n));
+}
+function intercalationIndex(year, month) {
+  return mod(2 * (12 * (year - Y0) + month - MONTH0) + BETA_STAR, 65);
+}
+function hasLeapMonthAfter(year, month) {
+  const ix = intercalationIndex(year, month);
+  return ix === 57 || ix === 58;
+}
+function monthCount(year, month, leap = false) {
+  const solarMonths = 12 * (year - Y0) + month - MONTH0;
+  const v = 67 * solarMonths + BETA_STAR;
+  const base = Math.floor(v / 65);
+  const ix = mod(v, 65);
+  if (leap) {
+    if (ix !== 57 && ix !== 58) {
+      throw new Error(`Bhutanese year ${year} has no leap month ${month}`);
+    }
+    return base + 1;
+  }
+  return base + (ix >= 59 ? 1 : 0);
+}
+function monthFromCount(n) {
+  const approx = Math.floor((n * 65 - BETA_STAR) / 67);
+  for (let s = approx - 2; s <= approx + 2; s++) {
+    const year = Y0 + Math.floor((s + MONTH0 - 1) / 12);
+    const month = mod(s + MONTH0 - 1, 12) + 1;
+    if (monthCount(year, month) === n) {
+      return { year, month, leapMonth: false };
+    }
+    if (hasLeapMonthAfter(year, month) && monthCount(year, month, true) === n) {
+      return { year, month, leapMonth: true };
+    }
+  }
+  throw new Error(`Unable to resolve Bhutanese month count ${n}`);
+}
+function monthBoundsByCount(n) {
+  return { start: jdOfLunarDay(30, n - 1) + 1, end: jdOfLunarDay(30, n) };
+}
+function firstDayJD(n, first) {
+  const start = monthBoundsByCount(n).start;
+  const end1 = jdOfLunarDay(1, n);
+  if (end1 < start) {
+    return start;
+  }
+  return first ? start : end1;
+}
+function toJdn(year, month, day, leapMonth, leapDay) {
+  const n = monthCount(year, month, leapMonth);
+  const first = leapDay;
+  if (day === 1) {
+    return firstDayJD(n, first);
+  }
+  const jd = jdOfLunarDay(day, n);
+  const prev = jdOfLunarDay(day - 1, n);
+  if (prev === jd) {
+    return jd + 1;
+  }
+  if (first && jd - prev === 2) {
+    return jd - 1;
+  }
+  return jd;
+}
+function fromJdn(jd) {
+  let n = Math.floor((jd - M0) / M1$1);
+  while (monthBoundsByCount(n).start > jd) {
+    n--;
+  }
+  while (monthBoundsByCount(n).end < jd) {
+    n++;
+  }
+  let day = 30;
+  let leapDay = false;
+  for (let d = 1; d <= 30; d++) {
+    const end = jdOfLunarDay(d, n);
+    if (end >= jd) {
+      day = d;
+      leapDay = end > jd;
+      break;
+    }
+  }
+  const info = monthFromCount(n);
+  return { year: info.year, month: info.month, day, leapMonth: info.leapMonth, leapDay };
+}
+class BhutaneseDay extends AbstractCulture {
+  year;
+  month;
+  day;
+  leapMonth;
+  leapDay;
+  constructor(year, month, day, leapMonth, leapDay) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+    this.leapMonth = leapMonth;
+    this.leapDay = leapDay;
+  }
+  static fromSolarDay(solarDay) {
+    const jd = Math.round(solarDay.getJulianDay().getDay());
+    const x = fromJdn(jd);
+    return new BhutaneseDay(x.year, x.month, x.day, x.leapMonth, x.leapDay);
+  }
+  static fromYmd(year, month, day, leapMonth = false, leapDay = false) {
+    const y = BhutaneseDay.numeric(year, "bhutanese year");
+    const m = BhutaneseDay.numeric(month, "bhutanese month");
+    const d = BhutaneseDay.numeric(day, "bhutanese day");
+    if (y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 30) {
+      throw new Error(`illegal bhutanese date: ${y}-${m}-${d}`);
+    }
+    const jd = toJdn(y, m, d, leapMonth, leapDay);
+    const x = fromJdn(jd);
+    if (x.year !== y || x.month !== m || x.day !== d || x.leapMonth !== leapMonth || x.leapDay !== leapDay) {
+      throw new Error(`illegal bhutanese date: ${y}-${m}-${d}`);
+    }
+    return new BhutaneseDay(y, m, d, leapMonth, leapDay);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  isLeapMonth() {
+    return this.leapMonth;
+  }
+  isLeapDay() {
+    return this.leapDay;
+  }
+  getMonthName() {
+    return (this.leapMonth ? "\u95F0" : "") + RabByungMonth.ALIAS[this.month - 1];
+  }
+  getName() {
+    return (this.leapDay ? "\u95F0" : "") + LunarDay.NAMES[this.day - 1];
+  }
+  getCycle() {
+    return Math.floor((this.year - 1027) / 60) + 1;
+  }
+  getYearOfCycle() {
+    return (this.year - 1027) % 60 + 1;
+  }
+  getSolarDay() {
+    const jd = toJdn(this.year, this.month, this.day, this.leapMonth, this.leapDay);
+    return JulianDay.fromJulianDay(jd - 0.5).getSolarDay();
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  next(n) {
+    return BhutaneseDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${RabByungYear.fromYear(this.year).toString()}${this.getMonthName()}${this.getName()}`;
+  }
+}
+
+const M1 = 167025 / 5656;
+const M2 = 11135 / 11312;
+const S1 = 65 / 804;
+const S2 = 13 / 4824;
+const A1 = 253 / 3528;
+const A2 = 1 / 28;
+const DAY_START_OFFSET = 7 / 24;
+const EPOCH_RAB_BYUNG = 1027;
+const MOON_TABLE = [0, 5, 10, 15, 19, 22, 24, 25];
+const SUN_TABLE = [0, 6, 10, 11];
+const MONGOLIAN_CONFIG = {
+  name: "mongolian",
+  m0: 2359237 + 2603 / 2828,
+  s0: 397 / 402,
+  a0: 1523 / 1764,
+  p0: 209 / 270,
+  epochYear: 1747,
+  standardOffset: 8 / 24,
+  bhutanLeap: false
+};
+class TibetanVariantCalculator {
+  config;
+  alpha;
+  beta;
+  constructor(config) {
+    this.config = config;
+    this.alpha = 12 * (config.s0 - config.p0);
+    this.beta = Math.ceil(67 * this.alpha) - (config.bhutanLeap ? 2 : 0);
+  }
+  isLeapMonth(year, month) {
+    const prime = 12 * (year - this.config.epochYear) + month;
+    const mod = (prime * 2 - this.beta) % 65;
+    return mod === 0 || mod === 1;
+  }
+  getTrueMonthCount(year, month, leapMonth) {
+    const prime = 12 * (year - this.config.epochYear) + month;
+    let n = Math.floor(67 * (prime - this.alpha) / 65);
+    if (leapMonth && this.isLeapMonth(year, month)) {
+      n += this.config.bhutanLeap ? 1 : -1;
+    }
+    return n;
+  }
+  getMonthFromCount(n) {
+    const x = Math.ceil((65 * n + this.beta) / 67);
+    let month = x % 12;
+    if (month === 0) {
+      month = 12;
+    }
+    const year = (x - month) / 12 + this.config.epochYear;
+    const leapX = Math.ceil((65 * (this.config.bhutanLeap ? n - 1 : n + 1) + this.beta) / 67);
+    return { year, month, leapMonth: x === leapX };
+  }
+  interpolate(xIn, table, half, period) {
+    let x = xIn % period;
+    if (x < 0) {
+      x += period;
+    }
+    let sign = 1;
+    const symmetry = half * 2;
+    if (x >= symmetry) {
+      sign = -1;
+      x -= symmetry;
+    }
+    if (x > half) {
+      x = symmetry - x;
+    }
+    const i = Math.floor(x);
+    const frac = x - i;
+    let value;
+    if (i < 0) {
+      value = table[0];
+    } else if (i >= table.length - 1) {
+      value = table[table.length - 1];
+    } else {
+      value = table[i] * (1 - frac) + table[i + 1] * frac;
+    }
+    return sign * value;
+  }
+  getTrueDate(n, day) {
+    const meanDate = n * M1 + day * M2 + this.config.m0;
+    let meanSun = n * S1 + day * S2 + this.config.s0;
+    meanSun -= Math.floor(meanSun);
+    let anomalyMoon = n * A1 + day * A2 + this.config.a0;
+    anomalyMoon -= Math.floor(anomalyMoon);
+    const moonEqu = this.interpolate(28 * anomalyMoon, MOON_TABLE, 7, 28);
+    let anomalySun = meanSun - 1 / 4;
+    anomalySun -= Math.floor(anomalySun);
+    const sunEqu = this.interpolate(12 * anomalySun, SUN_TABLE, 3, 12);
+    return meanDate + moonEqu / 60 - sunEqu / 60;
+  }
+  fromLocalJd(jd) {
+    const jdn = Math.trunc(Number(jd.toFixed(7)));
+    const solarDays = jdn - this.config.m0;
+    let n = Math.floor(solarDays / M1);
+    let day = Math.floor((solarDays - n * M1) / M2);
+    let leapDay = false;
+    for (let i = 0; i < 3; i++) {
+      const trueDate = this.getTrueDate(n, day);
+      if (trueDate > jdn + 1) {
+        leapDay = true;
+        break;
+      } else if (trueDate > jdn) {
+        break;
+      }
+      day++;
+    }
+    if (day === 0) {
+      n--;
+      day = 30;
+    }
+    if (day > 30) {
+      n++;
+      day -= 30;
+    }
+    const info = this.getMonthFromCount(n);
+    const cycle = Math.floor((info.year - EPOCH_RAB_BYUNG) / 60) + 1;
+    const yearOfCycle = (info.year - EPOCH_RAB_BYUNG) % 60 + 1;
+    return {
+      year: info.year,
+      month: info.month,
+      day,
+      leapMonth: info.leapMonth,
+      leapDay,
+      cycle,
+      yearOfCycle
+    };
+  }
+  toLocalJdn(year, month, day, leapMonth, leapDay) {
+    const n = this.getTrueMonthCount(year, month, leapMonth);
+    const trueDate = this.getTrueDate(n, day);
+    let jdn = Math.floor(trueDate);
+    const prevJdn = Math.floor(this.getTrueDate(n, day - 1));
+    const skipped = jdn === prevJdn;
+    const repeated = jdn === prevJdn + 2;
+    if (repeated && leapDay) {
+      jdn--;
+    }
+    if (skipped) {
+      jdn++;
+    }
+    return jdn;
+  }
+  fromSolarDay(solarDay) {
+    const jd = solarDay.getJulianDay().getDay() + 0.5 + this.config.standardOffset + DAY_START_OFFSET;
+    return this.fromLocalJd(jd);
+  }
+  toSolarDay(year, month, day, leapMonth, leapDay) {
+    const jdn = this.toLocalJdn(year, month, day, leapMonth, leapDay);
+    return JulianDay.fromJulianDay(jdn - 0.5).getSolarDay();
+  }
+}
+class TibetanVariantDay extends AbstractCulture {
+  calculator;
+  year;
+  month;
+  day;
+  leapMonth;
+  leapDay;
+  cycle;
+  yearOfCycle;
+  constructor(calculator, date) {
+    super();
+    this.calculator = calculator;
+    this.year = date.year;
+    this.month = date.month;
+    this.day = date.day;
+    this.leapMonth = date.leapMonth;
+    this.leapDay = date.leapDay;
+    this.cycle = date.cycle;
+    this.yearOfCycle = date.yearOfCycle;
+  }
+  static create(calculator, year, month, day, leapMonth, leapDay) {
+    if (year < 1900 || year > 2100) {
+      throw new Error(`tibetan variant year out of range: ${year}`);
+    }
+    if (month < 1 || month > 12 || day < 1 || day > 30) {
+      throw new Error(`illegal tibetan variant date: ${year}-${month}-${day}`);
+    }
+    const jdn = calculator.toLocalJdn(year, month, day, leapMonth, leapDay);
+    const date = calculator.fromLocalJd(jdn);
+    if (date.year !== year || date.month !== month || date.day !== day || date.leapMonth !== leapMonth || date.leapDay !== leapDay) {
+      throw new Error(`illegal tibetan variant date: ${year}-${month}-${day}`);
+    }
+    return date;
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  isLeapMonth() {
+    return this.leapMonth;
+  }
+  isLeapDay() {
+    return this.leapDay;
+  }
+  getCycle() {
+    return this.cycle;
+  }
+  getYearOfCycle() {
+    return this.yearOfCycle;
+  }
+  getMonthName() {
+    return (this.leapMonth ? "\u95F0" : "") + RabByungMonth.ALIAS[this.month - 1];
+  }
+  getName() {
+    return (this.leapDay ? "\u95F0" : "") + LunarDay.NAMES[this.day - 1];
+  }
+  getSolarDay() {
+    return this.calculator.toSolarDay(this.year, this.month, this.day, this.leapMonth, this.leapDay);
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  next(n) {
+    return this.fromSolar(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${RabByungYear.fromYear(this.year).toString()}${this.getMonthName()}${this.getName()}`;
+  }
+}
+class MongolianDay extends TibetanVariantDay {
+  static CALCULATOR = new TibetanVariantCalculator(MONGOLIAN_CONFIG);
+  constructor(date) {
+    super(MongolianDay.CALCULATOR, date);
+  }
+  static fromSolarDay(solarDay) {
+    return new MongolianDay(MongolianDay.CALCULATOR.fromSolarDay(solarDay));
+  }
+  static fromYmd(year, month, day, leapMonth = false, leapDay = false) {
+    const y = MongolianDay.numeric(year, "mongolian year");
+    const m = MongolianDay.numeric(month, "mongolian month");
+    const d = MongolianDay.numeric(day, "mongolian day");
+    return new MongolianDay(TibetanVariantDay.create(MongolianDay.CALCULATOR, y, m, d, leapMonth, leapDay));
+  }
+  fromSolar(solarDay) {
+    return MongolianDay.fromSolarDay(solarDay);
+  }
+  next(n) {
+    return MongolianDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+}
+
+const THAI_CS_YEARS = [
+  [1250, 2410741, 32, "C"],
+  [1251, 2411107, 14, "A"],
+  [1252, 2411472, 25, "C"],
+  [1253, 2411837, 6, "B"],
+  [1254, 2412202, 16, "A"],
+  [1255, 2412568, 28, "C"],
+  [1256, 2412933, 9, "A"],
+  [1257, 2413298, 20, "B"],
+  [1258, 2413663, 30, "C"],
+  [1259, 2414029, 12, "A"],
+  [1260, 2414394, 23, "A"],
+  [1261, 2414759, 34, "C"],
+  [1262, 2415125, 16, "A"],
+  [1263, 2415490, 27, "C"],
+  [1264, 2415855, 8, "B"],
+  [1265, 2416220, 18, "A"],
+  [1266, 2416586, 30, "C"],
+  [1267, 2416951, 11, "A"],
+  [1268, 2417316, 22, "B"],
+  [1269, 2417681, 32, "C"],
+  [1270, 2418047, 14, "A"],
+  [1271, 2418412, 25, "C"],
+  [1272, 2418777, 6, "A"],
+  [1273, 2419142, 17, "B"],
+  [1274, 2419508, 28, "C"],
+  [1275, 2419873, 9, "A"],
+  [1276, 2420238, 20, "A"],
+  [1277, 2420603, 31, "C"],
+  [1278, 2420969, 13, "A"],
+  [1279, 2421334, 24, "B"],
+  [1280, 2421699, 34, "C"],
+  [1281, 2422064, 15, "A"],
+  [1282, 2422430, 27, "C"],
+  [1283, 2422795, 8, "A"],
+  [1284, 2423160, 19, "B"],
+  [1285, 2423525, 29, "C"],
+  [1286, 2423891, 11, "A"],
+  [1287, 2424256, 22, "A"],
+  [1288, 2424621, 33, "C"],
+  [1289, 2424986, 14, "B"],
+  [1290, 2425352, 25, "C"],
+  [1291, 2425717, 6, "A"],
+  [1292, 2426082, 17, "A"],
+  [1293, 2426448, 29, "C"],
+  [1294, 2426813, 10, "B"],
+  [1295, 2427178, 20, "A"],
+  [1296, 2427543, 31, "C"],
+  [1297, 2427909, 13, "A"],
+  [1298, 2428274, 24, "B"],
+  [1299, 2428639, 34, "C"],
+  [1300, 2429004, 15, "A"],
+  [1301, 2429370, 27, "C"],
+  [1302, 2429735, 8, "A"],
+  [1303, 2430100, 19, "A"],
+  [1304, 2430465, 30, "C"],
+  [1305, 2430831, 12, "B"],
+  [1306, 2431196, 22, "A"],
+  [1307, 2431561, 33, "C"],
+  [1308, 2431926, 14, "A"],
+  [1309, 2432292, 26, "C"],
+  [1310, 2432657, 7, "B"],
+  [1311, 2433022, 17, "A"],
+  [1312, 2433387, 28, "C"],
+  [1313, 2433753, 10, "A"],
+  [1314, 2434118, 21, "B"],
+  [1315, 2434483, 31, "C"],
+  [1316, 2434848, 12, "A"],
+  [1317, 2435214, 24, "A"],
+  [1318, 2435579, 35, "C"],
+  [1319, 2435944, 16, "A"],
+  [1320, 2436310, 28, "C"],
+  [1321, 2436675, 9, "B"],
+  [1322, 2437040, 19, "A"],
+  [1323, 2437405, 30, "C"],
+  [1324, 2437771, 12, "A"],
+  [1325, 2438136, 23, "B"],
+  [1326, 2438501, 33, "C"],
+  [1327, 2438866, 14, "A"],
+  [1328, 2439232, 26, "C"],
+  [1329, 2439597, 7, "A"],
+  [1330, 2439962, 18, "B"],
+  [1331, 2440327, 28, "C"],
+  [1332, 2440693, 10, "A"],
+  [1333, 2441058, 21, "A"],
+  [1334, 2441423, 32, "C"],
+  [1335, 2441788, 13, "B"],
+  [1336, 2442154, 24, "A"],
+  [1337, 2442519, 35, "C"],
+  [1338, 2442884, 16, "A"],
+  [1339, 2443249, 27, "C"],
+  [1340, 2443615, 9, "B"],
+  [1341, 2443980, 19, "A"],
+  [1342, 2444345, 30, "C"],
+  [1343, 2444710, 11, "A"],
+  [1344, 2445076, 23, "A"],
+  [1345, 2445441, 34, "C"],
+  [1346, 2445806, 15, "B"],
+  [1347, 2446172, 26, "C"],
+  [1348, 2446537, 7, "A"],
+  [1349, 2446902, 18, "A"],
+  [1350, 2447267, 29, "C"],
+  [1351, 2447633, 11, "B"],
+  [1352, 2447998, 21, "A"],
+  [1353, 2448363, 32, "C"],
+  [1354, 2448728, 13, "A"],
+  [1355, 2449094, 25, "C"],
+  [1356, 2449459, 6, "B"],
+  [1357, 2449824, 16, "A"],
+  [1358, 2450189, 27, "C"],
+  [1359, 2450555, 9, "A"],
+  [1360, 2450920, 20, "B"],
+  [1361, 2451285, 30, "C"],
+  [1362, 2451650, 11, "A"],
+  [1363, 2452016, 23, "A"],
+  [1364, 2452381, 34, "C"],
+  [1365, 2452746, 15, "A"],
+  [1366, 2453111, 26, "C"],
+  [1367, 2453477, 8, "B"],
+  [1368, 2453842, 18, "A"],
+  [1369, 2454207, 29, "C"],
+  [1370, 2454572, 10, "A"],
+  [1371, 2454938, 22, "B"],
+  [1372, 2455303, 32, "C"],
+  [1373, 2455668, 13, "A"],
+  [1374, 2456033, 24, "C"],
+  [1375, 2456399, 6, "A"],
+  [1376, 2456764, 17, "B"],
+  [1377, 2457129, 27, "C"],
+  [1378, 2457495, 9, "A"],
+  [1379, 2457860, 20, "A"],
+  [1380, 2458225, 31, "C"],
+  [1381, 2458590, 12, "A"],
+  [1382, 2458956, 24, "B"],
+  [1383, 2459321, 34, "C"],
+  [1384, 2459686, 15, "A"],
+  [1385, 2460051, 26, "C"],
+  [1386, 2460417, 8, "A"],
+  [1387, 2460782, 19, "B"],
+  [1388, 2461147, 29, "C"],
+  [1389, 2461512, 10, "A"],
+  [1390, 2461878, 22, "A"],
+  [1391, 2462243, 33, "C"],
+  [1392, 2462608, 14, "B"],
+  [1393, 2462973, 24, "C"],
+  [1394, 2463339, 6, "A"],
+  [1395, 2463704, 17, "A"],
+  [1396, 2464069, 28, "C"],
+  [1397, 2464434, 9, "B"],
+  [1398, 2464800, 20, "A"],
+  [1399, 2465165, 31, "C"],
+  [1400, 2465530, 12, "A"],
+  [1401, 2465895, 23, "B"],
+  [1402, 2466261, 34, "C"],
+  [1403, 2466626, 15, "A"],
+  [1404, 2466991, 26, "C"],
+  [1405, 2467357, 8, "A"],
+  [1406, 2467722, 19, "A"],
+  [1407, 2468087, 30, "C"],
+  [1408, 2468452, 11, "B"],
+  [1409, 2468818, 22, "A"],
+  [1410, 2469183, 33, "C"],
+  [1411, 2469548, 14, "A"],
+  [1412, 2469913, 25, "C"],
+  [1413, 2470279, 7, "B"],
+  [1414, 2470644, 17, "A"],
+  [1415, 2471009, 28, "C"],
+  [1416, 2471374, 9, "A"],
+  [1417, 2471740, 21, "B"],
+  [1418, 2472105, 31, "C"],
+  [1419, 2472470, 12, "A"],
+  [1420, 2472835, 23, "A"],
+  [1421, 2473201, 35, "C"],
+  [1422, 2473566, 16, "A"],
+  [1423, 2473931, 27, "C"],
+  [1424, 2474296, 8, "B"],
+  [1425, 2474662, 19, "A"],
+  [1426, 2475027, 30, "C"],
+  [1427, 2475392, 11, "A"],
+  [1428, 2475757, 22, "B"],
+  [1429, 2476123, 33, "C"],
+  [1430, 2476488, 14, "A"],
+  [1431, 2476853, 25, "C"],
+  [1432, 2477218, 6, "A"],
+  [1433, 2477584, 18, "B"],
+  [1434, 2477949, 28, "C"],
+  [1435, 2478314, 9, "A"],
+  [1436, 2478680, 21, "A"],
+  [1437, 2479045, 32, "C"],
+  [1438, 2479410, 13, "B"],
+  [1439, 2479775, 23, "A"],
+  [1440, 2480141, 35, "C"],
+  [1441, 2480506, 16, "A"],
+  [1442, 2480871, 27, "C"],
+  [1443, 2481236, 8, "A"],
+  [1444, 2481602, 20, "B"],
+  [1445, 2481967, 30, "C"],
+  [1446, 2482332, 11, "A"],
+  [1447, 2482697, 22, "A"],
+  [1448, 2483063, 34, "C"],
+  [1449, 2483428, 15, "B"],
+  [1450, 2483793, 25, "C"],
+  [1451, 2484158, 6, "A"],
+  [1452, 2484524, 18, "A"],
+  [1453, 2484889, 29, "C"],
+  [1454, 2485254, 10, "B"],
+  [1455, 2485619, 20, "A"],
+  [1456, 2485985, 32, "C"],
+  [1457, 2486350, 13, "A"],
+  [1458, 2486715, 24, "B"],
+  [1459, 2487080, 34, "C"],
+  [1460, 2487446, 16, "A"],
+  [1461, 2487811, 27, "C"],
+  [1462, 2488176, 8, "A"],
+  [1463, 2488542, 20, "B"],
+  [1464, 2488907, 30, "C"],
+  [1465, 2489272, 11, "A"],
+  [1466, 2489637, 22, "A"],
+  [1467, 2490003, 34, "C"],
+  [1468, 2490368, 15, "A"],
+  [1469, 2490733, 26, "C"],
+  [1470, 2491098, 7, "B"]
+];
+
+class ThaiLunarDay extends AbstractCulture {
+  static MIN_YEAR = 1250;
+  static MAX_YEAR = 1470;
+  static MONTHS = THAI_CS_YEARS;
+  static MONTH_CUMULATIVE = {
+    A: [0, 29, 59, 88, 118, 147, 177, 206, 236, 265, 295, 324, 354, 383],
+    B: [0, 29, 59, 89, 119, 148, 178, 207, 237, 266, 296, 325, 355, 384],
+    C: [0, 29, 59, 88, 118, 148, 177, 207, 236, 266, 295, 325, 354, 384]
+  };
+  static LUNAR_MONTHS = [0, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 8, 88, 15, 16];
+  static MONTH_POSITION_AB = [5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 15, 16];
+  static MONTH_POSITION_C = [5, 6, 7, 8, 88, 9, 10, 11, 12, 1, 2, 3, 4, 15, 16];
+  year;
+  rawMonth;
+  day;
+  constructor(year, rawMonth, day) {
+    super();
+    this.year = year;
+    this.rawMonth = rawMonth;
+    this.day = day;
+  }
+  static getYearInfo(year) {
+    for (let i = 0; i < ThaiLunarDay.MONTHS.length; i++) {
+      if (ThaiLunarDay.MONTHS[i][0] === year) {
+        return ThaiLunarDay.MONTHS[i];
+      }
+    }
+    throw new Error(`thai lunar year ${year} is not loaded`);
+  }
+  static getLunarYearDays(year) {
+    const type = ThaiLunarDay.getYearInfo(year)[3];
+    return type === "C" ? 384 : type === "B" ? 355 : 354;
+  }
+  static getYearDays(year) {
+    const next = year < ThaiLunarDay.MAX_YEAR ? ThaiLunarDay.getYearStartJdn(year + 1) : ThaiLunarDay.getYearStartJdn(year) + 365;
+    return next - ThaiLunarDay.getYearStartJdn(year);
+  }
+  static getYearStartJdn(year) {
+    return ThaiLunarDay.getYearInfo(year)[1];
+  }
+  static isLeapMonthYear(year) {
+    return ThaiLunarDay.getYearInfo(year)[3] === "C";
+  }
+  static isLeapDayYear(year) {
+    return ThaiLunarDay.getYearInfo(year)[3] === "B";
+  }
+  static getMonthPosition(type, rawMonth) {
+    const positions = type === "C" ? ThaiLunarDay.MONTH_POSITION_C : ThaiLunarDay.MONTH_POSITION_AB;
+    return positions.indexOf(rawMonth);
+  }
+  static findDate(type, days) {
+    const values = {
+      A: [
+        [383, 16],
+        [354, 15],
+        [324, 12],
+        [295, 11],
+        [265, 10],
+        [236, 9],
+        [206, 8],
+        [177, 7],
+        [147, 6],
+        [118, 5],
+        [88, 4],
+        [59, 3],
+        [29, 2]
+      ],
+      B: [
+        [384, 16],
+        [355, 15],
+        [325, 12],
+        [296, 11],
+        [266, 10],
+        [237, 9],
+        [207, 8],
+        [178, 7],
+        [148, 6],
+        [119, 5],
+        [89, 4],
+        [59, 3],
+        [29, 2]
+      ],
+      C: [
+        [384, 15],
+        [354, 12],
+        [325, 11],
+        [295, 10],
+        [266, 9],
+        [236, 8],
+        [207, 7],
+        [177, 6],
+        [148, 5],
+        [118, 14],
+        [88, 13],
+        [59, 3],
+        [29, 2]
+      ]
+    };
+    let month = 5;
+    for (let i = 0; i < values[type].length; i++) {
+      const a = values[type][i][0];
+      if (days > a) {
+        days -= a;
+        month = ThaiLunarDay.LUNAR_MONTHS[values[type][i][1]];
+        break;
+      }
+    }
+    return { rawMonth: month, day: days };
+  }
+  static fromRawYmd(year, rawMonth, day) {
+    const y = ThaiLunarDay.numeric(year, "thai lunar year");
+    const m = ThaiLunarDay.numeric(rawMonth, "thai lunar month");
+    const d = ThaiLunarDay.numeric(day, "thai lunar day");
+    if (y < ThaiLunarDay.MIN_YEAR || y > ThaiLunarDay.MAX_YEAR) {
+      throw new Error(`thai lunar year out of range: ${y}`);
+    }
+    const info = ThaiLunarDay.getYearInfo(y);
+    const position = ThaiLunarDay.getMonthPosition(info[3], m);
+    if (position < 0 || d < 1 || d > 30) {
+      throw new Error(`illegal thai lunar date: ${y}-${m}-${d}`);
+    }
+    const offset = ThaiLunarDay.MONTH_CUMULATIVE[info[3]][position] + d - info[2];
+    const jd = info[1] + offset;
+    const parsed = ThaiLunarDay.fromJdn(jd);
+    if (parsed.getYear() !== y || parsed.getMonthRaw() !== m || parsed.getDay() !== d) {
+      throw new Error(`illegal thai lunar date: ${y}-${m}-${d}`);
+    }
+    return parsed;
+  }
+  static fromYmd(year, month, day, leapMonth = false, lateMonth = false) {
+    const y = ThaiLunarDay.numeric(year, "thai lunar year");
+    const m = ThaiLunarDay.numeric(month, "thai lunar month");
+    if (m < 1 || m > 12) {
+      throw new Error(`illegal thai lunar month: ${m}`);
+    }
+    let raw = m;
+    if (leapMonth) {
+      if (m !== 8) {
+        throw new Error("illegal Thai leap month: must be month 8");
+      }
+      raw = 88;
+    } else if (lateMonth) {
+      if (m !== 5 && m !== 6) {
+        throw new Error("lateMonth only applies to month 5 or 6");
+      }
+      raw = m + 10;
+    }
+    return ThaiLunarDay.fromRawYmd(y, raw, day);
+  }
+  static fromSolarDay(solarDay) {
+    return ThaiLunarDay.fromJdn(Math.round(solarDay.getJulianDay().getDay()));
+  }
+  static fromJdn(jd) {
+    let low = 0;
+    let high = ThaiLunarDay.MONTHS.length - 1;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const info = ThaiLunarDay.MONTHS[mid];
+      if (jd < info[1]) {
+        high = mid - 1;
+      } else if (jd >= info[1] + ThaiLunarDay.getYearDays(info[0])) {
+        low = mid + 1;
+      } else {
+        const found = ThaiLunarDay.findDate(info[3], info[2] + jd - info[1]);
+        return new ThaiLunarDay(info[0], found.rawMonth, found.day);
+      }
+    }
+    throw new Error(`thai lunar date out of range: JDN ${jd}`);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonthRaw() {
+    return this.rawMonth;
+  }
+  getMonth() {
+    if (this.rawMonth === 88) {
+      return 8;
+    }
+    return this.rawMonth > 12 ? this.rawMonth - 10 : this.rawMonth;
+  }
+  getDay() {
+    return this.day;
+  }
+  isLeapMonth() {
+    return this.rawMonth === 88;
+  }
+  isLateMonth() {
+    return this.rawMonth === 15 || this.rawMonth === 16;
+  }
+  getYearType() {
+    return ThaiLunarDay.getYearInfo(this.year)[3];
+  }
+  hasLeapDay() {
+    return ThaiLunarDay.isLeapDayYear(this.year);
+  }
+  getMonthName() {
+    return (this.isLeapMonth() ? "\u95F0" : this.isLateMonth() ? "\u540E" : "") + HinduMonth.NAMES[(this.getMonth() + 8) % 12];
+  }
+  getName() {
+    return `${this.day}\u65E5`;
+  }
+  getMoonPhase() {
+    return this.day <= 15 ? "\u767D\u5206" : "\u9ED1\u5206";
+  }
+  getFortnightDay() {
+    return this.day <= 15 ? this.day : this.day - 15;
+  }
+  getJdn() {
+    const info = ThaiLunarDay.getYearInfo(this.year);
+    const position = ThaiLunarDay.getMonthPosition(info[3], this.rawMonth);
+    return info[1] + ThaiLunarDay.MONTH_CUMULATIVE[info[3]][position] + this.day - info[2];
+  }
+  getSolarDay() {
+    return JulianDay.fromJulianDay(this.getJdn() - 0.5).getSolarDay();
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  next(n) {
+    return ThaiLunarDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `${this.year}\u5E74${this.getMonthName()}${this.day}\u65E5`;
+  }
+}
+
+const DEG = Math.PI / 180;
+const TWO_PI = 2 * Math.PI;
+const SYNODIC_MONTH = 29.530588853;
+const LUNATION_ZERO_JDN = 2415021;
+const WINTER_SOLSTICE_SECTOR = 9;
+const MIN_YEAR = 1800;
+const MAX_YEAR = 2199;
+const LUNATIONS_1900_TO_2000 = 1237;
+function sinDeg(degrees) {
+  return Math.sin(degrees * DEG);
+}
+function wrapRadians(angle) {
+  const r = angle % TWO_PI;
+  return r < 0 ? r + TWO_PI : r;
+}
+function jdFromDate(dd, mm, yy) {
+  const shiftedYear = mm <= 2 ? yy - 1 : yy;
+  const shiftedMonth = mm <= 2 ? mm + 12 : mm;
+  const isGregorian = yy * 1e4 + mm * 100 + dd >= 15821015;
+  let gregorianFix = 0;
+  if (isGregorian) {
+    const century = Math.floor(shiftedYear / 100);
+    gregorianFix = 2 - century + Math.floor(century / 4);
+  }
+  return Math.floor(365.25 * (shiftedYear + 4716)) + Math.floor(30.6001 * (shiftedMonth + 1)) + dd + gregorianFix - 1524;
+}
+function deltaTSeconds(year) {
+  if (year < 1700) {
+    const u2 = (year - 1820) / 100;
+    return -20 + 32 * u2 * u2;
+  }
+  if (year < 1800) {
+    const t = year - 1700;
+    return 8.83 + 0.1603 * t - 59285e-7 * Math.pow(t, 2) + 13336e-8 * Math.pow(t, 3) - Math.pow(t, 4) / 1174e3;
+  }
+  if (year < 1860) {
+    const t = year - 1800;
+    return 13.72 - 0.332447 * t + 68612e-7 * Math.pow(t, 2) + 41116e-7 * Math.pow(t, 3) - 37436e-8 * Math.pow(t, 4) + 121272e-10 * Math.pow(t, 5) - 1699e-10 * Math.pow(t, 6) + 875e-12 * Math.pow(t, 7);
+  }
+  if (year < 1900) {
+    const t = year - 1860;
+    return 7.62 + 0.5737 * t - 0.251754 * Math.pow(t, 2) + 0.01680668 * Math.pow(t, 3) - 4473624e-10 * Math.pow(t, 4) + Math.pow(t, 5) / 233174;
+  }
+  if (year < 1920) {
+    const t = year - 1900;
+    return -2.79 + 1.494119 * t - 0.0598939 * Math.pow(t, 2) + 61966e-7 * Math.pow(t, 3) - 197e-6 * Math.pow(t, 4);
+  }
+  if (year < 1941) {
+    const t = year - 1920;
+    return 21.2 + 0.84493 * t - 0.0761 * Math.pow(t, 2) + 20936e-7 * Math.pow(t, 3);
+  }
+  if (year < 1961) {
+    const t = year - 1950;
+    return 29.07 + 0.407 * t - Math.pow(t, 2) / 233 + Math.pow(t, 3) / 2547;
+  }
+  if (year < 1986) {
+    const t = year - 1975;
+    return 45.45 + 1.067 * t - Math.pow(t, 2) / 260 - Math.pow(t, 3) / 718;
+  }
+  if (year < 2005) {
+    const t = year - 2e3;
+    return 63.86 + 0.3345 * t - 0.060374 * Math.pow(t, 2) + 17275e-7 * Math.pow(t, 3) + 651814e-9 * Math.pow(t, 4) + 2373599e-11 * Math.pow(t, 5);
+  }
+  if (year < 2050) {
+    const t = year - 2e3;
+    return 62.92 + 0.32217 * t + 5589e-6 * Math.pow(t, 2);
+  }
+  const u = (year - 1820) / 100;
+  const parabola = -20 + 32 * u * u;
+  return year < 2150 ? parabola - 0.5628 * (2150 - year) : parabola;
+}
+const NEW_MOON_TERMS = [
+  [-0.4072, 0, 0, 1, 0, 0],
+  [0.17241, 1, 1, 0, 0, 0],
+  [0.01608, 0, 0, 2, 0, 0],
+  [0.01039, 0, 0, 0, 2, 0],
+  [739e-5, 1, -1, 1, 0, 0],
+  [-514e-5, 1, 1, 1, 0, 0],
+  [208e-5, 2, 2, 0, 0, 0],
+  [-111e-5, 0, 0, 1, -2, 0],
+  [-57e-5, 0, 0, 1, 2, 0],
+  [56e-5, 1, 1, 2, 0, 0],
+  [-42e-5, 0, 0, 3, 0, 0],
+  [42e-5, 1, 1, 0, 2, 0],
+  [38e-5, 1, 1, 0, -2, 0],
+  [-24e-5, 1, -1, 2, 0, 0],
+  [-17e-5, 0, 0, 0, 0, 1],
+  [-7e-5, 0, 2, 1, 0, 0],
+  [4e-5, 0, 0, 2, -2, 0],
+  [4e-5, 0, 3, 0, 0, 0],
+  [3e-5, 0, 1, 1, -2, 0],
+  [3e-5, 0, 0, 2, 2, 0],
+  [-3e-5, 0, 1, 1, 2, 0],
+  [3e-5, 0, -1, 1, 2, 0],
+  [-2e-5, 0, -1, 1, -2, 0],
+  [-2e-5, 0, 1, 3, 0, 0],
+  [2e-5, 0, 0, 4, 0, 0]
+];
+const PLANETARY_TERMS = [
+  [325e-6, 299.77, 0.107408],
+  [165e-6, 251.88, 0.016321],
+  [164e-6, 251.83, 26.651886],
+  [126e-6, 349.42, 36.412478],
+  [11e-5, 84.66, 18.206239],
+  [62e-6, 141.74, 53.303771],
+  [6e-5, 207.14, 2.453732],
+  [56e-6, 154.84, 7.30686],
+  [47e-6, 34.52, 27.261239],
+  [42e-6, 207.19, 0.121824],
+  [4e-5, 291.34, 1.844379],
+  [37e-6, 161.72, 24.198154],
+  [35e-6, 239.56, 25.513099],
+  [23e-6, 331.55, 3.592518]
+];
+function newMoon(k) {
+  const lunation = k - LUNATIONS_1900_TO_2000;
+  const t = lunation / 1236.85;
+  const t2 = t * t;
+  const t3 = t2 * t;
+  const t4 = t3 * t;
+  const meanPhase = 245155009766e-5 + 29.530588861 * lunation + 15437e-8 * t2 - 15e-8 * t3 + 73e-11 * t4;
+  const eccentricity = 1 - 2516e-6 * t - 74e-7 * t2;
+  const sunAnomaly = 2.5534 + 29.1053567 * lunation - 14e-7 * t2 - 11e-8 * t3;
+  const moonAnomaly = 201.5643 + 385.81693528 * lunation + 0.0107582 * t2 + 1238e-8 * t3 - 58e-9 * t4;
+  const latitudeArg = 160.7108 + 390.67050284 * lunation - 16118e-7 * t2 - 227e-8 * t3 + 11e-9 * t4;
+  const node = 124.7746 - 1.56375588 * lunation + 20672e-7 * t2 + 215e-8 * t3;
+  let correction = 0;
+  for (let i = 0; i < NEW_MOON_TERMS.length; i++) {
+    const row = NEW_MOON_TERMS[i];
+    const angle = row[2] * sunAnomaly + row[3] * moonAnomaly + row[4] * latitudeArg + row[5] * node;
+    correction += row[0] * Math.pow(eccentricity, row[1]) * sinDeg(angle);
+  }
+  for (let i = 0; i < PLANETARY_TERMS.length; i++) {
+    const row = PLANETARY_TERMS[i];
+    correction += row[0] * sinDeg(row[1] + row[2] * lunation + (i === 0 ? -9173e-6 * t2 : 0));
+  }
+  const terrestrialJd = meanPhase + correction;
+  const decimalYear = 2e3 + (terrestrialJd - 2451545) / 365.25;
+  return terrestrialJd - deltaTSeconds(decimalYear) / 86400;
+}
+function sunLongitude(jdn) {
+  const t = (jdn - 2451545) / 36525;
+  const meanLongitude = 280.46646 + 36000.76983 * t + 3032e-7 * t * t;
+  const meanAnomaly = 357.52911 + 35999.05029 * t - 1537e-7 * t * t;
+  const centre = (1.914602 - 4817e-6 * t - 14e-6 * t * t) * sinDeg(meanAnomaly) + (0.019993 - 101e-6 * t) * sinDeg(2 * meanAnomaly) + 289e-6 * sinDeg(3 * meanAnomaly);
+  const node = 125.04 - 1934.136 * t;
+  return wrapRadians((meanLongitude + centre - 569e-5 - 478e-5 * sinDeg(node)) * DEG);
+}
+function localMidnight(jdn) {
+  return jdn - 0.5 - 7 / 24;
+}
+function sunSector(jdn, parts) {
+  const fraction = sunLongitude(localMidnight(jdn)) / TWO_PI;
+  return Math.min(parts - 1, Math.floor(fraction * parts));
+}
+function getSunLongitudeIndex(jdn) {
+  return sunSector(jdn, 12);
+}
+const NEW_MOON_OVERRIDES = {
+  835: jdFromDate(8, 7, 1967)
+};
+function getNewMoonDay(k) {
+  const pinned = NEW_MOON_OVERRIDES[k];
+  return pinned !== void 0 ? pinned : Math.floor(newMoon(k) + 0.5 + 7 / 24);
+}
+const SPAN_CACHE = {};
+function lunationContaining(jdn) {
+  let k = Math.floor((jdn - LUNATION_ZERO_JDN) / SYNODIC_MONTH);
+  while (getNewMoonDay(k + 1) <= jdn) k++;
+  while (getNewMoonDay(k) > jdn) k--;
+  return k;
+}
+function monthElevenLunation(yy) {
+  let k = lunationContaining(jdFromDate(21, 12, yy));
+  while (getSunLongitudeIndex(getNewMoonDay(k)) >= WINTER_SOLSTICE_SECTOR) k--;
+  while (getSunLongitudeIndex(getNewMoonDay(k + 1)) < WINTER_SOLSTICE_SECTOR) k++;
+  return k;
+}
+function solsticeSpan(yy) {
+  if (SPAN_CACHE[yy]) {
+    return SPAN_CACHE[yy];
+  }
+  const firstLunation = monthElevenLunation(yy);
+  const monthCount = monthElevenLunation(yy + 1) - firstLunation;
+  let leapOffset = null;
+  if (monthCount === 13) {
+    for (let offset = 1; offset <= 12; offset++) {
+      if (getSunLongitudeIndex(getNewMoonDay(firstLunation + offset)) === getSunLongitudeIndex(getNewMoonDay(firstLunation + offset + 1))) {
+        leapOffset = offset;
+        break;
+      }
+    }
+  }
+  const span = { year: yy, firstLunation, leapOffset };
+  SPAN_CACHE[yy] = span;
+  return span;
+}
+function labelAt(span, offset) {
+  const leap = span.leapOffset === offset;
+  const regular = span.leapOffset !== null && offset >= span.leapOffset ? offset - 1 : offset;
+  return { month: (regular + 10) % 12 + 1, year: regular < 2 ? span.year : span.year + 1, leap };
+}
+function locateMonth(lunarMonth, lunarYear, leap) {
+  const span = solsticeSpan(lunarMonth >= 11 ? lunarYear : lunarYear - 1);
+  let offset;
+  if (leap && span.leapOffset !== null) {
+    offset = span.leapOffset;
+  } else {
+    offset = lunarMonth >= 11 ? lunarMonth - 11 : lunarMonth + 1;
+    if (span.leapOffset !== null && offset >= span.leapOffset) offset++;
+  }
+  const start = getNewMoonDay(span.firstLunation + offset);
+  const next = getNewMoonDay(span.firstLunation + offset + 1);
+  return { start, length: next - start };
+}
+class VietnameseLunarDay extends AbstractCulture {
+  year;
+  month;
+  day;
+  leap;
+  constructor(year, month, day, leap) {
+    super();
+    this.year = year;
+    this.month = month;
+    this.day = day;
+    this.leap = leap;
+  }
+  static getLeapMonth(year) {
+    for (let y = year - 1; y <= year; y++) {
+      const span = solsticeSpan(y);
+      if (span.leapOffset === null) continue;
+      const label = labelAt(span, span.leapOffset);
+      if (label.year === year) return label.month;
+    }
+    return 0;
+  }
+  static getMonthDays(year, month, leap = false) {
+    if (leap && VietnameseLunarDay.getLeapMonth(year) !== month) {
+      return 0;
+    }
+    return locateMonth(month, year, leap).length;
+  }
+  static fromSolarDay(solarDay) {
+    if (solarDay.getYear() < MIN_YEAR || solarDay.getYear() > MAX_YEAR) {
+      throw new Error(`Vietnamese lunar year out of range: ${solarDay.getYear()}`);
+    }
+    const jd = Math.round(solarDay.getJulianDay().getDay());
+    const lunation = lunationContaining(jd);
+    const thisYear = solsticeSpan(solarDay.getYear());
+    const span = lunation >= thisYear.firstLunation ? thisYear : solsticeSpan(solarDay.getYear() - 1);
+    const label = labelAt(span, lunation - span.firstLunation);
+    return new VietnameseLunarDay(label.year, label.month, jd - getNewMoonDay(lunation) + 1, label.leap);
+  }
+  static fromYmd(year, month, day, leap = false) {
+    const y = VietnameseLunarDay.numeric(year, "vietnamese lunar year");
+    const m = VietnameseLunarDay.numeric(month, "vietnamese lunar month");
+    const d = VietnameseLunarDay.numeric(day, "vietnamese lunar day");
+    if (y < MIN_YEAR || y > MAX_YEAR || m < 1 || m > 12 || d < 1 || d > 30) {
+      throw new Error(`illegal Vietnamese lunar date: ${y}-${m}-${d}`);
+    }
+    if (leap && VietnameseLunarDay.getLeapMonth(y) !== m) {
+      throw new Error(`Vietnamese lunar year ${y} has no leap month ${m}`);
+    }
+    const located = locateMonth(m, y, leap);
+    if (d > located.length) {
+      throw new Error(`Vietnamese lunar month ${y}-${m} has only ${located.length} days`);
+    }
+    return new VietnameseLunarDay(y, m, d, leap);
+  }
+  getYear() {
+    return this.year;
+  }
+  getMonth() {
+    return this.month;
+  }
+  getDay() {
+    return this.day;
+  }
+  isLeap() {
+    return this.leap;
+  }
+  getMonthName() {
+    return (this.leap ? "\u95F0" : "") + LunarMonth.NAMES[this.month - 1];
+  }
+  getName() {
+    return LunarDay.NAMES[this.day - 1];
+  }
+  getDayCount() {
+    return VietnameseLunarDay.getMonthDays(this.year, this.month, this.leap);
+  }
+  getJdn() {
+    return locateMonth(this.month, this.year, this.leap).start + this.day - 1;
+  }
+  getSolarDay() {
+    return JulianDay.fromJulianDay(this.getJdn() - 0.5).getSolarDay();
+  }
+  getJulianDay() {
+    return this.getSolarDay().getJulianDay();
+  }
+  getWeek() {
+    return this.getSolarDay().getWeek();
+  }
+  next(n) {
+    return VietnameseLunarDay.fromSolarDay(this.getSolarDay().next(n));
+  }
+  toString() {
+    return `\u8D8A\u5357\u519C\u5386${this.year}\u5E74${this.getMonthName()}${this.getName()}`;
   }
 }
 
@@ -11889,6 +15325,14 @@ class HolidayCalendar {
         return new HolidayCalendar(r, nigeriaRules(), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5\uFF1B\u4F0A\u65AF\u5170\u8282\u65E5\u4EE5\u89C2\u6708\u4E3A\u51C6\u3002");
       case "KE":
         return new HolidayCalendar(r, kenyaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5F00\u658B\u8282\u4EE5\u89C2\u6708\u4E3A\u51C6\u3002");
+      case "LK":
+        return new HolidayCalendar(r, [
+          HolidayRule.solar(2, 4, "\u72EC\u7ACB\u65E5"),
+          HolidayRule.solar(4, 13, "\u50E7\u4F3D\u7F57\u548C\u6CF0\u7C73\u5C14\u65B0\u5E74\u524D\u5915"),
+          HolidayRule.solar(4, 14, "\u50E7\u4F3D\u7F57\u548C\u6CF0\u7C73\u5C14\u65B0\u5E74"),
+          HolidayRule.solar(5, 1, "\u52B3\u52A8\u8282"),
+          HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
+        ], "\u516C\u5386\u56FA\u5B9A\u5047\u65E5\u7531\u89C4\u5219\u63A8\u7B97\uFF1BPoya\u3001\u5F00\u658B\u8282\u3001\u53E4\u5C14\u90A6\u8282\u3001\u6392\u706F\u8282\u4E0E\u8036\u7A23\u53D7\u96BE\u65E5\u6309\u653F\u5E9C\u516C\u62A5\u9010\u5E74\u516C\u5E03\uFF0C\u5DF2\u63D0\u4F9B LK-2025\u30012026\u30012027 \u6570\u636E\u3002");
       case "US-CA":
         return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(californiaExtra()), "\u8054\u90A6\u6CD5\u5B9A\u5047\u65E5 + \u52A0\u5DDE\u585E\u8428\u5C14\xB7\u67E5\u97E6\u65AF\u65E5\uFF1B\u53BF\u5E02\u5047\u53E6\u8BA1\u3002", 1);
       case "US-NY":
@@ -11965,6 +15409,7 @@ class HolidayCalendar {
       "ZA",
       "IN",
       "PH",
+      "LK",
       "PL",
       "SE",
       "NO",
@@ -15950,4 +19395,4 @@ class DayAlmanac {
   }
 }
 
-export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, Beast, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, IslamicFestival, JulianDay, KitchenGodSteed, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MonthGeneral, MonthUnit, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };
+export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, BanglaDay, Beast, BhutaneseDay, BikramSambatDay, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, EthiopianDay, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, IslamicFestival, JulianDay, KitchenGodSteed, KoreanLunarDay, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MongolianDay, MonthGeneral, MonthUnit, MyanmarDay, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SakaDay, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThaiLunarDay, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, VietnameseLunarDay, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tyme Enhanced · 多历法与通胜知识库</title>
-<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、76 个地区节假日、传统通胜、API 字段与实时校验。">
+<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、77 个地区节假日、传统通胜、API 字段与实时校验。">
 <link rel="icon" href="./wiki-icon.svg" type="image/svg+xml">
 <style>
 :root{
@@ -411,7 +411,7 @@ a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
   <section id="page-regions" class="doc hide">
     <div class="page-heading tone-cyan">
       <div><span class="eyebrow">REGIONAL CALENDARS</span><h2>国家与地区</h2><p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页已自动载入 <code>data/holidays/</code> 中的新马泰公告数据（2025–2027）。</p></div>
-      <span class="page-badge">76 地区</span>
+      <span class="page-badge">77 地区</span>
     </div>
     <div class="regions" id="region-cards"></div>
     <div class="content-panel">
@@ -453,8 +453,8 @@ const ics = c.toIcs(2025);</pre>
 
   <section id="page-calendars" class="doc hide">
     <div class="page-heading tone-indigo">
-      <div><span class="eyebrow">CALENDAR COMPARISON</span><h2>历法对照</h2><p>同一公历日期在八种历法中的表示。回历为算术历，与观月结果可能相差一日；乌姆库拉历按 KACST 月首表逐月取值，是沙特、阿联酋的官方民用历；Diyanet 历按「新月在安卡拉日没时高于地平线」计算，是土耳其的官方口径；波斯历年首按德黑兰春分正午判据推算；印度历的 tithi 以印度标准时间 06:00 计算。</p></div>
-      <span class="page-badge">8 套历法</span>
+      <div><span class="eyebrow">CALENDAR COMPARISON</span><h2>历法对照</h2><p>同一公历日期在十八种历法中的表示，涵盖中日韩、南亚、东南亚、西亚与非洲。回历为算术历；乌姆库拉历、Diyanet 历、波斯历、韩国阴历、尼泊尔 Bikram Sambat、不丹历、蒙古历、泰历与越南历各自采用官方或传统口径；超出内置范围的日期会明确显示为不可用。</p></div>
+      <span class="page-badge">18 套历法</span>
     </div>
     <div class="searchbar"><input type="date" id="cdate"><span class="count">选择日期查看对照</span></div>
     <div class="content-panel">
@@ -471,6 +471,16 @@ const ics = c.toIcs(2025);</pre>
       <tr><td>波斯历</td><td>春分在德黑兰正午之前则当日为岁首</td><td>1401–1411 年</td><td>11 个诺鲁孜全部吻合；33 年 8 闰的算术近似在 1404 年差一日，本库不用</td></tr>
       <tr><td>希伯来历</td><td>molad 定月首 + 四条 dehiyyot</td><td>全区间</td><td>只实现 9 个法定节日与 3 个纪念日</td></tr>
       <tr><td>印度历</td><td>恒星黄道定月，tithi 为日月黄经差 12° 的 1/30</td><td>全区间</td><td>部分节日按夜分或午分判定，与日出判定差一分</td></tr>
+      <tr><td>Saka 历</td><td>印度国定民事历，公历年份减 78，年首为 3 月 21/22 日</td><td>全区间</td><td>与 <code>IndianDay</code> 的印度阴阳历不同</td></tr>
+      <tr><td>Bangla 历</td><td>孟加拉国 1426 BS 起的修订规则，年首 4 月 14 日</td><td>1426 BS 起</td><td>不支持历史旧规则，也不用于印度西孟加拉邦</td></tr>
+      <tr><td>埃塞俄比亚历</td><td>13 月制，闰年条件 <code>year % 4 === 3</code></td><td>全区间</td><td>使用 Amete Mihret 纪元</td></tr>
+      <tr><td>韩国阴历</td><td>韩国天文研究院（KASI）阴阳历数据</td><td>1900–2050</td><td>与常见中国农历在边界可能差一日</td></tr>
+      <tr><td>缅甸历</td><td>watat 闰月与 big watat 闰日规则</td><td>算法全区间</td><td>传统历；行政民事使用公历</td></tr>
+      <tr><td>Bikram Sambat</td><td>尼泊尔官方 Panchanga 年度月长表</td><td>1975–2084 BS</td><td>2084 待官方确认；可用 `importJson` 续年</td></tr>
+      <tr><td>不丹历</td><td>不丹 Kālacakra 历，闰月跟在同名月之后</td><td>1900–2100</td><td>重复日以闰日标记</td></tr>
+      <tr><td>蒙古历</td><td>Phugpa 历的蒙古纪元常数</td><td>1900–2100</td><td>与西藏、不丹在部分年份可能差一日</td></tr>
+      <tr><td>泰国阴历</td><td>Chulasakarat 历，岁首为月 5，闰月为月 8</td><td>1250–1470 CS</td><td>保留月末后 5/6 月的原始月位</td></tr>
+      <tr><td>越南农历</td><td>UTC+7 定朔与中气，十一月含冬至，首个无中气月置闰</td><td>1800–2199</td><td>1985、2007、2030、2053 年春节与中国不同</td></tr>
       </table>
     </div>
   </section>
@@ -543,7 +553,7 @@ const ics = c.toIcs(2025);</pre>
 
 <script type="module">
 import {DATASETS, VERSION} from './holidays-data.js';
-import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
+import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
@@ -558,8 +568,8 @@ const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'T
   'PL': '波兰', 'SE': '瑞典', 'NO': '挪威', 'DK': '丹麦', 'FI': '芬兰', 'IS': '冰岛',
   'IE': '爱尔兰', 'PT': '葡萄牙', 'CH': '瑞士', 'AT': '奥地利', 'BE': '比利时',
   'CZ': '捷克', 'HU': '匈牙利', 'GR': '希腊', 'CY': '塞浦路斯', 'RO': '罗马尼亚',
-  'UA': '乌克兰', 'TR': '土耳其', 'ID': '印度尼西亚', 'IR': '伊朗', 'EG': '埃及', 'SA': '沙特阿拉伯',
-  'AE': '阿联酋', 'NG': '尼日利亚', 'KE': '肯尼亚',
+  'UA': '乌克兰',   'TR': '土耳其', 'ID': '印度尼西亚', 'IR': '伊朗', 'EG': '埃及', 'SA': '沙特阿拉伯',
+  'AE': '阿联酋', 'NG': '尼日利亚', 'KE': '肯尼亚', 'LK': '斯里兰卡',
   'US-CA': '美国·加州', 'US-NY': '美国·纽约州', 'US-TX': '美国·得州',
   'DE-BY': '德国·巴伐利亚', 'GB-SCT': '英国·苏格兰', 'AU-NSW': '澳大利亚·新南威尔士',
   'CA-ON': '加拿大·安大略', 'ES-CT': '西班牙·加泰罗尼亚',
@@ -1103,6 +1113,7 @@ const REGION_BASIS = {
   'AE': '内阁决议 27/2020',
   'NG': '《公共假日法》',
   'KE': '《公共假日法》Cap 110',
+  'LK': '《1971 年假期法》、政府公报与中央银行假日表',
   'US-CA': '联邦假日 + 加州《教育法典》与州法',
   'US-NY': '联邦假日 + 纽约州劳动法',
   'US-TX': '联邦假日 + 得州政府法典',
@@ -1294,6 +1305,16 @@ const CAL_HELP = {
   '乌姆库拉历': ['乌姆库拉历', '沙特 KACST 月首表，1356–1500 年（1937–2077）逐月取值，不观月。', 'KACST 官方月首表'],
   'Diyanet 历': ['Diyanet 历', '合朔后第一个「安卡拉日没时月亮在地平线之上」的傍晚，其次日为月首。', '土耳其宗教事务局判据'],
   '波斯历': ['波斯历', '春分在德黑兰正午之前则当日为岁首，否则顺延；闰年由相邻年首差 366 日决定。', '伊朗 1925 年历法 + 春分精算'],
+  'Saka 历': ['Saka 历', '印度国定民事历，公历年份减 78；平年 3 月 22 日、闰年 3 月 21 日为岁首。', '印度日历改革委员会（1955）'],
+  'Bangla 历': ['孟加拉国 Bangla 历', '自 1426 BS 起前六个月 31 天、法尔贡 29/30 天，年首固定 4 月 14 日。', '孟加拉国公共行政部通报 / Bangla Academy'],
+  '埃塞俄比亚历': ['埃塞俄比亚历', '十二个月各 30 日，第十三月平年 5 日、闰年 6 日；闰年条件为 year % 4 === 3。', 'Amete Mihret / Beyene–Kudlek'],
+  '韩国阴历': ['韩国阴历', '采用韩国天文研究院（KASI）数据，和常见中国农历在边界可能相差一日。', 'korean-lunar-calendar（MIT）'],
+  '缅甸历': ['缅甸传统历', 'Tagu 岁首，watat 闰月与 big watat 闰日；行政民事使用公历。', 'mmcal（MIT）'],
+  'Bikram Sambat': ['Bikram Sambat', '尼泊尔官方阴阳历，月长由太阳入宫决定，须按年采用 Panchanga 历表。', 'Nepal Panchanga Nirnayak Samiti / django-bikram-sambat'],
+  '不丹历': ['不丹历', '不丹 Kālacakra 历；闰月跟在同名月之后，重复日以闰日标记。', 'bhutanese-calendar（MIT）'],
+  '蒙古历': ['蒙古历', '藏历 Phugpa 系统的蒙古纪元常数，年首与闰月可能和不丹、西藏不同。', '@hnw/date-tibetan（MIT）'],
+  '泰国阴历': ['泰国 Chulasakarat 历', '岁首为月 5，闰月为月 8；闰月、闰日依泰历规则推算。', 'pythaidate（MIT）'],
+  '越南农历': ['越南农历', '按 UTC+7 计算朔与中气；两个十一月之间有十三个月时，首个无中气月为闰月。', 'Meeus / vn-skills 独立实现（MIT）'],
 };
 
 function helpOf(key, group) {
@@ -1440,7 +1461,7 @@ function renderData() {
     ['公历纪念日', String(stat.anniversary || 0), '国际日与中国行业性纪念日'],
     ['节假日地区', String(regions.length), '含 ' + stateCount + ' 个州省子地区'],
     ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 ' + coverage + '%，其余须逐年公告'],
-    ['单元测试', '606', '历法、择日、节日、节假日、ICS、取名'],
+    ['单元测试', '636', '历法、择日、节日、节假日、ICS、取名'],
     ['数据比对', '7 张表', '与 6tail 上游逐键逐值一致'],
   ];
   const stateDays = DATASETS.filter((d) => typeof d.year !== 'number').reduce((n, d) => n + d.days.length, 0);
@@ -1500,6 +1521,19 @@ const CHECKS = [
     ['2027 圣诞补假', '12/24 圣诞节（补假）', () => dayNames(HolidayCalendar.of('US').getDays(2027).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('圣诞节') === 0))],
     ['2027 元旦补假', '12/31 元旦（补假）', () => dayNames(HolidayCalendar.of('US').getDays(2027).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('元旦') === 0))],
   ]],
+  ['国家历法', [
+    ['Saka 1947 首日', '2025年3月22日', () => SakaDay.fromYmd(1947, 1, 1).getSolarDay().toString()],
+    ['Bangla 1426 首日', '2019年4月14日', () => BanglaDay.fromYmd(1426, 1, 1).getSolarDay().toString()],
+    ['埃塞俄比亚 2012 首日', '2019年9月12日', () => EthiopianDay.fromYmd(2012, 1, 1).getSolarDay().toString()],
+    ['韩国 2017 闰五月初一', '2017年6月24日', () => KoreanLunarDay.fromYmd(2017, 5, 1, true).getSolarDay().toString()],
+    ['缅甸 1386 后得固月6日', '2025年4月3日', () => MyanmarDay.fromYmd(1386, 13, 6).getSolarDay().toString()],
+    ['尼泊尔 2082 首日', '2025年4月14日', () => BikramSambatDay.fromYmd(2082, 1, 1).getSolarDay().toString()],
+    ['不丹 2026 新年', '2026年2月18日', () => BhutaneseDay.fromYmd(2026, 1, 1).getSolarDay().toString()],
+    ['蒙古 2025 正月初二', '2025年3月1日', () => MongolianDay.fromYmd(2025, 1, 2).getSolarDay().toString()],
+    ['泰历 1383 闰八月', '2021年7月10日', () => ThaiLunarDay.fromYmd(1383, 8, 1, true).getSolarDay().toString()],
+    ['越南 2007 春节', '2007年2月17日', () => VietnameseLunarDay.fromYmd(2007, 1, 1).getSolarDay().toString()],
+    ['地区总数', '77', () => String(HolidayCalendar.getRegions().length)],
+  ]],
   ['其他地区', [
     ['英国 2025 假日数', '8', () => String(HolidayCalendar.of('GB').getDays(2025).length)],
     ['英国 2025 夏季银行假日', '8/25 夏季银行假日', () => dayNames(HolidayCalendar.of('GB').getDays(2025).filter((h) => h.getName() === '夏季银行假日'))],
@@ -1509,7 +1543,6 @@ const CHECKS = [
     ['韩国 2025 佛诞与儿童节', '5/5 佛诞节、儿童节', () => dayNames(HolidayCalendar.of('KR').getDays(2025).filter((h) => h.getDay().getMonth() === 5 && h.getDay().getDay() === 5))],
     ['荷兰 2025 国王节', '4/26 国王节', () => dayNames(HolidayCalendar.of('NL').getDays(2025).filter((h) => h.getName() === '国王节'))],
     ['南非 2025 自由日补假', '4/28 自由日（补假）', () => dayNames(HolidayCalendar.of('ZA').getDays(2025).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('自由日') === 0))],
-    ['地区总数', '76', () => String(HolidayCalendar.getRegions().length)],
     ['马来西亚州级代码', '14', () => String(HolidayCalendar.getRegions().filter((x) => x.indexOf('MY-') === 0).length)],
     ['柔佛 2025 苏丹诞辰补假', '3/24 苏丹诞辰（补假）', () => dayNames(HolidayCalendar.of('MY-JHR').getDays(2025).filter((h) => h.getName() === '苏丹诞辰（补假）'))],
     ['吉打 2026 苏丹诞辰', '6/21 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-KDH').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
@@ -1698,6 +1731,9 @@ function renderCalendars() {
   const hijri = s.getHijriDay();
   const heb = HebrewDay.fromSolarDay(s);
   const ind = IndianDay.fromSolarDay(s);
+  const safe = (fn, fallback = '—（超出范围）') => {
+    try { return fn(); } catch (e) { return fallback; }
+  };
   const rows = [
     ['公历', `${y} 年 ${m} 月 ${d} 日`, `星期${WEEK[s.getWeek().getIndex()]}`, s.getTerm().getName() + '第' + (s.getTermDay().getDayIndex() + 1) + '天'],
     ['农历', lunar.toString(), lunar.getSixtyCycleDay().getYear().getName() + '年', lunar.getLunarMonth().getDayCount() + ' 天月'],
@@ -1711,6 +1747,25 @@ function renderCalendars() {
       DiyanetDay.fromSolarDay(s).getDayCount() === 30 ? '大月 30 天' : '小月 29 天'],
     ['波斯历', PersianDay.fromSolarDay(s).toString(), '伊朗、阿富汗官方历法',
       PersianDay.fromSolarDay(s).isLeapYear() ? '闰年 366 天' : '平年 365 天'],
+    ['Saka 历', safe(() => SakaDay.fromSolarDay(s).toString()), '印度国定民事历',
+      safe(() => SakaDay.fromSolarDay(s).isLeapYear() ? '闰年 366 天' : '平年 365 天')],
+    ['Bangla 历', safe(() => BanglaDay.fromSolarDay(s).toString()), '孟加拉国修订历',
+      safe(() => BanglaDay.fromSolarDay(s).isLeapYear() ? '闰年 366 天' : '平年 365 天')],
+    ['埃塞俄比亚历', safe(() => EthiopianDay.fromSolarDay(s).toString()), 'Amete Mihret',
+      safe(() => EthiopianDay.fromSolarDay(s).isLeapYear() ? '闰年 366 天' : '平年 365 天')],
+    ['韩国阴历', safe(() => KoreanLunarDay.fromSolarDay(s).toString()), '韩国天文研究院口径', '支持 1900–2050'],
+    ['缅甸历', safe(() => MyanmarDay.fromSolarDay(s).toString()), '缅甸传统历',
+      safe(() => ['平年', '小闰月', '大闰月'][MyanmarDay.fromSolarDay(s).getYearType()])],
+    ['Bikram Sambat', safe(() => BikramSambatDay.fromSolarDay(s).toString()), '尼泊尔 Panchanga',
+      safe(() => BikramSambatDay.fromSolarDay(s).isVerified() ? '已核对年份' : '暂定年份')],
+    ['不丹历', safe(() => BhutaneseDay.fromSolarDay(s).toString()), '不丹 Kālacakra 历',
+      safe(() => BhutaneseDay.fromSolarDay(s).getCycle() + ' 饶迥')],
+    ['蒙古历', safe(() => MongolianDay.fromSolarDay(s).toString()), '蒙古 Phugpa 变体',
+      safe(() => MongolianDay.fromSolarDay(s).getCycle() + ' 饶迥')],
+    ['泰国阴历', safe(() => ThaiLunarDay.fromSolarDay(s).toString()), 'Chulasakarat',
+      safe(() => `月位 ${ThaiLunarDay.fromSolarDay(s).getMonthRaw()} · ${ThaiLunarDay.fromSolarDay(s).getMoonPhase()}`)],
+    ['越南农历', safe(() => VietnameseLunarDay.fromSolarDay(s).toString()), 'UTC+7 定朔定气',
+      safe(() => VietnameseLunarDay.fromSolarDay(s).isLeap() ? '闰月' : '平月')],
   ];
   $('cal-table').innerHTML = '<tr><th>历法</th><th>日期</th><th>月名 / 说明</th><th>补充</th></tr>' +
     rows.map((r) => `<tr><td>${esc(r[0])}${CAL_HELP[r[0]] ? `<span class="help" data-k="${esc(r[0])}">?</span>` : ''}</td>` +

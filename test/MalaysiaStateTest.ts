@@ -17,7 +17,7 @@ class MalaysiaStateTest {
         for (let i: number = 0; i < states.length; i++) {
             ok(all.indexOf(states[i]) > -1, states[i]);
         }
-        equal(all.length, 76);
+        equal(all.length, 77);
     }
 
     @test

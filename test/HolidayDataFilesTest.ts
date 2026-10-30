@@ -12,7 +12,7 @@ class HolidayDataFilesTest {
     test0(): void {
         // 逐年公告文件均可解析并导入
         const files: string[] = readdirSync(HolidayDataFilesTest.DIR).filter((f: string) => f.slice(-5) === '.json').sort();
-        equal(files.length, 29);
+        equal(files.length, 32);
         for (let i: number = 0; i < files.length; i++) {
             const text: string = readFileSync(join(HolidayDataFilesTest.DIR, files[i]), 'utf8');
             const o: {
@@ -69,5 +69,11 @@ class HolidayDataFilesTest {
         equal(eg.getHoliday(SolarDay.fromYmd(2026, 1, 25)), null);
         equal(eg.getHoliday(SolarDay.fromYmd(2026, 5, 7))!.getName(), '劳动节');
         equal(eg.getHoliday(SolarDay.fromYmd(2026, 5, 1)), null);
+        // 斯里兰卡：Poya 与宗教节日按年导入，固定假日仍由规则推算
+        const lk: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'LK-2026.json'), 'utf8'));
+        equal(lk.getHoliday(SolarDay.fromYmd(2026, 5, 1))!.getName(), '卫塞月圆日、劳动节');
+        equal(lk.getHoliday(SolarDay.fromYmd(2026, 11, 8))!.getName(), '排灯节');
+        equal(lk.getDays(2026).length, 25);
+        ok(HolidayCalendar.of('LK').getDays(2033).length >= 5);
     }
 }

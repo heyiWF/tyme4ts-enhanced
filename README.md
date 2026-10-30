@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg?style=flat-square)](./LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-606%20passing-1f6b46?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-636%20passing-1f6b46?style=flat-square)
 
 在 [6tail/tyme4ts](https://github.com/6tail/tyme4ts) 之上，把多种历法、八类节日、多地区法定节假日与传统通胜，统一为可计算、可复现、可考证的 TypeScript API。
 
@@ -22,14 +22,14 @@
 
 | 分类 | 能力 | 依据 |
 | --- | --- | --- |
-| 历法 | 公历、农历（含闰月）、藏历、回历、希伯来历、印度阴阳历（tithi）、**乌姆库拉历**、**土耳其 Diyanet 历**、**波斯历（伊朗历）**、儒略日、星座、月相、七十二候 | 寿星天文历算法、molad 算术历、KACST 月首表、安卡拉日没判据、德黑兰春分正午判据 |
+| 历法 | 公历、农历（含闰月）、藏历、回历、希伯来历、印度阴阳历（tithi）、**乌姆库拉历**、**土耳其 Diyanet 历**、**波斯历（伊朗历）**、**Saka 历**、**孟加拉 Bangla 历**、**埃塞俄比亚历**、**韩国阴历**、**缅甸历**、**尼泊尔 Bikram Sambat**、**不丹历**、**蒙古历**、**泰国阴历**、**越南农历**、儒略日、星座、月相、七十二候 | 寿星天文历、molad、KACST、Diyanet、德黑兰春分、KASI、Panchanga、Chulasakarat、UTC+7 定朔定气 |
 | 干支 | 年月日时四柱、纳音、十神、藏干、人元司令、胎元、命宫、大运流年 | 子平术通行规则 |
 | 神煞 | 吉神宜趋、凶神宜忌、建除十二神、二十八宿、黄黑道十二神、六曜、小六壬、彭祖百忌 | 《协纪辨方书》体系 |
 | 择日 | 宜忌、日冲煞、旬空、月破岁破、天赦日、四离四绝、月将、年命禄贵合、贵人时、时辰吉凶 | 协纪辨方书 + 通书 |
 | 通胜栏目 | 诸葛武侯出行、生肖号码、九宫飞星、方位五神、胎神、神诞、吉数推演 | 《玉匣记》及港台通胜 |
 | 节日 | 八类来源统一聚合：法定、传统、民俗、公历纪念日与国际日、佛历、道历、节气、外历；共 **480+ 条名称**，同神异写自动归并 | 6tail/lunar-typescript、维基文库、政府公告 |
 | 民俗数据 | 民俗节日、神诞、周公解梦（988 条）、风水常识、出生取名、生肖流月运程 | 通行历书、维基文库公有领域本 |
-| 节假日 | **76 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区、中国广西），覆盖欧亚美非 41 国；支持公历、农历、伊斯兰历、希伯来历、波斯历、东正教复活节六类规则、14 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
+| 节假日 | **77 个地区代码**（含 8 个子地区、马来西亚 13 州与联邦直辖区、中国广西、斯里兰卡），覆盖欧亚美非 42 国；支持公历、农历、伊斯兰历、希伯来历、波斯历、东正教复活节六类规则、14 种规则类型与三种补假模式 | 政府公告、祝日法与银行假日表 |
 | 互操作 | ICS 订阅解析（年度循环事件转 tyme `Event`）与节假日 ICS 导出 | iCalendar RFC 5545 |
 
 ---
@@ -144,9 +144,9 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
-支持 76 个地区代码：
+支持 77 个地区代码：
 
-- 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID` `IR`
+- 亚洲：`CN` `HK` `MO` `TW` `JP` `KR` `VN` `SG` `MY` `TH` `IN` `PH` `ID` `IR` `LK`
 - 欧洲：`GB` `DE` `FR` `IT` `ES` `NL` `RU` `PL` `SE` `NO` `DK` `FI` `IS` `IE` `PT` `CH` `AT` `BE` `CZ` `HU` `GR` `CY` `RO` `UA` `TR`
 - 美洲：`US` `CA` `BR` `MX`
 - 大洋洲与非洲：`AU` `NZ` `ZA` `EG` `NG` `KE` `SA` `AE`
@@ -162,7 +162,7 @@ cn.importJson(JSON.stringify({
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-新加坡、马来西亚、泰国、印度尼西亚只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)——新加坡 3 份、泰国 3 份、马来西亚联邦 3 份、马来西亚州级 13 份、印度尼西亚 2 份、埃及 1 份、中国新疆 2 份、宁夏 2 份，共 29 个文件：
+新加坡、马来西亚、泰国、印度尼西亚、斯里兰卡只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)——新加坡 3 份、泰国 3 份、马来西亚联邦 3 份、马来西亚州级 13 份、印度尼西亚 2 份、埃及 1 份、中国新疆 2 份、宁夏 2 份、斯里兰卡 3 份，共 32 个文件：
 
 ```ts
 import {readFileSync} from 'node:fs';
@@ -248,7 +248,52 @@ PersianDay.isLeapYear(1408);                                        // true
 
 ---
 
-## 八、节日体系：八类来源与统一去重
+## 八、国家历法：南亚、东亚、东南亚与非洲
+
+新增十个按国家官方口径实现的历法类，均为零运行时依赖：
+
+| 类 | 国家 / 口径 | 支持范围 | 关键规则 |
+| --- | --- | --- | --- |
+| `SakaDay` | 印度国定 Saka 民事历 | 全公历区间 | 公历年减 78；平年 3 月 22 日、闰年 3 月 21 日岁首；与 `IndianDay` 的印度阴阳历并存 |
+| `BanglaDay` | 孟加拉国修订版 Bangla 历 | 1426 BS 起 | 前六个月 31 日，法尔贡 29/30 日，年首 4 月 14 日；不混用印度西孟加拉邦版本 |
+| `EthiopianDay` | 埃塞俄比亚 Amete Mihret 历 | 全区间 | 13 月制；`year % 4 === 3` 为闰年，Pagume 6 日 |
+| `KoreanLunarDay` | 韩国 KASI/KARI 阴历 | 1900–2050 | 年份数据表，处理闰月与朔日边界；与中国农历可能差一日 |
+| `MyanmarDay` | 缅甸传统历 | 算法全区间 | Tagu 岁首，watat 闰月、big watat 闰日；行政民事仍用公历 |
+| `BikramSambatDay` | 尼泊尔官方 Panchanga | 1975–2084 BS | 月长逐年查表；2084 暂定；支持 `importJson()` 续年 |
+| `BhutaneseDay` | 不丹 Kālacakra 历 | 1900–2100 | 闰月跟在同名月之后，重复日以闰日标记 |
+| `MongolianDay` | 蒙古 Phugpa 变体 | 1900–2100 | 蒙古纪元常数，年首与闰月可能不同于西藏、不丹 |
+| `ThaiLunarDay` | 泰国 Chulasakarat 阴历 | 1250–1470 CS | 月 5 岁首、月 8 闰月，保留年末后 5/6 月的原始月位 |
+| `VietnameseLunarDay` | 越南农历 | 1800–2199 | UTC+7 定朔定气，十一月含冬至，首个无中气月置闰 |
+
+```ts
+SakaDay.fromYmd(1947, 1, 1).getSolarDay();                 // 2025年3月22日
+BanglaDay.fromSolarDay(SolarDay.fromYmd(2020, 2, 21));     // 1426年法尔贡月8日
+KoreanLunarDay.fromYmd(2017, 5, 1, true);                  // 2017年闰五月初一
+BhutaneseDay.fromSolarDay(SolarDay.fromYmd(2026, 2, 18));  // 第十七饶迥火马年神变月初一
+VietnameseLunarDay.fromSolarDay(SolarDay.fromYmd(2007, 2, 17)); // 越南农历2007年正月初一
+```
+
+泰国年末的后 5/6 月用 `lateMonth=true`，闰月用 `leapMonth=true`；不丹与蒙古历的重复日用 `leapDay=true` 表示两日中的第一日。
+
+尼泊尔 Bikram Sambat 的新年度表可以不改代码直接追加。导入会校验每年 12 个月、总长 365/366 日，并拒绝不连续年份：
+
+```ts
+BikramSambatDay.importJson(JSON.stringify({
+  years: [{
+    year: 2085,
+    months: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+    verified: true,
+  }],
+}));
+```
+
+韩国、缅甸、不丹、蒙古、泰国与越南历的算法分别移植自 `korean-lunar-calendar`、`mmcal`、`bhutanese-calendar`、`@hnw/date-tibetan`、`pythaidate` 与 `vn-skills`（均为 MIT）；越南历使用独立实现的 Meeus 公式，不复制带非商业限制的 `amlich` 代码。
+
+斯里兰卡以 `LK` 地区接入，固定假日由规则推算；Poya 与宗教节日按政府公报导入 `data/holidays/LK-2025.json`、`LK-2026.json`、`LK-2027.json`。
+
+---
+
+## 九、节日体系：八类来源与统一去重
 
 ```ts
 import {Festivals, DayAlmanac, HebrewDay, IndianDay, Tithi} from 'tyme4ts-enhanced';
@@ -306,7 +351,7 @@ npm run build && npm run audit:holidays
 
 ---
 
-## 九、ICS 订阅转换
+## 十、ICS 订阅转换
 
 ```ts
 import {IcsCalendar, EventManager} from 'tyme4ts-enhanced';
@@ -329,7 +374,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十、准确性：以公开黄历逐项校验
+## 十一、准确性：以公开黄历逐项校验
 
 测试以 2025-04-03（乙巳年三月初六，壬寅日）为基准，与多家公开发布的黄历逐项对照，全部一致：
 
@@ -358,7 +403,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 
 ---
 
-## 十一、年份范围
+## 十二、年份范围
 
 | 能力 | 范围 |
 | --- | --- |
@@ -366,11 +411,15 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 | 农历 | 公元前 1 年至 9999 年 |
 | 节气 | 精度随年代衰减，1900–2100 年与官方历书一致 |
 | 藏历 / 回历 | 1950 年起 / 公元 622 年起 |
-| 节假日 | 中国大陆 2001–2026（可导入）；其他地区按规则推算 |
+| Saka / Bangla / 埃塞俄比亚 | 全区间 / 1426 BS 起 / 全区间 |
+| 韩国 / 不丹 / 蒙古 | 1900–2050 / 1900–2100 / 1900–2100 |
+| 尼泊尔 Bikram Sambat | 1975–2084 BS（可用 `importJson()` 续年） |
+| 泰国阴历 / 越南农历 / 缅甸历 | 1250–1470 CS / 1800–2199 / 算法全区间 |
+| 节假日 | 中国大陆 2001–2026（可导入）；斯里兰卡 2025–2027（可导入）；其他地区按规则推算 |
 
 ---
 
-## 十二、移植到其他语言
+## 十三、移植到其他语言
 
 `data/conformance.json` 给出 **252 个日期 × 26 个字段**的固定输出（1900–2100，含基准日、闰月、闰年、世纪交界样本）。移植版读入该文件逐条比对即可验收，不必读 TypeScript 源码：
 
@@ -390,7 +439,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ---
 
-## 十三、与 tyme4ts 的关系
+## 十四、与 tyme4ts 的关系
 
 - 100% 保留上游公开 API，可直接替换 `tyme4ts`；
 - 新增二十余个类：`DayAlmanac`、`WuHouDay`、`Clash`、`LifeRelation`、`HourFortune`、`NineStarChart`、`Palace`、`ZodiacNumbers`、`MonthGeneral`、`DeityFestival`、`DreamOracle`、`FengShuiTip`、`Naming`、`ElementBalance`、`ZodiacFortune`、`HolidayCalendar`、`HolidayRule`、`IcsCalendar`、`Era` 等；
@@ -398,11 +447,11 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ---
 
-## 十四、开发
+## 十五、开发
 
 ```bash
 npm i
-npm test          # 606 项测试
+npm test          # 636 项测试
 npm run lint
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs
@@ -410,6 +459,8 @@ npm run docs      # 构建并同步 docs/tyme.mjs
 
 数据勘误请附出处（古籍版本、政府公告或公开黄历截图），本库优先采纳可复核的来源。
 
-## 十五、许可与致谢
+## 十六、许可与致谢
 
 MIT。历法基础来自 [6tail/tyme4ts](https://github.com/6tail/tyme4ts)（MIT），节气算法引自许剑伟《寿星天文历》，藏历数据引自 [stonelf/zangli](https://github.com/stonelf/zangli)，神明诞辰转录自 [nihaixia-app](https://github.com/jangviktor-web/nihaixia-app)（Apache-2.0）整理的《玉匣记》维基文库本，周公解梦取自维基文库公有领域本；公历纪念日、农历民俗、佛历因果犯忌、道历诸神圣诞四张表由 `scripts/gen-festival-data.py` 从 [6tail/lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）源码解析生成，并由 `npm run verify:festivals` 逐条比对。
+
+国家历法数据与算法另致谢：[korean-lunar-calendar](https://github.com/usingsky/korean_lunar_calendar_js)（MIT）、[mmcal](https://github.com/yan9a/mcal)（MIT）、[django-bikram-sambat](https://github.com/anishbhimgc/django-bikram-sambat)（MIT，尼泊尔 Panchanga 年度表）、[bhutanese-calendar](https://www.npmjs.com/package/bhutanese-calendar)（MIT）、[@hnw/date-tibetan](https://github.com/hnw/date-tibetan)（MIT）、[pythaidate](https://github.com/hmmbug/pythaidate)（MIT）、[vn-skills](https://github.com/beiryu/vn-skills)（MIT）。斯里兰卡节假日数据来自 [Dilshan-H/srilanka-holidays](https://github.com/Dilshan-H/srilanka-holidays)（MIT）与 [HiranthaSandaruwan/sri-lanka-public-holidays](https://github.com/HiranthaSandaruwan/sri-lanka-public-holidays)（CC BY 4.0），文件内保留出处。

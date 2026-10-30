@@ -213,6 +213,14 @@ export class HolidayCalendar {
                 return new HolidayCalendar(r, nigeriaRules(), '联邦法定假日；伊斯兰节日以观月为准。');
             case 'KE':
                 return new HolidayCalendar(r, kenyaRules(), '全国法定假日；开斋节以观月为准。');
+            case 'LK':
+                return new HolidayCalendar(r, [
+                    HolidayRule.solar(2, 4, '独立日'),
+                    HolidayRule.solar(4, 13, '僧伽罗和泰米尔新年前夕'),
+                    HolidayRule.solar(4, 14, '僧伽罗和泰米尔新年'),
+                    HolidayRule.solar(5, 1, '劳动节'),
+                    HolidayRule.solar(12, 25, '圣诞节'),
+                ], '公历固定假日由规则推算；Poya、开斋节、古尔邦节、排灯节与耶稣受难日按政府公报逐年公布，已提供 LK-2025、2026、2027 数据。');
             case 'US-CA':
                 return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(californiaExtra()), '联邦法定假日 + 加州塞萨尔·查韦斯日；县市假另计。', 1);
             case 'US-NY':
@@ -265,7 +273,7 @@ export class HolidayCalendar {
     static getRegions(): string[] {
         return ['CN', 'HK', 'MO', 'TW', 'JP', 'KR', 'VN', 'SG', 'MY', 'TH',
             'US', 'GB', 'CA', 'AU', 'NZ', 'DE', 'FR', 'IT', 'ES', 'NL',
-            'BR', 'MX', 'RU', 'ZA', 'IN', 'PH',
+            'BR', 'MX', 'RU', 'ZA', 'IN', 'PH', 'LK',
             'PL', 'SE', 'NO', 'DK', 'FI', 'IS', 'IE', 'PT', 'CH', 'AT',
             'BE', 'CZ', 'HU', 'GR', 'CY', 'RO', 'UA', 'TR',
             'ID', 'IR', 'EG', 'SA', 'AE', 'NG', 'KE',
