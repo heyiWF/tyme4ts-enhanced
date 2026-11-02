@@ -1,0 +1,55 @@
+{
+  "region": "GB-SCT",
+  "year": 2023,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+    {
+      "date": "2023-01-02",
+      "name": "New Year’s Day",
+      "note": "Substitute day"
+    },
+    {
+      "date": "2023-01-03",
+      "name": "2nd January",
+      "note": "Substitute day"
+    },
+    {
+      "date": "2023-04-07",
+      "name": "Good Friday"
+    },
+    {
+      "date": "2023-05-01",
+      "name": "Early May bank holiday"
+    },
+    {
+      "date": "2023-05-08",
+      "name": "Bank holiday for the coronation of King Charles III"
+    },
+    {
+      "date": "2023-05-29",
+      "name": "Spring bank holiday"
+    },
+    {
+      "date": "2023-08-07",
+      "name": "Summer bank holiday"
+    },
+    {
+      "date": "2023-11-30",
+      "name": "St Andrew’s Day"
+    },
+    {
+      "date": "2023-12-25",
+      "name": "Christmas Day"
+    },
+    {
+      "date": "2023-12-26",
+      "name": "Boxing Day"
+    }
+  ]
+}

@@ -59,9 +59,9 @@ export class BanglaDay extends AbstractCulture {
     }
 
     static fromYmd(year: number | string, month: number | string, day: number | string): BanglaDay {
-        const y: number = BanglaDay.numeric(year, 'bangla year');
-        const m: number = BanglaDay.numeric(month, 'bangla month');
-        const d: number = BanglaDay.numeric(day, 'bangla day');
+        const y: number = BanglaDay.integer(year, 'bangla year');
+        const m: number = BanglaDay.integer(month, 'bangla month');
+        const d: number = BanglaDay.integer(day, 'bangla day');
         if (y < BanglaDay.MIN_YEAR) {
             throw new Error(`bangla year ${y} is before supported year ${BanglaDay.MIN_YEAR}`);
         }

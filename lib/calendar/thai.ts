@@ -97,9 +97,9 @@ export class ThaiLunarDay extends AbstractCulture {
     }
 
     static fromRawYmd(year: number | string, rawMonth: number | string, day: number | string): ThaiLunarDay {
-        const y: number = ThaiLunarDay.numeric(year, 'thai lunar year');
-        const m: number = ThaiLunarDay.numeric(rawMonth, 'thai lunar month');
-        const d: number = ThaiLunarDay.numeric(day, 'thai lunar day');
+        const y: number = ThaiLunarDay.integer(year, 'thai lunar year');
+        const m: number = ThaiLunarDay.integer(rawMonth, 'thai lunar month');
+        const d: number = ThaiLunarDay.integer(day, 'thai lunar day');
         if (y < ThaiLunarDay.MIN_YEAR || y > ThaiLunarDay.MAX_YEAR) {
             throw new Error(`thai lunar year out of range: ${y}`);
         }
@@ -119,8 +119,8 @@ export class ThaiLunarDay extends AbstractCulture {
 
     static fromYmd(year: number | string, month: number | string, day: number | string,
                    leapMonth: boolean = false, lateMonth: boolean = false): ThaiLunarDay {
-        const y: number = ThaiLunarDay.numeric(year, 'thai lunar year');
-        const m: number = ThaiLunarDay.numeric(month, 'thai lunar month');
+        const y: number = ThaiLunarDay.integer(year, 'thai lunar year');
+        const m: number = ThaiLunarDay.integer(month, 'thai lunar month');
         if (m < 1 || m > 12) {
             throw new Error(`illegal thai lunar month: ${m}`);
         }

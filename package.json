@@ -1,6 +1,6 @@
 {
   "name": "tyme4ts-enhanced",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "description": "多历法与通胜 TypeScript 引擎：农历、干支、节气、神煞、择日、解梦、Saka、Bangla、埃塞俄比亚、韩国、缅甸、尼泊尔、不丹、蒙古、泰国与越南历，多地区节假日与 ICS，零依赖、易移植。",
   "main": "./dist/lib/index.cjs",
   "module": "./dist/lib/index.mjs",
@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "lint": "eslint",
+    "lint": "eslint lib",
     "build": "unbuild",
     "test": "mocha -r ts-node/register --config=.mocharc.json",
     "release": "npm run test && npm publish",
@@ -23,7 +23,11 @@
     "verify:festivals": "node scripts/verify-festivals.mjs",
     "audit:holidays": "node scripts/audit-holidays.mjs",
     "gen:conformance": "node scripts/gen-conformance.mjs",
-    "gen:malaysia": "node scripts/gen-malaysia-states.mjs"
+    "gen:malaysia": "node scripts/gen-malaysia-states.mjs",
+    "typecheck": "tsc --noEmit",
+    "gen:govuk": "node scripts/gen-govuk.mjs",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run verify:festivals && npm run verify:package",
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "homepage": "https://github.com/heyiWF/tyme4ts-enhanced",
   "repository": {
@@ -78,5 +82,10 @@
     "typescript": "^5.7.3",
     "unbuild": "^3.3.1",
     "globals": "^15.14.0"
-  }
+  },
+  "files": [
+    "dist/lib",
+    "data",
+    "CHANGELOG.md"
+  ]
 }

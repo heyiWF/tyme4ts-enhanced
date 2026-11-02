@@ -49,9 +49,9 @@ export class EthiopianDay extends AbstractCulture {
     }
 
     static fromYmd(year: number | string, month: number | string, day: number | string): EthiopianDay {
-        const y: number = EthiopianDay.numeric(year, 'ethiopian year');
-        const m: number = EthiopianDay.numeric(month, 'ethiopian month');
-        const d: number = EthiopianDay.numeric(day, 'ethiopian day');
+        const y: number = EthiopianDay.integer(year, 'ethiopian year');
+        const m: number = EthiopianDay.integer(month, 'ethiopian month');
+        const d: number = EthiopianDay.integer(day, 'ethiopian day');
         if (y < 1) {
             throw new Error(`illegal ethiopian year: ${y}`);
         }

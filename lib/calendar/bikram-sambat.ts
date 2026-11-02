@@ -111,9 +111,9 @@ export class BikramSambatDay extends AbstractCulture {
     }
 
     static fromYmd(year: number | string, month: number | string, day: number | string): BikramSambatDay {
-        const y: number = BikramSambatDay.numeric(year, 'bikram sambat year');
-        const m: number = BikramSambatDay.numeric(month, 'bikram sambat month');
-        const d: number = BikramSambatDay.numeric(day, 'bikram sambat day');
+        const y: number = BikramSambatDay.integer(year, 'bikram sambat year');
+        const m: number = BikramSambatDay.integer(month, 'bikram sambat month');
+        const d: number = BikramSambatDay.integer(day, 'bikram sambat day');
         if (m < 1 || m > 12) {
             throw new Error(`illegal bikram sambat month: ${m}`);
         }

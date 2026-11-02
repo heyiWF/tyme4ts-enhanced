@@ -19,6 +19,7 @@ const files = readdirSync(DIR)
 
 const datasets = files.map((file) => JSON.parse(readFileSync(join(DIR, file), 'utf8')));
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const sources = JSON.parse(readFileSync('data/sources.json', 'utf8'));
 
 const header = `/**
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
@@ -30,7 +31,8 @@ export const VERSION = ${JSON.stringify(pkg.version)};
 
 export const DATASETS = `;
 
-writeFileSync(OUT, header + JSON.stringify(datasets, null, 1) + ';\n', 'utf8');
+writeFileSync(OUT, header + JSON.stringify(datasets, null, 1) + ';\n\nexport const SOURCES = '
+    + JSON.stringify(sources, null, 1) + ';\n', 'utf8');
 
 const byRegion = {};
 for (const d of datasets) {

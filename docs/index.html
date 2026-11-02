@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tyme Enhanced · 多历法与通胜知识库</title>
-<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、77 个地区节假日、传统通胜、API 字段与实时校验。">
+<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、78 个地区节假日、传统通胜、API 字段与实时校验。">
 <link rel="icon" href="./wiki-icon.svg" type="image/svg+xml">
 <style>
 :root{
@@ -410,13 +410,18 @@ a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
 
   <section id="page-regions" class="doc hide">
     <div class="page-heading tone-cyan">
-      <div><span class="eyebrow">REGIONAL CALENDARS</span><h2>国家与地区</h2><p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页已自动载入 <code>data/holidays/</code> 中的新马泰公告数据（2025–2027）。</p></div>
-      <span class="page-badge">77 地区</span>
+      <div><span class="eyebrow">REGIONAL CALENDARS</span><h2>国家与地区</h2><p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页自动载入仓库的年度数据，英国三个地区含 2019–2028 年完整公告。可搜索地区并切换年份，查看当前数据口径。</p></div>
+      <span class="page-badge" id="region-count"></span>
+    </div>
+    <div class="searchbar region-tools">
+      <div><label for="region-query">搜索地区</label><input id="region-query" type="search" placeholder="名称或代码，例如 GB"></div>
+      <div><label for="region-year">年份</label><input id="region-year" type="number" min="1900" max="2100" step="1"></div>
     </div>
     <div class="regions" id="region-cards"></div>
     <div class="content-panel">
       <h3 id="region-title">法定节假日</h3>
       <div class="note" id="region-desc"></div>
+      <div class="note" id="region-provenance" aria-live="polite"></div>
       <div class="hol-list" id="region-list"></div>
       <div class="note" id="region-audit"></div>
     </div>
@@ -424,7 +429,7 @@ a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
       <h3>追加数据</h3>
 <pre>import {HolidayCalendar} from 'tyme4ts-enhanced';
 
-const c = HolidayCalendar.of('US');
+const c = HolidayCalendar.create('US');
 c.importJson(JSON.stringify({
   region: 'US',
   days: [{date: '2027-12-24', name: '圣诞前夕', work: false}]
@@ -465,17 +470,17 @@ const ics = c.toIcs(2025);</pre>
       <tr><th>历法</th><th>判据</th><th>已验证范围</th><th>已知边界</th></tr>
       <tr><td>公历</td><td>格里高利历，四年一闰、百年不闰、四百年再闰</td><td>1582 年起</td><td>—</td></tr>
       <tr><td>农历</td><td>朔望月定月，无中气之月置闰，节气按太阳黄经</td><td>1900–2100</td><td>与紫金山天文台历书在少数历史年份差一日，源于时区口径</td></tr>
-      <tr><td>回历（算术）</td><td>30 年 11 闰</td><td>全区间</td><td>不观月，与观月国家差 1–2 日，仅作近似</td></tr>
+      <tr><td>回历（算术）</td><td>30 年 11 闰</td><td>见模块测试与范围说明</td><td>不观月，与观月国家差 1–2 日，仅作近似</td></tr>
       <tr><td>乌姆库拉历</td><td>沙特 KACST 月首表</td><td>1356–1500 AH</td><td>1937–2077 年有效，表外不支持；1364 年原表有一处笔误，如实保留</td></tr>
       <tr><td>Diyanet 历</td><td>合朔后第一个安卡拉日没时月亮高于地平线的傍晚</td><td>26 个官方日期</td><td>2015–2027 年，24 个吻合；2016 年两处差一日</td></tr>
       <tr><td>波斯历</td><td>春分在德黑兰正午之前则当日为岁首</td><td>1401–1411 年</td><td>11 个诺鲁孜全部吻合；33 年 8 闰的算术近似在 1404 年差一日，本库不用</td></tr>
-      <tr><td>希伯来历</td><td>molad 定月首 + 四条 dehiyyot</td><td>全区间</td><td>只实现 9 个法定节日与 3 个纪念日</td></tr>
-      <tr><td>印度历</td><td>恒星黄道定月，tithi 为日月黄经差 12° 的 1/30</td><td>全区间</td><td>部分节日按夜分或午分判定，与日出判定差一分</td></tr>
-      <tr><td>Saka 历</td><td>印度国定民事历，公历年份减 78，年首为 3 月 21/22 日</td><td>全区间</td><td>与 <code>IndianDay</code> 的印度阴阳历不同</td></tr>
+      <tr><td>希伯来历</td><td>molad 定月首 + 四条 dehiyyot</td><td>见模块测试与范围说明</td><td>只实现 9 个法定节日与 3 个纪念日</td></tr>
+      <tr><td>印度历</td><td>恒星黄道定月，tithi 为日月黄经差 12° 的 1/30</td><td>见模块测试与范围说明</td><td>部分节日按夜分或午分判定，与日出判定差一分</td></tr>
+      <tr><td>Saka 历</td><td>印度国定民事历，公历年份减 78，年首为 3 月 21/22 日</td><td>见模块测试与范围说明</td><td>与 <code>IndianDay</code> 的印度阴阳历不同</td></tr>
       <tr><td>Bangla 历</td><td>孟加拉国 1426 BS 起的修订规则，年首 4 月 14 日</td><td>1426 BS 起</td><td>不支持历史旧规则，也不用于印度西孟加拉邦</td></tr>
-      <tr><td>埃塞俄比亚历</td><td>13 月制，闰年条件 <code>year % 4 === 3</code></td><td>全区间</td><td>使用 Amete Mihret 纪元</td></tr>
+      <tr><td>埃塞俄比亚历</td><td>13 月制，闰年条件 <code>year % 4 === 3</code></td><td>见模块测试与范围说明</td><td>使用 Amete Mihret 纪元</td></tr>
       <tr><td>韩国阴历</td><td>韩国天文研究院（KASI）阴阳历数据</td><td>1900–2050</td><td>与常见中国农历在边界可能差一日</td></tr>
-      <tr><td>缅甸历</td><td>watat 闰月与 big watat 闰日规则</td><td>算法全区间</td><td>传统历；行政民事使用公历</td></tr>
+      <tr><td>缅甸历</td><td>watat 闰月与 big watat 闰日规则</td><td>见模块测试与范围说明</td><td>传统历；行政民事使用公历</td></tr>
       <tr><td>Bikram Sambat</td><td>尼泊尔官方 Panchanga 年度月长表</td><td>1975–2084 BS</td><td>2084 待官方确认；可用 `importJson` 续年</td></tr>
       <tr><td>不丹历</td><td>不丹 Kālacakra 历，闰月跟在同名月之后</td><td>1900–2100</td><td>重复日以闰日标记</td></tr>
       <tr><td>蒙古历</td><td>Phugpa 历的蒙古纪元常数</td><td>1900–2100</td><td>与西藏、不丹在部分年份可能差一日</td></tr>
@@ -505,15 +510,22 @@ const ics = c.toIcs(2025);</pre>
 
   <section id="page-data" class="doc hide">
     <div class="page-heading tone-gold">
-      <div><span class="eyebrow">DATA &amp; LICENSE</span><h2>数据来源与许可</h2><p>本项目只收录可考、可再分发的内容。凡无公开算法的栏目（原版吉数、三级时辰吉凶、出版社运程文案），一律标注为「推演」，不与原版数值混同。</p></div>
+      <div><span class="eyebrow">DATA &amp; LICENSE</span><h2>数据来源与许可</h2><p>数据分别来自官方资料、开源数据与传统文本，核验程度与许可逐项说明。凡无公开算法的栏目（原版吉数、三级时辰吉凶、出版社运程文案），一律标注为「推演」，不与原版数值混同。</p></div>
       <span class="page-badge">可复核</span>
     </div>
 
     <div class="stats" id="data-stats"></div>
+    <div class="content-panel">
+      <h3>官方资料与接入状态</h3>
+      <p id="source-checked"></p>
+      <p>逐条区分已接入数据与后续候选。公告、历法转换、民俗条目适用范围不同；规则命中日期的比例不代表法律准确率。</p>
+      <div class="source-grid" id="official-sources"></div>
+      <p><a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/SOURCES.md">资料目录与更新方法</a> · <a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/AUDIT.md">本次历史审查与已知边界</a></p>
+    </div>
 
     <div class="content-panel">
       <h3>数据管线</h3>
-      <p>节日与节假日数据不是手抄的，而是「上游源码 → 生成 → 逐条比对」三步：</p>
+      <p>数据采用源码生成、官方快照转换和人工校核等方式；新增记录需保留来源与适用范围。</p>
       <table class="t">
         <tr><th>步骤</th><th>命令</th><th>作用</th></tr>
         <tr><td>生成</td><td><code>npm run gen:festivals</code></td><td>解析 6tail/lunar-typescript 的 SolarUtil / LunarUtil / FotoUtil / TaoUtil，产出四张 TS 数据表与 JSON 快照</td></tr>
@@ -543,7 +555,7 @@ const ics = c.toIcs(2025);</pre>
       <ul>
         <li>潮汐：需测站调和常数，与历法无关，且模型数据另有许可。</li>
         <li>原版「今日吉数」「吉祥生肖排名」：无公开算法，本库仅给出可复算的推演值。</li>
-        <li>回历与观月历的逐日差异：本库为算术历，可能相差一日。</li>
+        <li>回历与观月历的逐日差异：本库分别提供算术回历、乌姆库拉表与 Diyanet 近似算法，均不能代替当地观月公告。</li>
       </ul>
     </div>
   </section>
@@ -552,7 +564,7 @@ const ics = c.toIcs(2025);</pre>
 <footer><div class="wrap"><span id="ver"></span> · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
 
 <script type="module">
-import {DATASETS, VERSION} from './holidays-data.js';
+import {DATASETS, VERSION, SOURCES} from './holidays-data.js';
 import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -571,7 +583,7 @@ const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'T
   'UA': '乌克兰',   'TR': '土耳其', 'ID': '印度尼西亚', 'IR': '伊朗', 'EG': '埃及', 'SA': '沙特阿拉伯',
   'AE': '阿联酋', 'NG': '尼日利亚', 'KE': '肯尼亚', 'LK': '斯里兰卡',
   'US-CA': '美国·加州', 'US-NY': '美国·纽约州', 'US-TX': '美国·得州',
-  'DE-BY': '德国·巴伐利亚', 'GB-SCT': '英国·苏格兰', 'AU-NSW': '澳大利亚·新南威尔士',
+  'DE-BY': '德国·巴伐利亚', 'GB-SCT': '英国·苏格兰', 'GB-NIR': '英国·北爱尔兰', 'AU-NSW': '澳大利亚·新南威尔士',
   'CA-ON': '加拿大·安大略', 'ES-CT': '西班牙·加泰罗尼亚',
   'MY-JHR': '马来西亚·柔佛', 'MY-KDH': '马来西亚·吉打', 'MY-KTN': '马来西亚·吉兰丹',
   'MY-MLK': '马来西亚·马六甲', 'MY-NSN': '马来西亚·森美兰', 'MY-PHG': '马来西亚·彭亨',
@@ -1402,11 +1414,14 @@ function renderFields() {
 }
 
 function renderRegionCards() {
-  const list = HolidayCalendar.getRegions();
+  const query = $('region-query').value.trim().toLowerCase();
+  const list = HolidayCalendar.getRegions().filter((r) => (r + ' ' + (CN[r] || '')).toLowerCase().includes(query));
+  $('region-count').textContent = HolidayCalendar.getRegions().length + ' 地区';
+  $('region-year').value = current.getFullYear();
   $('region-cards').innerHTML = list.map((r) => {
     const c = HolidayCalendar.of(r);
-    return `<div class="region ${r === region ? 'on' : ''}" data-r="${r}"><b>${CN[r] || r}<span class="help" data-r="${r}">?</span></b><span>${c.getDays(2026).length} 日 · ${esc(c.getNote().slice(0, 24))}…</span></div>`;
-  }).join('');
+    return `<button type="button" class="region ${r === region ? 'on' : ''}" aria-pressed="${r === region}" data-r="${r}"><b>${CN[r] || r}</b><span>${current.getFullYear()} 年 · ${c.getDays(current.getFullYear()).length} 日 · ${esc(r)}</span></button>`;
+  }).join('') || '<p>没有匹配的地区。</p>';
   $('region-cards').querySelectorAll('.region').forEach((el) => {
     el.onclick = (ev) => {
       if (ev && ev.target && ev.target.classList && ev.target.classList.contains('help')) return;
@@ -1424,6 +1439,12 @@ function renderRegionDetail() {
   const c = HolidayCalendar.of(region);
   $('region-title').innerHTML = (CN[region] || region) + ' · 法定节假日<span class="help" data-r="' + region + '">?</span>';
   $('region-desc').textContent = c.getNote();
+  const datasets = DATASETS.filter((d) => d.region === region && (d.year === current.getFullYear() || d.years?.includes(current.getFullYear())));
+  const complete = datasets.some((d) => d.mode === 'replace');
+  $('region-provenance').textContent = complete
+    ? `本年使用完整官方公告，已替换推算与自动补假。来源：${datasets.map((d) => d.source).join('；')}`
+    : datasets.length ? '本年使用规则与公告增补；没有覆盖到的州省、行业和临时安排请核对原始公告。'
+      : '本年未加载独立年度公告，当前显示内置数据或规则推算；请留意地区说明中的覆盖边界。';
   const list = c.getDays(current.getFullYear());
   $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}</span></div>`).join('')
     || '<div><b>本年暂无</b><span></span></div>';
@@ -1431,12 +1452,14 @@ function renderRegionDetail() {
   const ruleKeys = new Set(rule.map((h) => h.getDay().getMonth() + '-' + h.getDay().getDay()));
   const hit = list.filter((h) => ruleKeys.has(h.getDay().getMonth() + '-' + h.getDay().getDay())).length;
   $('region-audit').textContent = list.length
-    ? `本年 ${list.length} 日，其中 ${hit} 日可由规则算出（${Math.round(hit / list.length * 100)}%），其余为回历、印历、佛历节日、调休安排与临时公休，只能逐年公告。`
+    ? `本年 ${list.length} 日，其中 ${hit} 日与规则日期相同（${Math.round(hit / list.length * 100)}%）。这是日期覆盖率，不是官方认证或准确率；临时移日与替代日需查公告。`
     : '';
 }
 
 
 function renderData() {
+  $('source-checked').textContent = '资料核验日期：' + SOURCES.verifiedOn;
+  $('official-sources').innerHTML = SOURCES.sources.map((s) => `<article class="source-card"><span class="source-status">${esc(s.status)} · ${esc(s.format)}</span><h4><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a></h4><p>${esc(s.scope)}</p><p class="note">${esc(s.boundary)}</p></article>`).join('');
   const stat = Festivals.getStat();
   const regions = HolidayCalendar.getRegions();
   const stateCount = regions.filter((r) => r.indexOf('-') > -1).length;
@@ -1461,7 +1484,7 @@ function renderData() {
     ['公历纪念日', String(stat.anniversary || 0), '国际日与中国行业性纪念日'],
     ['节假日地区', String(regions.length), '含 ' + stateCount + ' 个州省子地区'],
     ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 ' + coverage + '%，其余须逐年公告'],
-    ['单元测试', '636', '历法、择日、节日、节假日、ICS、取名'],
+    ['自动验证', 'CI', '测试、类型检查、构建、上游表比对；运行状态请查看 GitHub Actions'],
     ['数据比对', '7 张表', '与 6tail 上游逐键逐值一致'],
   ];
   const stateDays = DATASETS.filter((d) => typeof d.year !== 'number').reduce((n, d) => n + d.days.length, 0);
@@ -1532,11 +1555,11 @@ const CHECKS = [
     ['蒙古 2025 正月初二', '2025年3月1日', () => MongolianDay.fromYmd(2025, 1, 2).getSolarDay().toString()],
     ['泰历 1383 闰八月', '2021年7月10日', () => ThaiLunarDay.fromYmd(1383, 8, 1, true).getSolarDay().toString()],
     ['越南 2007 春节', '2007年2月17日', () => VietnameseLunarDay.fromYmd(2007, 1, 1).getSolarDay().toString()],
-    ['地区总数', '77', () => String(HolidayCalendar.getRegions().length)],
+    ['地区总数', '78', () => String(HolidayCalendar.getRegions().length)],
   ]],
   ['其他地区', [
     ['英国 2025 假日数', '8', () => String(HolidayCalendar.of('GB').getDays(2025).length)],
-    ['英国 2025 夏季银行假日', '8/25 夏季银行假日', () => dayNames(HolidayCalendar.of('GB').getDays(2025).filter((h) => h.getName() === '夏季银行假日'))],
+    ['英国 2025 夏季银行假日（官方公告）', '8/25 Summer bank holiday', () => dayNames(HolidayCalendar.of('GB').getDays(2025).filter((h) => h.getName() === 'Summer bank holiday'))],
     ['日本 2025 假日数', '19', () => String(HolidayCalendar.of('JP').getDays(2025).length)],
     ['日本 2025 振替休日', '2/24 振替休日', () => dayNames(HolidayCalendar.of('JP').getDays(2025).filter((h) => h.getDay().getMonth() === 2 && h.getDay().getDay() === 24))],
     ['中国 2025 假日数', '28', () => String(HolidayCalendar.of('CN').getDays(2025).length)],
@@ -1775,6 +1798,16 @@ function renderCalendars() {
   $('cal-fest').innerHTML = `<b>希伯来节日</b>：${hebF.join('、') || '—'}<br><b>印度节日</b>：${indF.join('、') || '—'}`;
 }
 $('cdate').onchange = () => renderCalendars();
+$('region-query').oninput = () => renderRegionCards();
+$('region-year').onchange = () => {
+  const year = Number($('region-year').value);
+  if (!Number.isInteger(year) || year < 1900 || year > 2100) return;
+  current = new Date(year, 0, 1);
+  syncDateInput();
+  renderRegionCards();
+  renderRegionDetail();
+  render();
+};
 
 function activate(page, scroll) {
   if (TABS.indexOf(page) < 0) page = 'almanac';

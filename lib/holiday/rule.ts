@@ -200,8 +200,9 @@ export class HolidayRule extends AbstractCulture {
         return o;
     }
 
-    static term(termIndex: number, name: string, offset: number = 0): HolidayRule {
+    static term(termIndex: number, name: string, offset: number = 0, startYear: number = 1): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.TERM, name);
+        o.startYear = startYear;
         o.termIndex = termIndex;
         o.offset = offset;
         return o;

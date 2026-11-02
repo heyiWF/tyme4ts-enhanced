@@ -1,6 +1,7 @@
 import {AbstractCulture} from '../core/base';
 import {LegalHoliday, SolarDay} from '../calendar/core';
 import {HolidayRule} from './rule';
+import {MATARIKI_DATES} from './regions/new-zealand';
 import {
     austriaRules, belgiumRules, cyprusRules, czechRules, denmarkRules, finlandRules,
     greeceRules, hungaryRules, icelandRules, irelandRules, norwayRules, polandRules,
@@ -68,6 +69,7 @@ export class HolidayCalendar {
     protected observed: number;
     protected note: string;
     protected cache: { [key: string]: Holiday[] } = {};
+    protected replacedYears: { [year: number]: boolean } = {};
     /**
      * 被排除的日期键，用于表达「全国性节日但某几州不过」或临时取消
      */
@@ -98,7 +100,8 @@ export class HolidayCalendar {
         return c;
     }
 
-    protected static create(region: string): HolidayCalendar {
+    /** 创建独立实例；需要导入或排除数据时优先使用，避免修改 of() 的共享实例。 */
+    static create(region: string): HolidayCalendar {
         const r: string = region.toUpperCase();
         switch (r) {
             case 'CN':
@@ -140,7 +143,7 @@ export class HolidayCalendar {
             case 'AU':
                 return new HolidayCalendar(r, HolidayCalendar.australiaRules(), '全国法定假日，含顺延补假；国王诞辰与劳动节各州不同。', 3);
             case 'NZ':
-                return new HolidayCalendar(r, HolidayCalendar.newZealandRules(), '全国法定假日，含周一补假；马塔里基日为逐年公布。', 3);
+                return new HolidayCalendar(r, HolidayCalendar.newZealandRules(), '全国法定假日，含周一补假；Matariki 按 2022 年法案附表列明的 2022–2052 年日期，表外不推算。', 3);
             case 'DE':
                 return new HolidayCalendar(r, HolidayCalendar.germanyRules(), '全德统一法定假日；各州另有宗教节日。');
             case 'FR':
@@ -230,7 +233,12 @@ export class HolidayCalendar {
             case 'DE-BY':
                 return new HolidayCalendar(r, HolidayCalendar.germanyRules().concat(bavariaExtra()), '全德法定假日 + 巴伐利亚州宗教节日。');
             case 'GB-SCT':
-                return new HolidayCalendar(r, HolidayCalendar.britainRules().concat(scotlandExtra()), '苏格兰银行假日，含一月二日与圣安德烈节。', 3);
+                return new HolidayCalendar(r, HolidayCalendar.britainRules(true).concat(scotlandExtra()), '苏格兰银行假日；不含复活节星期一，夏季银行假日为八月第一个星期一；临时安排请导入 GOV.UK 年度表。', 3);
+            case 'GB-NIR':
+                return new HolidayCalendar(r, HolidayCalendar.britainRules().concat([
+                    HolidayRule.solar(3, 17, '圣帕特里克节'),
+                    HolidayRule.solar(7, 12, '博因河战役纪念日'),
+                ]), '北爱尔兰银行假日，含圣帕特里克节与博因河战役纪念日；临时安排请导入 GOV.UK 年度表。', 3);
             case 'AU-NSW':
                 return new HolidayCalendar(r, HolidayCalendar.australiaRules().concat(newSouthWalesExtra()), '澳大利亚全国假日 + 新南威尔士州银行假日与劳动节。', 3);
             case 'CA-ON':
@@ -277,7 +285,7 @@ export class HolidayCalendar {
             'PL', 'SE', 'NO', 'DK', 'FI', 'IS', 'IE', 'PT', 'CH', 'AT',
             'BE', 'CZ', 'HU', 'GR', 'CY', 'RO', 'UA', 'TR',
             'ID', 'IR', 'EG', 'SA', 'AE', 'NG', 'KE',
-            'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'AU-NSW', 'CA-ON', 'ES-CT',
+            'US-CA', 'US-NY', 'US-TX', 'DE-BY', 'GB-SCT', 'GB-NIR', 'AU-NSW', 'CA-ON', 'ES-CT',
             'MY-JHR', 'MY-KDH', 'MY-KTN', 'MY-MLK', 'MY-NSN', 'MY-PHG', 'MY-PNG',
             'MY-PRK', 'MY-PLS', 'MY-SBH', 'MY-SWK', 'MY-SGR', 'MY-TRG', 'MY-KUL',
             'CN-GX', 'CN-XJ', 'CN-NX'];
@@ -491,14 +499,14 @@ export class HolidayCalendar {
         ];
     }
 
-    protected static britainRules(): HolidayRule[] {
+    protected static britainRules(scotland: boolean = false): HolidayRule[] {
         return [
             HolidayRule.solar(1, 1, '元旦'),
             HolidayRule.easter(-2, '耶稣受难日'),
-            HolidayRule.easter(1, '复活节星期一'),
+            ...(scotland ? [] : [HolidayRule.easter(1, '复活节星期一')]),
             HolidayRule.week(5, 1, 1, '五月初银行假日'),
             HolidayRule.week(5, -1, 1, '春季银行假日'),
-            HolidayRule.week(8, -1, 1, '夏季银行假日'),
+            HolidayRule.week(8, scotland ? 1 : -1, 1, '夏季银行假日'),
             HolidayRule.solar(12, 25, '圣诞节'),
             HolidayRule.solar(12, 26, '节礼日'),
         ];
@@ -532,6 +540,7 @@ export class HolidayCalendar {
 
     protected static newZealandRules(): HolidayRule[] {
         return [
+            HolidayRule.table('毛利新年（Matariki）', MATARIKI_DATES),
             HolidayRule.solar(1, 1, '元旦'),
             HolidayRule.solar(1, 2, '元旦次日'),
             HolidayRule.solar(2, 6, '怀唐伊日'),
@@ -713,7 +722,7 @@ export class HolidayCalendar {
     }
 
     getRules(): HolidayRule[] {
-        return this.rules;
+        return this.rules.slice();
     }
 
     /**
@@ -729,23 +738,61 @@ export class HolidayCalendar {
      * JSON 形如 {"region":"CN","days":[{"date":"2026-01-01","name":"元旦","work":false}]}
      */
     importJson(json: string): number {
-        const o: { region?: string, days?: { date: string, name: string, work?: boolean }[], exclude?: string[] } = JSON.parse(json);
-        const days: { date: string, name: string, work?: boolean }[] = o.days || [];
-        if (o.exclude && o.exclude.length) {
-            this.excludeDays(o.exclude);
+        const o: { region?: string, year?: number, mode?: string, days?: { date: string, name: string, work?: boolean }[], exclude?: string[] } = JSON.parse(json);
+        if (!o || typeof o !== 'object' || Array.isArray(o)) {
+            throw new Error('illegal holiday dataset');
         }
-        let n: number = 0;
+        if (o.region !== undefined && (typeof o.region !== 'string'
+            || (o.region.toUpperCase() !== this.region && o.region.toUpperCase() !== this.region.split('-')[0]))) {
+            throw new Error('holiday dataset region mismatch');
+        }
+        if (o.mode !== undefined && o.mode !== 'merge' && o.mode !== 'replace') {
+            throw new Error('illegal holiday import mode');
+        }
+        const replace: boolean = o.mode === 'replace';
+        if (replace && (!Number.isInteger(o.year) || o.year! < 1 || o.year! > 9999
+            || (o.region !== undefined && o.region.toUpperCase() !== this.region))) {
+            throw new Error('replacement requires a year and matching region');
+        }
+        const days = o.days === undefined ? [] : o.days;
+        const excludes = o.exclude === undefined ? [] : o.exclude;
+        if (!Array.isArray(days) || !Array.isArray(excludes) || (replace && !Array.isArray(o.days))) {
+            throw new Error('holiday days and exclude must be arrays');
+        }
+        // 先校验完整文件，避免失败导入留下半份数据或旧缓存。
+        const pending: Holiday[] = [];
         for (let i: number = 0; i < days.length; i++) {
-            const item: { date: string, name: string, work?: boolean } = days[i];
-            const d: SolarDay = SolarDay.fromYmd(
-                parseInt(item.date.substring(0, 4), 10),
-                parseInt(item.date.substring(5, 7), 10),
-                parseInt(item.date.substring(8, 10), 10));
-            this.data[d.toString()] = new Holiday(d, item.name, item.work === true);
-            n++;
+            const item = days[i];
+            if (!item || typeof item.name !== 'string' || !item.name.trim()
+                || (item.work !== undefined && typeof item.work !== 'boolean')) {
+                throw new Error('illegal holiday entry');
+            }
+            const d: SolarDay = HolidayCalendar.parseDate(item.date);
+            if (replace && d.getYear() !== o.year) throw new Error('replacement date outside year');
+            pending.push(new Holiday(d, item.name, item.work === true));
         }
+        const removed: SolarDay[] = excludes.map((date: string) => HolidayCalendar.parseDate(date));
+        if (replace) {
+            if (removed.some((d) => d.getYear() !== o.year)) throw new Error('replacement exclusion outside year');
+            for (const k in this.data) {
+                if (this.data[k].getDay().getYear() === o.year) delete this.data[k];
+            }
+            for (const k in this.removed) {
+                if (k.startsWith(o.year + '年')) delete this.removed[k];
+            }
+            this.replacedYears[o.year!] = true;
+        }
+        for (const d of removed) this.removed[HolidayCalendar.getKey(d)] = true;
+        for (const h of pending) this.data[HolidayCalendar.getKey(h.getDay())] = h;
         this.cache = {};
-        return n;
+        return pending.length;
+    }
+
+    protected static parseDate(date: string): SolarDay {
+        if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            throw new Error('holiday date must be YYYY-MM-DD');
+        }
+        return SolarDay.fromYmd(Number(date.slice(0, 4)), Number(date.slice(5, 7)), Number(date.slice(8, 10)));
     }
 
     static fromJson(json: string): HolidayCalendar {
@@ -780,9 +827,9 @@ export class HolidayCalendar {
                 dataKeys[k] = true;
             }
         }
-        for (let i: number = 0; i < this.rules.length; i++) {
+        for (let i: number = 0; !this.replacedYears[year] && i < this.rules.length; i++) {
             const d: SolarDay | null = this.rules[i].getDay(year);
-            if (!d) {
+            if (!d || this.removed[HolidayCalendar.getKey(d)]) {
                 continue;
             }
             const key: string = HolidayCalendar.getKey(d);
@@ -794,10 +841,11 @@ export class HolidayCalendar {
                 map[key] = new Holiday(d, old.getName() + '、' + name);
             }
         }
-        if (this.substitute) {
+        for (const k in this.removed) delete map[k];
+        if (this.substitute && !this.replacedYears[year]) {
             this.applyJapaneseSubstitutes(year, map);
         }
-        if (this.observed === 1) {
+        if (this.observed === 1 && !this.replacedYears[year]) {
             // 次年元旦逢周六，美国补假定于本年十二月三十一日
             const nextNewYear: SolarDay = SolarDay.fromYmd(year + 1, 1, 1);
             if (nextNewYear.getWeek().getIndex() === 6) {
@@ -807,7 +855,7 @@ export class HolidayCalendar {
                 }
             }
         }
-        if (this.observed !== 0) {
+        if (this.observed !== 0 && !this.replacedYears[year]) {
             this.applyObserved(year, map);
         }
         const l: Holiday[] = [];
@@ -828,9 +876,9 @@ export class HolidayCalendar {
     /**
      * 顺延至下一个非假日
      */
-    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay): SolarDay {
+    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay, weekdaysOnly: boolean = false): SolarDay {
         let d: SolarDay = day;
-        while (map[HolidayCalendar.getKey(d)]) {
+        while (map[HolidayCalendar.getKey(d)] || (weekdaysOnly && (d.getWeek().getIndex() === 0 || d.getWeek().getIndex() === 6))) {
             d = d.next(1);
         }
         return d;
@@ -863,7 +911,7 @@ export class HolidayCalendar {
                 }
             } else if (this.observed === 3) {
                 if (w === 0 || w === 6) {
-                    target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), true);
                 }
             }
             if (target && !map[HolidayCalendar.getKey(target)]) {
@@ -904,6 +952,7 @@ export class HolidayCalendar {
      */
     toIcs(year: number, includeWork: boolean = false): string {
         const days: Holiday[] = this.getDays(year, includeWork);
+        const stamp: string = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
         const l: string[] = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
@@ -916,16 +965,34 @@ export class HolidayCalendar {
             const date: string = d.getYear() + (d.getMonth() < 10 ? '0' : '') + d.getMonth() + (d.getDay() < 10 ? '0' : '') + d.getDay();
             l.push('BEGIN:VEVENT');
             l.push('UID:' + date + '-' + this.region + '@tyme');
+            l.push('DTSTAMP:' + stamp);
             l.push('DTSTART;VALUE=DATE:' + date);
             l.push('SUMMARY:' + HolidayCalendar.escape(h.getName()));
             l.push('END:VEVENT');
         }
         l.push('END:VCALENDAR');
-        return l.join('\r\n') + '\r\n';
+        return l.map((line) => HolidayCalendar.foldLine(line)).join('\r\n') + '\r\n';
+    }
+
+    /** RFC 5545: 每行至多 75 个 UTF-8 字节，续行空格也计入。 */
+    protected static foldLine(line: string): string {
+        let result: string = '';
+        let bytes: number = 0;
+        for (const ch of Array.from(line)) {
+            const code: number = ch.codePointAt(0)!;
+            const width: number = code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4;
+            if (bytes + width > 75) {
+                result += '\r\n ';
+                bytes = 1;
+            }
+            result += ch;
+            bytes += width;
+        }
+        return result;
     }
 
     protected static escape(text: string): string {
-        return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+        return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r\n|\r|\n/g, '\\n');
     }
 
     /**
@@ -940,19 +1007,10 @@ export class HolidayCalendar {
      * 返回实际记录的条数。
      */
     excludeDays(dates: string[]): number {
-        let n: number = 0;
-        for (let i: number = 0; i < dates.length; i++) {
-            const parts: string[] = dates[i].split('-');
-            if (parts.length !== 3) {
-                continue;
-            }
-            const day: SolarDay = SolarDay.fromYmd(
-                parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2], 10));
-            this.removed[HolidayCalendar.getKey(day)] = true;
-            n++;
-        }
+        const days: SolarDay[] = dates.map((date) => HolidayCalendar.parseDate(date));
+        for (const day of days) this.removed[HolidayCalendar.getKey(day)] = true;
         this.cache = {};
-        return n;
+        return days.length;
     }
 
     /**
@@ -978,6 +1036,7 @@ export class HolidayCalendar {
                 map[key] = new Holiday(d, old.getName() + '、' + name);
             }
         }
+        if (this.substitute) this.applyJapaneseSubstitutes(year, map);
         if (this.observed === 1) {
             const nextNewYear: SolarDay = SolarDay.fromYmd(year + 1, 1, 1);
             if (nextNewYear.getWeek().getIndex() === 6) {

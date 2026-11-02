@@ -307,9 +307,9 @@ export class MongolianDay extends TibetanVariantDay {
 
     static fromYmd(year: number | string, month: number | string, day: number | string,
                    leapMonth: boolean = false, leapDay: boolean = false): MongolianDay {
-        const y: number = MongolianDay.numeric(year, 'mongolian year');
-        const m: number = MongolianDay.numeric(month, 'mongolian month');
-        const d: number = MongolianDay.numeric(day, 'mongolian day');
+        const y: number = MongolianDay.integer(year, 'mongolian year');
+        const m: number = MongolianDay.integer(month, 'mongolian month');
+        const d: number = MongolianDay.integer(day, 'mongolian day');
         return new MongolianDay(TibetanVariantDay.create(MongolianDay.CALCULATOR, y, m, d, leapMonth, leapDay));
     }
 

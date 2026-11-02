@@ -2,9 +2,9 @@
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
  *
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
- * 覆盖 CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、ID-2026、ID-2027、LK-2025、LK-2026、LK-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027，另有马来西亚 13 个州级增补文件。
+ * 覆盖 CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、GB-2019、GB-2020、GB-2021、GB-2022、GB-2023、GB-2024、GB-2025、GB-2026、GB-2027、GB-2028、GB-NIR-2019、GB-NIR-2020、GB-NIR-2021、GB-NIR-2022、GB-NIR-2023、GB-NIR-2024、GB-NIR-2025、GB-NIR-2026、GB-NIR-2027、GB-NIR-2028、GB-SCT-2019、GB-SCT-2020、GB-SCT-2021、GB-SCT-2022、GB-SCT-2023、GB-SCT-2024、GB-SCT-2025、GB-SCT-2026、GB-SCT-2027、GB-SCT-2028、ID-2026、ID-2027、LK-2025、LK-2026、LK-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027，另有马来西亚 13 个州级增补文件。
  */
-export const VERSION = "1.14.0";
+export const VERSION = "1.15.0";
 
 export const DATASETS = [
  {
@@ -703,6 +703,1559 @@ export const DATASETS = [
    "2026-06-17",
    "2026-06-30",
    "2026-08-26"
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2019,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2019-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2019-04-19",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2019-04-22",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2019-05-06",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2019-05-27",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2019-08-26",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2019-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2019-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2020,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2020-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2020-04-10",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2020-04-13",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2020-05-08",
+    "name": "Early May bank holiday (VE day)"
+   },
+   {
+    "date": "2020-05-25",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2020-08-31",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2020-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2020-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2021,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2021-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2021-04-02",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2021-04-05",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2021-05-03",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2021-05-31",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2021-08-30",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2021-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2021-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2022,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2022-01-03",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2022-04-15",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2022-04-18",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2022-05-02",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2022-06-02",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2022-06-03",
+    "name": "Platinum Jubilee bank holiday"
+   },
+   {
+    "date": "2022-08-29",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2022-09-19",
+    "name": "Bank Holiday for the State Funeral of Queen Elizabeth II"
+   },
+   {
+    "date": "2022-12-26",
+    "name": "Boxing Day"
+   },
+   {
+    "date": "2022-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2023,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2023-01-02",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2023-04-07",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2023-04-10",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2023-05-01",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2023-05-08",
+    "name": "Bank holiday for the coronation of King Charles III"
+   },
+   {
+    "date": "2023-05-29",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2023-08-28",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2023-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2023-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2024,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2024-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2024-03-29",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2024-04-01",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2024-05-06",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2024-05-27",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2024-08-26",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2024-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2024-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2025,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2025-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2025-04-18",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2025-04-21",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2025-05-05",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2025-05-26",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2025-08-25",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2025-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2025-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2026,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2026-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2026-04-03",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2026-04-06",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2026-05-04",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2026-05-25",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2026-08-31",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2026-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2026-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2027,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2027-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2027-03-26",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2027-03-29",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2027-05-03",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2027-05-31",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2027-08-30",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2027-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2027-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB",
+  "year": 2028,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "england-and-wales",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2028-01-03",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2028-04-14",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2028-04-17",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2028-05-01",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2028-05-29",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2028-08-28",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2028-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2028-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2019,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2019-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2019-03-18",
+    "name": "St Patrick’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2019-04-19",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2019-04-22",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2019-05-06",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2019-05-27",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2019-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2019-08-26",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2019-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2019-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2020,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2020-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2020-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2020-04-10",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2020-04-13",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2020-05-08",
+    "name": "Early May bank holiday (VE day)"
+   },
+   {
+    "date": "2020-05-25",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2020-07-13",
+    "name": "Battle of the Boyne (Orangemen’s Day)",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2020-08-31",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2020-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2020-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2021,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2021-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2021-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2021-04-02",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2021-04-05",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2021-05-03",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2021-05-31",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2021-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2021-08-30",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2021-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2021-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2022,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2022-01-03",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2022-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2022-04-15",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2022-04-18",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2022-05-02",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2022-06-02",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2022-06-03",
+    "name": "Platinum Jubilee bank holiday"
+   },
+   {
+    "date": "2022-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2022-08-29",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2022-09-19",
+    "name": "Bank Holiday for the State Funeral of Queen Elizabeth II"
+   },
+   {
+    "date": "2022-12-26",
+    "name": "Boxing Day"
+   },
+   {
+    "date": "2022-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2023,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2023-01-02",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2023-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2023-04-07",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2023-04-10",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2023-05-01",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2023-05-08",
+    "name": "Bank holiday for the coronation of King Charles III"
+   },
+   {
+    "date": "2023-05-29",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2023-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2023-08-28",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2023-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2023-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2024,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2024-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2024-03-18",
+    "name": "St Patrick’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2024-03-29",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2024-04-01",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2024-05-06",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2024-05-27",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2024-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2024-08-26",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2024-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2024-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2025,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2025-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2025-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2025-04-18",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2025-04-21",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2025-05-05",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2025-05-26",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2025-07-14",
+    "name": "Battle of the Boyne (Orangemen’s Day)",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2025-08-25",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2025-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2025-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2026,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2026-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2026-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2026-04-03",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2026-04-06",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2026-05-04",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2026-05-25",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2026-07-13",
+    "name": "Battle of the Boyne (Orangemen’s Day)",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2026-08-31",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2026-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2026-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2027,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2027-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2027-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2027-03-26",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2027-03-29",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2027-05-03",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2027-05-31",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2027-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2027-08-30",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2027-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2027-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-NIR",
+  "year": 2028,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "northern-ireland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2028-01-03",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2028-03-17",
+    "name": "St Patrick’s Day"
+   },
+   {
+    "date": "2028-04-14",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2028-04-17",
+    "name": "Easter Monday"
+   },
+   {
+    "date": "2028-05-01",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2028-05-29",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2028-07-12",
+    "name": "Battle of the Boyne (Orangemen’s Day)"
+   },
+   {
+    "date": "2028-08-28",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2028-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2028-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2019,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2019-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2019-01-02",
+    "name": "2nd January"
+   },
+   {
+    "date": "2019-04-19",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2019-05-06",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2019-05-27",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2019-08-05",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2019-12-02",
+    "name": "St Andrew’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2019-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2019-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2020,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2020-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2020-01-02",
+    "name": "2nd January"
+   },
+   {
+    "date": "2020-04-10",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2020-05-08",
+    "name": "Early May bank holiday (VE day)"
+   },
+   {
+    "date": "2020-05-25",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2020-08-03",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2020-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2020-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2020-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2021,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2021-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2021-01-04",
+    "name": "2nd January",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2021-04-02",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2021-05-03",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2021-05-31",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2021-08-02",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2021-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2021-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2021-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2022,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2022-01-03",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2022-01-04",
+    "name": "2nd January",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2022-04-15",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2022-05-02",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2022-06-02",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2022-06-03",
+    "name": "Platinum Jubilee bank holiday"
+   },
+   {
+    "date": "2022-08-01",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2022-09-19",
+    "name": "Bank Holiday for the State Funeral of Queen Elizabeth II"
+   },
+   {
+    "date": "2022-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2022-12-26",
+    "name": "Boxing Day"
+   },
+   {
+    "date": "2022-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2023,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2023-01-02",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2023-01-03",
+    "name": "2nd January",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2023-04-07",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2023-05-01",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2023-05-08",
+    "name": "Bank holiday for the coronation of King Charles III"
+   },
+   {
+    "date": "2023-05-29",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2023-08-07",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2023-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2023-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2023-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2024,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2024-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2024-01-02",
+    "name": "2nd January"
+   },
+   {
+    "date": "2024-03-29",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2024-05-06",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2024-05-27",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2024-08-05",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2024-12-02",
+    "name": "St Andrew’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2024-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2024-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2025,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2025-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2025-01-02",
+    "name": "2nd January"
+   },
+   {
+    "date": "2025-04-18",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2025-05-05",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2025-05-26",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2025-08-04",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2025-12-01",
+    "name": "St Andrew’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2025-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2025-12-26",
+    "name": "Boxing Day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2026,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2026-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2026-01-02",
+    "name": "2nd January"
+   },
+   {
+    "date": "2026-04-03",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2026-05-04",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2026-05-25",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2026-06-15",
+    "name": "World Cup bank holiday"
+   },
+   {
+    "date": "2026-08-03",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2026-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2026-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2026-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2027,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2027-01-01",
+    "name": "New Year’s Day"
+   },
+   {
+    "date": "2027-01-04",
+    "name": "2nd January",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2027-03-26",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2027-05-03",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2027-05-31",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2027-08-02",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2027-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2027-12-27",
+    "name": "Christmas Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2027-12-28",
+    "name": "Boxing Day",
+    "note": "Substitute day"
+   }
+  ]
+ },
+ {
+  "region": "GB-SCT",
+  "year": 2028,
+  "mode": "replace",
+  "source": "https://www.gov.uk/bank-holidays.json",
+  "division": "scotland",
+  "license": "Open Government Licence v3.0",
+  "licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "verifiedOn": "2026-11-01",
+  "snapshotSha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+  "days": [
+   {
+    "date": "2028-01-03",
+    "name": "New Year’s Day",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2028-01-04",
+    "name": "2nd January",
+    "note": "Substitute day"
+   },
+   {
+    "date": "2028-04-14",
+    "name": "Good Friday"
+   },
+   {
+    "date": "2028-05-01",
+    "name": "Early May bank holiday"
+   },
+   {
+    "date": "2028-05-29",
+    "name": "Spring bank holiday"
+   },
+   {
+    "date": "2028-08-07",
+    "name": "Summer bank holiday"
+   },
+   {
+    "date": "2028-11-30",
+    "name": "St Andrew’s Day"
+   },
+   {
+    "date": "2028-12-25",
+    "name": "Christmas Day"
+   },
+   {
+    "date": "2028-12-26",
+    "name": "Boxing Day"
+   }
   ]
  },
  {
@@ -2333,3 +3886,65 @@ export const DATASETS = [
   ]
  }
 ];
+
+export const SOURCES = {
+ "verifiedOn": "2026-11-01",
+ "sources": [
+  {
+   "title": "英国 · GOV.UK 银行假日",
+   "status": "已接入",
+   "format": "JSON API · OGL v3.0",
+   "url": "https://www.gov.uk/bank-holidays.json",
+   "scope": "GB、GB-SCT、GB-NIR；2019–2028 年原始快照与 30 份完整年度公告。",
+   "boundary": "实际银行放假日；替代日取代周末原日期。滚动 API 更新后需审核年度差异。"
+  },
+  {
+   "title": "新西兰 · Matariki 法案附表",
+   "status": "已接入",
+   "format": "法律附表 · 2022–2052",
+   "url": "https://www.legislation.govt.nz/act/public/2022/0014/latest/LMS557851.html",
+   "scope": "31 个年度日期，内置 HolidayRule.table；无需网络。",
+   "boundary": "这是法定假日日期表，不是完整毛利历转换算法；2052 年后不外推。"
+  },
+  {
+   "title": "中国大陆 · 纪念日设立依据",
+   "status": "已接入",
+   "format": "国务院批复、人大决定、主管机构资料",
+   "url": "https://www.moj.gov.cn/pub/sfbgw/jgsz/jgszjgtj/jgtjlfsij/lfsijtjxw/202306/t20230630_481763.html",
+   "scope": "7 项固定日期附生效年份与逐条来源；丰收节自 2018 年秋分起。",
+   "boundary": "纪念日并不自动成为放假日。旧上游民俗表仍保留原文，不代表已全部官方核验。"
+  },
+  {
+   "title": "日本 · 内阁府国民の祝日",
+   "status": "可扩展",
+   "format": "年度表 / CSV",
+   "url": "https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html",
+   "scope": "页面提供 1955–2027 年 CSV，适合接入完整年度替换与历史回归。",
+   "boundary": "应优先覆盖 2019 特例及 2020、2021 奥运移日；导入前核对网站再利用条款。"
+  },
+  {
+   "title": "中国香港 · 天文台公农历对照",
+   "status": "可扩展",
+   "format": "1901–2100 年对照表 / 开放 API",
+   "url": "https://www.hko.gov.hk/en/gts/time/conversion.htm",
+   "scope": "可作为农历、闰月和节气日期的独立对照；重点检查 2033 闰十一月。",
+   "boundary": "天文台注明远期近午夜朔或节气可能有一日差异；不要把自生成向量当作外部验证。"
+  },
+  {
+   "title": "美国 · OPM 联邦假日",
+   "status": "可扩展",
+   "format": "年度官方表",
+   "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/",
+   "scope": "联邦雇员假日与周末替代日，可用于检验跨年 12 月 31 日补假。",
+   "boundary": "不等于全体私人企业、州、市的放假安排。"
+  },
+  {
+   "title": "中国台湾 · 人事行政总处办公日历",
+   "status": "可扩展",
+   "format": "年度公告与附件",
+   "url": "https://www.dgpa.gov.tw/information?pid=12574&uid=83",
+   "scope": "2025 修订版与 2026 政府机关办公日历，适合替换年度规则。",
+   "boundary": "需区分政府机关与其他行业；现有 TW 规则不能完整表达 2025 新增假日及补假。"
+  }
+ ]
+};

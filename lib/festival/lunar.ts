@@ -62,7 +62,7 @@ export class FolkFestival extends AbstractCulture {
     protected static TERM_RULES: HolidayRule[] = [
         HolidayRule.term(7, '寒食节', -1),
         // 国务院 2018 年 6 月 21 日批复，自 2018 年起每年秋分
-        HolidayRule.term(18, '中国农民丰收节'),
+        HolidayRule.term(18, '中国农民丰收节', 0, 2018),
     ];
 
     /**

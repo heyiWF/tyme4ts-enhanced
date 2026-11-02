@@ -4263,12 +4263,14 @@ export class Event extends AbstractCulture {
             // 当月第1天
             const d: SolarDay = m.getFirstDay();
             // 往后找第几个星期几
-            return d.next(d.getWeek().stepsTo(w) + 7 * n - 7);
+            const candidate: SolarDay = d.next(d.getWeek().stepsTo(w) + 7 * n - 7);
+            return candidate.getYear() === year && candidate.getMonth() === m.getMonth() ? candidate : null;
         }
         // 当月最后一天
         const d: SolarDay = SolarDay.fromYmd(year, m.getMonth(), m.getDayCount());
         // 往前找第几个星期几
-        return d.next(d.getWeek().stepsBackTo(w) + 7 * n + 7);
+        const candidate: SolarDay = d.next(d.getWeek().stepsBackTo(w) + 7 * n + 7);
+        return candidate.getYear() === year && candidate.getMonth() === m.getMonth() ? candidate : null;
     }
 
     getSolarDayByTerm(year: number): SolarDay {

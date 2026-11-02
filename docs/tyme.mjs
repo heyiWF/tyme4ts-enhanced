@@ -52,6 +52,14 @@ class AbstractCulture {
     }
     return d;
   }
+  /** 日历年月日必须为有限整数；numeric 仍供儒略日等允许小数的 API 使用。 */
+  static integer(n, name) {
+    const d = AbstractCulture.numeric(n, name);
+    if (typeof n === "string" && !n.trim() || !Number.isInteger(d)) {
+      throw new Error(`illegal ${name}: ${n}`);
+    }
+    return d;
+  }
   static validateRange(value, min, max, field) {
     if (value < min || value > max) {
       throw new Error(`illegal ${field}: ${value}`);
@@ -7654,10 +7662,12 @@ class Event extends AbstractCulture {
     const w = this.getValue(4);
     if (n > 0) {
       const d2 = m.getFirstDay();
-      return d2.next(d2.getWeek().stepsTo(w) + 7 * n - 7);
+      const candidate2 = d2.next(d2.getWeek().stepsTo(w) + 7 * n - 7);
+      return candidate2.getYear() === year && candidate2.getMonth() === m.getMonth() ? candidate2 : null;
     }
     const d = SolarDay.fromYmd(year, m.getMonth(), m.getDayCount());
-    return d.next(d.getWeek().stepsBackTo(w) + 7 * n + 7);
+    const candidate = d.next(d.getWeek().stepsBackTo(w) + 7 * n + 7);
+    return candidate.getYear() === year && candidate.getMonth() === m.getMonth() ? candidate : null;
   }
   getSolarDayByTerm(year) {
     const d = SolarTerm.fromIndex(year, this.getValue(2)).getSolarDay();
@@ -10642,9 +10652,9 @@ class SakaDay extends AbstractCulture {
     return SolarDay.fromYmd(gregorianYear, 3, SakaDay.isLeapYear(year) ? 21 : 22);
   }
   static fromYmd(year, month, day) {
-    const y = SakaDay.numeric(year, "saka year");
-    const m = SakaDay.numeric(month, "saka month");
-    const d = SakaDay.numeric(day, "saka day");
+    const y = SakaDay.integer(year, "saka year");
+    const m = SakaDay.integer(month, "saka month");
+    const d = SakaDay.integer(day, "saka day");
     if (m < 1 || m > 12) {
       throw new Error(`illegal saka month: ${m}`);
     }
@@ -10761,9 +10771,9 @@ class BanglaDay extends AbstractCulture {
     return SolarDay.fromYmd(year + 593, 4, 14);
   }
   static fromYmd(year, month, day) {
-    const y = BanglaDay.numeric(year, "bangla year");
-    const m = BanglaDay.numeric(month, "bangla month");
-    const d = BanglaDay.numeric(day, "bangla day");
+    const y = BanglaDay.integer(year, "bangla year");
+    const m = BanglaDay.integer(month, "bangla month");
+    const d = BanglaDay.integer(day, "bangla day");
     if (y < BanglaDay.MIN_YEAR) {
       throw new Error(`bangla year ${y} is before supported year ${BanglaDay.MIN_YEAR}`);
     }
@@ -10878,9 +10888,9 @@ class EthiopianDay extends AbstractCulture {
     return EthiopianDay.EPOCH + 365 * (year - 1) + Math.floor(year / 4);
   }
   static fromYmd(year, month, day) {
-    const y = EthiopianDay.numeric(year, "ethiopian year");
-    const m = EthiopianDay.numeric(month, "ethiopian month");
-    const d = EthiopianDay.numeric(day, "ethiopian day");
+    const y = EthiopianDay.integer(year, "ethiopian year");
+    const m = EthiopianDay.integer(month, "ethiopian month");
+    const d = EthiopianDay.integer(day, "ethiopian day");
     if (y < 1) {
       throw new Error(`illegal ethiopian year: ${y}`);
     }
@@ -12110,9 +12120,9 @@ class KoreanLunarDay extends AbstractCulture {
     throw new Error(`illegal korean lunar abs day: ${absDays}`);
   }
   static fromYmd(year, month, day, leap = false) {
-    const y = KoreanLunarDay.numeric(year, "korean lunar year");
-    const m = KoreanLunarDay.numeric(month, "korean lunar month");
-    const d = KoreanLunarDay.numeric(day, "korean lunar day");
+    const y = KoreanLunarDay.integer(year, "korean lunar year");
+    const m = KoreanLunarDay.integer(month, "korean lunar month");
+    const d = KoreanLunarDay.integer(day, "korean lunar day");
     if (m < 1 || m > 12) {
       throw new Error(`illegal korean lunar month: ${m}`);
     }
@@ -12337,9 +12347,9 @@ class MyanmarDay extends AbstractCulture {
     return md - 15 * Math.floor(md / 16);
   }
   static fromYmd(my, mm, md) {
-    const y = MyanmarDay.numeric(my, "myanmar year");
-    const m = MyanmarDay.numeric(mm, "myanmar month");
-    const d = MyanmarDay.numeric(md, "myanmar day");
+    const y = MyanmarDay.integer(my, "myanmar year");
+    const m = MyanmarDay.integer(mm, "myanmar month");
+    const d = MyanmarDay.integer(md, "myanmar day");
     if (y < 0) {
       throw new Error(`illegal myanmar year: ${y}`);
     }
@@ -12655,9 +12665,9 @@ class BikramSambatDay extends AbstractCulture {
     return BikramSambatDay.getYearStart(max).next(BikramSambatDay.getYearDays(max) - 1);
   }
   static fromYmd(year, month, day) {
-    const y = BikramSambatDay.numeric(year, "bikram sambat year");
-    const m = BikramSambatDay.numeric(month, "bikram sambat month");
-    const d = BikramSambatDay.numeric(day, "bikram sambat day");
+    const y = BikramSambatDay.integer(year, "bikram sambat year");
+    const m = BikramSambatDay.integer(month, "bikram sambat month");
+    const d = BikramSambatDay.integer(day, "bikram sambat day");
     if (m < 1 || m > 12) {
       throw new Error(`illegal bikram sambat month: ${m}`);
     }
@@ -12978,9 +12988,9 @@ class BhutaneseDay extends AbstractCulture {
     return new BhutaneseDay(x.year, x.month, x.day, x.leapMonth, x.leapDay);
   }
   static fromYmd(year, month, day, leapMonth = false, leapDay = false) {
-    const y = BhutaneseDay.numeric(year, "bhutanese year");
-    const m = BhutaneseDay.numeric(month, "bhutanese month");
-    const d = BhutaneseDay.numeric(day, "bhutanese day");
+    const y = BhutaneseDay.integer(year, "bhutanese year");
+    const m = BhutaneseDay.integer(month, "bhutanese month");
+    const d = BhutaneseDay.integer(day, "bhutanese day");
     if (y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 30) {
       throw new Error(`illegal bhutanese date: ${y}-${m}-${d}`);
     }
@@ -13273,9 +13283,9 @@ class MongolianDay extends TibetanVariantDay {
     return new MongolianDay(MongolianDay.CALCULATOR.fromSolarDay(solarDay));
   }
   static fromYmd(year, month, day, leapMonth = false, leapDay = false) {
-    const y = MongolianDay.numeric(year, "mongolian year");
-    const m = MongolianDay.numeric(month, "mongolian month");
-    const d = MongolianDay.numeric(day, "mongolian day");
+    const y = MongolianDay.integer(year, "mongolian year");
+    const m = MongolianDay.integer(month, "mongolian month");
+    const d = MongolianDay.integer(day, "mongolian day");
     return new MongolianDay(TibetanVariantDay.create(MongolianDay.CALCULATOR, y, m, d, leapMonth, leapDay));
   }
   fromSolar(solarDay) {
@@ -13620,9 +13630,9 @@ class ThaiLunarDay extends AbstractCulture {
     return { rawMonth: month, day: days };
   }
   static fromRawYmd(year, rawMonth, day) {
-    const y = ThaiLunarDay.numeric(year, "thai lunar year");
-    const m = ThaiLunarDay.numeric(rawMonth, "thai lunar month");
-    const d = ThaiLunarDay.numeric(day, "thai lunar day");
+    const y = ThaiLunarDay.integer(year, "thai lunar year");
+    const m = ThaiLunarDay.integer(rawMonth, "thai lunar month");
+    const d = ThaiLunarDay.integer(day, "thai lunar day");
     if (y < ThaiLunarDay.MIN_YEAR || y > ThaiLunarDay.MAX_YEAR) {
       throw new Error(`thai lunar year out of range: ${y}`);
     }
@@ -13640,8 +13650,8 @@ class ThaiLunarDay extends AbstractCulture {
     return parsed;
   }
   static fromYmd(year, month, day, leapMonth = false, lateMonth = false) {
-    const y = ThaiLunarDay.numeric(year, "thai lunar year");
-    const m = ThaiLunarDay.numeric(month, "thai lunar month");
+    const y = ThaiLunarDay.integer(year, "thai lunar year");
+    const m = ThaiLunarDay.integer(month, "thai lunar month");
     if (m < 1 || m > 12) {
       throw new Error(`illegal thai lunar month: ${m}`);
     }
@@ -13994,9 +14004,9 @@ class VietnameseLunarDay extends AbstractCulture {
     return new VietnameseLunarDay(label.year, label.month, jd - getNewMoonDay(lunation) + 1, label.leap);
   }
   static fromYmd(year, month, day, leap = false) {
-    const y = VietnameseLunarDay.numeric(year, "vietnamese lunar year");
-    const m = VietnameseLunarDay.numeric(month, "vietnamese lunar month");
-    const d = VietnameseLunarDay.numeric(day, "vietnamese lunar day");
+    const y = VietnameseLunarDay.integer(year, "vietnamese lunar year");
+    const m = VietnameseLunarDay.integer(month, "vietnamese lunar month");
+    const d = VietnameseLunarDay.integer(day, "vietnamese lunar day");
     if (y < MIN_YEAR || y > MAX_YEAR || m < 1 || m > 12 || d < 1 || d > 30) {
       throw new Error(`illegal Vietnamese lunar date: ${y}-${m}-${d}`);
     }
@@ -14058,7 +14068,8 @@ class IcsEvent extends AbstractCulture {
   uid;
   location;
   description;
-  constructor(summary, start, end, rrule, uid, location, description) {
+  recurrenceExceptions;
+  constructor(summary, start, end, rrule, uid, location, description, recurrenceExceptions = false) {
     super();
     this.summary = summary;
     this.start = start;
@@ -14067,6 +14078,10 @@ class IcsEvent extends AbstractCulture {
     this.uid = uid;
     this.location = location;
     this.description = description;
+    this.recurrenceExceptions = recurrenceExceptions;
+  }
+  hasRecurrenceExceptions() {
+    return this.recurrenceExceptions;
   }
   getName() {
     return this.summary;
@@ -14102,10 +14117,20 @@ class IcsCalendar {
     const lines = text.replace(/\r\n[ \t]/g, "").replace(/\n[ \t]/g, "").split(/\r?\n/);
     const events = [];
     let fields = null;
+    let depth = 0;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (line === "BEGIN:VEVENT") {
         fields = {};
+        depth = 0;
+        continue;
+      }
+      if (fields && line.startsWith("BEGIN:")) {
+        depth++;
+        continue;
+      }
+      if (depth > 0) {
+        if (line.startsWith("END:")) depth--;
         continue;
       }
       if (line === "END:VEVENT") {
@@ -14135,17 +14160,19 @@ class IcsCalendar {
       fields["RRULE"] || "",
       fields["UID"] || "",
       IcsCalendar.unescape(fields["LOCATION"] || ""),
-      IcsCalendar.unescape(fields["DESCRIPTION"] || "")
+      IcsCalendar.unescape(fields["DESCRIPTION"] || ""),
+      ["EXDATE", "RDATE", "EXRULE", "RECURRENCE-ID"].some((key) => key in fields)
     );
   }
   /**
    * 还原 iCalendar 文本转义
    */
   static unescape(text) {
-    return text.replace(/\\n/gi, "\n").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\");
+    return text.replace(/\\([nN,;\\])/g, (_match, escaped) => /[nN]/.test(escaped) ? "\n" : escaped);
   }
   static parseDate(value) {
-    const s = value.replace(/[^0-9]/g, "");
+    if (!/^\d{8}(?:T\d{6}Z?)?$/.test(value)) throw new Error("illegal ICS date: " + value);
+    const s = value;
     return SolarDay.fromYmd(parseInt(s.substring(0, 4), 10), parseInt(s.substring(4, 6), 10), parseInt(s.substring(6, 8), 10));
   }
   getEvents() {
@@ -14168,32 +14195,40 @@ class IcsCalendar {
     const start = event.getStart();
     const rule = {};
     const rrule = event.getRrule();
-    if (!rrule) {
+    if (!rrule || event.hasRecurrenceExceptions()) {
       return null;
     }
     const parts = rrule.split(";");
     for (let i = 0; i < parts.length; i++) {
       const p = parts[i].indexOf("=");
-      rule[parts[i].substring(0, p).toUpperCase()] = parts[i].substring(p + 1);
+      const key = parts[i].substring(0, p).toUpperCase();
+      if (p < 1 || key in rule || !["FREQ", "BYMONTH", "BYMONTHDAY", "BYDAY", "INTERVAL"].includes(key)) return null;
+      rule[key] = parts[i].substring(p + 1).toUpperCase();
     }
-    if (rule["FREQ"] !== "YEARLY") {
+    if (rule["FREQ"] !== "YEARLY" || rule["INTERVAL"] !== void 0 && rule["INTERVAL"] !== "1") {
       return null;
     }
-    const month = rule["BYMONTH"] ? parseInt(rule["BYMONTH"], 10) : start.getMonth();
+    if (rule["BYMONTH"] !== void 0 && !/^(?:[1-9]|1[0-2])$/.test(rule["BYMONTH"])) return null;
+    const month = rule["BYMONTH"] ? Number(rule["BYMONTH"]) : start.getMonth();
     const monthDay = rule["BYMONTHDAY"] || "";
     const byDay = rule["BYDAY"] || "";
     if (byDay) {
-      const m = /^(-?\d)([A-Z]{2})$/.exec(byDay);
+      if (!rule["BYMONTH"] || monthDay) return null;
+      const m = /^(-?[1-5])(SU|MO|TU|WE|TH|FR|SA)$/.exec(byDay);
       if (!m) {
         return null;
       }
       const weeks = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-      return Event.builder().name(event.getName()).solarWeek(month, parseInt(m[1], 10), weeks.indexOf(m[2])).startYear(start.getYear()).build();
+      const eventRule = Event.builder().name(event.getName()).solarWeek(month, parseInt(m[1], 10), weeks.indexOf(m[2])).startYear(start.getYear()).build();
+      return eventRule.getSolarDay(start.getYear())?.equals(start) ? eventRule : null;
     }
-    const day = monthDay ? parseInt(monthDay.split(",")[0], 10) : start.getDay();
+    if (rule["BYMONTHDAY"] !== void 0 && !/^(?:[1-9]|[12]\d|3[01])$/.test(monthDay)) return null;
+    if (monthDay && !rule["BYMONTH"]) return null;
+    const day = monthDay ? Number(monthDay) : start.getDay();
     if (day < 1 || day > 31) {
       return null;
     }
+    if (month !== start.getMonth() || day !== start.getDay()) return null;
     return Event.builder().name(event.getName()).solarDay(month, day, 0).startYear(start.getYear()).build();
   }
   /**
@@ -14395,8 +14430,9 @@ class HolidayRule extends AbstractCulture {
     o.startYear = startYear;
     return o;
   }
-  static term(termIndex, name, offset = 0) {
+  static term(termIndex, name, offset = 0, startYear = 1) {
     const o = new HolidayRule(4 /* TERM */, name);
+    o.startYear = startYear;
     o.termIndex = termIndex;
     o.offset = offset;
     return o;
@@ -14609,6 +14645,40 @@ class HolidayRule extends AbstractCulture {
 function HebrewRuleYear(gregorianYear, hebrewMonth) {
   return hebrewMonth >= 7 ? gregorianYear + 3761 : gregorianYear + 3760;
 }
+
+const MATARIKI_DATES = {
+  2022: "6-24",
+  2023: "7-14",
+  2024: "6-28",
+  2025: "6-20",
+  2026: "7-10",
+  2027: "6-25",
+  2028: "7-14",
+  2029: "7-6",
+  2030: "6-21",
+  2031: "7-11",
+  2032: "7-2",
+  2033: "6-24",
+  2034: "7-7",
+  2035: "6-29",
+  2036: "7-18",
+  2037: "7-10",
+  2038: "6-25",
+  2039: "7-15",
+  2040: "7-6",
+  2041: "7-19",
+  2042: "7-11",
+  2043: "7-3",
+  2044: "6-24",
+  2045: "7-7",
+  2046: "6-29",
+  2047: "7-19",
+  2048: "7-3",
+  2049: "6-25",
+  2050: "7-15",
+  2051: "6-30",
+  2052: "6-21"
+};
 
 function polandRules() {
   return [
@@ -15185,6 +15255,7 @@ class HolidayCalendar {
   observed;
   note;
   cache = {};
+  replacedYears = {};
   /**
    * 被排除的日期键，用于表达「全国性节日但某几州不过」或临时取消
    */
@@ -15211,6 +15282,7 @@ class HolidayCalendar {
     HolidayCalendar.INSTANCES[key] = c;
     return c;
   }
+  /** 创建独立实例；需要导入或排除数据时优先使用，避免修改 of() 的共享实例。 */
   static create(region) {
     const r = region.toUpperCase();
     switch (r) {
@@ -15252,7 +15324,7 @@ class HolidayCalendar {
       case "AU":
         return new HolidayCalendar(r, HolidayCalendar.australiaRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u987A\u5EF6\u8865\u5047\uFF1B\u56FD\u738B\u8BDE\u8FB0\u4E0E\u52B3\u52A8\u8282\u5404\u5DDE\u4E0D\u540C\u3002", 3);
       case "NZ":
-        return new HolidayCalendar(r, HolidayCalendar.newZealandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5468\u4E00\u8865\u5047\uFF1B\u9A6C\u5854\u91CC\u57FA\u65E5\u4E3A\u9010\u5E74\u516C\u5E03\u3002", 3);
+        return new HolidayCalendar(r, HolidayCalendar.newZealandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5468\u4E00\u8865\u5047\uFF1BMatariki \u6309 2022 \u5E74\u6CD5\u6848\u9644\u8868\u5217\u660E\u7684 2022\u20132052 \u5E74\u65E5\u671F\uFF0C\u8868\u5916\u4E0D\u63A8\u7B97\u3002", 3);
       case "DE":
         return new HolidayCalendar(r, HolidayCalendar.germanyRules(), "\u5168\u5FB7\u7EDF\u4E00\u6CD5\u5B9A\u5047\u65E5\uFF1B\u5404\u5DDE\u53E6\u6709\u5B97\u6559\u8282\u65E5\u3002");
       case "FR":
@@ -15342,7 +15414,12 @@ class HolidayCalendar {
       case "DE-BY":
         return new HolidayCalendar(r, HolidayCalendar.germanyRules().concat(bavariaExtra()), "\u5168\u5FB7\u6CD5\u5B9A\u5047\u65E5 + \u5DF4\u4F10\u5229\u4E9A\u5DDE\u5B97\u6559\u8282\u65E5\u3002");
       case "GB-SCT":
-        return new HolidayCalendar(r, HolidayCalendar.britainRules().concat(scotlandExtra()), "\u82CF\u683C\u5170\u94F6\u884C\u5047\u65E5\uFF0C\u542B\u4E00\u6708\u4E8C\u65E5\u4E0E\u5723\u5B89\u5FB7\u70C8\u8282\u3002", 3);
+        return new HolidayCalendar(r, HolidayCalendar.britainRules(true).concat(scotlandExtra()), "\u82CF\u683C\u5170\u94F6\u884C\u5047\u65E5\uFF1B\u4E0D\u542B\u590D\u6D3B\u8282\u661F\u671F\u4E00\uFF0C\u590F\u5B63\u94F6\u884C\u5047\u65E5\u4E3A\u516B\u6708\u7B2C\u4E00\u4E2A\u661F\u671F\u4E00\uFF1B\u4E34\u65F6\u5B89\u6392\u8BF7\u5BFC\u5165 GOV.UK \u5E74\u5EA6\u8868\u3002", 3);
+      case "GB-NIR":
+        return new HolidayCalendar(r, HolidayCalendar.britainRules().concat([
+          HolidayRule.solar(3, 17, "\u5723\u5E15\u7279\u91CC\u514B\u8282"),
+          HolidayRule.solar(7, 12, "\u535A\u56E0\u6CB3\u6218\u5F79\u7EAA\u5FF5\u65E5")
+        ]), "\u5317\u7231\u5C14\u5170\u94F6\u884C\u5047\u65E5\uFF0C\u542B\u5723\u5E15\u7279\u91CC\u514B\u8282\u4E0E\u535A\u56E0\u6CB3\u6218\u5F79\u7EAA\u5FF5\u65E5\uFF1B\u4E34\u65F6\u5B89\u6392\u8BF7\u5BFC\u5165 GOV.UK \u5E74\u5EA6\u8868\u3002", 3);
       case "AU-NSW":
         return new HolidayCalendar(r, HolidayCalendar.australiaRules().concat(newSouthWalesExtra()), "\u6FB3\u5927\u5229\u4E9A\u5168\u56FD\u5047\u65E5 + \u65B0\u5357\u5A01\u5C14\u58EB\u5DDE\u94F6\u884C\u5047\u65E5\u4E0E\u52B3\u52A8\u8282\u3002", 3);
       case "CA-ON":
@@ -15440,6 +15517,7 @@ class HolidayCalendar {
       "US-TX",
       "DE-BY",
       "GB-SCT",
+      "GB-NIR",
       "AU-NSW",
       "CA-ON",
       "ES-CT",
@@ -15657,14 +15735,14 @@ class HolidayCalendar {
       HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282")
     ];
   }
-  static britainRules() {
+  static britainRules(scotland = false) {
     return [
       HolidayRule.solar(1, 1, "\u5143\u65E6"),
       HolidayRule.easter(-2, "\u8036\u7A23\u53D7\u96BE\u65E5"),
-      HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
+      ...scotland ? [] : [HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00")],
       HolidayRule.week(5, 1, 1, "\u4E94\u6708\u521D\u94F6\u884C\u5047\u65E5"),
       HolidayRule.week(5, -1, 1, "\u6625\u5B63\u94F6\u884C\u5047\u65E5"),
-      HolidayRule.week(8, -1, 1, "\u590F\u5B63\u94F6\u884C\u5047\u65E5"),
+      HolidayRule.week(8, scotland ? 1 : -1, 1, "\u590F\u5B63\u94F6\u884C\u5047\u65E5"),
       HolidayRule.solar(12, 25, "\u5723\u8BDE\u8282"),
       HolidayRule.solar(12, 26, "\u8282\u793C\u65E5")
     ];
@@ -15695,6 +15773,7 @@ class HolidayCalendar {
   }
   static newZealandRules() {
     return [
+      HolidayRule.table("\u6BDB\u5229\u65B0\u5E74\uFF08Matariki\uFF09", MATARIKI_DATES),
       HolidayRule.solar(1, 1, "\u5143\u65E6"),
       HolidayRule.solar(1, 2, "\u5143\u65E6\u6B21\u65E5"),
       HolidayRule.solar(2, 6, "\u6000\u5510\u4F0A\u65E5"),
@@ -15863,7 +15942,7 @@ class HolidayCalendar {
     return this.region;
   }
   getRules() {
-    return this.rules;
+    return this.rules.slice();
   }
   /**
    * 覆盖范围说明
@@ -15878,23 +15957,55 @@ class HolidayCalendar {
    */
   importJson(json) {
     const o = JSON.parse(json);
-    const days = o.days || [];
-    if (o.exclude && o.exclude.length) {
-      this.excludeDays(o.exclude);
+    if (!o || typeof o !== "object" || Array.isArray(o)) {
+      throw new Error("illegal holiday dataset");
     }
-    let n = 0;
+    if (o.region !== void 0 && (typeof o.region !== "string" || o.region.toUpperCase() !== this.region && o.region.toUpperCase() !== this.region.split("-")[0])) {
+      throw new Error("holiday dataset region mismatch");
+    }
+    if (o.mode !== void 0 && o.mode !== "merge" && o.mode !== "replace") {
+      throw new Error("illegal holiday import mode");
+    }
+    const replace = o.mode === "replace";
+    if (replace && (!Number.isInteger(o.year) || o.year < 1 || o.year > 9999 || o.region !== void 0 && o.region.toUpperCase() !== this.region)) {
+      throw new Error("replacement requires a year and matching region");
+    }
+    const days = o.days === void 0 ? [] : o.days;
+    const excludes = o.exclude === void 0 ? [] : o.exclude;
+    if (!Array.isArray(days) || !Array.isArray(excludes) || replace && !Array.isArray(o.days)) {
+      throw new Error("holiday days and exclude must be arrays");
+    }
+    const pending = [];
     for (let i = 0; i < days.length; i++) {
       const item = days[i];
-      const d = SolarDay.fromYmd(
-        parseInt(item.date.substring(0, 4), 10),
-        parseInt(item.date.substring(5, 7), 10),
-        parseInt(item.date.substring(8, 10), 10)
-      );
-      this.data[d.toString()] = new Holiday(d, item.name, item.work === true);
-      n++;
+      if (!item || typeof item.name !== "string" || !item.name.trim() || item.work !== void 0 && typeof item.work !== "boolean") {
+        throw new Error("illegal holiday entry");
+      }
+      const d = HolidayCalendar.parseDate(item.date);
+      if (replace && d.getYear() !== o.year) throw new Error("replacement date outside year");
+      pending.push(new Holiday(d, item.name, item.work === true));
     }
+    const removed = excludes.map((date) => HolidayCalendar.parseDate(date));
+    if (replace) {
+      if (removed.some((d) => d.getYear() !== o.year)) throw new Error("replacement exclusion outside year");
+      for (const k in this.data) {
+        if (this.data[k].getDay().getYear() === o.year) delete this.data[k];
+      }
+      for (const k in this.removed) {
+        if (k.startsWith(o.year + "\u5E74")) delete this.removed[k];
+      }
+      this.replacedYears[o.year] = true;
+    }
+    for (const d of removed) this.removed[HolidayCalendar.getKey(d)] = true;
+    for (const h of pending) this.data[HolidayCalendar.getKey(h.getDay())] = h;
     this.cache = {};
-    return n;
+    return pending.length;
+  }
+  static parseDate(date) {
+    if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      throw new Error("holiday date must be YYYY-MM-DD");
+    }
+    return SolarDay.fromYmd(Number(date.slice(0, 4)), Number(date.slice(5, 7)), Number(date.slice(8, 10)));
   }
   static fromJson(json) {
     const o = JSON.parse(json);
@@ -15925,9 +16036,9 @@ class HolidayCalendar {
         dataKeys[k] = true;
       }
     }
-    for (let i = 0; i < this.rules.length; i++) {
+    for (let i = 0; !this.replacedYears[year] && i < this.rules.length; i++) {
       const d = this.rules[i].getDay(year);
-      if (!d) {
+      if (!d || this.removed[HolidayCalendar.getKey(d)]) {
         continue;
       }
       const key = HolidayCalendar.getKey(d);
@@ -15939,10 +16050,11 @@ class HolidayCalendar {
         map[key] = new Holiday(d, old.getName() + "\u3001" + name);
       }
     }
-    if (this.substitute) {
+    for (const k in this.removed) delete map[k];
+    if (this.substitute && !this.replacedYears[year]) {
       this.applyJapaneseSubstitutes(year, map);
     }
-    if (this.observed === 1) {
+    if (this.observed === 1 && !this.replacedYears[year]) {
       const nextNewYear = SolarDay.fromYmd(year + 1, 1, 1);
       if (nextNewYear.getWeek().getIndex() === 6) {
         const eve = nextNewYear.next(-1);
@@ -15951,7 +16063,7 @@ class HolidayCalendar {
         }
       }
     }
-    if (this.observed !== 0) {
+    if (this.observed !== 0 && !this.replacedYears[year]) {
       this.applyObserved(year, map);
     }
     const l = [];
@@ -15971,9 +16083,9 @@ class HolidayCalendar {
   /**
    * 顺延至下一个非假日
    */
-  static nextFree(map, day) {
+  static nextFree(map, day, weekdaysOnly = false) {
     let d = day;
-    while (map[HolidayCalendar.getKey(d)]) {
+    while (map[HolidayCalendar.getKey(d)] || weekdaysOnly && (d.getWeek().getIndex() === 0 || d.getWeek().getIndex() === 6)) {
       d = d.next(1);
     }
     return d;
@@ -16005,7 +16117,7 @@ class HolidayCalendar {
         }
       } else if (this.observed === 3) {
         if (w === 0 || w === 6) {
-          target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+          target = HolidayCalendar.nextFree(map, h.getDay().next(1), true);
         }
       }
       if (target && !map[HolidayCalendar.getKey(target)]) {
@@ -16044,6 +16156,7 @@ class HolidayCalendar {
    */
   toIcs(year, includeWork = false) {
     const days = this.getDays(year, includeWork);
+    const stamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
     const l = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -16056,15 +16169,32 @@ class HolidayCalendar {
       const date = d.getYear() + (d.getMonth() < 10 ? "0" : "") + d.getMonth() + (d.getDay() < 10 ? "0" : "") + d.getDay();
       l.push("BEGIN:VEVENT");
       l.push("UID:" + date + "-" + this.region + "@tyme");
+      l.push("DTSTAMP:" + stamp);
       l.push("DTSTART;VALUE=DATE:" + date);
       l.push("SUMMARY:" + HolidayCalendar.escape(h.getName()));
       l.push("END:VEVENT");
     }
     l.push("END:VCALENDAR");
-    return l.join("\r\n") + "\r\n";
+    return l.map((line) => HolidayCalendar.foldLine(line)).join("\r\n") + "\r\n";
+  }
+  /** RFC 5545: 每行至多 75 个 UTF-8 字节，续行空格也计入。 */
+  static foldLine(line) {
+    let result = "";
+    let bytes = 0;
+    for (const ch of Array.from(line)) {
+      const code = ch.codePointAt(0);
+      const width = code < 128 ? 1 : code < 2048 ? 2 : code < 65536 ? 3 : 4;
+      if (bytes + width > 75) {
+        result += "\r\n ";
+        bytes = 1;
+      }
+      result += ch;
+      bytes += width;
+    }
+    return result;
   }
   static escape(text) {
-    return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+    return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n|\r|\n/g, "\\n");
   }
   /**
    * 仅用规则推算某年假日，不含 importJson 导入的公告数据
@@ -16078,22 +16208,10 @@ class HolidayCalendar {
    * 返回实际记录的条数。
    */
   excludeDays(dates) {
-    let n = 0;
-    for (let i = 0; i < dates.length; i++) {
-      const parts = dates[i].split("-");
-      if (parts.length !== 3) {
-        continue;
-      }
-      const day = SolarDay.fromYmd(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10),
-        parseInt(parts[2], 10)
-      );
-      this.removed[HolidayCalendar.getKey(day)] = true;
-      n++;
-    }
+    const days = dates.map((date) => HolidayCalendar.parseDate(date));
+    for (const day of days) this.removed[HolidayCalendar.getKey(day)] = true;
     this.cache = {};
-    return n;
+    return days.length;
   }
   /**
    * 已排除的日期数，便于自检
@@ -16117,6 +16235,7 @@ class HolidayCalendar {
         map[key] = new Holiday(d, old.getName() + "\u3001" + name);
       }
     }
+    if (this.substitute) this.applyJapaneseSubstitutes(year, map);
     if (this.observed === 1) {
       const nextNewYear = SolarDay.fromYmd(year + 1, 1, 1);
       if (nextNewYear.getWeek().getIndex() === 6) {
@@ -16748,20 +16867,65 @@ const TAOIST = {
   "12-29": ["\u6E05\u9759\u5B59\u771F\u541B(\u5B59\u4E0D\u4E8C)\u6210\u9053~"]
 };
 
+const CHINA_OBSERVANCES = [
+  {
+    month: 5,
+    day: 10,
+    name: "\u4E2D\u56FD\u54C1\u724C\u65E5",
+    startYear: 2017,
+    source: "https://app.www.gov.cn/govdata/gov/201705/02/403896/article.html"
+  },
+  {
+    month: 5,
+    day: 30,
+    name: "\u5168\u56FD\u79D1\u6280\u5DE5\u4F5C\u8005\u65E5",
+    startYear: 2017,
+    source: "https://www.most.gov.cn/ztzl/qgkjcxdhzkyzn/gcls/bm/201705/t20170526_133110.html"
+  },
+  {
+    month: 8,
+    day: 15,
+    name: "\u5168\u56FD\u751F\u6001\u65E5",
+    startYear: 2023,
+    source: "https://www.moj.gov.cn/pub/sfbgw/jgsz/jgszjgtj/jgtjlfsij/lfsijtjxw/202306/t20230630_481763.html"
+  },
+  {
+    month: 8,
+    day: 19,
+    name: "\u4E2D\u56FD\u533B\u5E08\u8282",
+    startYear: 2018,
+    source: "https://www.nhc.gov.cn/wjw/ttyw/201711/d6250b4507654d0a9d05d9826f9f5472.shtml"
+  },
+  {
+    month: 5,
+    day: 20,
+    name: "\u4E2D\u56FD\u5B66\u751F\u8425\u517B\u65E5",
+    startYear: 1990,
+    source: "https://www.casnhp.org.cn/intro/4.html"
+  },
+  {
+    month: 12,
+    day: 4,
+    name: "\u56FD\u5BB6\u5BAA\u6CD5\u65E5",
+    startYear: 2014,
+    source: "https://www.moe.gov.cn/srcsite/A02/s7049/201411/t20141121_178775.html"
+  },
+  {
+    month: 10,
+    day: 25,
+    name: "\u53F0\u6E7E\u5149\u590D\u7EAA\u5FF5\u65E5",
+    startYear: 2025,
+    source: "https://www.mod.gov.cn/gfbw/qwfb/16417277.html"
+  }
+];
+
 class AnniversaryFestival extends AbstractCulture {
   solarDay;
   entries;
   /**
    * 上游未收的中国纪念日，逐条附设立依据
    */
-  static CHINA_EXTRA = {
-    // 国务院 2017 年 4 月 24 日批复，自 2017 年起每年 5 月 10 日
-    "5-10": ["\u4E2D\u56FD\u54C1\u724C\u65E5"],
-    // 国务院 2016 年 11 月 25 日批复，自 2017 年起每年 5 月 30 日
-    "5-30": ["\u5168\u56FD\u79D1\u6280\u5DE5\u4F5C\u8005\u65E5"],
-    // 全国人大常委会 2023 年 6 月 28 日决定，每年 8 月 15 日
-    "8-15": ["\u5168\u56FD\u751F\u6001\u65E5"]
-  };
+  static CHINA_EXTRA = AnniversaryFestival.getChinaExtra();
   constructor(solarDay, entries) {
     super();
     this.solarDay = solarDay;
@@ -16786,15 +16950,16 @@ class AnniversaryFestival extends AbstractCulture {
         }
       }
     };
-    add(ANNIVERSARY[key]);
-    add(AnniversaryFestival.CHINA_EXTRA[key]);
+    const verified = CHINA_OBSERVANCES.filter((row) => row.month + "-" + row.day === key);
+    add((ANNIVERSARY[key] || []).filter((name) => !verified.some((row) => row.name === name)));
+    add(verified.filter((row) => solarDay.getYear() >= row.startYear).map((row) => row.name));
     const entries = [];
     for (let i = 0; i < names.length; i++) {
-      const isChinaExtra = !!AnniversaryFestival.CHINA_EXTRA[key] && AnniversaryFestival.CHINA_EXTRA[key].indexOf(names[i]) > -1;
+      const official = verified.find((row) => row.name === names[i]);
       entries.push(new FestivalEntry(
         names[i],
         AnniversaryFestival.classify(names[i]),
-        isChinaExtra ? "gov.cn" : "6tail"
+        official ? official.source : "6tail"
       ));
     }
     return new AnniversaryFestival(solarDay, entries);
@@ -16822,7 +16987,13 @@ class AnniversaryFestival extends AbstractCulture {
    * 上游未收的中国纪念日表，供事件注册与文档使用
    */
   static getChinaExtra() {
-    return AnniversaryFestival.CHINA_EXTRA;
+    const table = {};
+    for (const row of CHINA_OBSERVANCES) {
+      const key = row.month + "-" + row.day;
+      if (!table[key]) table[key] = [];
+      table[key].push(row.name);
+    }
+    return table;
   }
   static getSize() {
     let n = Object.keys(ANNIVERSARY).length;
@@ -17186,7 +17357,7 @@ class FolkFestival extends AbstractCulture {
   static TERM_RULES = [
     HolidayRule.term(7, "\u5BD2\u98DF\u8282", -1),
     // 国务院 2018 年 6 月 21 日批复，自 2018 年起每年秋分
-    HolidayRule.term(18, "\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282")
+    HolidayRule.term(18, "\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282", 0, 2018)
   ];
   /**
    * 节气后第几个某干日
@@ -17846,7 +18017,10 @@ class Festivals extends AbstractCulture {
       }
     };
     solarTable(ANNIVERSARY);
-    solarTable(AnniversaryFestival.getChinaExtra());
+    for (const row of CHINA_OBSERVANCES) {
+      put(row.name, Event.builder().solarDay(row.month, row.day, 0).startYear(row.startYear).build());
+    }
+    put("\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282", Event.builder().termDay(18, 0).startYear(2018).build());
     const lunarTable = (table, strip) => {
       for (const key in table) {
         const md = key.split("-");

@@ -12,8 +12,9 @@ export class IcsEvent extends AbstractCulture {
     protected uid: string;
     protected location: string;
     protected description: string;
+    protected recurrenceExceptions: boolean;
 
-    constructor(summary: string, start: SolarDay, end: SolarDay | null, rrule: string, uid: string, location: string, description: string) {
+    constructor(summary: string, start: SolarDay, end: SolarDay | null, rrule: string, uid: string, location: string, description: string, recurrenceExceptions: boolean = false) {
         super();
         this.summary = summary;
         this.start = start;
@@ -22,6 +23,11 @@ export class IcsEvent extends AbstractCulture {
         this.uid = uid;
         this.location = location;
         this.description = description;
+        this.recurrenceExceptions = recurrenceExceptions;
+    }
+
+    hasRecurrenceExceptions(): boolean {
+        return this.recurrenceExceptions;
     }
 
     getName(): string {
@@ -74,10 +80,20 @@ export class IcsCalendar {
         const lines: string[] = text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
         const events: IcsEvent[] = [];
         let fields: { [key: string]: string } | null = null;
+        let depth: number = 0;
         for (let i: number = 0; i < lines.length; i++) {
             const line: string = lines[i];
             if (line === 'BEGIN:VEVENT') {
                 fields = {};
+                depth = 0;
+                continue;
+            }
+            if (fields && line.startsWith('BEGIN:')) {
+                depth++;
+                continue;
+            }
+            if (depth > 0) {
+                if (line.startsWith('END:')) depth--;
                 continue;
             }
             if (line === 'END:VEVENT') {
@@ -108,18 +124,20 @@ export class IcsCalendar {
             fields['RRULE'] || '',
             fields['UID'] || '',
             IcsCalendar.unescape(fields['LOCATION'] || ''),
-            IcsCalendar.unescape(fields['DESCRIPTION'] || ''));
+            IcsCalendar.unescape(fields['DESCRIPTION'] || ''),
+            ['EXDATE', 'RDATE', 'EXRULE', 'RECURRENCE-ID'].some((key) => key in fields));
     }
 
     /**
      * 还原 iCalendar 文本转义
      */
     protected static unescape(text: string): string {
-        return text.replace(/\\n/gi, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\');
+        return text.replace(/\\([nN,;\\])/g, (_match: string, escaped: string) => /[nN]/.test(escaped) ? '\n' : escaped);
     }
 
     protected static parseDate(value: string): SolarDay {
-        const s: string = value.replace(/[^0-9]/g, '');
+        if (!/^\d{8}(?:T\d{6}Z?)?$/.test(value)) throw new Error('illegal ICS date: ' + value);
+        const s: string = value;
         return SolarDay.fromYmd(parseInt(s.substring(0, 4), 10), parseInt(s.substring(4, 6), 10), parseInt(s.substring(6, 8), 10));
     }
 
@@ -146,34 +164,44 @@ export class IcsCalendar {
         const rule: { [key: string]: string } = {};
         const rrule: string = event.getRrule();
         // 单次事件无法用年度循环表达，交由 getOneOffDays 返回
-        if (!rrule) {
+        if (!rrule || event.hasRecurrenceExceptions()) {
             return null;
         }
         const parts: string[] = rrule.split(';');
         for (let i: number = 0; i < parts.length; i++) {
             const p: number = parts[i].indexOf('=');
-            rule[parts[i].substring(0, p).toUpperCase()] = parts[i].substring(p + 1);
+            const key: string = parts[i].substring(0, p).toUpperCase();
+            if (p < 1 || key in rule || !['FREQ', 'BYMONTH', 'BYMONTHDAY', 'BYDAY', 'INTERVAL'].includes(key)) return null;
+            rule[key] = parts[i].substring(p + 1).toUpperCase();
         }
-        if (rule['FREQ'] !== 'YEARLY') {
+        if (rule['FREQ'] !== 'YEARLY' || (rule['INTERVAL'] !== undefined && rule['INTERVAL'] !== '1')) {
             return null;
         }
-        const month: number = rule['BYMONTH'] ? parseInt(rule['BYMONTH'], 10) : start.getMonth();
+        if (rule['BYMONTH'] !== undefined && !/^(?:[1-9]|1[0-2])$/.test(rule['BYMONTH'])) return null;
+        const month: number = rule['BYMONTH'] ? Number(rule['BYMONTH']) : start.getMonth();
         const monthDay: string = rule['BYMONTHDAY'] || '';
         const byDay: string = rule['BYDAY'] || '';
         if (byDay) {
-            const m: RegExpExecArray | null = /^(-?\d)([A-Z]{2})$/.exec(byDay);
+            // 没有 BYMONTH 的 YEARLY BYDAY 是按整年计数，不能当作某月星期。
+            if (!rule['BYMONTH'] || monthDay) return null;
+            const m: RegExpExecArray | null = /^(-?[1-5])(SU|MO|TU|WE|TH|FR|SA)$/.exec(byDay);
             if (!m) {
                 return null;
             }
             const weeks: string[] = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
-            return Event.builder().name(event.getName())
+            const eventRule: Event = Event.builder().name(event.getName())
                 .solarWeek(month, parseInt(m[1], 10), weeks.indexOf(m[2]))
                 .startYear(start.getYear()).build();
+            return eventRule.getSolarDay(start.getYear())?.equals(start) ? eventRule : null;
         }
-        const day: number = monthDay ? parseInt(monthDay.split(',')[0], 10) : start.getDay();
+        if (rule['BYMONTHDAY'] !== undefined && !/^(?:[1-9]|[12]\d|3[01])$/.test(monthDay)) return null;
+        // 没有 BYMONTH 的 BYMONTHDAY 可匹配多个日历月，无法降为单日年度规则。
+        if (monthDay && !rule['BYMONTH']) return null;
+        const day: number = monthDay ? Number(monthDay) : start.getDay();
         if (day < 1 || day > 31) {
             return null;
         }
+        if (month !== start.getMonth() || day !== start.getDay()) return null;
         return Event.builder().name(event.getName()).solarDay(month, day, 0).startYear(start.getYear()).build();
     }
 

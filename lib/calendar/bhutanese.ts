@@ -187,9 +187,9 @@ export class BhutaneseDay extends AbstractCulture {
 
     static fromYmd(year: number | string, month: number | string, day: number | string,
                    leapMonth: boolean = false, leapDay: boolean = false): BhutaneseDay {
-        const y: number = BhutaneseDay.numeric(year, 'bhutanese year');
-        const m: number = BhutaneseDay.numeric(month, 'bhutanese month');
-        const d: number = BhutaneseDay.numeric(day, 'bhutanese day');
+        const y: number = BhutaneseDay.integer(year, 'bhutanese year');
+        const m: number = BhutaneseDay.integer(month, 'bhutanese month');
+        const d: number = BhutaneseDay.integer(day, 'bhutanese day');
         if (y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 30) {
             throw new Error(`illegal bhutanese date: ${y}-${m}-${d}`);
         }

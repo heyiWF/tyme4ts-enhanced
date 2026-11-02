@@ -5,6 +5,7 @@ import {LUNAR_FOLK} from './data-lunar-folk';
 import {BUDDHIST_OTHER} from './data-buddhist';
 import {TAOIST} from './data-taoist';
 import {AnniversaryFestival} from './anniversary';
+import {CHINA_OBSERVANCES} from './china-observances';
 import {HebrewFestival, IndianFestival} from './foreign';
 import {IslamicFestival} from './islamic';
 import {BuddhistFestival} from './buddhist';
@@ -252,7 +253,10 @@ export class Festivals extends AbstractCulture {
             }
         };
         solarTable(ANNIVERSARY);
-        solarTable(AnniversaryFestival.getChinaExtra());
+        for (const row of CHINA_OBSERVANCES) {
+            put(row.name, Event.builder().solarDay(row.month, row.day, 0).startYear(row.startYear).build());
+        }
+        put('中国农民丰收节', Event.builder().termDay(18, 0).startYear(2018).build());
         const lunarTable = (table: { [key: string]: string[] }, strip: boolean) => {
             for (const key in table) {
                 const md: string[] = key.split('-');

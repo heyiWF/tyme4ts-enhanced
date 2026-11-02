@@ -2,7 +2,8 @@
 dist/
 node_modules/
 *.iml
-package-lock.json
+.tmp-tools/
+.tmp-validation/
 .DS_Store
 .workbuddy/
 docs/_*.png

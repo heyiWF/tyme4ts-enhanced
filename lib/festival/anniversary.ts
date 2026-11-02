@@ -2,12 +2,13 @@ import {AbstractCulture} from '../core/base';
 import {SolarDay} from '../calendar/core';
 import {ANNIVERSARY} from './data-anniversary';
 import {FestivalCategory, FestivalEntry} from './types';
+import {CHINA_OBSERVANCES, ChinaObservance} from './china-observances';
 
 /**
  * 公历纪念日与国际日
  *
  * 数据取自 6tail/lunar-typescript 的 SolarUtil.OTHER_FESTIVAL（137 个日期键、158 条名称），
- * 另补该表未收的四项中国纪念日，见 CHINA_EXTRA。
+ * 中国补充条目与已核实的设立年份见 china-observances.ts。
  *
  * 与 SolarFestival 的分工：SolarFestival 只收 10 个法定/半法定公历节日（元旦、劳动节、国庆节等），
  * 本类收其余纪念日、国际日与职业日，二者不重复。
@@ -19,14 +20,7 @@ export class AnniversaryFestival extends AbstractCulture {
     /**
      * 上游未收的中国纪念日，逐条附设立依据
      */
-    protected static CHINA_EXTRA: { [key: string]: string[] } = {
-        // 国务院 2017 年 4 月 24 日批复，自 2017 年起每年 5 月 10 日
-        '5-10': ['中国品牌日'],
-        // 国务院 2016 年 11 月 25 日批复，自 2017 年起每年 5 月 30 日
-        '5-30': ['全国科技工作者日'],
-        // 全国人大常委会 2023 年 6 月 28 日决定，每年 8 月 15 日
-        '8-15': ['全国生态日'],
-    };
+    protected static CHINA_EXTRA: { [key: string]: string[] } = AnniversaryFestival.getChinaExtra();
 
     protected constructor(solarDay: SolarDay, entries: FestivalEntry[]) {
         super();
@@ -54,15 +48,16 @@ export class AnniversaryFestival extends AbstractCulture {
                 }
             }
         };
-        add(ANNIVERSARY[key]);
-        add(AnniversaryFestival.CHINA_EXTRA[key]);
+        const verified: ChinaObservance[] = CHINA_OBSERVANCES.filter((row) => row.month + '-' + row.day === key);
+        add((ANNIVERSARY[key] || []).filter((name) => !verified.some((row) => row.name === name)));
+        add(verified.filter((row) => solarDay.getYear() >= row.startYear).map((row) => row.name));
         const entries: FestivalEntry[] = [];
         for (let i: number = 0; i < names.length; i++) {
-            const isChinaExtra: boolean = !!AnniversaryFestival.CHINA_EXTRA[key] && AnniversaryFestival.CHINA_EXTRA[key].indexOf(names[i]) > -1;
+            const official = verified.find((row) => row.name === names[i]);
             entries.push(new FestivalEntry(
                 names[i],
                 AnniversaryFestival.classify(names[i]),
-                isChinaExtra ? 'gov.cn' : '6tail',
+                official ? official.source : '6tail',
             ));
         }
         return new AnniversaryFestival(solarDay, entries);
@@ -95,7 +90,13 @@ export class AnniversaryFestival extends AbstractCulture {
      * 上游未收的中国纪念日表，供事件注册与文档使用
      */
     static getChinaExtra(): { [key: string]: string[] } {
-        return AnniversaryFestival.CHINA_EXTRA;
+        const table: { [key: string]: string[] } = {};
+        for (const row of CHINA_OBSERVANCES) {
+            const key = row.month + '-' + row.day;
+            if (!table[key]) table[key] = [];
+            table[key].push(row.name);
+        }
+        return table;
     }
 
     static getSize(): number {

@@ -192,6 +192,16 @@ table.spec td:nth-child(3){width:130px}
 .cat-dot{margin-right:3px;flex:none}
 .cat-dot.c0{background:#c24f40}.cat-dot.c1{background:#c58a25}.cat-dot.c2{background:#339267}
 .cat-dot.c3{background:#5368b5}.cat-dot.c4{background:#3d8da3}.cat-dot.c5{background:#8b65a6}
+.source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px;margin:18px 0}
+.source-card{border:1px solid var(--line);border-radius:12px;padding:18px;background:#f8faf7;overflow-wrap:anywhere}
+.source-card h4{margin:9px 0;font-size:16px}.source-card p{font-size:13px;line-height:1.7}
+.source-status{font-size:11px;color:var(--green);font-weight:600}
+button.region{text-align:left;font:inherit;color:inherit;cursor:pointer}
+button.region b,button.region span{display:block}
+button.region:focus-visible,nav.tabs button:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.region-tools{display:grid;grid-template-columns:minmax(0,1fr)100px;gap:12px}
+.region-tools label{display:block;font-size:12px;margin-bottom:6px;color:var(--ink-2)}
+#region-query,#region-year{min-width:0;width:100%;box-sizing:border-box}#region-provenance{overflow-wrap:anywhere}
 .cat-dot.c6{background:#7b8982}.cat-dot.c7{background:#ad654b}
 .fest-months{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
 .fest-months .month{--month-accent:var(--green);border:1px solid var(--line);border-top:3px solid var(--month-accent);border-radius:13px;padding:13px 14px;box-shadow:var(--shadow)}

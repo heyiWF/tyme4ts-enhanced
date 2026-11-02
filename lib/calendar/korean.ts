@@ -130,9 +130,9 @@ export class KoreanLunarDay extends AbstractCulture {
     }
 
     static fromYmd(year: number | string, month: number | string, day: number | string, leap: boolean = false): KoreanLunarDay {
-        const y: number = KoreanLunarDay.numeric(year, 'korean lunar year');
-        const m: number = KoreanLunarDay.numeric(month, 'korean lunar month');
-        const d: number = KoreanLunarDay.numeric(day, 'korean lunar day');
+        const y: number = KoreanLunarDay.integer(year, 'korean lunar year');
+        const m: number = KoreanLunarDay.integer(month, 'korean lunar month');
+        const d: number = KoreanLunarDay.integer(day, 'korean lunar day');
         if (m < 1 || m > 12) {
             throw new Error(`illegal korean lunar month: ${m}`);
         }

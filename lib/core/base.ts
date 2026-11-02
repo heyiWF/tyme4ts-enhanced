@@ -67,6 +67,15 @@ export abstract class AbstractCulture implements Culture {
         return d;
     }
 
+    /** 日历年月日必须为有限整数；numeric 仍供儒略日等允许小数的 API 使用。 */
+    protected static integer(n: number | string, name: string): number {
+        const d: number = AbstractCulture.numeric(n, name);
+        if ((typeof n === 'string' && !n.trim()) || !Number.isInteger(d)) {
+            throw new Error(`illegal ${name}: ${n}`);
+        }
+        return d;
+    }
+
     static validateRange(value: number, min: number, max: number, field: string): void {
         if (value < min || value > max) {
             throw new Error(`illegal ${field}: ${value}`);

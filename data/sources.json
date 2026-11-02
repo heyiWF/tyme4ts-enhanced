@@ -1,0 +1,61 @@
+{
+  "verifiedOn": "2026-11-01",
+  "sources": [
+    {
+      "title": "英国 · GOV.UK 银行假日",
+      "status": "已接入",
+      "format": "JSON API · OGL v3.0",
+      "url": "https://www.gov.uk/bank-holidays.json",
+      "scope": "GB、GB-SCT、GB-NIR；2019–2028 年原始快照与 30 份完整年度公告。",
+      "boundary": "实际银行放假日；替代日取代周末原日期。滚动 API 更新后需审核年度差异。"
+    },
+    {
+      "title": "新西兰 · Matariki 法案附表",
+      "status": "已接入",
+      "format": "法律附表 · 2022–2052",
+      "url": "https://www.legislation.govt.nz/act/public/2022/0014/latest/LMS557851.html",
+      "scope": "31 个年度日期，内置 HolidayRule.table；无需网络。",
+      "boundary": "这是法定假日日期表，不是完整毛利历转换算法；2052 年后不外推。"
+    },
+    {
+      "title": "中国大陆 · 纪念日设立依据",
+      "status": "已接入",
+      "format": "国务院批复、人大决定、主管机构资料",
+      "url": "https://www.moj.gov.cn/pub/sfbgw/jgsz/jgszjgtj/jgtjlfsij/lfsijtjxw/202306/t20230630_481763.html",
+      "scope": "7 项固定日期附生效年份与逐条来源；丰收节自 2018 年秋分起。",
+      "boundary": "纪念日并不自动成为放假日。旧上游民俗表仍保留原文，不代表已全部官方核验。"
+    },
+    {
+      "title": "日本 · 内阁府国民の祝日",
+      "status": "可扩展",
+      "format": "年度表 / CSV",
+      "url": "https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html",
+      "scope": "页面提供 1955–2027 年 CSV，适合接入完整年度替换与历史回归。",
+      "boundary": "应优先覆盖 2019 特例及 2020、2021 奥运移日；导入前核对网站再利用条款。"
+    },
+    {
+      "title": "中国香港 · 天文台公农历对照",
+      "status": "可扩展",
+      "format": "1901–2100 年对照表 / 开放 API",
+      "url": "https://www.hko.gov.hk/en/gts/time/conversion.htm",
+      "scope": "可作为农历、闰月和节气日期的独立对照；重点检查 2033 闰十一月。",
+      "boundary": "天文台注明远期近午夜朔或节气可能有一日差异；不要把自生成向量当作外部验证。"
+    },
+    {
+      "title": "美国 · OPM 联邦假日",
+      "status": "可扩展",
+      "format": "年度官方表",
+      "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/",
+      "scope": "联邦雇员假日与周末替代日，可用于检验跨年 12 月 31 日补假。",
+      "boundary": "不等于全体私人企业、州、市的放假安排。"
+    },
+    {
+      "title": "中国台湾 · 人事行政总处办公日历",
+      "status": "可扩展",
+      "format": "年度公告与附件",
+      "url": "https://www.dgpa.gov.tw/information?pid=12574&uid=83",
+      "scope": "2025 修订版与 2026 政府机关办公日历，适合替换年度规则。",
+      "boundary": "需区分政府机关与其他行业；现有 TW 规则不能完整表达 2025 新增假日及补假。"
+    }
+  ]
+}

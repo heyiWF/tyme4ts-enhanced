@@ -51,9 +51,9 @@ export class SakaDay extends AbstractCulture {
     }
 
     static fromYmd(year: number | string, month: number | string, day: number | string): SakaDay {
-        const y: number = SakaDay.numeric(year, 'saka year');
-        const m: number = SakaDay.numeric(month, 'saka month');
-        const d: number = SakaDay.numeric(day, 'saka day');
+        const y: number = SakaDay.integer(year, 'saka year');
+        const m: number = SakaDay.integer(month, 'saka month');
+        const d: number = SakaDay.integer(day, 'saka day');
         if (m < 1 || m > 12) {
             throw new Error(`illegal saka month: ${m}`);
         }

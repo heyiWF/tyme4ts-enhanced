@@ -160,9 +160,9 @@ export class MyanmarDay extends AbstractCulture {
     }
 
     static fromYmd(my: number | string, mm: number | string, md: number | string): MyanmarDay {
-        const y: number = MyanmarDay.numeric(my, 'myanmar year');
-        const m: number = MyanmarDay.numeric(mm, 'myanmar month');
-        const d: number = MyanmarDay.numeric(md, 'myanmar day');
+        const y: number = MyanmarDay.integer(my, 'myanmar year');
+        const m: number = MyanmarDay.integer(mm, 'myanmar month');
+        const d: number = MyanmarDay.integer(md, 'myanmar day');
         if (y < 0) {
             throw new Error(`illegal myanmar year: ${y}`);
         }

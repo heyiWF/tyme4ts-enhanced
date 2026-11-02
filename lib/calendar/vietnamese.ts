@@ -286,9 +286,9 @@ export class VietnameseLunarDay extends AbstractCulture {
     }
 
     static fromYmd(year: number | string, month: number | string, day: number | string, leap: boolean = false): VietnameseLunarDay {
-        const y: number = VietnameseLunarDay.numeric(year, 'vietnamese lunar year');
-        const m: number = VietnameseLunarDay.numeric(month, 'vietnamese lunar month');
-        const d: number = VietnameseLunarDay.numeric(day, 'vietnamese lunar day');
+        const y: number = VietnameseLunarDay.integer(year, 'vietnamese lunar year');
+        const m: number = VietnameseLunarDay.integer(month, 'vietnamese lunar month');
+        const d: number = VietnameseLunarDay.integer(day, 'vietnamese lunar day');
         if (y < MIN_YEAR || y > MAX_YEAR || m < 1 || m > 12 || d < 1 || d > 30) {
             throw new Error(`illegal Vietnamese lunar date: ${y}-${m}-${d}`);
         }
