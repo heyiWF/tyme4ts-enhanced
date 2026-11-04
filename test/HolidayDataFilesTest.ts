@@ -41,13 +41,15 @@ class HolidayDataFilesTest {
 
     @test
     test1(): void {
-        // 导入数据优先于规则：新加坡 2025 国庆补假
+        // 导入数据优先于规则：新加坡 2025 选举日；周六国庆日不补假
         const c: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'SG-2025.json'), 'utf8'));
-        equal(c.getHoliday(SolarDay.fromYmd(2025, 8, 11))!.getName(), '国庆日补假');
+        equal(c.getHoliday(SolarDay.fromYmd(2025, 8, 11)), null);
         equal(c.getHoliday(SolarDay.fromYmd(2025, 5, 3))!.getName(), '选举日');
         // 马来西亚联邦日
         const my: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'MY-2026.json'), 'utf8'));
         equal(my.getHoliday(SolarDay.fromYmd(2026, 3, 21))!.getName(), '开斋节');
+        equal(my.getHoliday(SolarDay.fromYmd(2026, 6, 2))!.getName(), '卫塞节补假');
+        equal(my.getHoliday(SolarDay.fromYmd(2026, 11, 9))!.getName(), '屠妖节补假');
         ok(my.getDays(2026).length >= 16);
         // 印度尼西亚 2026：公告数据覆盖算术历差一日者，并扣掉被取代的规则日期
         const id: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'ID-2026.json'), 'utf8'));
@@ -69,6 +71,9 @@ class HolidayDataFilesTest {
         equal(eg.getHoliday(SolarDay.fromYmd(2026, 1, 25)), null);
         equal(eg.getHoliday(SolarDay.fromYmd(2026, 5, 7))!.getName(), '劳动节');
         equal(eg.getHoliday(SolarDay.fromYmd(2026, 5, 1)), null);
+        // 武装部队日由 10-06 顺延至 10-08（总理府决定）
+        equal(eg.getHoliday(SolarDay.fromYmd(2026, 10, 8))!.getName(), '武装部队日');
+        equal(eg.getHoliday(SolarDay.fromYmd(2026, 10, 6)), null);
         // 斯里兰卡：Poya 与宗教节日按年导入，固定假日仍由规则推算
         const lk: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'LK-2026.json'), 'utf8'));
         equal(lk.getHoliday(SolarDay.fromYmd(2026, 5, 1))!.getName(), '卫塞月圆日、劳动节');

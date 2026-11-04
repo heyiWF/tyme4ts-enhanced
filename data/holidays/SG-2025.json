@@ -1,7 +1,7 @@
 {
  "region": "SG",
  "year": 2025,
- "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+ "source": "MOM Singapore / data.gov.sg",
  "days": [
   {
    "date": "2025-01-01",
@@ -42,10 +42,6 @@
   {
    "date": "2025-08-09",
    "name": "国庆日"
-  },
-  {
-   "date": "2025-08-11",
-   "name": "国庆日补假"
   },
   {
    "date": "2025-10-20",

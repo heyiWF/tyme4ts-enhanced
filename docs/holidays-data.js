@@ -693,7 +693,7 @@ export const DATASETS = [
     "name": "圣纪"
    },
    {
-    "date": "2026-10-06",
+    "date": "2026-10-08",
     "name": "武装部队日"
    }
   ],
@@ -702,7 +702,8 @@ export const DATASETS = [
    "2026-05-01",
    "2026-06-17",
    "2026-06-30",
-   "2026-08-26"
+   "2026-08-26",
+   "2026-10-06"
   ]
  },
  {
@@ -2788,6 +2789,10 @@ export const DATASETS = [
     "name": "国庆日"
    },
    {
+    "date": "2025-09-01",
+    "name": "国庆日补假"
+   },
+   {
     "date": "2025-09-05",
     "name": "先知诞辰"
    },
@@ -2859,6 +2864,10 @@ export const DATASETS = [
     "name": "最高元首诞辰"
    },
    {
+    "date": "2026-06-02",
+    "name": "卫塞节补假"
+   },
+   {
     "date": "2026-06-17",
     "name": "伊斯兰新年"
    },
@@ -2877,6 +2886,10 @@ export const DATASETS = [
    {
     "date": "2026-11-08",
     "name": "屠妖节"
+   },
+   {
+    "date": "2026-11-09",
+    "name": "屠妖节补假"
    },
    {
     "date": "2026-12-25",
@@ -3090,6 +3103,10 @@ export const DATASETS = [
    {
     "date": "2025-06-08",
     "name": "哈芝节次日"
+   },
+   {
+    "date": "2026-03-08",
+    "name": "古兰经降示日补假"
    },
    {
     "date": "2026-05-26",
@@ -3406,7 +3423,7 @@ export const DATASETS = [
  {
   "region": "SG",
   "year": 2025,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "MOM Singapore / data.gov.sg",
   "days": [
    {
     "date": "2025-01-01",
@@ -3449,10 +3466,6 @@ export const DATASETS = [
     "name": "国庆日"
    },
    {
-    "date": "2025-08-11",
-    "name": "国庆日补假"
-   },
-   {
     "date": "2025-10-20",
     "name": "排灯节"
    },
@@ -3465,7 +3478,7 @@ export const DATASETS = [
  {
   "region": "SG",
   "year": 2026,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "MOM Singapore / data.gov.sg",
   "days": [
    {
     "date": "2026-01-01",
@@ -3528,7 +3541,7 @@ export const DATASETS = [
  {
   "region": "SG",
   "year": 2027,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "MOM Singapore / data.gov.sg",
   "days": [
    {
     "date": "2027-01-01",
@@ -3583,7 +3596,7 @@ export const DATASETS = [
  {
   "region": "TH",
   "year": 2025,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
   "days": [
    {
     "date": "2025-01-01",
@@ -3654,6 +3667,10 @@ export const DATASETS = [
     "name": "三宝佛节"
    },
    {
+    "date": "2025-07-11",
+    "name": "守夏节"
+   },
+   {
     "date": "2025-07-28",
     "name": "国王诞辰"
    },
@@ -3690,7 +3707,7 @@ export const DATASETS = [
  {
   "region": "TH",
   "year": 2026,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
   "days": [
    {
     "date": "2026-01-01",
@@ -3751,6 +3768,10 @@ export const DATASETS = [
    {
     "date": "2026-07-29",
     "name": "三宝佛节"
+   },
+   {
+    "date": "2026-07-30",
+    "name": "守夏节"
    },
    {
     "date": "2026-08-12",

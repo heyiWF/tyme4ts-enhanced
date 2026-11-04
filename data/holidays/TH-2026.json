@@ -1,7 +1,7 @@
 {
  "region": "TH",
  "year": 2026,
- "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+ "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
  "days": [
   {
    "date": "2026-01-01",
@@ -62,6 +62,10 @@
   {
    "date": "2026-07-29",
    "name": "三宝佛节"
+  },
+  {
+   "date": "2026-07-30",
+   "name": "守夏节"
   },
   {
    "date": "2026-08-12",
