@@ -134,7 +134,7 @@ a.getHourFortunes().map((h) => h.toString());
 ```ts
 import {HolidayCalendar, SolarDay} from 'tyme4ts-enhanced';
 
-const cn = HolidayCalendar.of('CN');       // 已内置 2001–2026 年公告数据
+const cn = HolidayCalendar.of('CN');       // 已内置 2001–2027 年公告数据
 cn.getHoliday(SolarDay.fromYmd(2025, 10, 6))!.getName();  // 国庆中秋
 cn.getHoliday(SolarDay.fromYmd(2025, 1, 26))!.isWork();   // true（补班）
 
@@ -442,7 +442,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 | 韩国 / 不丹 / 蒙古 | 1900–2050 / 1900–2100 / 1900–2100 |
 | 尼泊尔 Bikram Sambat | 1975–2084 BS（可用 `importJson()` 续年） |
 | 泰国阴历 / 越南农历 / 缅甸历 | 1250–1470 CS / 1800–2199 / 见模块测试 |
-| 节假日 | 中国大陆 2001–2026（可导入）；斯里兰卡 2025–2027（可导入）；英国 2019–2028（完整公告）；Matariki 2022–2052（内置表）；其他地区见各自说明 |
+| 节假日 | 中国大陆 2001–2027（可导入）；斯里兰卡 2025–2027（可导入）；英国 2019–2028（完整公告）；Matariki 2022–2052（内置表）；其他地区见各自说明 |
 
 ---
 
