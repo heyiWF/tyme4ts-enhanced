@@ -856,7 +856,7 @@ export class HolidayCalendar {
             }
         }
         if (this.observed !== 0 && !this.replacedYears[year]) {
-            this.applyObserved(year, map);
+            this.applyObserved(year, map, dataKeys);
         }
         const l: Holiday[] = [];
         const removed: { [key: string]: boolean } = this.removed;
@@ -875,10 +875,17 @@ export class HolidayCalendar {
 
     /**
      * 顺延至下一个非假日
+     *
+     * dataKeys 标记来自公告数据的日期：公告已声明的补假日（名称含「补假」）
+     * 即为顺延终点，不再越过后移，否则会多算一日。
      */
-    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay, weekdaysOnly: boolean = false): SolarDay {
+    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay, weekdaysOnly: boolean = false, dataKeys?: { [key: string]: boolean }): SolarDay {
         let d: SolarDay = day;
         while (map[HolidayCalendar.getKey(d)] || (weekdaysOnly && (d.getWeek().getIndex() === 0 || d.getWeek().getIndex() === 6))) {
+            const k: string = HolidayCalendar.getKey(d);
+            if (map[k] && dataKeys && dataKeys[k] && map[k].getName().indexOf('补假') > -1) {
+                return d;
+            }
             d = d.next(1);
         }
         return d;
@@ -887,7 +894,7 @@ export class HolidayCalendar {
     /**
      * 补假：美国周六前移、周日后移；其余为顺延至下一工作日
      */
-    protected applyObserved(year: number, map: { [key: string]: Holiday }): void {
+    protected applyObserved(year: number, map: { [key: string]: Holiday }, dataKeys?: { [key: string]: boolean }): void {
         const list: Holiday[] = [];
         for (const k in map) {
             if (!map[k].isWork()) {
@@ -907,11 +914,11 @@ export class HolidayCalendar {
                 }
             } else if (this.observed === 2) {
                 if (w === 0) {
-                    target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), false, dataKeys);
                 }
             } else if (this.observed === 3) {
                 if (w === 0 || w === 6) {
-                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), true);
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), true, dataKeys);
                 }
             }
             if (target && !map[HolidayCalendar.getKey(target)]) {

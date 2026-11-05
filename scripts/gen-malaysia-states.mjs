@@ -32,6 +32,16 @@ const AWAL_RAMADAN = {2025: '2025-03-02', 2026: '2026-02-19', 2027: '2027-02-08'
 const ARAFAH = {2025: '2025-06-06', 2026: '2026-05-26', 2027: '2027-05-16'};
 const HAJI_2 = {2025: '2025-06-08', 2026: '2026-05-28', 2027: '2027-05-18'};
 
+// 州级口径扣减的联邦公告日：
+// - 北三州（吉打、吉兰丹、登嘉楼）周末为周五周六，周日逢节不设周一补假；
+// - 砂拉不过屠妖节（卫塞节补假跨过达雅节落在 6 月 3 日，由规则顺延生成）。
+const EXTRA_EXCLUDE = {
+    'MY-KDH': ['2025-09-01', '2026-06-02', '2026-11-09'],
+    'MY-KTN': ['2025-09-01', '2026-06-02', '2026-11-09'],
+    'MY-TRG': ['2025-09-01', '2026-06-02'],
+    'MY-SWK': ['2025-10-20', '2026-11-08', '2026-11-09', '2027-10-28'],
+};
+
 /** 按年取值 */
 const pick = (table) => YEARS.map((y) => table[y]).filter(Boolean);
 /** 按年取值并附名称 */
@@ -41,6 +51,8 @@ const STATE_EXTRA = {
     'MY-JHR': [
         ...named(THAIPUSAM, '大宝森节'),
         ...named(AWAL_RAMADAN, '斋戒月首日'),
+        // 柔佛独有：开斋节周六逢休，公告额外补周二一日（johor.gov.my）
+        ['2026-03-24', '开斋节补假'],
     ],
     'MY-KDH': [
         ...named(THAIPUSAM, '大宝森节'),
@@ -52,6 +64,8 @@ const STATE_EXTRA = {
     'MY-KTN': [
         ...named(ARAFAH, '阿拉法日'),
         ...named(HAJI_2, '哈芝节次日'),
+        // 吉兰丹周末为周五周六，古兰经降示日逢周六补于周日
+        ['2026-03-08', '古兰经降示日补假'],
     ],
     'MY-MLK': [
         // 马六甲开斋节第三天；2026 年该日已含在联邦补假中，不重复列
@@ -78,10 +92,22 @@ const STATE_EXTRA = {
         ['2026-03-08', '古兰经降示日补假'],
         ['2027-12-26', '登霄节'],
     ],
-    'MY-KUL': [...named(THAIPUSAM, '大宝森节')],
-    // 以下两州不过古兰经降示日，只写扣减
+    'MY-KUL': [
+        // 2026 年大宝森节与联邦直辖区日同逢周日，两个补假分别落在周一、周二（kabinet.gov.my）
+        ['2025-02-11', '大宝森节'],
+        ['2026-02-01', '大宝森节、联邦直辖区日'],
+        ['2026-02-02', '大宝森节补假'],
+        ['2026-02-03', '联邦直辖区日补假'],
+        ['2027-01-22', '大宝森节'],
+    ],
+    // 以下两州不过古兰经降示日；砂拉越另按州公告覆盖 6 月达雅节数日（sarawak.gov.my）
     'MY-SBH': [],
-    'MY-SWK': [],
+    'MY-SWK': [
+        // 2026 年卫塞节（5/31 周日）的补假跨过达雅节两日落在 6 月 3 日，另加 6 月 4 日达雅节补假
+        ['2026-06-01', '最高元首诞辰、达雅节'],
+        ['2026-06-02', '达雅节次日'],
+        ['2026-06-04', '达雅节补假'],
+    ],
 };
 
 let n = 0;
@@ -112,9 +138,16 @@ for (const [region, extras] of Object.entries(STATE_EXTRA)) {
         note: '州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json',
         days,
     };
-    if (NO_NUZUL.includes(region)) {
-        doc.exclude = YEARS.map((y) => NUZUL[y]);
-        doc.note += '；并以 exclude 扣掉本州不过的古兰经降示日';
+    const ex = (NO_NUZUL.includes(region) ? YEARS.map((y) => NUZUL[y]) : []).concat(EXTRA_EXCLUDE[region] || []);
+    if (ex.length) {
+        ex.sort();
+        doc.exclude = ex;
+        if (NO_NUZUL.includes(region)) {
+            doc.note += '；并以 exclude 扣掉本州不过的古兰经降示日';
+        }
+        if (EXTRA_EXCLUDE[region]) {
+            doc.note += '；并按本州周末或节日口径扣掉不适用的联邦补假';
+        }
     }
     writeFileSync(join(DIR, `${region}.json`), JSON.stringify(doc, null, 1) + '\n', 'utf8');
     n++;

@@ -3003,6 +3003,10 @@ export const DATASETS = [
     "name": "斋戒月首日"
    },
    {
+    "date": "2026-03-24",
+    "name": "开斋节补假"
+   },
+   {
     "date": "2027-01-22",
     "name": "大宝森节"
    },
@@ -3025,7 +3029,7 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日；并按本州周末或节日口径扣掉不适用的联邦补假",
   "days": [
    {
     "date": "2025-01-27",
@@ -3082,7 +3086,10 @@ export const DATASETS = [
   ],
   "exclude": [
    "2025-03-18",
+   "2025-09-01",
    "2026-03-07",
+   "2026-06-02",
+   "2026-11-09",
    "2027-02-24"
   ]
  },
@@ -3094,7 +3101,7 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并按本州周末或节日口径扣掉不适用的联邦补假",
   "days": [
    {
     "date": "2025-06-06",
@@ -3124,6 +3131,11 @@ export const DATASETS = [
     "date": "2027-05-18",
     "name": "哈芝节次日"
    }
+  ],
+  "exclude": [
+   "2025-09-01",
+   "2026-06-02",
+   "2026-11-09"
   ]
  },
  {
@@ -3142,7 +3154,15 @@ export const DATASETS = [
    },
    {
     "date": "2026-02-01",
-    "name": "大宝森节"
+    "name": "大宝森节、联邦直辖区日"
+   },
+   {
+    "date": "2026-02-02",
+    "name": "大宝森节补假"
+   },
+   {
+    "date": "2026-02-03",
+    "name": "联邦直辖区日补假"
    },
    {
     "date": "2027-01-22",
@@ -3356,12 +3376,29 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
-  "days": [],
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日；并按本州周末或节日口径扣掉不适用的联邦补假",
+  "days": [
+   {
+    "date": "2026-06-01",
+    "name": "最高元首诞辰、达雅节"
+   },
+   {
+    "date": "2026-06-02",
+    "name": "达雅节次日"
+   },
+   {
+    "date": "2026-06-04",
+    "name": "达雅节补假"
+   }
+  ],
   "exclude": [
    "2025-03-18",
+   "2025-10-20",
    "2026-03-07",
-   "2027-02-24"
+   "2026-11-08",
+   "2026-11-09",
+   "2027-02-24",
+   "2027-10-28"
   ]
  },
  {
@@ -3372,7 +3409,7 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并按本州周末或节日口径扣掉不适用的联邦补假",
   "days": [
    {
     "date": "2025-01-27",
@@ -3418,6 +3455,10 @@ export const DATASETS = [
     "date": "2027-12-26",
     "name": "登霄节"
    }
+  ],
+  "exclude": [
+   "2025-09-01",
+   "2026-06-02"
   ]
  },
  {
