@@ -1,0 +1,78 @@
+{
+  "region": "JP",
+  "year": 2010,
+  "mode": "replace",
+  "verification": "official",
+  "source": "https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv",
+  "scope": "国民の祝日及祝日法规定的休日；不含一般周末与银行休业日",
+  "license": "Public Data License 1.0; edited into annual JSON from Cabinet Office CSV",
+  "licenseUrl": "https://www.cao.go.jp/notice/rule.html",
+  "verifiedOn": "2026-11-02",
+  "snapshotSha256": "cec37a743c96995cdb9cb52b685c9003634682a9b0e1a640a6b9b96881fe964a",
+  "days": [
+    {
+      "date": "2010-01-01",
+      "name": "元日"
+    },
+    {
+      "date": "2010-01-11",
+      "name": "成人の日"
+    },
+    {
+      "date": "2010-02-11",
+      "name": "建国記念の日"
+    },
+    {
+      "date": "2010-03-21",
+      "name": "春分の日"
+    },
+    {
+      "date": "2010-03-22",
+      "name": "休日"
+    },
+    {
+      "date": "2010-04-29",
+      "name": "昭和の日"
+    },
+    {
+      "date": "2010-05-03",
+      "name": "憲法記念日"
+    },
+    {
+      "date": "2010-05-04",
+      "name": "みどりの日"
+    },
+    {
+      "date": "2010-05-05",
+      "name": "こどもの日"
+    },
+    {
+      "date": "2010-07-19",
+      "name": "海の日"
+    },
+    {
+      "date": "2010-09-20",
+      "name": "敬老の日"
+    },
+    {
+      "date": "2010-09-23",
+      "name": "秋分の日"
+    },
+    {
+      "date": "2010-10-11",
+      "name": "体育の日"
+    },
+    {
+      "date": "2010-11-03",
+      "name": "文化の日"
+    },
+    {
+      "date": "2010-11-23",
+      "name": "勤労感謝の日"
+    },
+    {
+      "date": "2010-12-23",
+      "name": "天皇誕生日"
+    }
+  ]
+}

@@ -91,7 +91,9 @@ class MalaysiaStateTest {
     test7(): void {
         // 联邦直辖区日与各州单列节日
         equal(HolidayCalendar.of('MY-KUL').getHoliday(SolarDay.fromYmd(2026, 2, 1))!.getName(), '联邦直辖区日');
-        equal(HolidayCalendar.of('MY-MLK').getHoliday(SolarDay.fromYmd(2026, 4, 15))!.getName(), '世界遗产城日');
+        equal(HolidayCalendar.create('MY-MLK').getHoliday(SolarDay.fromYmd(2026, 4, 15)), null);
+        equal(HolidayCalendar.create('MY-MLK').getHoliday(SolarDay.fromYmd(2023, 2, 20)), null);
+        equal(HolidayCalendar.create('MY-MLK').getHoliday(SolarDay.fromYmd(2024, 2, 20))!.getName(), '独立宣言日');
         equal(HolidayCalendar.of('MY-NSN').getHoliday(SolarDay.fromYmd(2026, 1, 14))!.getName(), '严端诞辰');
         equal(HolidayCalendar.of('MY-PLS').getHoliday(SolarDay.fromYmd(2026, 5, 17))!.getName(), '拉惹诞辰');
         equal(HolidayCalendar.of('MY-TRG').getHoliday(SolarDay.fromYmd(2026, 3, 4))!.getName(), '苏丹登基纪念日');

@@ -14,9 +14,9 @@
 
 零运行时依赖，提供 CJS、ESM 与 TypeScript 声明，适合日历应用、节日聚合、通胜展示和跨语言移植。
 
-[在线 Wiki](https://heyiWF.github.io/tyme4ts-enhanced/) · [官方资料与扩展路线](./docs/SOURCES.md) · [历史审查报告](./docs/AUDIT.md) · [移植指南](./docs/PORTING.md) · [变更记录](./CHANGELOG.md)
+[在线 Wiki](https://heyiWF.github.io/tyme4ts-enhanced/) · [开发文档与 131 个字段示例](https://heyiWF.github.io/tyme4ts-enhanced/#tab-fields) · [官方资料与接入状态](./docs/SOURCES.md) · [逐项核验报告](./docs/DATA-REVIEW.md) · [历史审查报告](./docs/AUDIT.md) · [移植指南](./docs/PORTING.md) · [变更记录](./CHANGELOG.md)
 
-当前仓库版本 **1.15.0**：78 个地区代码、62 份年度或州级数据文件。新增英国官方公告、Matariki 法定日期表，以及中国纪念日的设立年约束。本次未发布 npm 包；注册表版本可能晚于仓库。
+当前仓库版本 **1.16.0**：78 个地区代码、157 份数据文件，其中 **135 份已核验年度表、2,054 条日期记录**；另有 22 份待核验文件，不进入官方日历接口和 Wiki 自动导入。已完成原定六项优先接入：日本、台湾机关办公日历、香港天文台对照、美国 OPM、全国科普月、全民阅读活动周。本次未发布 npm 包；注册表版本可能晚于仓库。
 
 历法转换、民俗纪念日与法定放假是不同的数据层。算法可推算日期，但临时移日、行业适用范围、观月结果仍以当地公告为准。各项核验范围见资料目录。
 
@@ -148,6 +148,42 @@ cn.importJson(JSON.stringify({
 }));
 ```
 
+### 优先使用已核验年度表
+
+`OfficialHolidayCalendar` 无需自行读取 JSON，严格限定地区、年份和适用范围。未收录的年度会报错，不回退到推算。
+
+```ts
+import {OfficialHolidayCalendar, SolarDay} from 'tyme4ts-enhanced';
+
+const jp = OfficialHolidayCalendar.create('JP', 2020);
+jp.getHoliday(SolarDay.fromYmd(2020, 7, 23))!.getName(); // 海の日（奥运移日）
+jp.getScope(); // 适用范围
+jp.getSource(); // 官方来源
+OfficialHolidayCalendar.getAvailableYears('JP'); // 1955…2027
+
+const tw = OfficialHolidayCalendar.create('TW', 2025);
+tw.getDays().length;     // 118：政府机关全年休息日，包含普通周末
+tw.getDays(true).length; // 119：另含 2 月 8 日补班
+const us = OfficialHolidayCalendar.create('US', 2027);
+us.getHoliday(SolarDay.fromYmd(2027, 12, 31)); // 2028 元旦的提前放假日
+```
+
+日本为国民祝日与休日，台湾为**政府机关办公日历**，美国为 **OPM 常规周一至周五联邦雇员安排**；不能据此判断各行业或全部地方雇员的休假。接口支持范围及待核验清单见[核验报告](./docs/DATA-REVIEW.md)。
+
+### 多日活动
+
+```ts
+import {FestivalPeriods, SolarDay} from 'tyme4ts-enhanced';
+
+FestivalPeriods.getYear(2026); // 阅读活动周 4/20–26、全国科普月 9/1–30
+const periods = FestivalPeriods.getDay(SolarDay.fromYmd(2026, 9, 15));
+periods[0].getDayCount(); // 30，包含起止日
+periods[0].getSource();  // 科普法原文
+// 同样可以从当天的 Festivals 实例调用 getPeriods()
+```
+
+科普月自 2025 年起；阅读活动周仅收录明确公布的 2026 年，其他年度不猜测。“活动”独立于原有八类单日节日与放假表，可用 `FestivalPeriod.toEntry()` 转为 `FestivalCategory.ACTIVITY` 条目。
+
 ### 独立实例与完整公告
 
 `of(region)` 返回可变的共享实例；页面统一初始化可以使用它。应用中的用户配置、请求或测试应使用 `create(region)` / `fromJson(json)`，避免导入互相污染。
@@ -189,14 +225,14 @@ gb.importJson(readFileSync('data/holidays/GB-SCT-2026.json', 'utf8'));
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-新加坡、马来西亚、泰国、印度尼西亚、斯里兰卡只能逐年公布的数据已整理为可导入文件，放在 [`data/holidays/`](./data/holidays/)——新加坡 3 份、泰国 3 份、马来西亚联邦 3 份、马来西亚州级 13 份、印度尼西亚 2 份、埃及 1 份、中国新疆 2 份、宁夏 2 份、斯里兰卡 3 份，共 32 个原有文件；另新增英国三个地区 2019–2028 年的 30 个文件，总计 62 份：
+年度 JSON 位于 [`data/holidays/`](./data/holidays/)。每份表包含 `verification`、`scope` 和来源；135 份已核验表使用完整替换。马来西亚、泰国、斯里兰卡的 22 份旧文件仍待核验，不能作为已认证的完整放假安排。逐日清单可查 [`data/quality-review.json`](./data/quality-review.json)。
 
 ```ts
 import {readFileSync} from 'node:fs';
 HolidayCalendar.create('SG').importJson(readFileSync('data/holidays/SG-2026.json', 'utf8'));
 ```
 
-马来西亚是「联邦 + 州」两层，州级日历要导入两次；州级文件里的 `exclude` 会扣掉该州不过的全国性节日：
+马来西亚旧文件是「联邦 + 州」两层，以下仅演示导入机制。它们尚未逐项核验，含行业、州适用范围与补假问题，不建议直接用于生产放假安排：
 
 ```ts
 const jhr = HolidayCalendar.create('MY-JHR');
@@ -205,7 +241,7 @@ jhr.importJson(readFileSync('data/holidays/MY-JHR.json', 'utf8'));     // 州级
 jhr.getExcludedCount();   // 3
 ```
 
-印尼 2026 年的开斋节比算术历晚一日，公告文件除了写入官方 17 日，还用 `exclude` 扣掉被取代的三个规则日期（3-20、6-17、8-26），避免同一年多出三天假：
+印尼 2026 年完整替换表包含官方 17 日全国假日，不含 8 日共同休假（cuti bersama）；`replace` 自动停用该年度的推算与补假，避免多列旧规则日期：
 
 ```ts
 const id = HolidayCalendar.create('ID');
@@ -442,7 +478,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 | 韩国 / 不丹 / 蒙古 | 1900–2050 / 1900–2100 / 1900–2100 |
 | 尼泊尔 Bikram Sambat | 1975–2084 BS（可用 `importJson()` 续年） |
 | 泰国阴历 / 越南农历 / 缅甸历 | 1250–1470 CS / 1800–2199 / 见模块测试 |
-| 节假日 | 中国大陆 2001–2026（可导入）；斯里兰卡 2025–2027（可导入）；英国 2019–2028（完整公告）；Matariki 2022–2052（内置表）；其他地区见各自说明 |
+| 节假日 | 已核验年度表：日本 1955–2027、台湾机关 2025–2026、美国 OPM 2011–2030、英国 2019–2028 等；完整范围及待核验文件见 DATA-REVIEW.md |
 
 ---
 
@@ -478,8 +514,8 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm ci            # 使用已提交的 lockfile，开发/CI 使用 Node.js 20 或 22
-npm run check     # lint、类型检查、649 项测试、构建、上游数据比对
-npm run gen:govuk  # 从已提交官方快照离线再生成英国数据
+npm run check     # lint、类型检查、656 项测试、构建、上游数据比对
+npm run gen:official # 从已提交官方资料离线再生成表、核验清单与运行时数据
 npm run audit:holidays
 npm run build     # 生成 CJS / ESM / d.ts
 npm run docs      # 构建并同步 docs/tyme.mjs
@@ -493,6 +529,6 @@ npm run docs      # 构建并同步 docs/tyme.mjs
 
 国家历法数据与算法另致谢：[korean-lunar-calendar](https://github.com/usingsky/korean_lunar_calendar_js)（MIT）、[mmcal](https://github.com/yan9a/mcal)（MIT）、[django-bikram-sambat](https://github.com/anishbhimgc/django-bikram-sambat)（MIT，尼泊尔 Panchanga 年度表）、[bhutanese-calendar](https://www.npmjs.com/package/bhutanese-calendar)（MIT）、[@hnw/date-tibetan](https://github.com/hnw/date-tibetan)（MIT）、[pythaidate](https://github.com/hmmbug/pythaidate)（MIT）、[vn-skills](https://github.com/beiryu/vn-skills)（MIT）。斯里兰卡节假日数据来自 [Dilshan-H/srilanka-holidays](https://github.com/Dilshan-H/srilanka-holidays)（MIT）与 [HiranthaSandaruwan/sri-lanka-public-holidays](https://github.com/HiranthaSandaruwan/sri-lanka-public-holidays)（CC BY 4.0），文件内保留出处。
 
-本仓库是 [tyme4ts](https://github.com/6tail/tyme4ts) 的衍生作品：上游部分版权归 **6tail** 所有；本仓库的修改与扩展部分（含各国历法模块、斯里兰卡节假日数据及配套测试、文档与站点）版权归 **heyiWF** 所有。两部分代码以 MIT 许可发布，完整声明见 [LICENSE](./LICENSE)。第三方数据保留各自许可：英国公告为 OGL v3.0，部分斯里兰卡文件为 CC BY 4.0；代码的 MIT 许可不覆盖这些数据条款。
+本仓库是 [tyme4ts](https://github.com/6tail/tyme4ts) 的衍生作品：上游部分版权归 **6tail** 所有；本仓库的修改与扩展部分（含各国历法模块、斯里兰卡节假日数据及配套测试、文档与站点）版权归 **heyiWF** 所有。两部分代码以 MIT 许可发布，完整声明见 [LICENSE](./LICENSE)。第三方数据保留各自许可：英国公告为 OGL v3.0、日本为 PDL 1.0，部分斯里兰卡文件为 CC BY 4.0；HKO 数据及其他官方资料保留出处和适用条款，详见 SOURCES.md。代码的 MIT 许可不覆盖这些数据条款。
 
 ICS 仅提供日期级解析和有限年度循环转换；`COUNT`、`UNTIL`、多值规则、`EXDATE` 等无法无损表达的事件保留在 `getUnsupported()`，不会悄悄转为永久循环。`getOneOffDays()` 只包含没有 RRULE 的起始日，时区和复杂循环需由调用方处理。

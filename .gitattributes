@@ -1,0 +1,2 @@
+# Preserve the Cabinet Office's original Shift-JIS CSV bytes for SHA-256 provenance.
+scripts/fixtures/japan-holidays.csv binary

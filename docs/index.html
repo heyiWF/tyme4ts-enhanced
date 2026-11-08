@@ -372,7 +372,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
         <div class="card c12 tone-violet">
           <h3>出生取名 <em>依所选日午时八字，取喜用五行之字</em></h3>
           <div class="bar">
-            <input id="surname" value="李" aria-label="姓氏" style="width:92px">
+            <input id="surname" type="text" value="李" aria-label="姓氏" autocomplete="family-name" style="width:92px">
             <select id="gender" aria-label="性别">
               <option value="1">男</option><option value="0">女</option>
             </select>
@@ -388,29 +388,95 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
 
   <section id="page-fields" class="doc hide">
     <div class="page-heading tone-indigo">
-      <div><span class="eyebrow">API REFERENCE</span><h2>字段速查</h2><p>示例按当前所选日期实时计算。所有取法均可在 <code>DayAlmanac</code> 实例上直接调用，返回文化对象或基础类型。</p></div>
-      <span class="page-badge">96 字段</span>
+      <div><span class="eyebrow">DEVELOPER DOCUMENTATION</span><h2>字段与开发文档</h2><p>从初始化对象，到逐项读取字段。每个条目提供完整调用链、参数、返回类型、可复制代码与真实输出。</p></div>
+      <span class="page-badge" id="api-total"></span>
     </div>
-    <div class="searchbar">
-      <input id="q" type="text" placeholder="搜索字段，如：冲煞、纳音、宜忌、九宫、节假日">
-      <span class="count" id="qcount"></span>
-    </div>
-    <div id="fields"></div>
-    <div class="content-panel">
-      <h2>最小示例</h2>
-<pre>import {DayAlmanac} from 'tyme4ts-enhanced';
+    <div class="api-layout">
+      <aside class="api-sidebar" aria-label="开发文档目录"><b>开发指南</b>
+        <a href="#api-start">安装与初始化</a><a href="#api-objects">对象与字段取值</a><a href="#api-contract">参数与边界约定</a><a href="#api-data">数据接口怎么选</a>
+        <b>字段目录</b><div id="api-toc"></div>
+        <a href="https://6tail.cn/tyme.html" target="_blank" rel="noopener noreferrer">上游 Tyme 文档 ↗</a>
+      </aside>
+      <div class="api-main">
+        <section class="api-guide content-panel" id="api-start">
+          <span class="eyebrow">GETTING STARTED</span><h3>1. 安装与初始化</h3>
+          <p>本文针对当前仓库版本 <strong id="api-version"></strong>。多数查询从一个 <code>DayAlmanac</code> 开始；只做历法转换时，也可直接创建 <code>SolarDay</code>。以下字段示例固定使用 <strong>2025-04-03</strong>，不随黄历页日期变化；特殊年度接口在代码中明确写出年份。</p>
+          <pre><code>npm install tyme4ts-enhanced</code></pre>
+          <p class="note">仓库的新版本尚未发布 npm 时，注册表不包含新增接口。使用仓库源码执行 <code>npm ci</code>、<code>npm run build</code>、<code>npm pack</code>，再在你的项目中安装生成的本地 tgz；不要把包版本不同误判为方法不存在。</p>
+          <div class="api-code-head"><b>TypeScript / ESM</b><button type="button" class="api-copy">复制代码</button></div>
+          <pre class="api-code"><code>import {DayAlmanac, SolarDay} from 'tyme4ts-enhanced';
 
 const a = DayAlmanac.fromYmd(2025, 4, 3);
-a.getClash().toString();           <span class="c">// 冲猴(丙申)煞北</span>
-a.getDutyAdvice().getRecommends(); <span class="c">// 筑堤、补垣、修屋、埋穴</span>
-a.getLifeRelation(1983).toString();<span class="c">// 癸命劫财，互禄，六合</span>
-a.getFolkFestivals().getName();    <span class="c">// 寒食节</span></pre>
+const solar = SolarDay.fromYmd(2025, 4, 3);
+const sameDay = DayAlmanac.fromSolarDay(solar);
+
+console.log(a.getLunarDay().toString()); // 农历乙巳年三月初六
+console.log(sameDay.getDuty().getName()); // 闭</code></pre>
+          <p>CommonJS 可用 <code>const {DayAlmanac} = require('tyme4ts-enhanced')</code>。浏览器需使用 <code>type="module"</code> 并导入构建后的 ESM 文件；本 Wiki 使用同目录 <code>./tyme.mjs</code>，浏览器不会自动解析 npm 裸包名。</p>
+        </section>
+        <section class="api-guide content-panel" id="api-objects">
+          <h3>2. 对象与字段取值</h3>
+          <p><code>getLunarDay()</code> 返回农历日对象，而非字符串。对象适合继续计算；展示时再取名称或完整描述。不要解析中文日期字符串来提取年月日。</p>
+          <div class="api-table-wrap"><table class="fields"><thead><tr><th>需要什么</th><th>如何读取</th><th>结果类型</th></tr></thead><tbody>
+            <tr><td>公历年月日</td><td><code>a.getSolarDay().getYear() / getMonth() / getDay()</code></td><td>number</td></tr>
+            <tr><td>农历日期对象</td><td><code>a.getLunarDay()</code></td><td>LunarDay</td></tr>
+            <tr><td>农历完整描述</td><td><code>a.getLunarDay().toString()</code></td><td>string</td></tr>
+            <tr><td>日干支名称</td><td><code>a.getSixtyCycleDay().getSixtyCycle().getName()</code></td><td>string</td></tr>
+            <tr><td>宜事项名称列表</td><td><code>a.getSixtyCycleDay().getRecommends().map(x =&gt; x.getName())</code></td><td>string[]</td></tr>
+            <tr><td>无神诞时的默认显示</td><td><code>a.getDeityFestival()?.getName() ?? '无'</code></td><td>string</td></tr>
+          </tbody></table></div>
+          <p><code>getName()</code> 通常只返回名称，<code>toString()</code> 返回完整描述；具体以每个字段的输出为准。数组用 <code>map</code> 提取成员属性，布尔值直接用于条件判断。公共接口不保证所有对象都具有相同方法，以下条目已分别给出可用调用链。</p>
+          <div class="api-code-head"><b>组装你的页面数据</b><button type="button" class="api-copy">复制代码</button></div>
+          <pre class="api-code"><code>import {DayAlmanac} from 'tyme4ts-enhanced';
+
+const a = DayAlmanac.fromYmd(2025, 4, 3);
+const solar = a.getSolarDay();
+const lunar = a.getLunarDay();
+const data = {
+  year: solar.getYear(), month: solar.getMonth(), day: solar.getDay(),
+  lunar: lunar.toString(),
+  leapMonth: lunar.getLunarMonth().isLeap(),
+  duty: a.getDuty().getName(),
+  recommends: a.getSixtyCycleDay().getRecommends().map(x =&gt; x.getName()),
+  deity: a.getDeityFestival()?.getName() ?? null,
+  festivals: a.getFestivals().getEntries().map(e =&gt; ({
+    name: e.getName(), category: e.getCategory(), source: e.getSource()
+  }))
+};
+console.log(JSON.stringify(data, null, 2));</code></pre>
+        </section>
+        <section class="api-guide content-panel" id="api-contract">
+          <h3>3. 参数、空值与日期边界</h3>
+          <ul>
+            <li><strong>年月日：</strong>月为 1–12，日从 1 开始；JavaScript <code>Date.getMonth()</code> 要加 1。用明确年月日创建对象，可避免解析 UTC 日期字符串导致的本地日期偏移。<code>DayAlmanac.fromDate(date)</code> 读取运行环境的本地年月日。</li>
+            <li><strong>闰月：</strong><code>LunarDay.fromYmd(2023, -2, 1)</code> 表示闰二月初一。月对象的 <code>getMonth()</code> 取绝对月号，<code>getMonthWithLeap()</code> 保留负号，<code>isLeap()</code> 单独判断闰月。</li>
+            <li><strong>索引：</strong>星期索引 0 为周日，1–6 为周一至周六；节气日索引 0 是交节当日。要展示“第几天”需加 1，不要对所有数字统一加 1。</li>
+            <li><strong>时刻：</strong>日级对象不包含出生时分秒。八字使用 <code>SolarTime.fromYmdHms(...).getSixtyCycleHour().getEightChar()</code>；农历年、日级干支年与立春时刻的年柱口径不同。</li>
+            <li><strong>空值：</strong>神诞、年号、当日假期可能为 <code>null</code>，数组可能为空。使用可选链、判空或检查数组长度；不要直接使用非空断言掩盖真实缺失。</li>
+            <li><strong>数据范围：</strong>各国家历法有不同表范围；超范围先检查说明并捕获异常。日期推算不等于完整官方公告。HKO 2057 年已知差异见<a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/DATA-REVIEW.md">核验报告</a>。</li>
+          </ul>
+        </section>
+        <section class="api-guide content-panel" id="api-data">
+          <h3>4. 节日、放假与活动：选择对应接口</h3>
+          <div class="api-table-wrap"><table class="fields"><thead><tr><th>需求</th><th>入口</th><th>关键约定</th></tr></thead><tbody>
+            <tr><td>当天有哪些传统节日、纪念日</td><td><code>a.getFestivals().getEntries()</code></td><td>读取名称、分类、来源；不自动代表放假</td></tr>
+            <tr><td>严格读取已核验年度安排</td><td><code>OfficialHolidayCalendar.create(region, year)</code></td><td>缺少年度报错；getScope() 明确适用对象</td></tr>
+            <tr><td>规则推算、自定义导入</td><td><code>HolidayCalendar.create(region)</code></td><td>独立实例；of(region) 是共享可变实例</td></tr>
+            <tr><td>公共活动跨多天或一个月</td><td><code>FestivalPeriods.getYear(year)</code></td><td>起止日期均包含；未公布的阅读周年份不推算</td></tr>
+          </tbody></table></div>
+          <p>完整年度导入使用 <code>mode: 'replace'</code>，停用该年度规则及自动补假；增补使用默认 <code>merge</code>。字段必须包括准确的地区、年度与日期。接口不能把另一地区的完整年度表替换进来。</p>
+          <p>例如台湾 2025 年表中的 118 日是机关休息日总数，包含周末；<code>getDays(true)</code> 另含补班。美国表采用 OPM 常规联邦雇员工作安排。需同时读取 <code>getScope()</code> 和 <code>getSource()</code>，不能只保留一个假期名称。</p>
+        </section>
+        <div class="api-field-heading"><h3>5. 逐项字段参考</h3><p>搜索中文字段名、方法名或返回类型。每个代码块均包含导入和初始化，可独立复制运行。</p></div>
+        <div class="searchbar api-search"><input id="q" type="search" aria-label="搜索开发文档" placeholder="搜索字段、方法或类型，如 getLunarDay、补班、EightChar"><span class="count" id="qcount" aria-live="polite"></span><button id="api-expand" type="button">展开全部</button><button id="api-collapse" type="button">收起全部</button></div>
+        <div id="fields"></div><p id="api-copy-status" class="note" role="status" aria-live="polite"></p>
+      </div>
     </div>
   </section>
 
   <section id="page-regions" class="doc hide">
     <div class="page-heading tone-cyan">
-      <div><span class="eyebrow">REGIONAL CALENDARS</span><h2>国家与地区</h2><p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页自动载入仓库的年度数据，英国三个地区含 2019–2028 年完整公告。可搜索地区并切换年份，查看当前数据口径。</p></div>
+      <div><span class="eyebrow">REGIONAL CALENDARS</span><h2>国家与地区</h2><p>点击切换，黄历页的「节假日」栏随即更新。各地区以全国性法定假日为主；州省差异、宗教节日与逐年公布的特殊安排，可用 <code>importJson</code> 追加。本页仅自动载入已核验年度表；未核验数据不自动加载，适用范围会单独注明。可搜索地区并切换年份，查看当前数据口径。</p></div>
       <span class="page-badge" id="region-count"></span>
     </div>
     <div class="searchbar region-tools">
@@ -446,12 +512,13 @@ const ics = c.toIcs(2025);</pre>
       <span class="page-badge">8 类来源</span>
     </div>
     <div class="searchbar">
-      <input id="fy" type="number" value="2025" min="1900" max="2100" style="width:90px">
-      <input id="fq" placeholder="搜索节日名或备注">
+      <input id="fy" type="number" value="2025" min="1900" max="2100" step="1" aria-label="节日年份" style="width:90px">
+      <input id="fq" type="search" aria-label="搜索节日" placeholder="搜索节日名或备注">
       <span class="count" id="fcount"></span>
-      <button id="fexport">导出 JSON</button>
+      <button id="fexport" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg><span>导出 JSON</span></button>
     </div>
     <div id="fcats" class="cats"></div>
+    <div class="content-panel" id="festival-periods"></div>
     <div id="fest-months" class="fest-months"></div>
     <div id="fest-detail"></div>
   </section>
@@ -518,9 +585,9 @@ const ics = c.toIcs(2025);</pre>
     <div class="content-panel">
       <h3>官方资料与接入状态</h3>
       <p id="source-checked"></p>
-      <p>逐条区分已接入数据与后续候选。公告、历法转换、民俗条目适用范围不同；规则命中日期的比例不代表法律准确率。</p>
+      <p>六项优先资料已按顺序接入。公告、历法转换、民俗条目适用范围不同；规则命中日期的比例不代表法律准确率。仍待核实的旧文件保留在仓库中，本站不自动加载。</p>
       <div class="source-grid" id="official-sources"></div>
-      <p><a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/SOURCES.md">资料目录与更新方法</a> · <a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/AUDIT.md">本次历史审查与已知边界</a></p>
+      <p><a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/SOURCES.md">资料目录与更新方法</a> · <a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/DATA-REVIEW.md">逐项核验结果与剩余缺口</a> · <a href="data-review.json">下载逐条核验清单</a></p>
     </div>
 
     <div class="content-panel">
@@ -565,11 +632,12 @@ const ics = c.toIcs(2025);</pre>
 
 <script type="module">
 import {DATASETS, VERSION, SOURCES} from './holidays-data.js';
-import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
+import {API_FIELDS} from './api-reference.js';
+import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, OfficialHolidayCalendar, FestivalPeriods, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
-const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const ymd = (d) => d.getYear() + '-' + pad(d.getMonth()) + '-' + pad(d.getDay());
 const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
 const CN = {'CN': '中国大陆', 'HK': '中国香港', 'MO': '中国澳门', 'TW': '中国台湾',
@@ -627,6 +695,7 @@ function almanac() {
  */
 function loadDatasets() {
   for (const d of DATASETS) {
+    if (d.verification !== 'official') continue;
     try {
       HolidayCalendar.of(d.region).importJson(JSON.stringify(d));
     } catch (e) { /* 单个文件损坏不影响其他 */ }
@@ -634,10 +703,10 @@ function loadDatasets() {
   // 州级日历还需导入所属国家的联邦公告
   const byYear = {};
   for (const d of DATASETS) {
-    if (typeof d.year === 'number') byYear[d.region + '-' + d.year] = d;
+    if (d.verification === 'official' && typeof d.year === 'number') byYear[d.region + '-' + d.year] = d;
   }
   for (const d of DATASETS) {
-    if (!d.years) continue;
+    if (!d.years || d.verification !== 'official') continue;
     const base = d.region.split('-')[0];
     for (const y of d.years) {
       const src = byYear[base + '-' + y];
@@ -867,112 +936,6 @@ function renderNames(a) {
   $('name-detail').textContent = l.length ? l[0].getGivenName() + '：' + l[0].getMeaning() : '';
 }
 
-const FIELDS = [
-  ['农历', '农历日', 'a.getLunarDay()', (a) => a.getLunarDay().toString()],
-  ['农历', '农历月大小', 'a.getLunarMonthSize()', (a) => a.getLunarMonthSize() + '月'],
-  ['农历', '农历月干支', 'a.getLunarDay().getLunarMonth().getSixtyCycle()', (a) => a.getLunarDay().getLunarMonth().getSixtyCycle().getName()],
-  ['农历', '是否闰月', 'a.getLunarDay().getLunarMonth().isLeap()', (a) => a.getLunarDay().getLunarMonth().isLeap() ? '是' : '否'],
-  ['农历', '星期', 'a.getSolarDay().getWeek()', (a) => '星期' + a.getSolarDay().getWeek().getName()],
-  ['农历', '节气', 'a.getSolarDay().getTerm()', (a) => a.getSolarDay().getTerm().getName()],
-  ['农历', '节气第几天', 'a.getSolarDay().getTermDay().getDayIndex()', (a) => '第 ' + (a.getSolarDay().getTermDay().getDayIndex() + 1) + ' 天'],
-  ['农历', '节气时刻', 'a.getSolarDay().getTerm().getJulianDay().getSolarTime()', (a) => a.getSolarDay().getTerm().getJulianDay().getSolarTime().toString()],
-  ['农历', '下一节气', 'a.getSolarDay().getTerm().next(1)', (a) => { const t = a.getSolarDay().getTerm().next(1); return t.getName() + ' ' + t.getSolarDay().getMonth() + '/' + t.getSolarDay().getDay(); }],
-  ['农历', '物候', 'a.getSolarDay().getPhenology()', (a) => a.getSolarDay().getPhenology().getName()],
-  ['农历', '月相', 'a.getSolarDay().getPhase()', (a) => a.getSolarDay().getPhase().getName()],
-  ['农历', '伊斯兰历', 'a.getSolarDay().getHijriDay()', (a) => a.getSolarDay().getHijriDay().toString()],
-  ['农历', '伊斯兰月名', 'a.getSolarDay().getHijriDay().getHijriMonth().getEnglishName()', (a) => a.getSolarDay().getHijriDay().getHijriMonth().getEnglishName()],
-  ['农历', '藏历', 'a.getSolarDay().getRabByungDay()', (a) => a.getSolarDay().getRabByungDay().toString()],
-  ['农历', '日本年号', 'Era.of(a.getSolarDay())', (a) => { const e = Era.of(a.getSolarDay()); return e ? e.getName() + e.getYearName(a.getSolarDay()) + '年' : '—'; }],
-  ['农历', '佛历', 'Era.getBuddhistYear(year)', (a) => String(Era.getBuddhistYear(a.getSolarDay().getYear()))],
-  ['农历', '民国纪年', 'Era.getMinguoYear(year)', (a) => String(Era.getMinguoYear(a.getSolarDay().getYear()))],
-
-  ['干支', '年干支', 'a.getSixtyCycleDay().getYear()', (a) => a.getSixtyCycleDay().getYear().getName()],
-  ['干支', '月干支', 'a.getSixtyCycleDay().getMonth()', (a) => a.getSixtyCycleDay().getMonth().getName()],
-  ['干支', '日干支', 'a.getSixtyCycleDay().getSixtyCycle()', (a) => a.getSixtyCycleDay().getSixtyCycle().getName()],
-  ['干支', '时干支', 'a.getSixtyCycleDay().getHours()[0].getSixtyCycle()', (a) => a.getSixtyCycleDay().getHours()[0].getSixtyCycle().getName()],
-  ['干支', '纳音', 'a.getSixtyCycleDay().getSixtyCycle().getSound()', (a) => a.getSixtyCycleDay().getSixtyCycle().getSound().getName()],
-  ['干支', '纳音五行', '...getSound().getElement()', (a) => a.getSixtyCycleDay().getSixtyCycle().getSound().getElement().getName()],
-  ['干支', '八字', 'a.getSixtyCycleDay().getHours()[0].getEightChar()', (a) => a.getSixtyCycleDay().getHours()[0].getEightChar().toString()],
-  ['干支', '旬空', 'a.getVoidBranches()', (a) => a.getVoidBranches().map((b) => b.getName()).join('')],
-  ['干支', '三合', '...getEarthBranch().getTriangle()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getTriangle().map((b) => b.getName()).join('')],
-  ['干支', '六合', '...getEarthBranch().getCombine()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getCombine().getName()],
-  ['干支', '相冲', '...getEarthBranch().getOpposite()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getOpposite().getName()],
-  ['干支', '相刑', '...getEarthBranch().getPunishments()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getPunishments().map((b) => b.getName()).join('')],
-  ['干支', '相破', '...getEarthBranch().getDestruction()', (a) => a.getSixtyCycleDay().getSixtyCycle().getEarthBranch().getDestruction().getName()],
-  ['干支', '禄', '...getHeavenStem().getProsperity()', (a) => a.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getProsperity().getName()],
-  ['干支', '天乙贵人', '...getHeavenStem().getNoble()', (a) => a.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getNoble().map((b) => b.getName()).join('')],
-  ['干支', '福神方位', '...getHeavenStem().getFortuneDirection()', (a) => a.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getFortuneDirection().getName()],
-
-  ['神煞', '宜', 'a.getSixtyCycleDay().getRecommends()', (a) => a.getSixtyCycleDay().getRecommends().map((t) => t.getName()).join(' ') || '诸事不宜'],
-  ['神煞', '忌', 'a.getSixtyCycleDay().getAvoids()', (a) => a.getSixtyCycleDay().getAvoids().map((t) => t.getName()).join(' ') || '—'],
-  ['神煞', '吉神宜趋', 'a.getSixtyCycleDay().getGods()', (a) => a.getSixtyCycleDay().getGods().filter((g) => g.getLuck().getName() === '吉').map((g) => g.getName()).join(' ')],
-  ['神煞', '凶神宜忌', 'a.getSixtyCycleDay().getGods()', (a) => a.getSixtyCycleDay().getGods().filter((g) => g.getLuck().getName() !== '吉').map((g) => g.getName()).join(' ')],
-  ['神煞', '建除十二神', 'a.getDuty()', (a) => a.getDuty().getName()],
-  ['神煞', '建除宜忌', 'a.getDutyAdvice()', (a) => a.getDutyAdvice().getRecommends() + ' / ' + a.getDutyAdvice().getAvoids()],
-  ['神煞', '值神（黄黑道）', 'a.getSixtyCycleDay().getTwelveStar()', (a) => a.getSixtyCycleDay().getTwelveStar().getName() + ' · ' + a.getSixtyCycleDay().getTwelveStar().getEcliptic().getName()],
-  ['神煞', '二十八宿', 'a.getSixtyCycleDay().getTwentyEightStar()', (a) => { const s = a.getSixtyCycleDay().getTwentyEightStar(); return s.getName() + '宿 ' + s.getAnimal().getName() + ' ' + s.getLuck().getName(); }],
-  ['神煞', '六曜', 'a.getLunarDay().getSixStar()', (a) => a.getLunarDay().getSixStar().getName()],
-  ['神煞', '小六壬', 'a.getLunarDay().getMinorRen()', (a) => a.getLunarDay().getMinorRen().getName()],
-  ['神煞', '彭祖百忌', 'a.getSixtyCycleDay().getSixtyCycle().getPengZu()', (a) => a.getSixtyCycleDay().getSixtyCycle().getPengZu().toString()],
-  ['神煞', '胎神', 'a.getSixtyCycleDay().getFetusDay()', (a) => a.getSixtyCycleDay().getFetusDay().getName()],
-
-  ['择日', '冲煞', 'a.getClash()', (a) => a.getClash().toString()],
-  ['择日', '月破', 'a.isMonthBreak()', (a) => a.isMonthBreak() ? '是' : '否'],
-  ['择日', '岁破', 'a.isYearBreak()', (a) => a.isYearBreak() ? '是' : '否'],
-  ['择日', '天赦日', 'a.isHeavenlyPardon()', (a) => a.isHeavenlyPardon() ? '是' : '否'],
-  ['择日', '四离', 'a.isFourDeparture()', (a) => a.isFourDeparture() ? '是' : '否'],
-  ['择日', '四绝', 'a.isFourSeverance()', (a) => a.isFourSeverance() ? '是' : '否'],
-  ['择日', '月将', 'a.getMonthGeneral()', (a) => a.getMonthGeneral().toString()],
-  ['择日', '年命十神', 'a.getLifeRelation(year)', (a) => a.getLifeRelation(1983).toString()],
-  ['择日', '贵人时', 'a.getNobleHours()', (a) => a.getNobleHours().map((h) => h.getSixtyCycle().getEarthBranch().getName()).join('、') || '—'],
-  ['择日', '吉时', 'a.getLuckyHours()', (a) => a.getLuckyHours().map((h) => h.getSixtyCycle().getEarthBranch().getName()).join('、')],
-  ['择日', '时辰吉凶', 'a.getHourFortunes()', (a) => a.getHourFortunes().map((h) => h.getHour().getSixtyCycle().getEarthBranch().getName() + h.getName()).join(' ')],
-  ['择日', '九星', 'a.getSixtyCycleDay().getNineStar()', (a) => a.getSixtyCycleDay().getNineStar().toString()],
-  ['择日', '九宫飞星', 'a.getDayNineStarChart()', (a) => a.getDayNineStarChart().toString().replace(/\n/g, ' / ')],
-  ['择日', '方位五神', 'getJoyDirection / getWealthDirection / getFortuneDirection', (a) => { const s = a.getSixtyCycleDay().getSixtyCycle().getHeavenStem(); return '喜' + s.getJoyDirection().getName() + ' 财' + s.getWealthDirection().getName() + ' 福' + s.getFortuneDirection().getName(); }],
-
-  ['民俗', '神明诞辰', 'a.getDeityFestival()', (a) => { const d = a.getDeityFestival(); return d ? d.getName() : '—'; }],
-  ['民俗', '民俗节日', 'a.getFolkFestivals()', (a) => a.getFolkFestivals().getName() || '—'],
-  ['民俗', '节日合集', 'a.getFestivalNames()', (a) => a.getFestivalNames().join('、') || '—'],
-  ['民俗', '诸葛武侯', 'a.getWuHouDay()', (a) => a.getWuHouDay().getYuan().getName() + ' ' + a.getWuHouDay().getName() + ' ' + a.getWuHouDay().getLuck().getName()],
-  ['民俗', '生肖号码', 'a.getCombineZodiacNumbers()', (a) => a.getCombineZodiacNumbers().toString()],
-  ['民俗', '今日吉数', 'a.getDailyNumbers()', (a) => a.getDailyNumbers().join(' ')],
-
-  ['节日', '节日条目', 'a.getFestivals()', (a) => a.getFestivals().getEntries().map((e) => Festivals.getCategoryName(e.getCategory()) + ':' + e.getName()).join(' | ') || '—'],
-  ['节日', '含外历', 'a.getFestivals(true)', (a) => a.getFestivals(true).getEntries().map((e) => e.getName()).join('、') || '—'],
-  ['节日', '按类取', 'a.getFestivals().getByCategory(5)', (a) => a.getFestivals().getByCategory(5).map((e) => e.getName()).join('、') || '—'],
-  ['节日', '出处合并', 'e.getSource()', (a) => { const l = a.getFestivals().getEntries(); return l.length ? l[0].getSource() : '—'; }],
-  ['节日', '纪念日', 'AnniversaryFestival.of(d)', (a) => { const x = AnniversaryFestival.of(a.getSolarDay()); return x.getName() || '—'; }],
-  ['节日', '佛历', 'BuddhistFestival.of(lunar)', (a) => BuddhistFestival.of(a.getLunarDay()).getName() || '—'],
-  ['节日', '道历', 'TaoistFestival.of(lunar)', (a) => TaoistFestival.of(a.getLunarDay()).getName() || '—'],
-  ['节日', '十斋日', 'BuddhistFestival.isVegetarianDay(lunar, 1)', (a) => BuddhistFestival.isVegetarianDay(a.getLunarDay(), 1) ? '是' : '否'],
-  ['节日', '观音斋', 'BuddhistFestival.isVegetarianDay(lunar, 0)', (a) => BuddhistFestival.isVegetarianDay(a.getLunarDay(), 0) ? '是' : '否'],
-  ['节日', '杨公忌', 'BuddhistFestival.isYangGongDay(lunar)', (a) => BuddhistFestival.isYangGongDay(a.getLunarDay()) ? '是' : '否'],
-  ['节日', '三元日', 'TaoistFestival.isSanYuan(lunar)', (a) => TaoistFestival.isSanYuan(a.getLunarDay()) ? '是' : '否'],
-  ['节日', '五腊日', 'TaoistFestival.isWuLa(lunar)', (a) => TaoistFestival.isWuLa(a.getLunarDay()) ? '是' : '否'],
-  ['节日', '八会日', 'TaoistFestival.isBaHui(sixty)', (a) => TaoistFestival.isBaHui(a.getSixtyCycleDay().getSixtyCycle()) ? '是' : '否'],
-  ['节日', '戊日', 'TaoistFestival.isWuDay(sixty)', (a) => TaoistFestival.isWuDay(a.getSixtyCycleDay().getSixtyCycle()) ? '是' : '否'],
-  ['节日', '节日统计', 'Festivals.getStat()', (a) => Object.keys(Festivals.getStat()).map((k) => k + ':' + Festivals.getStat()[k]).join(' ')],
-  ['节日', '注册事件', 'Festivals.installEvents()', () => '见控制台，幂等'],
-
-  ['外历', '希伯来历', 'HebrewDay.fromSolarDay(d)', (a) => HebrewDay.fromSolarDay(a.getSolarDay()).toString()],
-  ['外历', '希伯来月名', 'h.getMonthName()', (a) => HebrewDay.fromSolarDay(a.getSolarDay()).getMonthName()],
-  ['外历', '希伯来闰年', 'h.isLeapYear()', (a) => HebrewDay.fromSolarDay(a.getSolarDay()).isLeapYear() ? '是' : '否'],
-  ['外历', '希伯来节日', 'HebrewFestival.of(d)', (a) => HebrewFestival.of(a.getSolarDay()).getName() || '—'],
-  ['外历', '印度月名', 'IndianDay.fromSolarDay(d)', (a) => IndianDay.fromSolarDay(a.getSolarDay()).getMonthName()],
-  ['外历', 'tithi', 'IndianDay.getTithi()', (a) => IndianDay.fromSolarDay(a.getSolarDay()).getTithi() + ' ' + Tithi.getName(IndianDay.fromSolarDay(a.getSolarDay()).getTithi())],
-  ['外历', '印度节日', 'IndianFestival.of(d)', (a) => IndianFestival.of(a.getSolarDay()).getName() || '—'],
-  ['外历', '摩羯入宫', 'findSankranti(y, 9)', (a) => findSankranti(a.getSolarDay().getYear(), 9).toString()],
-  ['外历', '东正教复活节', 'HolidayRule.getOrthodoxEasterDay(y)', (a) => HolidayRule.getOrthodoxEasterDay(a.getSolarDay().getYear()).toString()],
-  ['外历', '回历', 'd.getHijriDay()', (a) => a.getSolarDay().getHijriDay().toString()],
-  ['民俗', '周公解梦', 'a.getDreamOracle()', (a) => a.getDreamOracle().toString()],
-  ['民俗', '风水常识', 'a.getFengShuiTip()', (a) => a.getFengShuiTip().getText()],
-  ['民俗', '生肖运程', 'a.getZodiacFortunes()', (a) => a.getZodiacFortunes()[0].toString()],
-  ['民俗', '取名', 'Naming.suggest(surname, eightChar, gender)', (a) => Naming.suggest('李', a.getSixtyCycleDay().getHours()[6].getEightChar(), Gender.MAN, 3).map((n) => n.getFullName()).join(' ')],
-  ['民俗', '节假日', 'HolidayCalendar.of(region).getHoliday(day)', (a) => { const h = HolidayCalendar.of(region).getHoliday(a.getSolarDay()); return h ? h.getName() : '—'; }],
-];
-
-
 /* ---------- 字段科普 ---------- */
 const HELP = {
   '农历日': ['农历日期', '以朔为初一、望为十五或十六，用朔望月定月，用无中气之月置闰。', 'GB/T 33661-2017《农历的编算和颁行》'],
@@ -980,7 +943,7 @@ const HELP = {
   '农历月干支': ['月柱干支', '以节气换月（立春起寅月），不是以农历初一换月。', '五虎遁：甲己之年丙作首'],
   '是否闰月': ['闰月判定', '19 年 7 闰，一个朔望月内无中气则置为闰月。', '《农历的编算和颁行》'],
   '星期': ['公历星期', '由儒略日对 7 取余得出，与历法改革无关。', '儒略日连续纪日'],
-  '节气': ['二十四节气', '太阳视黄经每 15° 为一个节气，冬至为 0°。', '《寿星天文历》'],
+  '节气': ['二十四节气', '太阳视黄经每 15° 为一个节气；冬至黄经 270°，在本库节气序列中索引为 0。', '《寿星天文历》'],
   '节气第几天': ['节气序数', '当日距最近一个节气交节日的天数，交节当日为第 1 天。', '节气定气法'],
   '节气时刻': ['交节时刻', '用天文算法求太阳视黄经达到节气度数的瞬间，东八区。', '《寿星天文历》'],
   '下一节气': ['下一节气', '按黄经顺序的下一个节气及其交节日期。', '节气定气法'],
@@ -1387,30 +1350,43 @@ document.addEventListener('click', (e) => {
 });
 
 function renderFields() {
-  const q = ($('q').value || '').trim().toLowerCase();
-  const order = [];
-  const groups = {};
-  let count = 0;
-  for (const f of FIELDS) {
-    if (q && (f[0] + f[1] + f[2]).toLowerCase().indexOf(q) < 0) continue;
-    if (!groups[f[0]]) { groups[f[0]] = []; order.push(f[0]); }
-    groups[f[0]].push(f);
-    count++;
+  const q = $('q').value.trim().toLowerCase();
+  const order = ['基础日期','农历','干支','神煞','择日','民俗','节日','外历','国家历法','官方数据','多日活动'];
+  const filtered = API_FIELDS.filter(f => !q || [f.group,f.title,f.expression,f.returns,f.description].join(' ').toLowerCase().includes(q));
+  $('api-total').textContent = API_FIELDS.length + ' 个完整示例';
+  $('api-version').textContent = 'v' + VERSION;
+  $('api-toc').innerHTML = order.map((g,i) => '<a href="#api-group-' + i + '">' + esc(g) + '<span>' + API_FIELDS.filter(f => f.group === g).length + '</span></a>').join('');
+  $('fields').innerHTML = order.map((g,i) => {
+    const rows = filtered.filter(f => f.group === g);
+    if (!rows.length) return '';
+    return '<section class="api-group" id="api-group-' + i + '"><h3>' + esc(g) + '</h3>' + rows.map(f => '<details class="api-entry" id="' + f.id + '"' + (q ? ' open' : '') + '><summary><span>' + esc(f.title) + '</span><code>' + esc(f.expression) + '</code></summary><div class="api-entry-body"><p>' + esc(f.description) + '</p><dl><dt>参数 / 上下文</dt><dd>' + esc(f.parameters) + '</dd><dt>返回类型</dt><dd><code>' + esc(f.returns) + '</code></dd></dl><div class="api-code-head"><b>完整示例</b><div><a href="#' + f.id + '" aria-label="链接到' + esc(f.title) + '">字段链接</a><button type="button" class="api-copy">复制代码</button></div></div><pre class="api-code"><code>' + esc(f.code) + '</code></pre><p class="api-output-label">运行输出</p><pre class="api-output">' + esc(f.output) + '</pre></div></details>').join('') + '</section>';
+  }).join('') || '<div class="content-panel">没有匹配的字段。可搜索中文名称、完整方法名或返回类型。</div>';
+  $('qcount').textContent = filtered.length + ' / ' + API_FIELDS.length;
+}
+
+$('api-expand').onclick = () => $('fields').querySelectorAll('details').forEach(el => el.open = true);
+$('api-collapse').onclick = () => $('fields').querySelectorAll('details').forEach(el => el.open = false);
+$('page-fields').addEventListener('click', async e => {
+  const button = e.target.closest('.api-copy');
+  if (!button) return;
+  const pre = button.closest('.api-code-head').nextElementSibling;
+  try {
+    await navigator.clipboard.writeText(pre.textContent);
+    button.textContent = '已复制';
+    $('api-copy-status').textContent = '代码已复制，包含所需导入与初始化。';
+    setTimeout(() => button.textContent = '复制代码', 1500);
+  } catch {
+    const range = document.createRange(); range.selectNodeContents(pre);
+    const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+    $('api-copy-status').textContent = '已选中代码，请按 Ctrl+C 或使用系统复制。';
   }
-  const a = almanac();
-  let html = '';
-  for (const g of order) {
-    html += `<div class="field-group"><h3>${g}</h3><table class="fields"><tr><th>字段</th><th>取法</th><th>示例</th></tr>`;
-    for (const f of groups[g]) {
-      let sample = '—';
-      try { sample = String(f[3](a)); } catch (e) { sample = '—'; }
-      const hk = HELP[f[1]] ? `<span class="help" data-k="${esc(f[1])}" data-g="${esc(f[0])}">?</span>` : `<span class="help" data-k="${esc(f[1])}" data-g="${esc(f[0])}">?</span>`;
-      html += `<tr><td>${esc(f[1])}${hk}</td><td>${esc(f[2])}</td><td>${esc(sample)}</td></tr>`;
-    }
-    html += '</table></div>';
-  }
-  $('fields').innerHTML = html || '<p>没有匹配的字段。</p>';
-  $('qcount').textContent = count + ' 个字段';
+});
+
+function revealApiAnchor() {
+  if (!location.hash.startsWith('#api-')) return;
+  let el = document.getElementById(location.hash.slice(1));
+  if (!el && $('q').value) { $('q').value = ''; renderFields(); el = document.getElementById(location.hash.slice(1)); }
+  if (el) { if (el.tagName === 'DETAILS') el.open = true; el.scrollIntoView({block:'start',behavior:'instant'}); }
 }
 
 function renderRegionCards() {
@@ -1437,13 +1413,13 @@ function renderRegionCards() {
 
 function renderRegionDetail() {
   const c = HolidayCalendar.of(region);
-  $('region-title').innerHTML = (CN[region] || region) + ' · 法定节假日<span class="help" data-r="' + region + '">?</span>';
+  $('region-title').innerHTML = (CN[region] || region) + ' · 假日与办公安排<span class="help" data-r="' + region + '">?</span>';
   $('region-desc').textContent = c.getNote();
   const datasets = DATASETS.filter((d) => d.region === region && (d.year === current.getFullYear() || d.years?.includes(current.getFullYear())));
-  const complete = datasets.some((d) => d.mode === 'replace');
+  const complete = datasets.some((d) => d.mode === 'replace' && d.verification === 'official');
   $('region-provenance').textContent = complete
-    ? `本年使用完整官方公告，已替换推算与自动补假。来源：${datasets.map((d) => d.source).join('；')}`
-    : datasets.length ? '本年使用规则与公告增补；没有覆盖到的州省、行业和临时安排请核对原始公告。'
+    ? `本年使用已核验年度表，已替换推算与自动补假。适用范围：${datasets.map((d) => d.scope || '').join('；')} 来源：${datasets.map((d) => d.source).join('；')}`
+    : datasets.length ? '本年旧数据尚待逐项核实，未自动加载；下方仅显示内置规则，不是完整公告。原因：' + datasets.map(d => d.scope || '缺少可复查来源').join('；')
       : '本年未加载独立年度公告，当前显示内置数据或规则推算；请留意地区说明中的覆盖边界。';
   const list = c.getDays(current.getFullYear());
   $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}</span></div>`).join('')
@@ -1463,33 +1439,21 @@ function renderData() {
   const stat = Festivals.getStat();
   const regions = HolidayCalendar.getRegions();
   const stateCount = regions.filter((r) => r.indexOf('-') > -1).length;
-  const announced = DATASETS.filter((d) => typeof d.year === 'number');
-  const total = announced.reduce((n, d) => n + d.days.length, 0);
-  let hit = 0;
-  for (const d of announced) {
-    const excluded = new Set((d.exclude || []).map((x) => Number(x.slice(5, 7)) + '-' + Number(x.slice(8, 10))));
-    const ruleKeys = new Set(HolidayCalendar.of(d.region).getRuleDays(d.year)
-      .map((h) => h.getDay().getMonth() + '-' + h.getDay().getDay())
-      .filter((k) => !excluded.has(k)));
-    hit += d.days.filter((x) => {
-      const md = Number(x.date.slice(5, 7)) + '-' + Number(x.date.slice(8, 10));
-      return ruleKeys.has(md);
-    }).length;
-  }
-  const coverage = total ? Math.round(hit / total * 100) : 0;
+  const official = DATASETS.filter(d => d.verification === 'official');
+  const pending = DATASETS.filter(d => d.verification !== 'official');
+  const total = official.reduce((n,d) => n + d.days.length,0);
   const cards = [
     ['节日来源', '8 类', '法定、传统、民俗、纪念、国际、宗教、节气、外历'],
     ['佛历 / 道历', (stat.buddhist || 0) + ' / ' + (stat.taoist || 0), '因果犯忌与诸神圣诞的日期键数'],
     ['民俗 / 神诞', (stat.folk || 0) + ' / ' + (stat.deity || 0), '农历月日键数，含《玉匣记》圣诞'],
     ['公历纪念日', String(stat.anniversary || 0), '国际日与中国行业性纪念日'],
     ['节假日地区', String(regions.length), '含 ' + stateCount + ' 个州省子地区'],
-    ['公告数据', DATASETS.length + ' 文件 / ' + DATASETS.reduce((n, d) => n + d.days.length, 0) + ' 日', '规则覆盖 ' + coverage + '%，其余须逐年公告'],
+    ['已核验年度表', official.length + ' 份 / ' + total + ' 条', '按各表适用范围核验，含补班与机关休息日'],
+    ['待核验数据', pending.length + ' 份', '保留原始来源，未自动导入当前展示'],
     ['自动验证', 'CI', '测试、类型检查、构建、上游表比对；运行状态请查看 GitHub Actions'],
     ['数据比对', '7 张表', '与 6tail 上游逐键逐值一致'],
   ];
-  const stateDays = DATASETS.filter((d) => typeof d.year !== 'number').reduce((n, d) => n + d.days.length, 0);
-  $('audit-note').textContent = `全国性公告 ${total} 日（另有州级增补 ${stateDays} 日），其中 ${hit} 日（${coverage}%）可由规则算出；`
-    + `其余为回历、印历、佛历节日与临时公休，只能逐年公告。审计同时会列出「规则多算」项，此前即由此发现马来西亚三份文件漏列元旦。`;
+  $('audit-note').textContent = '已核验表示与所列官方年度表逐日匹配，仅适用于每份表的范围，不承诺未来不修订。规则推算、传统民俗与待核验数据不计入该数量。天文台独立对照覆盖 4,390 个农历日期与 288 个节气；2057 年存在已记录的 30 日差异，详见逐项核验报告。';
 
   $('data-stats').innerHTML = cards.map((c) =>
     `<div class="s"><b>${esc(c[1])}</b><span>${esc(c[0])}</span><em>${esc(c[2])}</em></div>`).join('');
@@ -1536,13 +1500,20 @@ const CHECKS = [
     ['2024', '春 3-25 / 秋 9-21', () => sheDay(2024)],
     ['2025', '春 3-20 / 秋 9-26', () => sheDay(2025)],
   ]],
-  ['美国补假（OPM）', [
-    ['2025 假日数', '11', () => String(HolidayCalendar.of('US').getDays(2025).length)],
-    ['2025 感恩节', '11/27 感恩节', () => dayNames(HolidayCalendar.of('US').getDays(2025).filter((h) => h.getName() === '感恩节'))],
-    ['2027 六月节补假', '6/18 六月节（补假）', () => dayNames(HolidayCalendar.of('US').getDays(2027).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('六月节') === 0))],
-    ['2027 独立日补假', '7/5 独立日（补假）', () => dayNames(HolidayCalendar.of('US').getDays(2027).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('独立日') === 0))],
-    ['2027 圣诞补假', '12/24 圣诞节（补假）', () => dayNames(HolidayCalendar.of('US').getDays(2027).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('圣诞节') === 0))],
-    ['2027 元旦补假', '12/31 元旦（补假）', () => dayNames(HolidayCalendar.of('US').getDays(2027).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('元旦') === 0))],
+  ['美国官方工作日安排（OPM）', [
+    ['2025 假日数', '11', () => String(OfficialHolidayCalendar.create('US',2025).getDays().length)],
+    ['2025 感恩节', 'Thanksgiving Day', () => name(OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,11,27)))],
+    ['2027 六月节补假', 'Juneteenth National Independence Day', () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,6,18)))],
+    ['2027 独立日补假', 'Independence Day', () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,7,5)))],
+    ['2027 圣诞补假', 'Christmas Day', () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,12,24)))],
+    ['2028 元旦在 2027 年补假', "New Year’s Day", () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,12,31)))],
+  ]],
+  ['多日活动与机关日历', [
+    ['2026 阅读周', '7', () => String(FestivalPeriods.getYear(2026).find(p => p.getName() === '全民阅读活动周').getDayCount())],
+    ['2027 阅读周不推算', 'false', () => String(FestivalPeriods.getYear(2027).some(p => p.getName() === '全民阅读活动周'))],
+    ['2025 科普月', '30', () => String(FestivalPeriods.getYear(2025)[0].getDayCount())],
+    ['台湾 2025 机关休息日', '118', () => String(OfficialHolidayCalendar.create('TW',2025).getDays().length)],
+    ['台湾 2025 补班', 'true', () => String(OfficialHolidayCalendar.create('TW',2025).getHoliday(SolarDay.fromYmd(2025,2,8)).isWork())],
   ]],
   ['国家历法', [
     ['Saka 1947 首日', '2025年3月22日', () => SakaDay.fromYmd(1947, 1, 1).getSolarDay().toString()],
@@ -1561,7 +1532,7 @@ const CHECKS = [
     ['英国 2025 假日数', '8', () => String(HolidayCalendar.of('GB').getDays(2025).length)],
     ['英国 2025 夏季银行假日（官方公告）', '8/25 Summer bank holiday', () => dayNames(HolidayCalendar.of('GB').getDays(2025).filter((h) => h.getName() === 'Summer bank holiday'))],
     ['日本 2025 假日数', '19', () => String(HolidayCalendar.of('JP').getDays(2025).length)],
-    ['日本 2025 振替休日', '2/24 振替休日', () => dayNames(HolidayCalendar.of('JP').getDays(2025).filter((h) => h.getDay().getMonth() === 2 && h.getDay().getDay() === 24))],
+    ['日本 2025 振替休日', '2/24 休日', () => dayNames(HolidayCalendar.of('JP').getDays(2025).filter((h) => h.getDay().getMonth() === 2 && h.getDay().getDay() === 24))],
     ['中国 2025 假日数', '28', () => String(HolidayCalendar.of('CN').getDays(2025).length)],
     ['韩国 2025 佛诞与儿童节', '5/5 佛诞节、儿童节', () => dayNames(HolidayCalendar.of('KR').getDays(2025).filter((h) => h.getDay().getMonth() === 5 && h.getDay().getDay() === 5))],
     ['荷兰 2025 国王节', '4/26 国王节', () => dayNames(HolidayCalendar.of('NL').getDays(2025).filter((h) => h.getName() === '国王节'))],
@@ -1667,6 +1638,7 @@ $('q').oninput = () => renderFields();
 const TABS = ['almanac', 'fields', 'festivals', 'regions', 'calendars', 'check', 'data'];
 
 function hashPage() {
+  if (location.hash.startsWith('#api-')) return 'fields';
   const h = location.hash.replace('#', '');
   return h.indexOf('tab-') === 0 ? h.slice(4) : '';
 }
@@ -1694,6 +1666,8 @@ function renderFestCats() {
 function renderFestivals() {
   const y = festYear;
   const q = $('fq').value.trim();
+  const periods = FestivalPeriods.getYear(y).filter(p => !q || p.getName().includes(q));
+  $('festival-periods').innerHTML = '<h3>多日公共活动</h3><p class="note">以下为活动期间，不代表放假。全民阅读活动周只列已核实年度，未公布年份不推算。</p>' + (periods.map(p => `<p><b>${esc(p.getName())}</b> · ${ymd(p.getStart())} 至 ${ymd(p.getEnd())}（${p.getDayCount()} 天） <a href="${esc(p.getSource())}" target="_blank" rel="noopener noreferrer">官方依据 ↗</a></p>`).join('') || '<p>本年暂无匹配的已核实活动期间。</p>');
   let total = 0;
   const months = [];
   for (let m = 1; m <= 12; m++) {
@@ -1723,9 +1697,10 @@ function renderFestivals() {
   $('fest-detail').innerHTML = '';
 }
 
-$('fy').onchange = () => { festYear = Number($('fy').value) || 2025; renderFestivals(); };
+$('fy').onchange = () => { if (!$('fy').value || !$('fy').reportValidity()) return; festYear = Number($('fy').value); renderFestivals(); };
 $('fq').oninput = () => renderFestivals();
 $('fexport').onclick = () => {
+  if (!$('fy').value || !$('fy').reportValidity()) return;
   const out = [];
   for (let m = 1; m <= 12; m++) {
     const count = SolarDay.fromYmd(festYear, m, 1).getSolarMonth().getDayCount();
@@ -1737,11 +1712,13 @@ $('fexport').onclick = () => {
       }
     }
   }
-  const blob = new Blob([JSON.stringify({year: festYear, festivals: out}, null, 2)], {type: 'application/json'});
+  const periods = FestivalPeriods.getYear(festYear).map(p => ({name:p.getName(), start:ymd(p.getStart()), end:ymd(p.getEnd()), dayCount:p.getDayCount(), source:p.getSource(), region:'CN'}));
+  const blob = new Blob([JSON.stringify({year: festYear, festivals: out, periods}, null, 2)], {type: 'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `festivals-${festYear}.json`;
   a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
 renderFestCats();
 
@@ -1829,13 +1806,17 @@ document.querySelectorAll('nav.tabs button').forEach((b) => {
   };
 });
 
-window.addEventListener('hashchange', () => activate(hashPage(), true));
+window.addEventListener('hashchange', () => {
+  activate(hashPage(), !location.hash.startsWith('#api-'));
+  revealApiAnchor();
+});
 
 loadDatasets();
 if ($('ver')) $('ver').textContent = 'Tyme Enhanced v' + VERSION;
 initRegion();
 activate(hashPage(), false);
 setToday();
+revealApiAnchor();
 </script>
 </body>
 </html>

@@ -37,7 +37,8 @@ for (const [division, region] of Object.entries(divisions)) {
             || !days.some((d) => d.date.startsWith(`${year}-12-`))) {
             throw new Error(`Incomplete year ${division} ${year}; review before replacing`);
         }
-        output.push({region, year, mode: 'replace', source, division,
+        output.push({region, year, mode: 'replace', verification: 'official', source, division,
+            scope: 'GOV.UK bank holiday dates for ' + division + '; excludes ordinary weekends.',
             license: 'Open Government Licence v3.0',
             licenseUrl: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
             // 这是固定快照的核验日；--fetch 更新时写入真实抓取日期。

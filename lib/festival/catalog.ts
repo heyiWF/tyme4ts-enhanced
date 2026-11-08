@@ -6,6 +6,7 @@ import {BUDDHIST_OTHER} from './data-buddhist';
 import {TAOIST} from './data-taoist';
 import {AnniversaryFestival} from './anniversary';
 import {CHINA_OBSERVANCES} from './china-observances';
+import {FestivalPeriod, FestivalPeriods} from './period';
 import {HebrewFestival, IndianFestival} from './foreign';
 import {IslamicFestival} from './islamic';
 import {BuddhistFestival} from './buddhist';
@@ -32,7 +33,7 @@ export class Festivals extends AbstractCulture {
      */
     protected static STATUTORY_SOLAR: string[] = ['元旦', '劳动节', '国庆节'];
 
-    protected static CATEGORY_NAMES: string[] = ['法定', '传统', '民俗', '纪念', '国际', '宗教', '节气', '外历'];
+    protected static CATEGORY_NAMES: string[] = ['法定', '传统', '民俗', '纪念', '国际', '宗教', '节气', '外历', '活动'];
 
     protected constructor(solarDay: SolarDay, entries: FestivalEntry[]) {
         super();
@@ -135,6 +136,11 @@ export class Festivals extends AbstractCulture {
         }
 
         return new Festivals(solarDay, Festivals.dedupe(raw));
+    }
+
+    /** 当日所在的多日活动；保留完整期间，不混入单日节日清单。 */
+    getPeriods(): FestivalPeriod[] {
+        return FestivalPeriods.getDay(this.solarDay);
     }
 
     /**

@@ -109,6 +109,10 @@ for (const [region, extras] of Object.entries(STATE_EXTRA)) {
         region,
         years: YEARS,
         source: SOURCE,
+        verification: 'pending',
+        scope: '旧有州级增补，尚未逐项确认全部临时通告、补假与适用范围；不进入官方日历接口或 Wiki 自动导入。',
+        reviewSource: 'https://www.kelantanlibrary.gov.my/v4/images/download/jadual-hari-kelepasan-am/HKA-2026.pdf',
+        reviewedOn: '2026-11-02',
         note: '州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json',
         days,
     };

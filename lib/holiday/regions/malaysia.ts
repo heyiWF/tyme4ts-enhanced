@@ -52,9 +52,11 @@ export function kelantanExtra(): HolidayRule[] {
  */
 export function melakaExtra(): HolidayRule[] {
     return [
-        HolidayRule.solar(2, 20, '独立宣言日'),
-        // 马六甲于 2008 年 4 月 15 日列入世界遗产名录
-        HolidayRule.solar(4, 15, '世界遗产城日'),
+        // 州政府 2024 预算第 17 段：自 2024-02-20 起成为公共假日。
+        // https://jkpnm.melaka.gov.my/userfiles/user/1/file/TEKS%20UCAPAN%20BAJET%202024%20NEGERI%20MELAKA.pdf
+        HolidayRule.solar(2, 20, '独立宣言日', 2024),
+        // 旧规则误将 4 月 15 日称为世界遗产日；2026 州政府完整表未列此日。
+        // https://www.melaka.gov.my/rakyat/info-rakyat/hari-kelepasan-am-negeri-melaka-2026.html
         HolidayRule.solar(8, 24, '州元首诞辰'),
     ];
 }

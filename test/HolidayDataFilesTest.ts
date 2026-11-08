@@ -12,7 +12,7 @@ class HolidayDataFilesTest {
     test0(): void {
         // 逐年公告文件均可解析并导入
         const files: string[] = readdirSync(HolidayDataFilesTest.DIR).filter((f: string) => f.slice(-5) === '.json').sort();
-        equal(files.length, 62);
+        ok(files.length >= 157);
         for (let i: number = 0; i < files.length; i++) {
             const text: string = readFileSync(join(HolidayDataFilesTest.DIR, files[i]), 'utf8');
             const o: {
@@ -41,9 +41,9 @@ class HolidayDataFilesTest {
 
     @test
     test1(): void {
-        // 导入数据优先于规则：新加坡 2025 国庆补假
+        // MOM 公告不把星期六国庆日自动补到周一。
         const c: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'SG-2025.json'), 'utf8'));
-        equal(c.getHoliday(SolarDay.fromYmd(2025, 8, 11))!.getName(), '国庆日补假');
+        equal(c.getHoliday(SolarDay.fromYmd(2025, 8, 11)), null);
         equal(c.getHoliday(SolarDay.fromYmd(2025, 5, 3))!.getName(), '选举日');
         // 马来西亚联邦日
         const my: HolidayCalendar = HolidayCalendar.fromJson(readFileSync(join(HolidayDataFilesTest.DIR, 'MY-2026.json'), 'utf8'));

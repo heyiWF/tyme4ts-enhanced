@@ -20,6 +20,8 @@ export enum FestivalCategory {
     SOLAR_TERM = 6,
     /** 外历节日（希伯来、印度、伊斯兰） */
     FOREIGN = 7,
+    /** 多日公共活动（不代表放假） */
+    ACTIVITY = 8,
 }
 
 /**

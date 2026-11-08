@@ -1,0 +1,56 @@
+{
+  "region": "US",
+  "year": 2025,
+  "mode": "replace",
+  "verification": "official",
+  "source": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/",
+  "scope": "OPM 常规联邦假日（周一至周五工作的联邦雇员），按实际公历年归档；不含 DC 地区就职日、总统临时行政休假、州假或私人雇主安排。",
+  "verifiedOn": "2026-11-02",
+  "snapshotSha256": "c390d8a2374e9e82e46beed1e33939f3de91a3aac2e6f78eb606b43f9c4f1c60",
+  "days": [
+    {
+      "date": "2025-01-01",
+      "name": "New Year’s Day"
+    },
+    {
+      "date": "2025-01-20",
+      "name": "Birthday of Martin Luther King, Jr."
+    },
+    {
+      "date": "2025-02-17",
+      "name": "Washington’s Birthday"
+    },
+    {
+      "date": "2025-05-26",
+      "name": "Memorial Day"
+    },
+    {
+      "date": "2025-06-19",
+      "name": "Juneteenth National Independence Day"
+    },
+    {
+      "date": "2025-07-04",
+      "name": "Independence Day"
+    },
+    {
+      "date": "2025-09-01",
+      "name": "Labor Day"
+    },
+    {
+      "date": "2025-10-13",
+      "name": "Columbus Day"
+    },
+    {
+      "date": "2025-11-11",
+      "name": "Veterans Day"
+    },
+    {
+      "date": "2025-11-27",
+      "name": "Thanksgiving Day"
+    },
+    {
+      "date": "2025-12-25",
+      "name": "Christmas Day"
+    }
+  ]
+}

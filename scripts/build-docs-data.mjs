@@ -7,7 +7,7 @@
  *
  * 用法：node scripts/build-docs-data.mjs
  */
-import {readFileSync, readdirSync, writeFileSync} from 'node:fs';
+import {readFileSync, readdirSync, writeFileSync, copyFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 const DIR = 'data/holidays';
@@ -20,6 +20,7 @@ const files = readdirSync(DIR)
 const datasets = files.map((file) => JSON.parse(readFileSync(join(DIR, file), 'utf8')));
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const sources = JSON.parse(readFileSync('data/sources.json', 'utf8'));
+copyFileSync('data/quality-review.json', 'docs/data-review.json');
 
 const header = `/**
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
