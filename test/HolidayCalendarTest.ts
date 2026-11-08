@@ -6,7 +6,7 @@ import {equal, ok} from 'assert';
 class HolidayCalendarTest {
     @test
     test0(): void {
-        // 中国大陆逐年公布的法定节假日，数据已含 2001 至 2026 年
+        // 中国大陆逐年公布的法定节假日，数据已含 2001 至 2027 年
         const c: HolidayCalendar = HolidayCalendar.of('CN');
         equal(c.getHoliday(SolarDay.fromYmd(2025, 1, 1))!.getName(), '元旦');
         equal(c.getHoliday(SolarDay.fromYmd(2025, 1, 29))!.getName(), '春节');
@@ -66,5 +66,21 @@ class HolidayCalendarTest {
         ok(d);
         equal(d!.getName(), '春节');
         equal(SolarDay.fromYmd(2027, 2, 6).getLunarDay().getDay(), 1);
+        // 国办发明电〔2026〕10 号：春节 2 月 5 日至 13 日放假调休，1 月 31 日、2 月 14 日上班
+        equal(c.getDays(2027).length, 29);
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 2, 5))!.getName(), '春节');
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 2, 13))!.getName(), '春节');
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 1, 31))!.isWork(), true);
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 2, 14))!.isWork(), true);
+        // 劳动节 5 月 1 日至 5 日、5 月 8 日上班；国庆节 10 月 1 日至 7 日、9 月 26 日与 10 月 9 日上班
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 5, 5))!.getName(), '劳动节');
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 5, 8))!.isWork(), true);
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 10, 7))!.getName(), '国庆节');
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 9, 26))!.isWork(), true);
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 10, 9))!.isWork(), true);
+        // 端午、中秋均逢周三，只在当日放假；元旦逢周五，与周末顺连，不调休
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 6, 9))!.getName(), '端午节');
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 9, 15))!.getName(), '中秋节');
+        equal(c.getHoliday(SolarDay.fromYmd(2027, 1, 4)), null);
     }
 }

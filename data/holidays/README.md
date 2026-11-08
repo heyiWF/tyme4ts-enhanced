@@ -1,50 +1,39 @@
 # 逐年节假日数据
 
-本目录保存年度公告、州级增补与历史整理的节假日数据，供 `HolidayCalendar.importJson()` 直接导入。
+本目录共 158 份 JSON：136 份已核验年度表、22 份待核验历史整理文件。每份数据保留 verification、scope、source 与核验时间。逐日清单见 [quality-review.json](../quality-review.json)，范围与差异见 [核验报告](../../docs/DATA-REVIEW.md)。
+
+## 推荐入口
+
+```ts
+import {OfficialHolidayCalendar, SolarDay} from 'tyme4ts-enhanced';
+const cn = OfficialHolidayCalendar.create('CN', 2027);
+cn.getDays().length; // 29 个放假日
+cn.getDays(true).length; // 另含 5 个补班日，共 34 条
+cn.getHoliday(SolarDay.fromYmd(2027, 1, 31))?.isWork(); // true
+cn.getScope();
+cn.getSource();
+```
+
+该接口只接受已核验年份，缺失数据明确报错。已覆盖日本 1955–2027、台湾机关 2025–2026、美国 OPM 2011–2030、英国三地区 2019–2028、新加坡 2025–2027、印尼 2026–2027、埃及 2026、新疆/宁夏 2025–2026，以及中国大陆全国 2027。
+
+各表适用对象不同：台湾表包含机关普通周末；美国表为常规联邦工作安排；印尼不含共同休假；新加坡补假有周日休息日条件；埃及表保留 10 月 8 日移日专项通告。请读取 scope，不把所有记录都解释为全体居民法定休假。
+
+## 手动导入与州级增补
 
 ```ts
 import {readFileSync} from 'node:fs';
 import {HolidayCalendar} from 'tyme4ts-enhanced';
-
-HolidayCalendar.create('SG').importJson(readFileSync('data/holidays/SG-2026.json', 'utf8'));
-```
-
-州级日历要导入两次：先联邦，再州级。州级文件的 `exclude` 会扣掉该州不过的全国性节日。
-
-```ts
 const c = HolidayCalendar.create('MY-JHR');
-c.importJson(readFileSync('data/holidays/MY-2026.json', 'utf8'));   // 联邦
-c.importJson(readFileSync('data/holidays/MY-JHR.json', 'utf8'));     // 州级增补 + 排除
+c.importJson(readFileSync('data/holidays/MY-2026.json', 'utf8'));
+c.importJson(readFileSync('data/holidays/MY-JHR.json', 'utf8'));
 ```
 
-| 文件 | 覆盖 | 来源 |
-| --- | --- | --- |
-| `GB/GB-SCT/GB-NIR-2019…2028.json` | 英国三个地区的实际银行放假日；`mode: replace` 完整替换年度 | [GOV.UK JSON](https://www.gov.uk/bank-holidays.json)，OGL v3.0，含快照 SHA-256 |
-| `SG-2025/2026/2027.json` | 新加坡全部公共假日，含补假 | 新加坡人力部 MOM |
-| `MY-2025/2026/2027.json` | 马来西亚联邦公共假日 | 马来西亚内阁 kabinet.gov.my |
-| `TH-2025/2026/2027.json` | 泰国政府机关与银行公休日，含万佛节、佛诞节、三宝佛节与补假 | 泰国内阁公告，经 officeholidays、timefyi 等汇总比对 |
-| `MY-<州>.json` | 马来西亚 13 个州级增补文件，含 `years` 字段 | 同上，另比对州政府宪报 |
-| `CN-XJ-2025/2026.json` | 新疆维吾尔自治区全年放假安排，含肉孜节、古尔邦节 | 自治区人民政府办公厅通知 |
-| `CN-NX-2025/2026.json` | 宁夏回族自治区全年放假安排，含开斋节、古尔邦节 | 宁政办发〔2025〕36 号等 |
-| `LK-2025/2026/2027.json` | 斯里兰卡公共、银行与 Poya 假日 | 政府公报 / 中央银行；数据整理自 `Dilshan-H/srilanka-holidays`（MIT）与 `HiranthaSandaruwan/sri-lanka-public-holidays`（CC BY 4.0） |
+以上马来西亚文件仍为 pending，示例仅说明机制：先导入联邦，再导入州级，州级同日记录覆盖联邦；exclude 扣减不适用日期。已保留远端针对柔佛额外补假、吉隆坡两日补假、砂拉越达雅节、北三州排除项的修订，但完整年度、临时通告和地区适用范围仍需核查，不能据此将整组文件标为官方认证。
 
-说明：
-
-- 马来西亚联邦表 `MY-<年>.json` 含古兰经降示日（全国性，但柔佛、吉打、马六甲、森美兰、沙巴、砂拉越六州不过）。
-- 各州苏丹诞辰、州庆等固定节日由规则推算（见 `lib/holiday/regions/malaysia.ts`），不重复写入数据文件；州级文件只补回历节日与大宝森节。
-- 一次性补假与特假（如各州元首诞辰逢周末的「补假」）未逐条收录。
-- 新疆、宁夏为「全年安排」而非「增补」：直接导入即可得到该区完整放假日，含调休。
-- 两区 2027 年安排尚未公布，公布后按同格式追加 `CN-XJ-2027.json`、`CN-NX-2027.json` 即可。
-- 新加坡 `2025-05-03` 为一次性选举日公休。
-- 泰国 `2025-05-09`、`2026-05-13` 为皇家耕稼节，仅政府机关放假；2027 年该节尚未公布，未列入。
-- 泰国 2027 年佛历节日（万佛节 2/21、佛诞节 5/20、三宝佛节 7/18、守夏节 7/19）取自三家汇总一致的日期。
-- 导入数据优先于规则：同一天既有规则日又有导入日时，以导入名称为准。
-- 斯里兰卡 `LK` 的固定假日（独立日、僧伽罗和泰米尔新年、劳动节、圣诞节）由规则推算；Poya、开斋节、古尔邦节、排灯节与耶稣受难日按政府公报逐年导入。`LK-2026/2027` 数据采用 CC BY 4.0，复制或再分发时请保留文件内的来源与许可说明。
+泰国旧文件包含皇家耕稼节及守夏节等政府机关假日，与银行范围不同；斯里兰卡旧文件保留原 MIT / CC BY 4.0 整理来源，并按公报修正 2026 卫塞节次日。上述 MY、TH、LK 共 22 份文件不会自动进入官方接口或 Wiki。
 
 ## 完整替换与更新
 
-总计 62 个 JSON 文件（30 份英国年度公告 + 32 份原有文件）。英国文件含 `year` 与 `mode: "replace"`，导入后仅使用公告中的实际放假日，不叠加周末原节日、旧导入或自动补假。其他文件仍采用默认增补模式。
+已核验年度表统一使用 mode: replace，按年停用推算与自动补假；历史州级增补沿用 merge。导入前校验，错误不会写入一半。
 
-`npm run gen:govuk` 离线再生成；`npm run gen:govuk -- --fetch` 显式更新官方快照。更新后运行 `npm run check`、审阅差异，再用 `npm run docs` 同步 Wiki。
-
-原有文件的来源层级并不相同：部分来自第三方汇总或未最终确认的推算。上表只描述现有内容，不能视为本次已对所有记录完成独立官方认证。完整资料及后续优先级见 [资料目录](../../docs/SOURCES.md)。
+运行 npm run gen:official 从提交的官方快照与独立转录再生成，npm run check 核验，npm run docs 同步 Wiki。日本和英国有显式联网更新选项，详见 [资料目录](../../docs/SOURCES.md)。官方数据及第三方整理数据保留各自许可，项目代码的 MIT 许可不覆盖其额外条款。

@@ -453,7 +453,7 @@ console.log(JSON.stringify(data, null, 2));</code></pre>
             <li><strong>索引：</strong>星期索引 0 为周日，1–6 为周一至周六；节气日索引 0 是交节当日。要展示“第几天”需加 1，不要对所有数字统一加 1。</li>
             <li><strong>时刻：</strong>日级对象不包含出生时分秒。八字使用 <code>SolarTime.fromYmdHms(...).getSixtyCycleHour().getEightChar()</code>；农历年、日级干支年与立春时刻的年柱口径不同。</li>
             <li><strong>空值：</strong>神诞、年号、当日假期可能为 <code>null</code>，数组可能为空。使用可选链、判空或检查数组长度；不要直接使用非空断言掩盖真实缺失。</li>
-            <li><strong>数据范围：</strong>各国家历法有不同表范围；超范围先检查说明并捕获异常。日期推算不等于完整官方公告。HKO 2057 年已知差异见<a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/DATA-REVIEW.md">核验报告</a>。</li>
+            <li><strong>数据范围：</strong>各国家历法有不同表范围；超范围先检查说明并捕获异常。日期推算不等于完整官方公告。HKO 2057 年已知差异见<a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/main/docs/DATA-REVIEW.md">核验报告</a>。</li>
           </ul>
         </section>
         <section class="api-guide content-panel" id="api-data">
@@ -587,7 +587,7 @@ const ics = c.toIcs(2025);</pre>
       <p id="source-checked"></p>
       <p>六项优先资料已按顺序接入。公告、历法转换、民俗条目适用范围不同；规则命中日期的比例不代表法律准确率。仍待核实的旧文件保留在仓库中，本站不自动加载。</p>
       <div class="source-grid" id="official-sources"></div>
-      <p><a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/SOURCES.md">资料目录与更新方法</a> · <a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/master/docs/DATA-REVIEW.md">逐项核验结果与剩余缺口</a> · <a href="data-review.json">下载逐条核验清单</a></p>
+      <p><a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/main/docs/SOURCES.md">资料目录与更新方法</a> · <a href="https://github.com/heyiWF/tyme4ts-enhanced/blob/main/docs/DATA-REVIEW.md">逐项核验结果与剩余缺口</a> · <a href="data-review.json">下载逐条核验清单</a></p>
     </div>
 
     <div class="content-panel">
@@ -633,6 +633,7 @@ const ics = c.toIcs(2025);</pre>
 <script type="module">
 import {DATASETS, VERSION, SOURCES} from './holidays-data.js';
 import {API_FIELDS} from './api-reference.js';
+if (location.hash.startsWith('#api-')) history.scrollRestoration = 'manual';
 import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, OfficialHolidayCalendar, FestivalPeriods, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -694,12 +695,6 @@ function almanac() {
  * 规则算不出的节日（回历、印历、临时公休）只能这样逐年补充
  */
 function loadDatasets() {
-  for (const d of DATASETS) {
-    if (d.verification !== 'official') continue;
-    try {
-      HolidayCalendar.of(d.region).importJson(JSON.stringify(d));
-    } catch (e) { /* 单个文件损坏不影响其他 */ }
-  }
   // 州级日历还需导入所属国家的联邦公告
   const byYear = {};
   for (const d of DATASETS) {
@@ -714,6 +709,12 @@ function loadDatasets() {
         try { HolidayCalendar.of(d.region).importJson(JSON.stringify(src)); } catch (e) { /* ignore */ }
       }
     }
+  }
+  for (const d of DATASETS) {
+    if (d.verification !== 'official') continue;
+    try {
+      HolidayCalendar.of(d.region).importJson(JSON.stringify(d));
+    } catch (e) { /* 单个文件损坏不影响其他 */ }
   }
 }
 

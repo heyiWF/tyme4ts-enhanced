@@ -2,11 +2,163 @@
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
  *
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
- * 覆盖 CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、GB-2019、GB-2020、GB-2021、GB-2022、GB-2023、GB-2024、GB-2025、GB-2026、GB-2027、GB-2028、GB-NIR-2019、GB-NIR-2020、GB-NIR-2021、GB-NIR-2022、GB-NIR-2023、GB-NIR-2024、GB-NIR-2025、GB-NIR-2026、GB-NIR-2027、GB-NIR-2028、GB-SCT-2019、GB-SCT-2020、GB-SCT-2021、GB-SCT-2022、GB-SCT-2023、GB-SCT-2024、GB-SCT-2025、GB-SCT-2026、GB-SCT-2027、GB-SCT-2028、ID-2026、ID-2027、JP-1955、JP-1956、JP-1957、JP-1958、JP-1959、JP-1960、JP-1961、JP-1962、JP-1963、JP-1964、JP-1965、JP-1966、JP-1967、JP-1968、JP-1969、JP-1970、JP-1971、JP-1972、JP-1973、JP-1974、JP-1975、JP-1976、JP-1977、JP-1978、JP-1979、JP-1980、JP-1981、JP-1982、JP-1983、JP-1984、JP-1985、JP-1986、JP-1987、JP-1988、JP-1989、JP-1990、JP-1991、JP-1992、JP-1993、JP-1994、JP-1995、JP-1996、JP-1997、JP-1998、JP-1999、JP-2000、JP-2001、JP-2002、JP-2003、JP-2004、JP-2005、JP-2006、JP-2007、JP-2008、JP-2009、JP-2010、JP-2011、JP-2012、JP-2013、JP-2014、JP-2015、JP-2016、JP-2017、JP-2018、JP-2019、JP-2020、JP-2021、JP-2022、JP-2023、JP-2024、JP-2025、JP-2026、JP-2027、LK-2025、LK-2026、LK-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027、TW-2025、TW-2026、US-2011、US-2012、US-2013、US-2014、US-2015、US-2016、US-2017、US-2018、US-2019、US-2020、US-2021、US-2022、US-2023、US-2024、US-2025、US-2026、US-2027、US-2028、US-2029、US-2030，另有马来西亚 13 个州级增补文件。
+ * 覆盖 CN-2027、CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、GB-2019、GB-2020、GB-2021、GB-2022、GB-2023、GB-2024、GB-2025、GB-2026、GB-2027、GB-2028、GB-NIR-2019、GB-NIR-2020、GB-NIR-2021、GB-NIR-2022、GB-NIR-2023、GB-NIR-2024、GB-NIR-2025、GB-NIR-2026、GB-NIR-2027、GB-NIR-2028、GB-SCT-2019、GB-SCT-2020、GB-SCT-2021、GB-SCT-2022、GB-SCT-2023、GB-SCT-2024、GB-SCT-2025、GB-SCT-2026、GB-SCT-2027、GB-SCT-2028、ID-2026、ID-2027、JP-1955、JP-1956、JP-1957、JP-1958、JP-1959、JP-1960、JP-1961、JP-1962、JP-1963、JP-1964、JP-1965、JP-1966、JP-1967、JP-1968、JP-1969、JP-1970、JP-1971、JP-1972、JP-1973、JP-1974、JP-1975、JP-1976、JP-1977、JP-1978、JP-1979、JP-1980、JP-1981、JP-1982、JP-1983、JP-1984、JP-1985、JP-1986、JP-1987、JP-1988、JP-1989、JP-1990、JP-1991、JP-1992、JP-1993、JP-1994、JP-1995、JP-1996、JP-1997、JP-1998、JP-1999、JP-2000、JP-2001、JP-2002、JP-2003、JP-2004、JP-2005、JP-2006、JP-2007、JP-2008、JP-2009、JP-2010、JP-2011、JP-2012、JP-2013、JP-2014、JP-2015、JP-2016、JP-2017、JP-2018、JP-2019、JP-2020、JP-2021、JP-2022、JP-2023、JP-2024、JP-2025、JP-2026、JP-2027、LK-2025、LK-2026、LK-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027、TW-2025、TW-2026、US-2011、US-2012、US-2013、US-2014、US-2015、US-2016、US-2017、US-2018、US-2019、US-2020、US-2021、US-2022、US-2023、US-2024、US-2025、US-2026、US-2027、US-2028、US-2029、US-2030，另有马来西亚 13 个州级增补文件。
  */
 export const VERSION = "1.16.0";
 
 export const DATASETS = [
+ {
+  "region": "CN",
+  "year": 2027,
+  "mode": "replace",
+  "verification": "official",
+  "source": "https://www.gov.cn/zhengce/content/202611/content_7085101.htm",
+  "scope": "国务院办公厅国办发明电〔2026〕10号全年放假调休安排，含五个补班日",
+  "verifiedOn": "2026-11-08",
+  "days": [
+   {
+    "date": "2027-01-01",
+    "name": "元旦"
+   },
+   {
+    "date": "2027-01-02",
+    "name": "元旦"
+   },
+   {
+    "date": "2027-01-03",
+    "name": "元旦"
+   },
+   {
+    "date": "2027-01-31",
+    "name": "春节",
+    "work": true
+   },
+   {
+    "date": "2027-02-05",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-06",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-07",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-08",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-09",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-10",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-11",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-12",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-13",
+    "name": "春节"
+   },
+   {
+    "date": "2027-02-14",
+    "name": "春节",
+    "work": true
+   },
+   {
+    "date": "2027-04-03",
+    "name": "清明节"
+   },
+   {
+    "date": "2027-04-04",
+    "name": "清明节"
+   },
+   {
+    "date": "2027-04-05",
+    "name": "清明节"
+   },
+   {
+    "date": "2027-05-01",
+    "name": "劳动节"
+   },
+   {
+    "date": "2027-05-02",
+    "name": "劳动节"
+   },
+   {
+    "date": "2027-05-03",
+    "name": "劳动节"
+   },
+   {
+    "date": "2027-05-04",
+    "name": "劳动节"
+   },
+   {
+    "date": "2027-05-05",
+    "name": "劳动节"
+   },
+   {
+    "date": "2027-05-08",
+    "name": "劳动节",
+    "work": true
+   },
+   {
+    "date": "2027-06-09",
+    "name": "端午节"
+   },
+   {
+    "date": "2027-09-15",
+    "name": "中秋节"
+   },
+   {
+    "date": "2027-09-26",
+    "name": "国庆节",
+    "work": true
+   },
+   {
+    "date": "2027-10-01",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-02",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-03",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-04",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-05",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-06",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-07",
+    "name": "国庆节"
+   },
+   {
+    "date": "2027-10-09",
+    "name": "国庆节",
+    "work": true
+   }
+  ]
+ },
  {
   "region": "CN-NX",
   "year": 2025,
@@ -819,14 +971,23 @@ export const DATASETS = [
     "name": "圣纪"
    },
    {
-    "date": "2026-10-06",
+    "date": "2026-10-08",
     "name": "武装部队日"
    }
   ],
-  "mode": "replace",
-  "scope": "总统府 National Holidays 2026 表列日期；不额外猜测移日",
   "verification": "official",
-  "verifiedOn": "2026-11-02"
+  "scope": "总统府 2026 年表及总理府 2026-09-29 移日决定；10 月假期适用于政府机关与公共部门。",
+  "mode": "replace",
+  "verifiedOn": "2026-11-08",
+  "amendments": [
+   {
+    "source": "https://cabinet.gov.eg/News/Details/86219",
+    "publishedOn": "2026-09-29",
+    "removed": "2026-10-06",
+    "added": "2026-10-08",
+    "note": "武装部队日实际放假从 10 月 6 日移至 10 月 8 日。"
+   }
+  ]
  },
  {
   "region": "GB",
@@ -8286,6 +8447,10 @@ export const DATASETS = [
     "name": "国庆日"
    },
    {
+    "date": "2025-09-01",
+    "name": "国庆日补假"
+   },
+   {
     "date": "2025-09-05",
     "name": "先知诞辰"
    },
@@ -8361,6 +8526,10 @@ export const DATASETS = [
     "name": "最高元首诞辰"
    },
    {
+    "date": "2026-06-02",
+    "name": "卫塞节补假"
+   },
+   {
     "date": "2026-06-17",
     "name": "伊斯兰新年"
    },
@@ -8379,6 +8548,10 @@ export const DATASETS = [
    {
     "date": "2026-11-08",
     "name": "屠妖节"
+   },
+   {
+    "date": "2026-11-09",
+    "name": "屠妖节补假"
    },
    {
     "date": "2026-12-25",
@@ -8500,6 +8673,10 @@ export const DATASETS = [
     "name": "斋戒月首日"
    },
    {
+    "date": "2026-03-24",
+    "name": "开斋节补假"
+   },
+   {
     "date": "2027-01-22",
     "name": "大宝森节"
    },
@@ -8526,7 +8703,7 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日；并按本州周末或节日口径扣掉不适用的联邦补假",
   "days": [
    {
     "date": "2025-01-27",
@@ -8583,7 +8760,10 @@ export const DATASETS = [
   ],
   "exclude": [
    "2025-03-18",
+   "2025-09-01",
    "2026-03-07",
+   "2026-06-02",
+   "2026-11-09",
    "2027-02-24"
   ],
   "verification": "pending",
@@ -8599,7 +8779,7 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并按本州周末或节日口径扣掉不适用的联邦补假",
   "days": [
    {
     "date": "2025-06-06",
@@ -8608,6 +8788,10 @@ export const DATASETS = [
    {
     "date": "2025-06-08",
     "name": "哈芝节次日"
+   },
+   {
+    "date": "2026-03-08",
+    "name": "古兰经降示日补假"
    },
    {
     "date": "2026-05-26",
@@ -8625,6 +8809,11 @@ export const DATASETS = [
     "date": "2027-05-18",
     "name": "哈芝节次日"
    }
+  ],
+  "exclude": [
+   "2025-09-01",
+   "2026-06-02",
+   "2026-11-09"
   ],
   "verification": "pending",
   "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
@@ -8647,7 +8836,15 @@ export const DATASETS = [
    },
    {
     "date": "2026-02-01",
-    "name": "大宝森节"
+    "name": "大宝森节、联邦直辖区日"
+   },
+   {
+    "date": "2026-02-02",
+    "name": "大宝森节补假"
+   },
+   {
+    "date": "2026-02-03",
+    "name": "联邦直辖区日补假"
    },
    {
     "date": "2027-01-22",
@@ -8893,12 +9090,29 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日",
-  "days": [],
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并以 exclude 扣掉本州不过的古兰经降示日；并按本州周末或节日口径扣掉不适用的联邦补假",
+  "days": [
+   {
+    "date": "2026-06-01",
+    "name": "最高元首诞辰、达雅节"
+   },
+   {
+    "date": "2026-06-02",
+    "name": "达雅节次日"
+   },
+   {
+    "date": "2026-06-04",
+    "name": "达雅节补假"
+   }
+  ],
   "exclude": [
    "2025-03-18",
+   "2025-10-20",
    "2026-03-07",
-   "2027-02-24"
+   "2026-11-08",
+   "2026-11-09",
+   "2027-02-24",
+   "2027-10-28"
   ],
   "verification": "pending",
   "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
@@ -8913,7 +9127,7 @@ export const DATASETS = [
    2027
   ],
   "source": "publicholidays.com.my / kalendarmalaysia.com / malaysiacalendar.com 三站交叉",
-  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json",
+  "note": "州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json；并按本州周末或节日口径扣掉不适用的联邦补假",
   "days": [
    {
     "date": "2025-01-27",
@@ -8959,6 +9173,10 @@ export const DATASETS = [
     "date": "2027-12-26",
     "name": "登霄节"
    }
+  ],
+  "exclude": [
+   "2025-09-01",
+   "2026-06-02"
   ],
   "verification": "pending",
   "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
@@ -9153,7 +9371,7 @@ export const DATASETS = [
  {
   "region": "TH",
   "year": 2025,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
   "days": [
    {
     "date": "2025-01-01",
@@ -9224,6 +9442,10 @@ export const DATASETS = [
     "name": "三宝佛节"
    },
    {
+    "date": "2025-07-11",
+    "name": "守夏节"
+   },
+   {
     "date": "2025-07-28",
     "name": "国王诞辰"
    },
@@ -9264,7 +9486,7 @@ export const DATASETS = [
  {
   "region": "TH",
   "year": 2026,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
   "days": [
    {
     "date": "2026-01-01",
@@ -9325,6 +9547,10 @@ export const DATASETS = [
    {
     "date": "2026-07-29",
     "name": "三宝佛节"
+   },
+   {
+    "date": "2026-07-30",
+    "name": "守夏节"
    },
    {
     "date": "2026-08-12",
@@ -11529,7 +11755,7 @@ export const DATASETS = [
 ];
 
 export const SOURCES = {
- "verifiedOn": "2026-11-02",
+ "verifiedOn": "2026-11-08",
  "sources": [
   {
    "title": "英国 · GOV.UK 银行假日",
@@ -11602,6 +11828,14 @@ export const SOURCES = {
    "url": "https://www.nppa.gov.cn/xxfb/tzgs/202604/t20260411_984328.html",
    "scope": "2026 年 4 月 20–26 日，共七天。",
    "boundary": "其他年度不擅自将第四周推算成第四个星期一。"
+  },
+  {
+   "title": "中国大陆 · 2027 放假调休",
+   "status": "已接入",
+   "format": "国务院办公厅年度通知",
+   "url": "https://www.gov.cn/zhengce/content/202611/content_7085101.htm",
+   "scope": "29 个放假日、5 个补班日；保留远端最新编码并增加独立年度表。",
+   "boundary": "仅为全国年度安排，不包含尚未公布的省区少数民族节日增补。"
   }
  ]
 };

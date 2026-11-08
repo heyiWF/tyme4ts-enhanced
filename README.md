@@ -16,7 +16,7 @@
 
 [在线 Wiki](https://heyiWF.github.io/tyme4ts-enhanced/) · [开发文档与 131 个字段示例](https://heyiWF.github.io/tyme4ts-enhanced/#tab-fields) · [官方资料与接入状态](./docs/SOURCES.md) · [逐项核验报告](./docs/DATA-REVIEW.md) · [历史审查报告](./docs/AUDIT.md) · [移植指南](./docs/PORTING.md) · [变更记录](./CHANGELOG.md)
 
-当前仓库版本 **1.16.0**：78 个地区代码、157 份数据文件，其中 **135 份已核验年度表、2,054 条日期记录**；另有 22 份待核验文件，不进入官方日历接口和 Wiki 自动导入。已完成原定六项优先接入：日本、台湾机关办公日历、香港天文台对照、美国 OPM、全国科普月、全民阅读活动周。本次未发布 npm 包；注册表版本可能晚于仓库。
+当前仓库版本 **1.16.0**：78 个地区代码、158 份数据文件，其中 **136 份已核验年度表、2,088 条日期记录**；另有 22 份待核验文件，不进入官方日历接口和 Wiki 自动导入。已完成原定六项优先接入：日本、台湾机关办公日历、香港天文台对照、美国 OPM、全国科普月、全民阅读活动周。本次未发布 npm 包；注册表版本可能晚于仓库。
 
 历法转换、民俗纪念日与法定放假是不同的数据层。算法可推算日期，但临时移日、行业适用范围、观月结果仍以当地公告为准。各项核验范围见资料目录。
 
@@ -134,7 +134,7 @@ a.getHourFortunes().map((h) => h.toString());
 ```ts
 import {HolidayCalendar, SolarDay} from 'tyme4ts-enhanced';
 
-const cn = HolidayCalendar.of('CN');       // 已内置 2001–2026 年公告数据
+const cn = HolidayCalendar.of('CN');       // 已内置 2001–2027 年公告数据
 cn.getHoliday(SolarDay.fromYmd(2025, 10, 6))!.getName();  // 国庆中秋
 cn.getHoliday(SolarDay.fromYmd(2025, 1, 26))!.isWork();   // true（补班）
 
@@ -217,7 +217,7 @@ gb.importJson(readFileSync('data/holidays/GB-SCT-2026.json', 'utf8'));
 - 中国省级：`CN-GX` 广西（三月三，农历推算）、`CN-XJ` 新疆（肉孜节、古尔邦节）、`CN-NX` 宁夏（开斋节、古尔邦节）；后两者 2025、2026 年公告数据已内置
 - 马来西亚州级：`MY-JHR` `MY-KDH` `MY-KTN` `MY-MLK` `MY-NSN` `MY-PHG` `MY-PNG` `MY-PRK` `MY-PLS` `MY-SBH` `MY-SWK` `MY-SGR` `MY-TRG` `MY-KUL`
 
-马来西亚州级日历在联邦假日之上叠加州苏丹或州元首诞辰、州庆、丰收节与达雅节等。这些日期分三类实现：固定月日（如柔佛 3 月 23 日）、某月第几个星期几（如槟城州元首诞辰为七月第二个周六、霹雳苏丹诞辰为十一月第一个周五、彭亨为七月最后一个周五）、以及「某日后的第一个周日」（吉打苏丹诞辰为 6 月 18 日后的第一个周日）。已故苏丹忌日等无固定公式者用 `HolidayRule.table()` 逐年列表，表外年份返回 `null`，不臆造。吉打、吉兰丹、登嘉楼的周末为周五周六，因此不作周日顺延。
+马来西亚州级日历在联邦假日之上叠加州苏丹或州元首诞辰、州庆、丰收节与达雅节等。这些日期分四类实现：固定月日（如柔佛 3 月 23 日）、某月第几个星期几（如槟城州元首诞辰为七月第二个周六、霹雳苏丹诞辰为十一月第一个周五、彭亨为七月最后一个周五）、以及「某日后的第一个周日」（吉打苏丹诞辰为 6 月 18 日后的第一个周日）。已故苏丹忌日等无固定公式者用 `HolidayRule.table()` 逐年列表，表外年份返回 `null`，不臆造。吉打、吉兰丹、登嘉楼的周末为周五周六，因此不作周日顺延。
 
 伊斯兰节日按算术历推算，观月国家可能相差一日，可用 `importJson` 覆盖；土耳其改用 Diyanet 历（见第六节），沙特、阿联酋改用乌姆库拉历。
 
@@ -225,7 +225,7 @@ gb.importJson(readFileSync('data/holidays/GB-SCT-2026.json', 'utf8'));
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-年度 JSON 位于 [`data/holidays/`](./data/holidays/)。每份表包含 `verification`、`scope` 和来源；135 份已核验表使用完整替换。马来西亚、泰国、斯里兰卡的 22 份旧文件仍待核验，不能作为已认证的完整放假安排。逐日清单可查 [`data/quality-review.json`](./data/quality-review.json)。
+年度 JSON 位于 [`data/holidays/`](./data/holidays/)。每份表包含 `verification`、`scope` 和来源；136 份已核验表使用完整替换。马来西亚、泰国、斯里兰卡的 22 份旧文件仍待核验，不能作为已认证的完整放假安排。逐日清单可查 [`data/quality-review.json`](./data/quality-review.json)。
 
 ```ts
 import {readFileSync} from 'node:fs';
@@ -269,7 +269,7 @@ HolidayCalendar.of('VN').getHoliday(SolarDay.fromYmd(2025, 4, 7))!.getName();  /
 | 类 | 口径 | 适用 | 误差 |
 | --- | --- | --- | --- |
 | `HijriDay` | 30 年 11 闰的算术历（Kuwaiti algorithm） | 埃及、尼日利亚、肯尼亚等观月国家的近似值 | 与观月结果可差 1–2 日 |
-| `UmmAlQuraDay` | 沙特 KACST 逐月月首表，1356–1500 年（1937–2077） | 沙特、阿联酋的官方民用历 | 与官方公布日期一致 |
+| `UmmAlQuraDay` | 沙特 KACST 逐月月首表，1356–1500 年（1937–2077） | 乌姆库拉民用历日期换算 | 按内置月首表换算，不替代当年观月与放假公告 |
 | `DiyanetDay` | 合朔后第一个「安卡拉日没时月亮在地平线之上」的傍晚，其次日为月首 | 土耳其官方口径 | 2015–2027 年 26 个官方节日里 24 个吻合 |
 
 ```ts
@@ -408,7 +408,7 @@ Tithi.getTithi(SolarDay.fromYmd(2025, 3, 14), 6);                      // 15（H
 npm run build && npm run audit:holidays
 ```
 
-对 `data/holidays/` 的全国性公告 360 日逐日比对：158 日（44%）可由规则算出，其余 202 日为回历、印历、佛历节日与临时公休。新疆、宁夏的全年调休安排拉低了整体比例，按地区看新加坡 69%、泰国 63%、印尼 60%、马来西亚 53%、埃及 48%。审计同时会列出「规则多算但公告未列」的日子——此前即由此发现马来西亚三年公告文件漏了元旦，并修正了印尼公告里 `exclude` 被误报为多算的问题。
+旧审计脚本用于比较规则日期与文件条目，结果不代表官方核验准确率。逐项认证状态和当前数量以 [核验报告](./docs/DATA-REVIEW.md) 与机器清单为准。
 
 `HolidayCalendar.getRuleDays(year)` 返回仅由规则推算的假日，可与 `getDays(year)` 对照，判断某个节日是「算出来的」还是「公告来的」。
 
@@ -514,7 +514,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm ci            # 使用已提交的 lockfile，开发/CI 使用 Node.js 20 或 22
-npm run check     # lint、类型检查、656 项测试、构建、上游数据比对
+npm run check     # lint、类型检查、659 项测试、构建、上游数据比对
 npm run gen:official # 从已提交官方资料离线再生成表、核验清单与运行时数据
 npm run audit:holidays
 npm run build     # 生成 CJS / ESM / d.ts

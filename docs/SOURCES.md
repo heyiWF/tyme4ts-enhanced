@@ -1,6 +1,6 @@
 # 官方资料、接入状态与更新方法
 
-核验日期：2026-11-02。原“下一步优先接入”六项已按原顺序完成。逐日清单见 [data/quality-review.json](../data/quality-review.json)，核验边界、已知差异和待核验项见 [DATA-REVIEW.md](./DATA-REVIEW.md)。
+首轮核验：2026-11-02；增量复核：2026-11-08。原“下一步优先接入”六项已按原顺序完成。逐日清单见 [data/quality-review.json](../data/quality-review.json)，核验边界、已知差异和待核验项见 [DATA-REVIEW.md](./DATA-REVIEW.md)。
 
 ## 六项优先接入的结果
 
@@ -22,7 +22,7 @@
 | [GOV.UK Bank Holidays JSON](https://www.gov.uk/bank-holidays.json) | GB、GB-SCT、GB-NIR 2019–2028 共 30 份年度表 | 实际银行放假日，含一次性国葬、加冕；替代日不再叠加周末原日期 |
 | [Matariki 法案 Schedule 1](https://www.legislation.govt.nz/act/public/2022/0014/latest/LMS557851.html) | NZ 规则内置 2022–2052 共 31 个日期 | 这是法定日期表，不是完整毛利历，也不外推至 2052 年后 |
 | [中国纪念日逐条来源](../lib/festival/china-observances.ts) | 7 项固定日期带设立年；[农民丰收节](https://www.beijing.gov.cn/zhengce/zhengcefagui/201905/t20190522_61275.html) 自 2018 年秋分起 | 纪念日并不自动放假；传统民俗表未因此获得官方认证 |
-| [既有公告逐项核验](../scripts/fixtures/official-review.json) | 新加坡 2025–2027、印尼 2026–2027、埃及 2026、新疆及宁夏 2025–2026，共 10 表、259 条放假/补班记录 | 各自按公告范围，宗教节日后续变更仍须追踪；印尼不含共同休假 |
+| [既有公告逐项核验](../scripts/fixtures/official-review.json) | 新加坡 2025–2027、印尼 2026–2027、埃及 2026、新疆及宁夏 2025–2026、中国大陆 2027，共 11 表、293 条放假/补班记录 | 各自按公告范围，宗教节日后续变更仍须追踪；印尼不含共同休假 |
 
 ## 离线复现和更新
 

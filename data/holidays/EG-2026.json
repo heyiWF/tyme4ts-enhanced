@@ -84,12 +84,21 @@
       "name": "圣纪"
     },
     {
-      "date": "2026-10-06",
+      "date": "2026-10-08",
       "name": "武装部队日"
     }
   ],
-  "mode": "replace",
-  "scope": "总统府 National Holidays 2026 表列日期；不额外猜测移日",
   "verification": "official",
-  "verifiedOn": "2026-11-02"
+  "scope": "总统府 2026 年表及总理府 2026-09-29 移日决定；10 月假期适用于政府机关与公共部门。",
+  "mode": "replace",
+  "verifiedOn": "2026-11-08",
+  "amendments": [
+    {
+      "source": "https://cabinet.gov.eg/News/Details/86219",
+      "publishedOn": "2026-09-29",
+      "removed": "2026-10-06",
+      "added": "2026-10-08",
+      "note": "武装部队日实际放假从 10 月 6 日移至 10 月 8 日。"
+    }
+  ]
 }

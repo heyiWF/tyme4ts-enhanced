@@ -1,14 +1,231 @@
 {
-  "checkedOn": "2026-11-02",
+  "checkedOn": "2026-11-08",
   "meaning": "official 表示与所列官方年度表逐项匹配，仅适用于 scope，不承诺未来不修订；pending 不进入 OfficialHolidayCalendar 或 Wiki 自动导入。",
   "summary": {
-    "files": 157,
-    "officialFiles": 135,
+    "files": 158,
+    "officialFiles": 136,
     "pendingFiles": 22,
-    "officialRows": 2054,
-    "pendingRows": 261
+    "officialRows": 2088,
+    "pendingRows": 273
   },
   "datasets": [
+    {
+      "file": "CN-2027.json",
+      "region": "CN",
+      "year": 2027,
+      "status": "official",
+      "source": "https://www.gov.cn/zhengce/content/202611/content_7085101.htm",
+      "scope": "国务院办公厅国办发明电〔2026〕10号全年放假调休安排，含五个补班日",
+      "checkedOn": "2026-11-08",
+      "rows": [
+        {
+          "date": "2027-01-01",
+          "name": "元旦",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-01-02",
+          "name": "元旦",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-01-03",
+          "name": "元旦",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-01-31",
+          "name": "春节",
+          "work": true,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-05",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-06",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-07",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-08",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-09",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-10",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-11",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-12",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-13",
+          "name": "春节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-02-14",
+          "name": "春节",
+          "work": true,
+          "status": "official"
+        },
+        {
+          "date": "2027-04-03",
+          "name": "清明节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-04-04",
+          "name": "清明节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-04-05",
+          "name": "清明节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-05-01",
+          "name": "劳动节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-05-02",
+          "name": "劳动节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-05-03",
+          "name": "劳动节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-05-04",
+          "name": "劳动节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-05-05",
+          "name": "劳动节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-05-08",
+          "name": "劳动节",
+          "work": true,
+          "status": "official"
+        },
+        {
+          "date": "2027-06-09",
+          "name": "端午节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-09-15",
+          "name": "中秋节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-09-26",
+          "name": "国庆节",
+          "work": true,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-01",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-02",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-03",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-04",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-05",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-06",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-07",
+          "name": "国庆节",
+          "work": false,
+          "status": "official"
+        },
+        {
+          "date": "2027-10-09",
+          "name": "国庆节",
+          "work": true,
+          "status": "official"
+        }
+      ],
+      "exclusions": [],
+      "amendments": []
+    },
     {
       "file": "CN-NX-2025.json",
       "region": "CN-NX",
@@ -1057,8 +1274,8 @@
       "year": 2026,
       "status": "official",
       "source": "https://www.presidency.eg/en/مصر/العطلات-الرسمية/",
-      "scope": "总统府 National Holidays 2026 表列日期；不额外猜测移日",
-      "checkedOn": "2026-11-02",
+      "scope": "总统府 2026 年表及总理府 2026-09-29 移日决定；10 月假期适用于政府机关与公共部门。",
+      "checkedOn": "2026-11-08",
       "rows": [
         {
           "date": "2026-01-07",
@@ -1181,14 +1398,22 @@
           "status": "official"
         },
         {
-          "date": "2026-10-06",
+          "date": "2026-10-08",
           "name": "武装部队日",
           "work": false,
           "status": "official"
         }
       ],
       "exclusions": [],
-      "amendments": []
+      "amendments": [
+        {
+          "source": "https://cabinet.gov.eg/News/Details/86219",
+          "publishedOn": "2026-09-29",
+          "removed": "2026-10-06",
+          "added": "2026-10-08",
+          "note": "武装部队日实际放假从 10 月 6 日移至 10 月 8 日。"
+        }
+      ]
     },
     {
       "file": "GB-2019.json",
@@ -11425,6 +11650,12 @@
           "status": "pending"
         },
         {
+          "date": "2025-09-01",
+          "name": "国庆日补假",
+          "work": false,
+          "status": "pending"
+        },
+        {
           "date": "2025-09-05",
           "name": "先知诞辰",
           "work": false,
@@ -11535,6 +11766,12 @@
           "status": "pending"
         },
         {
+          "date": "2026-06-02",
+          "name": "卫塞节补假",
+          "work": false,
+          "status": "pending"
+        },
+        {
           "date": "2026-06-17",
           "name": "伊斯兰新年",
           "work": false,
@@ -11561,6 +11798,12 @@
         {
           "date": "2026-11-08",
           "name": "屠妖节",
+          "work": false,
+          "status": "pending"
+        },
+        {
+          "date": "2026-11-09",
+          "name": "屠妖节补假",
           "work": false,
           "status": "pending"
         },
@@ -11735,6 +11978,12 @@
           "status": "pending"
         },
         {
+          "date": "2026-03-24",
+          "name": "开斋节补假",
+          "work": false,
+          "status": "pending"
+        },
+        {
           "date": "2027-01-22",
           "name": "大宝森节",
           "work": false,
@@ -11849,7 +12098,10 @@
       ],
       "exclusions": [
         "2025-03-18",
+        "2025-09-01",
         "2026-03-07",
+        "2026-06-02",
+        "2026-11-09",
         "2027-02-24"
       ],
       "amendments": []
@@ -11881,6 +12133,12 @@
           "status": "pending"
         },
         {
+          "date": "2026-03-08",
+          "name": "古兰经降示日补假",
+          "work": false,
+          "status": "pending"
+        },
+        {
           "date": "2026-05-26",
           "name": "阿拉法日",
           "work": false,
@@ -11905,7 +12163,11 @@
           "status": "pending"
         }
       ],
-      "exclusions": [],
+      "exclusions": [
+        "2025-09-01",
+        "2026-06-02",
+        "2026-11-09"
+      ],
       "amendments": []
     },
     {
@@ -11930,7 +12192,19 @@
         },
         {
           "date": "2026-02-01",
-          "name": "大宝森节",
+          "name": "大宝森节、联邦直辖区日",
+          "work": false,
+          "status": "pending"
+        },
+        {
+          "date": "2026-02-02",
+          "name": "大宝森节补假",
+          "work": false,
+          "status": "pending"
+        },
+        {
+          "date": "2026-02-03",
+          "name": "联邦直辖区日补假",
           "work": false,
           "status": "pending"
         },
@@ -12244,11 +12518,34 @@
       "reviewSource": "https://www.kelantanlibrary.gov.my/v4/images/download/jadual-hari-kelepasan-am/HKA-2026.pdf",
       "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
       "checkedOn": "2026-11-02",
-      "rows": [],
+      "rows": [
+        {
+          "date": "2026-06-01",
+          "name": "最高元首诞辰、达雅节",
+          "work": false,
+          "status": "pending"
+        },
+        {
+          "date": "2026-06-02",
+          "name": "达雅节次日",
+          "work": false,
+          "status": "pending"
+        },
+        {
+          "date": "2026-06-04",
+          "name": "达雅节补假",
+          "work": false,
+          "status": "pending"
+        }
+      ],
       "exclusions": [
         "2025-03-18",
+        "2025-10-20",
         "2026-03-07",
-        "2027-02-24"
+        "2026-11-08",
+        "2026-11-09",
+        "2027-02-24",
+        "2027-10-28"
       ],
       "amendments": []
     },
@@ -12333,7 +12630,10 @@
           "status": "pending"
         }
       ],
-      "exclusions": [],
+      "exclusions": [
+        "2025-09-01",
+        "2026-06-02"
+      ],
       "amendments": []
     },
     {
@@ -12608,7 +12908,7 @@
       "region": "TH",
       "year": 2025,
       "status": "pending",
-      "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+      "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
       "reviewSource": "https://www.bot.or.th/en/financial-institutions-holiday.html",
       "scope": "原文件混合政府和银行假期。BOT 表仅适用金融机构，不能据此认证全国公众假日；保留待核实。",
       "checkedOn": "2026-11-02",
@@ -12716,6 +13016,12 @@
           "status": "pending"
         },
         {
+          "date": "2025-07-11",
+          "name": "守夏节",
+          "work": false,
+          "status": "pending"
+        },
+        {
           "date": "2025-07-28",
           "name": "国王诞辰",
           "work": false,
@@ -12772,7 +13078,7 @@
       "region": "TH",
       "year": 2026,
       "status": "pending",
-      "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+      "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
       "reviewSource": "https://www.bot.or.th/en/financial-institutions-holiday.html",
       "scope": "原文件混合政府和银行假期。BOT 表仅适用金融机构，不能据此认证全国公众假日；保留待核实。",
       "checkedOn": "2026-11-02",
@@ -12864,6 +13170,12 @@
         {
           "date": "2026-07-29",
           "name": "三宝佛节",
+          "work": false,
+          "status": "pending"
+        },
+        {
+          "date": "2026-07-30",
+          "name": "守夏节",
           "work": false,
           "status": "pending"
         },

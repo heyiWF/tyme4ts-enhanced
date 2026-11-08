@@ -11,7 +11,7 @@ const summary={files:datasets.length,officialFiles:datasets.filter(d=>d.status==
     pendingFiles:datasets.filter(d=>d.status==='pending').length,
     officialRows:datasets.filter(d=>d.status==='official').reduce((n,d)=>n+d.rows.length,0),
     pendingRows:datasets.filter(d=>d.status==='pending').reduce((n,d)=>n+d.rows.length,0)};
-writeFileSync('data/quality-review.json',JSON.stringify({checkedOn:'2026-11-02',
+writeFileSync('data/quality-review.json',JSON.stringify({checkedOn:'2026-11-08',
     meaning:'official 表示与所列官方年度表逐项匹配，仅适用于 scope，不承诺未来不修订；pending 不进入 OfficialHolidayCalendar 或 Wiki 自动导入。',
     summary,datasets},null,2)+'\n');
 console.log(summary);

@@ -1,10 +1,33 @@
 import {suite, test} from '@testdeck/mocha';
 import {deepEqual, equal, ok, throws} from 'assert';
 import {readFileSync} from 'fs';
-import {OfficialHolidayCalendar, SolarDay} from '../lib';
+import {HolidayCalendar, OfficialHolidayCalendar, SolarDay} from '../lib';
 
 @suite
 class OfficialCalendarTest {
+    @test
+    china2027NoticeMatchesExistingEncoding(): void {
+        const expected = OfficialHolidayCalendar.create('CN', 2027).getDataset().days;
+        const actual = HolidayCalendar.create('CN').getDays(2027, true).map(h => {
+            const d = h.getDay();
+            return {date: `${d.getYear()}-${String(d.getMonth()).padStart(2, '0')}-${String(d.getDay()).padStart(2, '0')}`, name: h.getName(), ...(h.isWork() ? {work: true} : {})};
+        });
+        deepEqual(actual, expected);
+        equal(expected.length, 34);
+    }
+
+    @test
+    unrelatedObservedHolidayDoesNotAbsorbAnother(): void {
+        const christmas = SolarDay.fromYmd(2022, 12, 25);
+        const c = HolidayCalendar.create('GB');
+        const title = c.getHoliday(christmas)!.getName();
+        c.importJson(JSON.stringify({region: 'GB', days: [{date: '2022-12-27', name: '另一节日补假'}]}));
+        equal(c.getHoliday(SolarDay.fromYmd(2022, 12, 28))!.getName(), title + '（补假）');
+        const same = HolidayCalendar.create('GB');
+        same.importJson(JSON.stringify({region: 'GB', days: [{date: '2022-12-27', name: title + '补假'}]}));
+        equal(same.getHoliday(SolarDay.fromYmd(2022, 12, 28)), null);
+    }
+
     @test
     japanSpecialYears(): void {
         equal(OfficialHolidayCalendar.getAvailableYears('jp').length, 73);

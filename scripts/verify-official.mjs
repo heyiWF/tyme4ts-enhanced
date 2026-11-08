@@ -21,7 +21,7 @@ for (const [id, r] of Object.entries(review.datasets)) {
         assert.deepEqual(data.days.map(d => d.date).sort(), expected, `${id}: missing rows need review`);
         data.days.push(...work.map(date => ({date, name: '调休上班', work: true})));
         data.days.sort((a,b) => a.date.localeCompare(b.date));
-        Object.assign(data, {mode:'replace', source:r.source, scope:r.scope, verification:'official', verifiedOn:review.checkedOn});
+        Object.assign(data, {mode:'replace', source:r.source, scope:r.scope, verification:'official', verifiedOn:r.checkedOn || review.checkedOn});
         delete data.exclude;
         writeFileSync(file, JSON.stringify(data,null,2)+'\n');
     }

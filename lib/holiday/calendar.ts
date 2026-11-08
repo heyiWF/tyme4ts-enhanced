@@ -856,7 +856,7 @@ export class HolidayCalendar {
             }
         }
         if (this.observed !== 0 && !this.replacedYears[year]) {
-            this.applyObserved(year, map);
+            this.applyObserved(year, map, dataKeys);
         }
         const l: Holiday[] = [];
         const removed: { [key: string]: boolean } = this.removed;
@@ -875,10 +875,19 @@ export class HolidayCalendar {
 
     /**
      * 顺延至下一个非假日
+     *
+     * 公告中同一节日的补假是顺延终点；其他节日的补假仍占用日期。
      */
-    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay, weekdaysOnly: boolean = false): SolarDay {
+    protected static nextFree(map: { [key: string]: Holiday }, day: SolarDay, weekdaysOnly: boolean = false, dataKeys?: { [key: string]: boolean }, holidayName: string = ''): SolarDay {
         let d: SolarDay = day;
         while (map[HolidayCalendar.getKey(d)] || (weekdaysOnly && (d.getWeek().getIndex() === 0 || d.getWeek().getIndex() === 6))) {
+            const k: string = HolidayCalendar.getKey(d);
+            if (map[k] && dataKeys && dataKeys[k] && !map[k].isWork()
+                && (!weekdaysOnly || (d.getWeek().getIndex() !== 0 && d.getWeek().getIndex() !== 6))) {
+                const candidate: string = map[k].getName();
+                const base: string = candidate.replace(/（补假）$|\(补假\)$|补假$/, '');
+                if (candidate !== base && holidayName.split('、').indexOf(base) > -1) return d;
+            }
             d = d.next(1);
         }
         return d;
@@ -887,7 +896,7 @@ export class HolidayCalendar {
     /**
      * 补假：美国周六前移、周日后移；其余为顺延至下一工作日
      */
-    protected applyObserved(year: number, map: { [key: string]: Holiday }): void {
+    protected applyObserved(year: number, map: { [key: string]: Holiday }, dataKeys?: { [key: string]: boolean }): void {
         const list: Holiday[] = [];
         for (const k in map) {
             if (!map[k].isWork()) {
@@ -907,11 +916,11 @@ export class HolidayCalendar {
                 }
             } else if (this.observed === 2) {
                 if (w === 0) {
-                    target = HolidayCalendar.nextFree(map, h.getDay().next(1));
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), false, dataKeys, h.getName());
                 }
             } else if (this.observed === 3) {
                 if (w === 0 || w === 6) {
-                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), true);
+                    target = HolidayCalendar.nextFree(map, h.getDay().next(1), true, dataKeys, h.getName());
                 }
             }
             if (target && !map[HolidayCalendar.getKey(target)]) {

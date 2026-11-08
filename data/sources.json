@@ -1,5 +1,5 @@
 {
-  "verifiedOn": "2026-11-02",
+  "verifiedOn": "2026-11-08",
   "sources": [
     {
       "title": "英国 · GOV.UK 银行假日",
@@ -72,6 +72,14 @@
       "url": "https://www.nppa.gov.cn/xxfb/tzgs/202604/t20260411_984328.html",
       "scope": "2026 年 4 月 20–26 日，共七天。",
       "boundary": "其他年度不擅自将第四周推算成第四个星期一。"
+    },
+    {
+      "title": "中国大陆 · 2027 放假调休",
+      "status": "已接入",
+      "format": "国务院办公厅年度通知",
+      "url": "https://www.gov.cn/zhengce/content/202611/content_7085101.htm",
+      "scope": "29 个放假日、5 个补班日；保留远端最新编码并增加独立年度表。",
+      "boundary": "仅为全国年度安排，不包含尚未公布的省区少数民族节日增补。"
     }
   ]
 }

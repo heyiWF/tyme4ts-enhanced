@@ -1,7 +1,7 @@
 {
   "region": "TH",
   "year": 2025,
-  "source": "MOM Singapore / kabinet.gov.my / timeanddate",
+  "source": "泰国内阁公告，经 officeholidays、timefyi 等汇总比对",
   "days": [
     {
       "date": "2025-01-01",
@@ -70,6 +70,10 @@
     {
       "date": "2025-07-10",
       "name": "三宝佛节"
+    },
+    {
+      "date": "2025-07-11",
+      "name": "守夏节"
     },
     {
       "date": "2025-07-28",
