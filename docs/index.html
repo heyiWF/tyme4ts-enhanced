@@ -512,7 +512,7 @@ const ics = c.toIcs(2025);</pre>
       <span class="page-badge">8 类来源</span>
     </div>
     <div class="searchbar">
-      <input id="fy" type="number" value="2025" min="1900" max="2100" step="1" aria-label="节日年份" style="width:90px">
+      <input id="fy" type="number" min="1900" max="2100" step="1" aria-label="节日年份" style="width:90px">
       <input id="fq" type="search" aria-label="搜索节日" placeholder="搜索节日名或备注">
       <span class="count" id="fcount"></span>
       <button id="fexport" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg><span>导出 JSON</span></button>
@@ -1648,7 +1648,7 @@ function hashPage() {
 /* ---------- 节日总览 ---------- */
 const CAT_ALL = [0, 1, 2, 3, 4, 5, 6, 7];
 let festCats = [0, 1, 2, 3, 4, 6];
-let festYear = 2025;
+let festYear = new Date().getFullYear();
 
 function renderFestCats() {
   $('fcats').innerHTML = CAT_ALL.map((c) =>
@@ -1721,6 +1721,7 @@ $('fexport').onclick = () => {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
+$('fy').value = festYear;
 renderFestCats();
 
 /* ---------- 历法对照 ---------- */
