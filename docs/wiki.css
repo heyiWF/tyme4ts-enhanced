@@ -182,8 +182,9 @@ table.checks{min-width:620px;border-radius:12px;margin-bottom:8px}
 table.checks th{background:#f4f7f3;padding:9px 12px;font-size:11px}
 table.checks td{padding:8px 12px}
 #fest-detail .checks{width:100%;table-layout:fixed}
+#fest-detail .checks th,#fest-detail .checks td{text-align:left}
 #fest-detail .checks th:nth-child(1),#fest-detail .checks td:nth-child(1){width:64px}
-#fest-detail .checks th:nth-child(2),#fest-detail .checks td:nth-child(2){width:120px}
+#fest-detail .checks th:nth-child(2),#fest-detail .checks td:nth-child(2){width:180px}
 #fest-detail .checks th:nth-child(4),#fest-detail .checks td:nth-child(4){width:140px;overflow-wrap:anywhere}
 table.spec td:nth-child(1){width:105px;color:var(--indigo);font-weight:650}
 table.spec td:nth-child(3){width:130px}
