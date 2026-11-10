@@ -41,11 +41,17 @@ export class FestivalOrdinals {
                 const dates = rule.dates.filter(d => year >= d.fromYear);
                 const date = dates[dates.length - 1];
                 if (!date || day.getMonth() !== date.month) return null;
-                if (date.day !== undefined) {
+                if (date.term !== undefined) {
+                    const termDay = day.getTermDay();
+                    if (termDay.getDayIndex() !== 0 || termDay.getSolarTerm().getIndex() !== date.term) return null;
+                } else if (date.day !== undefined) {
                     if (day.getDay() !== date.day) return null;
                 } else {
                     const first = day.next(1 - day.getDay()).getWeek().getIndex();
-                    const target = date.firstFriday && first === 5 ? 1
+                    const lastDay = day.getSolarMonth().getDayCount();
+                    const lastWeekday = (first + lastDay - 1) % 7;
+                    const target = date.firstFriday && first === 5 ? 1 : date.week! < 0
+                        ? lastDay - ((lastWeekday - date.weekday! + 7) % 7) + 7 * (date.week! + 1)
                         : 1 + ((date.weekday! - first + 7) % 7) + 7 * (date.week! - 1);
                     if (day.getDay() !== target) return null;
                 }

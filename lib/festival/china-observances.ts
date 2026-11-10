@@ -8,6 +8,8 @@ export interface ChinaObservance {
 }
 
 export const CHINA_OBSERVANCES: ChinaObservance[] = [
+    {month: 10, day: 8, name: '全国高血压日', startYear: 1998,
+        source: 'https://www.nhc.gov.cn/ylyjs/gzdt/202509/2db90f506b274a95a25ac4ec701c3416.shtml'},
     {month: 5, day: 10, name: '中国品牌日', startYear: 2017,
         source: 'https://app.www.gov.cn/govdata/gov/201705/02/403896/article.html'},
     {month: 5, day: 30, name: '全国科技工作者日', startYear: 2017,

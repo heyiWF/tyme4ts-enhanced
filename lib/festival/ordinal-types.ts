@@ -3,6 +3,9 @@ export interface FestivalOrdinalDateRule {
     fromYear: number;
     month: number;
     day?: number;
+    /** Solar-term index (0 = winter solstice); match the term's exact civil date. */
+    term?: number;
+    /** Positive from month start, negative from month end (e.g. -1 = last). */
     week?: number;
     weekday?: number;
     /** St Brigid's public holiday: February 1 itself when it is Friday. */

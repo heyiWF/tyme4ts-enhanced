@@ -47,12 +47,12 @@ export class FolkFestival extends AbstractCulture {
      * 某月第几个星期几，-1 表示最后一个
      */
     protected static WEEK_RULES: HolidayRule[] = [
-        HolidayRule.week(3, -1, 1, '全国中小学生安全教育日'),
+        HolidayRule.week(3, -1, 1, '全国中小学生安全教育日', 1996),
         HolidayRule.week(5, 2, 0, '母亲节'),
-        HolidayRule.week(5, 3, 0, '全国助残日'),
+        HolidayRule.week(5, 3, 0, '全国助残日', 1991),
         HolidayRule.week(6, 3, 0, '父亲节'),
-        HolidayRule.week(9, 3, 6, '全民国防教育日'),
-        HolidayRule.week(10, 1, 1, '世界住房日'),
+        HolidayRule.week(9, 3, 6, '全民国防教育日', 2001),
+        HolidayRule.week(10, 1, 1, '世界住房日', 1986),
         HolidayRule.week(11, 4, 4, '感恩节'),
     ];
 

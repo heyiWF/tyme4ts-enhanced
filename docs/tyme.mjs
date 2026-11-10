@@ -1670,6 +1670,163 @@ const FESTIVAL_ORDINAL_DATA = [
     "\u65B0\u534E\u793E\u672C\u793E\u8BB0\u8005\u8282\u62A5\u9053\uFF1A2025\u5E74\u7B2C26\u4E2A\u3002"
   ),
   annual(
+    "CN",
+    "\u4E2D\u56FD\u70C8\u58EB\u7EAA\u5FF5\u65E5",
+    2014,
+    9,
+    30,
+    2025,
+    12,
+    "https://www.mva.gov.cn/xinwen/dfdt/202510/t20251021_516534.html",
+    "\u9000\u5F79\u519B\u4EBA\u4E8B\u52A1\u90E8\uFF1A2025-09-30\u4E3A\u7B2C\u5341\u4E8C\u4E2A\u70C8\u58EB\u7EAA\u5FF5\u65E5\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u65C5\u6E38\u65E5",
+    2011,
+    5,
+    19,
+    2025,
+    15,
+    "https://zwgk.mct.gov.cn/zfxxgkml/scgl/202504/t20250408_959270.html",
+    "\u6587\u5316\u548C\u65C5\u6E38\u90E8\u901A\u77E5\uFF1A2025-05-19\u7B2C15\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u513F\u7AE5\u9884\u9632\u63A5\u79CD\u5BA3\u4F20\u65E5",
+    1987,
+    4,
+    25,
+    2025,
+    39,
+    "https://www.ndcpa.gov.cn/jbkzzx/c100014/common/content/content_1906951204930752512.html",
+    "\u56FD\u5BB6\u75BE\u63A7\u5C40\uFF1A2025-04-25\u7B2C39\u4E2A\u5168\u56FD\u513F\u7AE5\u9884\u9632\u63A5\u79CD\u65E5\uFF1B\u4E0D\u4EE5\u6279\u51C6\u5E74\u66FF\u4EE3\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u7231\u809D\u65E5",
+    2001,
+    3,
+    18,
+    2025,
+    25,
+    "https://wjw.zhengzhou.gov.cn/zwxx/9159118.jhtml",
+    "\u90D1\u5DDE\u5E02\u536B\u751F\u5065\u5EB7\u59D4\u73B0\u573A\u6D3B\u52A8\u8BB0\u5F55\uFF1A2025-03-18\u7B2C25\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u9752\u5E74\u5FD7\u613F\u8005\u670D\u52A1\u65E5",
+    2e3,
+    3,
+    5,
+    2025,
+    26,
+    "https://www.zgzyz.org.cn/gb/articles/2025-07/01/content_qbPapFGq.html",
+    "\u4E2D\u56FD\u9752\u5E74\u5FD7\u613F\u8005\u7F51\u6C47\u603B2025\u5E743\u67085\u65E5\u6D3B\u52A8\uFF1A\u7B2C26\u4E2A\uFF1B\u4E0D\u4E0E\u5B66\u96F7\u950B\u7EAA\u5FF5\u65E5\u5408\u5E76\u8BA1\u6570\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u6D4B\u7ED8\u6CD5\u5BA3\u4F20\u65E5",
+    2004,
+    8,
+    29,
+    2025,
+    22,
+    "https://ghzyj.sh.gov.cn/hyxw/20250901/5cb4a7cc21764df7971e87d68b4c7cde.html",
+    "\u4E0A\u6D77\u5E02\u89C4\u5212\u8D44\u6E90\u5C40\uFF1A2025-08-29\u5168\u56FD\u7B2C22\u4E2A\uFF1B\u4E0D\u4ECE\u6D4B\u7ED8\u6CD5\u9881\u5E03\u5E74\u8BA1\u3002"
+  ),
+  annual(
+    "CN",
+    "\u690D\u6811\u8282",
+    1979,
+    3,
+    12,
+    2025,
+    47,
+    "https://www.forestry.gov.cn/c/www/zxzb/614392.jhtml",
+    "\u56FD\u5BB6\u6797\u8349\u5C40\u53D1\u5E03\u4F1A\uFF1A2025-03-12\u7B2C47\u4E2A\u4E2D\u56FD\u690D\u6811\u8282\uFF1B\u4E0D\u4ECE\u4E49\u52A1\u690D\u6811\u8FD0\u52A8\u8D77\u8BA1\u3002",
+    "\u4E2D\u56FD\u5927\u9646\u73B0\u884C\u690D\u6811\u8282\u5E8F\u53F7\uFF0C\u81EA1979\u5E74\u8D77"
+  ),
+  annual(
+    "CN",
+    "\u53F0\u6E7E\u5149\u590D\u7EAA\u5FF5\u65E5",
+    2025,
+    10,
+    25,
+    2025,
+    1,
+    "https://www.gwytb.gov.cn/xwdt/xwfb/wyly/202510/t20251029_12731163.htm",
+    "\u56FD\u52A1\u9662\u53F0\u529E\u786E\u8BA42025\u5E74\u9996\u4E2A\u7EAA\u5FF5\u65E5\uFF1B80\u5468\u5E74\u662F\u5386\u53F2\u4E8B\u4EF6\u5468\u5E74\uFF0C\u4E0D\u80FD\u5199\u6210\u7B2C80\u4E2A\u3002",
+    "\u4E2D\u56FD\u5927\u96462025\u5E74\u8BBE\u7ACB\u7684\u7EAA\u5FF5\u65E5\u5E8F\u53F7\uFF0C\u4E0D\u8BA1\u53F0\u6E7E\u5730\u533A\u65E2\u6709\u5236\u5EA6\u6216\u5386\u53F2\u5468\u5E74"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u9AD8\u8840\u538B\u65E5",
+    1998,
+    10,
+    8,
+    2025,
+    28,
+    "https://www.nhc.gov.cn/ylyjs/gzdt/202509/2db90f506b274a95a25ac4ec701c3416.shtml",
+    "\u56FD\u5BB6\u536B\u751F\u5065\u5EB7\u59D4\u901A\u77E5\uFF1A2025-10-08\u7B2C28\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282",
+    2018,
+    9,
+    23,
+    2025,
+    8,
+    "https://nmfsj.moa.gov.cn/xwzx_25646/ywjj/202508/t20250815_6476482.htm",
+    "\u519C\u4E1A\u519C\u6751\u90E8\uFF1A2025-09-23\u7B2C\u516B\u4E2A\uFF1B2018\u5E74\u8D77\u6BCF\u5E74\u79CB\u5206\uFF0C\u975E\u56FA\u5B9A9\u670823\u65E5\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u4E2D\u5C0F\u5B66\u751F\u5B89\u5168\u6559\u80B2\u65E5",
+    1996,
+    3,
+    31,
+    2025,
+    30,
+    "https://www.moe.gov.cn/srcsite/A06/s3325/202503/t20250331_1185528.html",
+    "\u6559\u80B2\u90E8\uFF1A2025-03-31\u7B2C30\u4E2A\uFF1B1996\u5E74\u8D77\u6BCF\u5E74\u4E09\u6708\u6700\u540E\u4E00\u4E2A\u661F\u671F\u4E00\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u52A9\u6B8B\u65E5",
+    1991,
+    5,
+    18,
+    2025,
+    35,
+    "https://hdqw.bjhd.gov.cn/hdcl/clxw/202cl/202505/t20250516_4769562.htm",
+    "\u5317\u4EAC\u5E02\u6D77\u6DC0\u533A\u6B8B\u8054\uFF1A2025-05-18\u7B2C\u4E09\u5341\u4E94\u6B21\uFF1B1991\u5E74\u8D77\u6BCF\u5E74\u4E94\u6708\u7B2C\u4E09\u4E2A\u661F\u671F\u65E5\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u6C11\u56FD\u9632\u6559\u80B2\u65E5",
+    2001,
+    9,
+    20,
+    2025,
+    25,
+    "https://www.mod.gov.cn/gfbw/gfjy_index/16410802.html",
+    "\u56FD\u9632\u90E8\uFF1A2025-09-20\u7B2C25\u4E2A\uFF1B\u6BCF\u5E74\u4E5D\u6708\u7B2C\u4E09\u4E2A\u661F\u671F\u516D\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E16\u754C\u9632\u6CBB\u7ED3\u6838\u75C5\u65E5",
+    1996,
+    3,
+    24,
+    2025,
+    30,
+    "https://www.shanghai.gov.cn/gwk/search/content/9e61d155f9f046f28831081278cb88e9",
+    "\u4E0A\u6D77\u5E02\u75BE\u63A7\u5C40\u8F6C\u53D1\u56FD\u5BB6\u75BE\u63A7\u5C40\u901A\u77E5\uFF1A2025-03-24\u7B2C30\u4E2A\uFF1B\u4E0E1982\u5E74\u8D77\u7684\u56FD\u9645\u6D3B\u52A8\u5206\u522B\u8BA1\u6570\u3002",
+    "\u4E2D\u56FD\u5B98\u65B9\u5BA3\u4F20\u5C4A\u6570\u53E3\u5F84\uFF0C\u81EA1996\u5E74\u8D77\uFF1B\u4E0D\u662F\u56FD\u9645\u6D3B\u52A8\u603B\u6B21\u6570"
+  ),
+  annual(
     "*",
     "\u4E16\u754C\u6E7F\u5730\u65E5",
     1997,
@@ -1890,6 +2047,432 @@ const FESTIVAL_ORDINAL_DATA = [
     "https://www.unaids.org/sites/default/files/web_story/071201_pp_wad_statement_en_0.pdf",
     "UNAIDS\uFF1A1988\u5E74\u9996\u6B21\uFF0C2007\u5E74\u4E3A\u7B2C20\u6B21\u3002"
   ),
+  annual(
+    "*",
+    "\u56FD\u9645\u6D77\u5173\u65E5",
+    1983,
+    1,
+    26,
+    1983,
+    1,
+    "https://mpmc.gov.ws/pr-ministry-of-customs-revenue-commemorates-and-celebrates-international-customs-day/",
+    "\u8428\u6469\u4E9A\u6D77\u5173\u4E3B\u7BA1\u90E8\u95E8\uFF1A1983\u5E74\u53D1\u8D77\uFF0C\u6BCF\u5E741\u670826\u65E5\uFF1B\u4E0D\u4ECE\u6D77\u5173\u5408\u4F5C\u7406\u4E8B\u4F1A\u6210\u7ACB\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5927\u5C60\u6740\u7EAA\u5FF5\u65E5",
+    2006,
+    1,
+    27,
+    2006,
+    1,
+    "https://www.un.org/en/holocaustremembrance/observance/2006",
+    "\u8054\u5408\u56FD2006\u5E74\u6D3B\u52A8\u6863\u6848\uFF1A2006-01-27\u9996\u4E2A\u5168\u7403\u7EAA\u5FF5\u65E5\uFF1B2005\u5E74\u662F\u51B3\u8BAE\u5E74\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6297\u764C\u65E5",
+    2e3,
+    2,
+    4,
+    2e3,
+    1,
+    "https://www.uicc.org/what-we-do/events/world-cancer-day",
+    "UICC\uFF1A2000\u5E74\u53D1\u8D77\uFF0C\u6BCF\u5E742\u67084\u65E5\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u6D88\u9664\u79CD\u65CF\u6B67\u89C6\u65E5",
+    1967,
+    3,
+    21,
+    1967,
+    1,
+    "https://digitallibrary.un.org/record/860183/files/1122896-EN.pdf",
+    "\u8054\u5408\u56FD1967\u5E74\u5E74\u9274\u660E\u786E1967-03-21\u9996\u6B21\u7EAA\u5FF5\uFF1B\u4E0D\u4ECE1960\u5E74\u4E8B\u4EF6\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u9632\u6CBB\u7ED3\u6838\u75C5\u65E5",
+    1982,
+    3,
+    24,
+    1982,
+    1,
+    "https://iris.who.int/bitstream/handle/10665/179640/WHA50_1997-REC-3_eng.pdf",
+    "WHO\u7B2C50\u5C4A\u5927\u4F1A\u4F1A\u8BAE\u8BB0\u5F55\uFF1A\u81EA1982\u5E74\u4E3E\u884C\uFF0CWHO\u81EA1996\u5E74\u5168\u9762\u652F\u6301\uFF1B\u4E24\u79CD\u8D77\u70B9\u987B\u533A\u5206\u3002",
+    "\u56FD\u9645\u6D3B\u52A8\u5E8F\u53F7\uFF0C\u81EA1982\u5E74\u8D77\uFF1BCN\u67E5\u8BE2\u91C7\u7528\u4E2D\u56FD\u5B98\u65B9\u5BA3\u4F20\u53E3\u5F84"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u513F\u7AE5\u56FE\u4E66\u65E5",
+    1967,
+    4,
+    2,
+    1967,
+    1,
+    "https://www.ibby.org/fileadmin/user_upload/booklet_ICBD_2017.indd.pdf",
+    "IBBY\uFF1A1966\u5E74\u63D0\u51FA\uFF0C1967\u5E74\u8D77\u57284\u67082\u65E5\u524D\u540E\u4E3E\u884C\uFF1B\u6309\u7EAA\u5FF5\u65E5\u6B63\u65E5\u8BA1\u6570\uFF0C\u4E0D\u8BA1\u5468\u8FB9\u6D3B\u52A8\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u81EA\u95ED\u75C7\u65E5",
+    2008,
+    4,
+    2,
+    2008,
+    1,
+    "https://documents.un.org/access.nsf/get?DS=A%2F63%2F183&Lang=E&OpenAgent=",
+    "\u8054\u5408\u56FDA/63/183\u62A5\u544A\uFF1A2008-04-02\u9996\u6B21\uFF1B2007\u5E74\u51B3\u8BAE\u5E76\u975E\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5730\u96F7\u884C\u52A8\u65E5",
+    2006,
+    4,
+    4,
+    2006,
+    1,
+    "https://www.unhcr.org/uk/news/stories/international-mine-awareness-day-unhcr-concerned-over-dangers-facing-returning",
+    "UNHCR\u9996\u5C4A\u516C\u544A\uFF1A2006-04-04\u9996\u6B21\u5730\u96F7\u610F\u8BC6\u548C\u5730\u96F7\u884C\u52A8\u63F4\u52A9\u56FD\u9645\u65E5\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u5730\u7403\u65E5",
+    1970,
+    4,
+    22,
+    1970,
+    1,
+    "https://www.archives.gov/topics/earth-day",
+    "\u7F8E\u56FD\u56FD\u5BB6\u6863\u6848\u9986\uFF1A1970-04-22\u9996\u6B21\uFF1B\u4E0D\u4E0E2009\u5E74\u8054\u5408\u56FD\u5730\u7403\u6BCD\u4EB2\u65E5\u53E6\u8BBE\u5236\u5EA6\u6DF7\u7B97\u3002",
+    "4\u670822\u65E5Earth Day\u6D3B\u52A8\u5E8F\u53F7\uFF0C\u81EA1970\u5E74\u8D77"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u5B89\u5168\u751F\u4EA7\u4E0E\u5065\u5EB7\u65E5",
+    2003,
+    4,
+    28,
+    2003,
+    1,
+    "https://webapps.ilo.org/static/english/protection/safework/worldday/products04/factsheet04_eng.pdf",
+    "ILO\uFF1A2003\u5E74\u8BBE\u7ACB\u6BCF\u5E744\u670828\u65E5\u7684\u672C\u9879\u7EAA\u5FF5\u65E5\uFF1B\u6B64\u524D\u5DE5\u4F1A\u60BC\u5FF5\u6D3B\u52A8\u4E0D\u5E76\u8BA1\u3002",
+    "\u56FD\u9645\u52B3\u5DE5\u7EC4\u7EC7\u4E16\u754C\u5DE5\u4F5C\u5B89\u5168\u4E0E\u5065\u5EB7\u65E5\u5E8F\u53F7\uFF0C\u81EA2003\u5E74\u8D77"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u91D1\u67AA\u9C7C\u65E5",
+    2017,
+    5,
+    2,
+    2017,
+    1,
+    "https://www.un.org/pga/71/2017/05/02/un-celebrates-first-ever-world-tuna-day/",
+    "\u8054\u5408\u56FD\u9996\u5C4A\u58F0\u660E\uFF1A2017-05-02\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u65B0\u95FB\u81EA\u7531\u65E5",
+    1994,
+    5,
+    3,
+    1994,
+    1,
+    "https://digitallibrary.un.org/record/199894/files/%5EST_DPI_PRESS_%5ESG_SM_5277-EN.pdf?ln=en",
+    "\u8054\u5408\u56FD\u79D8\u4E66\u957F1994\u5E74\u9996\u5C4A\u6587\u544A\uFF1A1993\u5E7412\u6708\u51B3\u5B9A\uFF0C1994-05-03\u9996\u6B21\u5168\u7403\u7EAA\u5FF5\u3002",
+    "\u8054\u5408\u56FD\u5168\u7403\u7EAA\u5FF5\u5E8F\u53F7\uFF0C\u81EA1994\u5E74\u9996\u6B21\u5168\u7403\u7EAA\u5FF5\u8D77"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u7EA2\u5341\u5B57\u65E5",
+    1948,
+    5,
+    8,
+    1948,
+    1,
+    "https://www.ifrc.org/world-red-cross-and-red-crescent-day",
+    "IFRC\uFF1A1948-05-08\u9996\u6B21\uFF0C1984\u5E74\u6539\u4E3A\u4E16\u754C\u7EA2\u5341\u5B57\u4E0E\u7EA2\u65B0\u6708\u65E5\uFF0C\u8FDE\u7EED\u8BA1\u6570\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u7EF4\u548C\u4EBA\u5458\u65E5",
+    2003,
+    5,
+    29,
+    2003,
+    1,
+    "https://www.un.org/unispal/document/auto-insert-201511/",
+    "\u8054\u5408\u56FD\u9996\u5C4A\u65B0\u95FB\uFF1A2003-05-29\u9996\u6B21\uFF1B\u4E0D\u4ECE1948\u5E74\u9996\u4E2A\u7EF4\u548C\u4EFB\u52A1\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u81EA\u884C\u8F66\u65E5",
+    2018,
+    6,
+    3,
+    2018,
+    1,
+    "https://www.un.org/sg/en/content/highlight/2018-06-04.html",
+    "\u8054\u5408\u56FD2018-06-04\u7B80\u62A5\u786E\u8BA4\u5468\u65E5\u9996\u4E2A\u4E16\u754C\u81EA\u884C\u8F66\u65E5\uFF0C\u53732018-06-03\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u73AF\u5883\u65E5",
+    1973,
+    6,
+    5,
+    1973,
+    1,
+    "https://www.unep.org/en/news-and-stories/story/five-decades-world-environment-day-continues-shape-global-movement",
+    "UNEP\u660E\u786E\u9996\u6B21\u4E3A1973\u5E74\uFF0C\u6BCF\u5E746\u67085\u65E5\uFF1B1972\u5E74\u662F\u8BBE\u7ACB\u5E74\uFF0C\u4E0D\u5199\u6210\u9996\u5C4A\u3002",
+    "UNEP\u9996\u6B21\u4E3E\u529E\u8D77\u7684\u5E8F\u53F7\uFF0C\u81EA1973\u5E74\u8D77\uFF0C\u4E0D\u63091972\u5E74\u8BBE\u7ACB\u5468\u5E74\u8BA1"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u732E\u8840\u65E5",
+    2004,
+    6,
+    14,
+    2004,
+    1,
+    "https://www.emro.who.int/press-releases/2005/world-blood-donor-day-2005.html",
+    "WHO\uFF1A2004-06-14\u9996\u6B21\uFF1B2005\u5E74\u4E16\u754C\u536B\u751F\u5927\u4F1A\u786E\u8BA4\u4E3A\u5E74\u5EA6\u6D3B\u52A8\uFF0C\u4E0D\u91CD\u7F6E\u8BA1\u6570\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u9632\u6CBB\u8352\u6F20\u5316\u4E0E\u5E72\u65F1\u65E5",
+    1995,
+    6,
+    17,
+    1995,
+    1,
+    "https://digitallibrary.un.org/nanna/record/222665/files/A_51_510-EN.pdf?registerDownload=1&version=1&withMetadata=0&withWatermark=0",
+    "\u8054\u5408\u56FDA/51/510\u7B2C19\u6BB5\uFF1A\u6BCF\u5E746\u670817\u65E5\uFF0C\u81EA1995\u5E74\u8D77\u7EAA\u5FF5\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u4EBA\u53E3\u65E5",
+    1990,
+    7,
+    11,
+    1990,
+    1,
+    "https://www.un.org/en/observances/world-population-day/background",
+    "\u8054\u5408\u56FD\uFF1A1990-07-11\u9996\u6B21\uFF1B\u4E0D\u4ECE1987\u5E7450\u4EBF\u4EBA\u53E3\u65E5\u62161989\u5E74\u51B3\u5B9A\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u66FC\u5FB7\u62C9\u56FD\u9645\u65E5",
+    2010,
+    7,
+    18,
+    2010,
+    1,
+    "https://www.un.org/en/events/mandeladay/",
+    "\u8054\u5408\u56FD\uFF1A2009\u5E7411\u6708\u51B3\u5B9A\uFF0C2010\u5E74\u9996\u6B21\uFF1B\u4E0D\u4ECE\u66FC\u5FB7\u62C9\u51FA\u751F\u8BA1\u3002",
+    "\u8054\u5408\u56FD\u6B63\u5F0F\u66FC\u5FB7\u62C9\u56FD\u9645\u65E5\u5E8F\u53F7\uFF0C\u81EA2010\u5E74\u8D77"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u53CB\u8C0A\u65E5",
+    2011,
+    7,
+    30,
+    2011,
+    1,
+    "https://www.un.org/sg/en/content/former-secretary-general/statements/2011-07-30/secretary-generals-message-international-day-of-friendship",
+    "\u8054\u5408\u56FD\u79D8\u4E66\u957F2011-07-30\u9996\u5C4A\u6587\u544A\uFF1B\u4E0D\u5408\u5E76\u5404\u56FD\u65E2\u6709\u53CB\u8C0A\u8282\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u571F\u8457\u4EBA\u65E5",
+    1995,
+    8,
+    9,
+    1995,
+    1,
+    "https://webtv.un.org/en/asset/k18/k18x3ftb29",
+    "\u8054\u5408\u56FD\u6863\u6848\u56DE\u987E\uFF1A1995-08-09\u9996\u6B21\uFF1B\u4E0D\u4ECE1982\u5E74\u5DE5\u4F5C\u7EC4\u4F1A\u8BAE\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u6C11\u4E3B\u65E5",
+    2008,
+    9,
+    15,
+    2008,
+    1,
+    "https://www.un.org/en/observances/democracy-day/past-events",
+    "\u8054\u5408\u56FD\u5386\u5C4A\u9875\u9762\u660E\u786E2008-09-15\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u81ED\u6C27\u5C42\u4FDD\u62A4\u65E5",
+    1995,
+    9,
+    16,
+    1995,
+    1,
+    "https://www.ozone.unep.org/ru/node/112",
+    "UNEP\u81ED\u6C27\u79D8\u4E66\u5904\u5E74\u8868\uFF1A1994\u5E74\u5BA3\u5E03\uFF0C\u81EA1995\u5E749\u670816\u65E5\u8D77\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u8001\u5E74\u4EBA\u65E5",
+    1991,
+    10,
+    1,
+    1991,
+    1,
+    "https://www.un.org/development/desa/ageing/wp-content/uploads/sites/24/2020/11/MIPAA-Master-Slide-Deck-12-Nov-2020.pdf",
+    "\u8054\u5408\u56FD\u8001\u9F84\u95EE\u9898\u8D44\u6599\uFF1A1991-10-01\u9996\u6B21\uFF1B1990\u5E74\u51B3\u8BAE\u4E0D\u7B97\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u975E\u66B4\u529B\u65E5",
+    2007,
+    10,
+    2,
+    2007,
+    1,
+    "https://www.unic.or.jp/news_press/messages_speeches/sg/743/?lang=en",
+    "\u8054\u5408\u56FD\u65B0\u95FB\u4E2D\u5FC3\u9996\u5C4A\u6587\u544A\uFF1A2007-10-02\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u7CAE\u98DF\u65E5",
+    1981,
+    10,
+    16,
+    1981,
+    1,
+    "https://www.fao.org/unfao/histo-e.htm",
+    "FAO\u5386\u53F2\u8BB0\u5F55\uFF1A1981-10-16\u9996\u6B21\uFF1B1979\u5E74\u51B3\u5B9A\u30011945\u5E74\u673A\u6784\u6210\u7ACB\u5747\u975E\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u4F4F\u623F\u65E5",
+    1986,
+    10,
+    6,
+    1986,
+    1,
+    "https://www.un.org/en/observances/habitat-day",
+    "\u8054\u5408\u56FD\uFF1A1986\u5E74\u9996\u6B21\uFF0C\u65E5\u671F\u4E3A\u5341\u6708\u9996\u4E2A\u661F\u671F\u4E00\uFF1B\u4E0D\u4ECE1985\u5E74\u51B3\u5B9A\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5BBD\u5BB9\u65E5",
+    1996,
+    11,
+    16,
+    1996,
+    1,
+    "https://digitallibrary.un.org/record/262272/files/A_53_284-EN.pdf",
+    "\u8054\u5408\u56FDA/53/284\u62A5\u544A\u4E13\u8282\u8BB0\u8F7D1996\u5E74\u9996\u6B21\u5168\u7403\u7EAA\u5FF5\uFF1B1995\u5E74\u4E3A\u5BA3\u8A00\u5E74\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u5395\u6240\u65E5",
+    2013,
+    11,
+    19,
+    2013,
+    1,
+    "https://www.un.org/development/desa/en/news/sustainable/world-toilet-day.html",
+    "\u8054\u5408\u56FD\u7ECF\u793E\u90E8\uFF1A2013\u5E74\u9996\u6B21\u6B63\u5F0F\u7EAA\u5FF5\uFF1B\u4E0E2001\u5E74\u8D77\u7684\u6C11\u95F4\u5021\u8BAE\u533A\u5206\u3002",
+    "\u8054\u5408\u56FD\u6B63\u5F0F\u7EAA\u5FF5\u5E8F\u53F7\uFF0C\u81EA2013\u5E74\u8D77\uFF0C\u4E0D\u8BA1\u6B64\u524D\u6C11\u95F4\u5021\u8BAE"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u58F0\u63F4\u5DF4\u52D2\u65AF\u5766\u4EBA\u6C11\u65E5",
+    1978,
+    11,
+    29,
+    1978,
+    1,
+    "https://www.un.org/unispal/document/auto-insert-210103/",
+    "\u8054\u5408\u56FD\u9996\u5C4A\u516C\u62A5\uFF1A1978-11-29\u9996\u6B21\uFF1B1977\u5E74\u51B3\u5B9A\u4E0D\u662F\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6B8B\u75BE\u4EBA\u65E5",
+    1992,
+    12,
+    3,
+    1992,
+    1,
+    "https://cdn.un.org/unyearbook/yun/chapter_pdf/1993YUN/1993_P3_CH11.pdf",
+    "\u8054\u5408\u56FD1993\u5E74\u5E74\u9274\u786E\u8BA41992-12-03\u4E3A\u9996\u6B21\uFF1B\u540E\u7EED\u540D\u79F0\u53D8\u5316\u4E0D\u91CD\u7F6E\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5FD7\u613F\u4EBA\u5458\u65E5",
+    1986,
+    12,
+    5,
+    1986,
+    1,
+    "https://digitallibrary.un.org/record/144493/files/UNDP_UNV%2802%29_M2-E.pdf",
+    "UNV1986\u5E74\u9A6C\u585E\u5362\u5BA3\u8A00\u660E\u786E\u5F53\u5E7412\u67085\u65E5\u9996\u6B21\uFF1B1985\u5E7412\u6708\u51B3\u8BAE\u4E0D\u7B97\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u6C11\u822A\u65E5",
+    1994,
+    12,
+    7,
+    1994,
+    1,
+    "https://www.icao.int/secretariat/SecretaryGeneral/aviation_day/2006/pio200615_e.pdf",
+    "ICAO\u660E\u786E1994-12-07\u9996\u6B21\uFF1B1996\u5E74\u8054\u5408\u56FD\u8BA4\u53EF\u4E0D\u91CD\u7F6E\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u53CD\u8150\u8D25\u65E5",
+    2004,
+    12,
+    9,
+    2004,
+    1,
+    "https://www.un.org/sg/en/content/highlight/2004-12-08.html",
+    "\u8054\u5408\u56FD2004-12-08\u7B80\u62A5\u660E\u786E\u6B21\u65E5\u4E3A\u9996\u6B21\uFF1B2003\u5E74\u516C\u7EA6\u7B7E\u7F72\u4E0D\u7B97\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u4EBA\u6743\u65E5",
+    1950,
+    12,
+    10,
+    1950,
+    1,
+    "https://www.trumanlibrary.gov/library/proclamations/2913/united-nations-human-rights-day-1950",
+    "1950\u5E74\u4EBA\u6743\u65E5\u5B98\u65B9\u516C\u544A\uFF1B\u8054\u5408\u56FD\u540C\u5E7412\u67084\u65E5\u8BBE\u7ACB\uFF0C\u4E0D\u4ECE1948\u5E74\u5BA3\u8A00\u5468\u5E74\u8BA1\u3002",
+    "\u8054\u5408\u56FD\u6B63\u5F0F\u4EBA\u6743\u65E5\u5236\u5EA6\u5E8F\u53F7\uFF0C\u81EA1950\u5E74\u8D77"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5C71\u5CB3\u65E5",
+    2003,
+    12,
+    11,
+    2003,
+    1,
+    "https://www.fao.org/4/J1032e/J1032e.htm",
+    "FAO2003\u5E74\u5927\u4F1A\u62A5\u544A\uFF1A2003-12-11\u4E3A\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u79FB\u5F99\u8005\u65E5",
+    2e3,
+    12,
+    18,
+    2e3,
+    1,
+    "https://www.ilo.org/resource/news/ilo-joins-celebration-united-nations-international-migrants-day",
+    "ILO\u9996\u5C4A\u65B0\u95FB\uFF1A2000-12-18\u9996\u6B21\uFF1B\u4E0D\u4ECE1990\u5E74\u516C\u7EA6\u901A\u8FC7\u8BA1\u3002"
+  ),
   annual("JP", "\u5143\u65E5", 1949, 1, 1, 1949, 1, jp, "1948\u5E747\u6708\u795D\u65E5\u6CD5\u751F\u6548\u540E\u7684\u9996\u6B21\u5143\u65E5\u3002", jpScope),
   annual("JP", "\u61B2\u6CD5\u8A18\u5FF5\u65E5", 1949, 5, 3, 1949, 1, jp, "1948\u5E747\u6708\u7ACB\u6CD5\u540E\u9996\u6B215\u67083\u65E5\uFF1B\u5E76\u975E\u5BAA\u6CD5\u65BD\u884C\u5468\u5E74\u3002", jpScope),
   annual("JP", "\u3053\u3069\u3082\u306E\u65E5", 1949, 5, 5, 1949, 1, jp, "1948\u5E747\u6708\u7ACB\u6CD5\u540E\u9996\u6B215\u67085\u65E5\u3002", jpScope),
@@ -2019,6 +2602,28 @@ dates("JP", "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", [{ fromYear: 1966, month: 10
 row("JP", "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5").names.push("\u4F53\u80B2\u306E\u65E5", "\u4F53\u80B2\u306E\u65E5\uFF08\u30B9\u30DD\u30FC\u30C4\u306E\u65E5\uFF09");
 row("US", "\u9A6C\u4E01\xB7\u8DEF\u5FB7\xB7\u91D1\u7EAA\u5FF5\u65E5").names.push("Birthday of Martin Luther King, Jr.");
 row("US", "\u516D\u6708\u8282").names.push("Juneteenth National Independence Day");
+row("CN", "\u4E2D\u56FD\u70C8\u58EB\u7EAA\u5FF5\u65E5").names.push("\u70C8\u58EB\u7EAA\u5FF5\u65E5");
+row("CN", "\u513F\u7AE5\u9884\u9632\u63A5\u79CD\u5BA3\u4F20\u65E5").names.push("\u5168\u56FD\u513F\u7AE5\u9884\u9632\u63A5\u79CD\u65E5");
+row("CN", "\u5168\u56FD\u6D4B\u7ED8\u6CD5\u5BA3\u4F20\u65E5").names.push("\u6D4B\u7ED8\u6CD5\u5BA3\u4F20\u65E5");
+row("CN", "\u690D\u6811\u8282").names.push("\u4E2D\u56FD\u690D\u6811\u8282");
+row("*", "\u4E16\u754C\u7EA2\u5341\u5B57\u65E5").names.push("\u4E16\u754C\u7EA2\u5341\u5B57\u4E0E\u7EA2\u65B0\u6708\u65E5");
+row("*", "\u4E16\u754C\u81EA\u95ED\u75C7\u65E5").names.push("\u4E16\u754C\u63D0\u9AD8\u81EA\u95ED\u75C7\u610F\u8BC6\u65E5");
+row("*", "\u4E16\u754C\u6B8B\u75BE\u4EBA\u65E5").names.push("\u56FD\u9645\u6B8B\u75BE\u4EBA\u65E5");
+row("*", "\u56FD\u9645\u5FD7\u613F\u4EBA\u5458\u65E5").names.push("\u56FD\u9645\u5FD7\u613F\u8005\u65E5");
+row("*", "\u4E16\u754C\u732E\u8840\u65E5").names.push("\u4E16\u754C\u732E\u8840\u8005\u65E5");
+row("*", "\u56FD\u9645\u5C71\u5CB3\u65E5").names.push("\u56FD\u9645\u5C71\u65E5");
+row("*", "\u4E16\u754C\u4EBA\u6743\u65E5").sources.push("https://mandates.un.org/mandate/A/RES/423%28V%29");
+row("*", "\u4E16\u754C\u4F4F\u623F\u65E5").names.push("\u4E16\u754C\u4EBA\u5C45\u65E5");
+row("CN", "\u4E2D\u56FD\u9752\u5E74\u5FD7\u613F\u8005\u670D\u52A1\u65E5").sources.push("https://www.zgzyz.org.cn/node_44102.htm");
+row("CN", "\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282").sources.push("https://nmfsj.moa.gov.cn/xwzx_25646/ywjj/201809/t20180903_6156728.htm");
+row("CN", "\u5168\u56FD\u4E2D\u5C0F\u5B66\u751F\u5B89\u5168\u6559\u80B2\u65E5").sources.push("https://www.moe.gov.cn/jyb_xxgk/xxgk_jyta/jyta_jcys/201611/t20161104_287709.html");
+row("CN", "\u5168\u56FD\u52A9\u6B8B\u65E5").sources.push("https://www.mfa.gov.cn/web/ziliao_674904/zt_674979/ywzt_675099/wzzt_675579/2296_675789/200207/t20020705_7961975.shtml");
+row("CN", "\u5168\u6C11\u56FD\u9632\u6559\u80B2\u65E5").sources.push("https://www.mod.gov.cn/gfbw/gfjy_index/4850847.html");
+dates("CN", "\u4E2D\u56FD\u519C\u6C11\u4E30\u6536\u8282", [{ fromYear: 2018, month: 9, term: 18 }]);
+dates("CN", "\u5168\u56FD\u4E2D\u5C0F\u5B66\u751F\u5B89\u5168\u6559\u80B2\u65E5", [{ fromYear: 1996, month: 3, week: -1, weekday: 1 }]);
+dates("CN", "\u5168\u56FD\u52A9\u6B8B\u65E5", [{ fromYear: 1991, month: 5, week: 3, weekday: 0 }]);
+dates("CN", "\u5168\u6C11\u56FD\u9632\u6559\u80B2\u65E5", [{ fromYear: 2001, month: 9, week: 3, weekday: 6 }]);
+dates("*", "\u4E16\u754C\u4F4F\u623F\u65E5", [{ fromYear: 1986, month: 10, week: 1, weekday: 1 }]);
 dates("US", "\u9A6C\u4E01\xB7\u8DEF\u5FB7\xB7\u91D1\u7EAA\u5FF5\u65E5", [{ fromYear: 1986, month: 1, week: 3, weekday: 1 }]);
 dates("IE", "\u5723\u5E03\u91CC\u5409\u5FB7\u8282", [{ fromYear: 2023, month: 2, week: 1, weekday: 1, firstFriday: true }]);
 for (const name of ["\u5143\u65E5", "\u61B2\u6CD5\u8A18\u5FF5\u65E5", "\u3053\u3069\u3082\u306E\u65E5", "\u6587\u5316\u306E\u65E5", "\u52E4\u52B4\u611F\u8B1D\u306E\u65E5", "\u6210\u4EBA\u306E\u65E5", "\u5929\u7687\u8A95\u751F\u65E5"]) row("JP", name).sources.push(jpLaw);
@@ -2094,11 +2699,16 @@ class FestivalOrdinals {
         const dates = rule.dates.filter((d) => year >= d.fromYear);
         const date = dates[dates.length - 1];
         if (!date || day.getMonth() !== date.month) return null;
-        if (date.day !== void 0) {
+        if (date.term !== void 0) {
+          const termDay = day.getTermDay();
+          if (termDay.getDayIndex() !== 0 || termDay.getSolarTerm().getIndex() !== date.term) return null;
+        } else if (date.day !== void 0) {
           if (day.getDay() !== date.day) return null;
         } else {
           const first = day.next(1 - day.getDay()).getWeek().getIndex();
-          const target = date.firstFriday && first === 5 ? 1 : 1 + (date.weekday - first + 7) % 7 + 7 * (date.week - 1);
+          const lastDay = day.getSolarMonth().getDayCount();
+          const lastWeekday = (first + lastDay - 1) % 7;
+          const target = date.firstFriday && first === 5 ? 1 : date.week < 0 ? lastDay - (lastWeekday - date.weekday + 7) % 7 + 7 * (date.week + 1) : 1 + (date.weekday - first + 7) % 7 + 7 * (date.week - 1);
           if (day.getDay() !== target) return null;
         }
       }
@@ -17772,6 +18382,13 @@ const TAOIST = {
 
 const CHINA_OBSERVANCES = [
   {
+    month: 10,
+    day: 8,
+    name: "\u5168\u56FD\u9AD8\u8840\u538B\u65E5",
+    startYear: 1998,
+    source: "https://www.nhc.gov.cn/ylyjs/gzdt/202509/2db90f506b274a95a25ac4ec701c3416.shtml"
+  },
+  {
     month: 5,
     day: 10,
     name: "\u4E2D\u56FD\u54C1\u724C\u65E5",
@@ -18250,12 +18867,12 @@ class FolkFestival extends AbstractCulture {
    * 某月第几个星期几，-1 表示最后一个
    */
   static WEEK_RULES = [
-    HolidayRule.week(3, -1, 1, "\u5168\u56FD\u4E2D\u5C0F\u5B66\u751F\u5B89\u5168\u6559\u80B2\u65E5"),
+    HolidayRule.week(3, -1, 1, "\u5168\u56FD\u4E2D\u5C0F\u5B66\u751F\u5B89\u5168\u6559\u80B2\u65E5", 1996),
     HolidayRule.week(5, 2, 0, "\u6BCD\u4EB2\u8282"),
-    HolidayRule.week(5, 3, 0, "\u5168\u56FD\u52A9\u6B8B\u65E5"),
+    HolidayRule.week(5, 3, 0, "\u5168\u56FD\u52A9\u6B8B\u65E5", 1991),
     HolidayRule.week(6, 3, 0, "\u7236\u4EB2\u8282"),
-    HolidayRule.week(9, 3, 6, "\u5168\u6C11\u56FD\u9632\u6559\u80B2\u65E5"),
-    HolidayRule.week(10, 1, 1, "\u4E16\u754C\u4F4F\u623F\u65E5"),
+    HolidayRule.week(9, 3, 6, "\u5168\u6C11\u56FD\u9632\u6559\u80B2\u65E5", 2001),
+    HolidayRule.week(10, 1, 1, "\u4E16\u754C\u4F4F\u623F\u65E5", 1986),
     HolidayRule.week(11, 4, 4, "\u611F\u6069\u8282")
   ];
   /**

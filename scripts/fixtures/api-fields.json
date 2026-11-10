@@ -1078,5 +1078,29 @@
     "expression": "OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,6,19))?.getOrdinalInfo() ?? null",
     "description": "美国六月节在联邦假日口径为第5次；不从1865年计数。补假或调休上班日不重复赋号。",
     "parameters": "读取Holiday的getOrdinalInfo()；规则日历和官方年度日历使用同一计数元数据。"
+  },
+  {
+    "id": "api-136",
+    "group": "节日",
+    "title": "中国烈士纪念日届数",
+    "expression": "FestivalOrdinals.get('中国烈士纪念日', SolarDay.fromYmd(2026,9,30))",
+    "description": "2014年首个烈士纪念日，2026年为第13个；烈士纪念日别名使用同一序列。返回元数据包含退役军人事务部的届数依据。",
+    "parameters": "name: string, day: SolarDay, region: string = 'CN'。"
+  },
+  {
+    "id": "api-137",
+    "group": "节日",
+    "title": "同名纪念日的地区口径",
+    "expression": "['CN','*'].map(region => FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025,3,24), region))",
+    "description": "中国官方宣传届数为30，国际活动序列为44；务必保留scope，不能把不同口径视为同一个届数。",
+    "parameters": "region为CN时匹配中国官方宣传口径；为*时显式使用国际口径。"
+  },
+  {
+    "id": "api-138",
+    "group": "节日",
+    "title": "浮动日期与节气纪念日",
+    "expression": "[FestivalOrdinals.get('全国中小学生安全教育日', SolarDay.fromYmd(2026,3,30)), FestivalOrdinals.get('中国农民丰收节', SolarDay.fromYmd(2024,9,22))]",
+    "description": "三月最后一个星期一对应2026年第31个安全教育日；2024年秋分为9月22日，对应第7个丰收节。错误的月日返回null。",
+    "parameters": "先按实际规则确定日期；不能用上一年的月日硬编码浮动纪念日。"
   }
 ]

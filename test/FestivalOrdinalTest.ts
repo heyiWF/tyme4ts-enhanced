@@ -1,6 +1,6 @@
 import {strict as assert} from 'assert';
 import {AnniversaryFestival, DayAlmanac, Event, EventManager, FestivalCategory, FestivalEntry,
-    FestivalOrdinals, Festivals, Holiday, HolidayCalendar, OfficialHolidayCalendar, SolarDay} from '../lib';
+    FestivalOrdinals, Festivals, FolkFestival, Holiday, HolidayCalendar, OfficialHolidayCalendar, SolarDay, SolarTerm} from '../lib';
 
 const day = (date: string): SolarDay => {
     const [y, m, d] = date.split('-').map(Number);
@@ -55,6 +55,89 @@ describe('Verified festival ordinals', () => {
         assert.equal(FestivalOrdinals.get('国家公祭日', day('2026-12-13'))?.ordinal, 13);
         assert.equal(FestivalOrdinals.get('世界知识产权日', day('2000-04-26')), null);
         assert.equal(FestivalOrdinals.get('世界知识产权日', day('2001-04-26'))?.ordinal, 1);
+    });
+
+    it('exposes Chinese martyrs day and aliases without counting historical anniversaries', () => {
+        const martyrs = Festivals.of(day('2026-09-30')).getEntries().find(e => e.getName() === '中国烈士纪念日')!;
+        assert.equal(martyrs.getOrdinalName(), '第13个中国烈士纪念日');
+        assert.equal(FestivalOrdinals.get('烈士纪念日', day('2026-09-30'))?.id, martyrs.getOrdinalInfo()?.id);
+        assert.ok(!AnniversaryFestival.of(day('2013-09-30')).getNames().includes('中国烈士纪念日'));
+        assert.equal(FestivalOrdinals.get('台湾光复纪念日', day('2025-10-25'))?.ordinal, 1);
+        assert.equal(FestivalOrdinals.get('台湾光复纪念日', day('2025-10-25'), 'TW'), null);
+        assert.equal(day('2025-03-12').getFestival()!.getOrdinal(), 47);
+        assert.equal(FestivalOrdinals.get('植树节', day('2025-03-12'), 'TW'), null);
+    });
+
+    it('keeps international activity and Chinese publicity numbering in their own scopes', () => {
+        const date = day('2025-03-24');
+        const cn = FestivalOrdinals.get('世界防治结核病日', date, 'CN')!;
+        const international = FestivalOrdinals.get('世界防治结核病日', date, '*')!;
+        assert.equal(cn.ordinal, 30);
+        assert.equal(international.ordinal, 44);
+        assert.notEqual(cn.scope, international.scope);
+        assert.equal(FestivalOrdinals.get('世界防治结核病日', date, 'CN-SH')?.ordinal, 30);
+        assert.equal(FestivalOrdinals.get('世界防治结核病日', day('1982-03-24'), '*')?.ordinal, 1);
+        assert.equal(FestivalOrdinals.get('世界防治结核病日', day('1982-03-24'), 'CN'), null);
+        assert.equal(AnniversaryFestival.of(date).getEntries().find(e => e.getName() === '世界防治结核病日')?.getOrdinal(), 30);
+    });
+
+    it('uses first observances instead of earlier resolutions or institution anniversaries', () => {
+        const examples: [string, string, number][] = [
+            ['世界环境日', '2026-06-05', 54], ['世界粮食日', '2026-10-16', 46],
+            ['世界人口日', '2026-07-11', 37], ['国际志愿人员日', '2026-12-05', 41],
+            ['国际新闻自由日', '2026-05-03', 0], // unverified name is not guessed as an alias
+            ['世界新闻自由日', '2026-05-03', 33], ['国际维和人员日', '2026-05-29', 24],
+            ['国际反腐败日', '2026-12-09', 23], ['世界厕所日', '2026-11-19', 14],
+        ];
+        for (const [name, date, expected] of examples) {
+            assert.equal(FestivalOrdinals.get(name, day(date))?.ordinal ?? 0, expected, name);
+            if (expected) assert.ok(Festivals.of(day(date)).getNames(true).includes(`第${expected}个${name}`), name);
+        }
+    });
+
+    it('counts the added hypertension day only from its first edition and registers its event', () => {
+        assert.ok(!AnniversaryFestival.of(day('1997-10-08')).getNames().includes('全国高血压日'));
+        assert.ok(AnniversaryFestival.of(day('1998-10-08')).getNames(true).includes('第1个全国高血压日'));
+        assert.ok(Festivals.of(day('2025-10-08')).getNames(true).includes('第28个全国高血压日'));
+        const saved = EventManager.DATA;
+        try {
+            Festivals.installEvents();
+            assert.equal(Event.fromName('节日:全国高血压日')?.getStartYear(), 1998);
+            assert.equal(Event.fromName('节日:世界防治结核病日')?.getStartYear(), 1996);
+            assert.equal(Event.fromName('节日:中国烈士纪念日')?.getStartYear(), 2014);
+        } finally { EventManager.DATA = saved; }
+    });
+
+    it('matches moving weekday observances and never repeats the previous years date', () => {
+        const cases: [string, string, number, string][] = [
+            ['全国中小学生安全教育日', '2024-03-25', 29, '2024-03-31'],
+            ['全国中小学生安全教育日', '2025-03-31', 30, '2025-03-24'],
+            ['全国中小学生安全教育日', '2026-03-30', 31, '2026-03-31'],
+            ['全国助残日', '2026-05-17', 36, '2026-05-18'],
+            ['全民国防教育日', '2026-09-19', 26, '2026-09-20'],
+            ['世界住房日', '2026-10-05', 41, '2026-10-06'],
+        ];
+        for (const [name, date, ordinal, wrongDate] of cases) {
+            assert.equal(FestivalOrdinals.get(name, day(date))?.ordinal, ordinal, name);
+            assert.equal(FestivalOrdinals.get(name, day(wrongDate)), null, name);
+            assert.ok(Festivals.of(day(date)).getNames(true).includes(`第${ordinal}个${name}`), name);
+        }
+        for (const [name, date] of [
+            ['全国中小学生安全教育日', '1995-03-27'], ['全国助残日', '1990-05-20'],
+            ['全民国防教育日', '2000-09-16'], ['世界住房日', '1985-10-07'],
+        ]) assert.ok(!FolkFestival.of(day(date)).getNames().includes(name), name);
+    });
+
+    it('counts harvest festival on the autumn equinox instead of a fixed September day', () => {
+        assert.equal(FestivalOrdinals.get('中国农民丰收节', day('2018-09-23'))?.ordinal, 1);
+        assert.equal(FestivalOrdinals.get('中国农民丰收节', day('2024-09-22'))?.ordinal, 7);
+        assert.equal(FestivalOrdinals.get('中国农民丰收节', day('2024-09-23')), null);
+        for (let year = 2017; year <= 2030; year++) {
+            const date = SolarTerm.fromIndex(year, 18).getSolarDay();
+            const entry = Festivals.of(date).getEntries().find(e => e.getName() === '中国农民丰收节');
+            assert.equal(entry?.getOrdinal() ?? null, year < 2018 ? null : year - 2017);
+            assert.equal(FestivalOrdinals.get('中国农民丰收节', date.next(1)), null);
+        }
     });
 
     it('world statistics day is every five years, including event registration', () => {

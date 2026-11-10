@@ -46,8 +46,8 @@ class FestivalCoverageTest {
 
     @test
     test1(): void {
-        // 对外计数：纪念日含 2 个上游未收的中国纪念日
-        equal(AnniversaryFestival.getSize(), 139);
+        // 对外计数：纪念日含 3 个上游未收的日期键
+        equal(AnniversaryFestival.getSize(), 140);
         equal(FolkFestival.getLunarSize(), 29);
         equal(BuddhistFestival.getFestivalSize(), 219);
         equal(BuddhistFestival.getOtherSize(), 30);
@@ -55,7 +55,7 @@ class FestivalCoverageTest {
         equal(BuddhistFestival.getYangGongSize(), 13);
         equal(TaoistFestival.getSize(), 96);
         const stat: { [key: string]: number } = Festivals.getStat();
-        equal(stat['anniversary'], 139);
+        equal(stat['anniversary'], 140);
         equal(stat['deity'], 125);
     }
 

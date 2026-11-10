@@ -876,7 +876,7 @@ export const API_FIELDS = [
     "expression": "Festivals.getStat()",
     "description": "返回各来源日期键数量；不是去重后的全年放假天数。",
     "parameters": "使用示例中构造的日期对象；本查询无需额外输入。",
-    "output": "{\n  \"anniversary\": 139,\n  \"folk\": 29,\n  \"buddhist\": 219,\n  \"buddhistOther\": 30,\n  \"guanyin\": 22,\n  \"yangGong\": 13,\n  \"taoist\": 96,\n  \"deity\": 125\n}",
+    "output": "{\n  \"anniversary\": 140,\n  \"folk\": 29,\n  \"buddhist\": 219,\n  \"buddhistOther\": 30,\n  \"guanyin\": 22,\n  \"yangGong\": 13,\n  \"taoist\": 96,\n  \"deity\": 125\n}",
     "returns": "{ [key: string]: number; }",
     "code": "import {DayAlmanac, Festivals} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.getStat();\n// 返回类型：{ [key: string]: number; }\nconsole.log(value);"
   },
@@ -887,7 +887,7 @@ export const API_FIELDS = [
     "expression": "Festivals.installEvents()",
     "description": "将单日节日注册到全局 EventManager，重复调用幂等更新；返回本次处理条数，不等于新增条数。不会注册多日活动。",
     "parameters": "无参数；此调用会修改全局事件注册表。",
-    "output": "342",
+    "output": "343",
     "returns": "number",
     "code": "import {DayAlmanac, Festivals} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.installEvents();\n// 返回类型：number\nconsole.log(value);"
   },
@@ -1484,5 +1484,38 @@ export const API_FIELDS = [
     "output": "{\n  \"id\": \"US:六月节\",\n  \"ordinal\": 5,\n  \"region\": \"US\",\n  \"scope\": \"美国联邦假日次数，自2021年起，不是自1865年以来的周年\",\n  \"sources\": [\n    \"https://www.congress.gov/crs_external_products/IN/PDF/IN11697/IN11697.3.pdf\"\n  ],\n  \"verifiedOn\": \"2026-11-10\"\n}",
     "returns": "FestivalOrdinalInfo | null",
     "code": "import {DayAlmanac, OfficialHolidayCalendar, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,6,19))?.getOrdinalInfo() ?? null;\n// 返回类型：FestivalOrdinalInfo | null\nconsole.log(value);"
+  },
+  {
+    "id": "api-136",
+    "group": "节日",
+    "title": "中国烈士纪念日届数",
+    "expression": "FestivalOrdinals.get('中国烈士纪念日', SolarDay.fromYmd(2026,9,30))",
+    "description": "2014年首个烈士纪念日，2026年为第13个；烈士纪念日别名使用同一序列。返回元数据包含退役军人事务部的届数依据。",
+    "parameters": "name: string, day: SolarDay, region: string = 'CN'。",
+    "output": "{\n  \"id\": \"CN:中国烈士纪念日\",\n  \"ordinal\": 13,\n  \"region\": \"CN\",\n  \"scope\": \"当地纪念日的举办序号\",\n  \"sources\": [\n    \"https://www.mva.gov.cn/xinwen/dfdt/202510/t20251021_516534.html\"\n  ],\n  \"verifiedOn\": \"2026-11-10\"\n}",
+    "returns": "FestivalOrdinalInfo | null",
+    "code": "import {DayAlmanac, FestivalOrdinals, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = FestivalOrdinals.get('中国烈士纪念日', SolarDay.fromYmd(2026,9,30));\n// 返回类型：FestivalOrdinalInfo | null\nconsole.log(value);"
+  },
+  {
+    "id": "api-137",
+    "group": "节日",
+    "title": "同名纪念日的地区口径",
+    "expression": "['CN','*'].map(region => FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025,3,24), region))",
+    "description": "中国官方宣传届数为30，国际活动序列为44；务必保留scope，不能把不同口径视为同一个届数。",
+    "parameters": "region为CN时匹配中国官方宣传口径；为*时显式使用国际口径。",
+    "output": "[\n  {\n    \"id\": \"CN:世界防治结核病日\",\n    \"ordinal\": 30,\n    \"region\": \"CN\",\n    \"scope\": \"中国官方宣传届数口径，自1996年起；不是国际活动总次数\",\n    \"sources\": [\n      \"https://www.shanghai.gov.cn/gwk/search/content/9e61d155f9f046f28831081278cb88e9\"\n    ],\n    \"verifiedOn\": \"2026-11-10\"\n  },\n  {\n    \"id\": \"*:世界防治结核病日\",\n    \"ordinal\": 44,\n    \"region\": \"*\",\n    \"scope\": \"国际活动序号，自1982年起；CN查询采用中国官方宣传口径\",\n    \"sources\": [\n      \"https://iris.who.int/bitstream/handle/10665/179640/WHA50_1997-REC-3_eng.pdf\"\n    ],\n    \"verifiedOn\": \"2026-11-10\"\n  }\n]",
+    "returns": "(FestivalOrdinalInfo | null)[]",
+    "code": "import {DayAlmanac, FestivalOrdinals, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = ['CN','*'].map(region => FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025,3,24), region));\n// 返回类型：(FestivalOrdinalInfo | null)[]\nconsole.log(value);"
+  },
+  {
+    "id": "api-138",
+    "group": "节日",
+    "title": "浮动日期与节气纪念日",
+    "expression": "[FestivalOrdinals.get('全国中小学生安全教育日', SolarDay.fromYmd(2026,3,30)), FestivalOrdinals.get('中国农民丰收节', SolarDay.fromYmd(2024,9,22))]",
+    "description": "三月最后一个星期一对应2026年第31个安全教育日；2024年秋分为9月22日，对应第7个丰收节。错误的月日返回null。",
+    "parameters": "先按实际规则确定日期；不能用上一年的月日硬编码浮动纪念日。",
+    "output": "[\n  {\n    \"id\": \"CN:全国中小学生安全教育日\",\n    \"ordinal\": 31,\n    \"region\": \"CN\",\n    \"scope\": \"当地纪念日的举办序号\",\n    \"sources\": [\n      \"https://www.moe.gov.cn/srcsite/A06/s3325/202503/t20250331_1185528.html\",\n      \"https://www.moe.gov.cn/jyb_xxgk/xxgk_jyta/jyta_jcys/201611/t20161104_287709.html\"\n    ],\n    \"verifiedOn\": \"2026-11-10\"\n  },\n  {\n    \"id\": \"CN:中国农民丰收节\",\n    \"ordinal\": 7,\n    \"region\": \"CN\",\n    \"scope\": \"当地纪念日的举办序号\",\n    \"sources\": [\n      \"https://nmfsj.moa.gov.cn/xwzx_25646/ywjj/202508/t20250815_6476482.htm\",\n      \"https://nmfsj.moa.gov.cn/xwzx_25646/ywjj/201809/t20180903_6156728.htm\"\n    ],\n    \"verifiedOn\": \"2026-11-10\"\n  }\n]",
+    "returns": "(FestivalOrdinalInfo | null)[]",
+    "code": "import {DayAlmanac, FestivalOrdinals, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = [FestivalOrdinals.get('全国中小学生安全教育日', SolarDay.fromYmd(2026,3,30)), FestivalOrdinals.get('中国农民丰收节', SolarDay.fromYmd(2024,9,22))];\n// 返回类型：(FestivalOrdinalInfo | null)[]\nconsole.log(value);"
   }
 ];

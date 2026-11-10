@@ -1,4 +1,4 @@
-import {FestivalOrdinalDefinition} from './ordinal-types';
+import {FestivalOrdinalDateRule, FestivalOrdinalDefinition} from './ordinal-types';
 import {MATARIKI_DATES} from '../holiday/regions/new-zealand';
 
 // Each row was checked individually. reference is transcribed from the cited evidence,
@@ -65,6 +65,34 @@ export const FESTIVAL_ORDINAL_DATA: FestivalOrdinalDefinition[] = [
         'https://www.mva.gov.cn/xinwen/dfdt/202601/t20260104_525369.html', '退役军人事务部：2025年第12个，不从1937年计。'),
     annual('CN', '记者节', 2000, 11, 8, 2025, 26,
         'https://www.xinhuanet.com.cn/20251108/808932de79c84a3499e4c911cbcbbc6f/c.html', '新华社本社记者节报道：2025年第26个。'),
+    annual('CN', '中国烈士纪念日', 2014, 9, 30, 2025, 12,
+        'https://www.mva.gov.cn/xinwen/dfdt/202510/t20251021_516534.html', '退役军人事务部：2025-09-30为第十二个烈士纪念日。'),
+    annual('CN', '中国旅游日', 2011, 5, 19, 2025, 15,
+        'https://zwgk.mct.gov.cn/zfxxgkml/scgl/202504/t20250408_959270.html', '文化和旅游部通知：2025-05-19第15个。'),
+    annual('CN', '儿童预防接种宣传日', 1987, 4, 25, 2025, 39,
+        'https://www.ndcpa.gov.cn/jbkzzx/c100014/common/content/content_1906951204930752512.html', '国家疾控局：2025-04-25第39个全国儿童预防接种日；不以批准年替代首届。'),
+    annual('CN', '全国爱肝日', 2001, 3, 18, 2025, 25,
+        'https://wjw.zhengzhou.gov.cn/zwxx/9159118.jhtml', '郑州市卫生健康委现场活动记录：2025-03-18第25个。'),
+    annual('CN', '中国青年志愿者服务日', 2000, 3, 5, 2025, 26,
+        'https://www.zgzyz.org.cn/gb/articles/2025-07/01/content_qbPapFGq.html', '中国青年志愿者网汇总2025年3月5日活动：第26个；不与学雷锋纪念日合并计数。'),
+    annual('CN', '全国测绘法宣传日', 2004, 8, 29, 2025, 22,
+        'https://ghzyj.sh.gov.cn/hyxw/20250901/5cb4a7cc21764df7971e87d68b4c7cde.html', '上海市规划资源局：2025-08-29全国第22个；不从测绘法颁布年计。'),
+    annual('CN', '植树节', 1979, 3, 12, 2025, 47,
+        'https://www.forestry.gov.cn/c/www/zxzb/614392.jhtml', '国家林草局发布会：2025-03-12第47个中国植树节；不从义务植树运动起计。', '中国大陆现行植树节序号，自1979年起'),
+    annual('CN', '台湾光复纪念日', 2025, 10, 25, 2025, 1,
+        'https://www.gwytb.gov.cn/xwdt/xwfb/wyly/202510/t20251029_12731163.htm', '国务院台办确认2025年首个纪念日；80周年是历史事件周年，不能写成第80个。', '中国大陆2025年设立的纪念日序号，不计台湾地区既有制度或历史周年'),
+    annual('CN', '全国高血压日', 1998, 10, 8, 2025, 28,
+        'https://www.nhc.gov.cn/ylyjs/gzdt/202509/2db90f506b274a95a25ac4ec701c3416.shtml', '国家卫生健康委通知：2025-10-08第28个。'),
+    annual('CN', '中国农民丰收节', 2018, 9, 23, 2025, 8,
+        'https://nmfsj.moa.gov.cn/xwzx_25646/ywjj/202508/t20250815_6476482.htm', '农业农村部：2025-09-23第八个；2018年起每年秋分，非固定9月23日。'),
+    annual('CN', '全国中小学生安全教育日', 1996, 3, 31, 2025, 30,
+        'https://www.moe.gov.cn/srcsite/A06/s3325/202503/t20250331_1185528.html', '教育部：2025-03-31第30个；1996年起每年三月最后一个星期一。'),
+    annual('CN', '全国助残日', 1991, 5, 18, 2025, 35,
+        'https://hdqw.bjhd.gov.cn/hdcl/clxw/202cl/202505/t20250516_4769562.htm', '北京市海淀区残联：2025-05-18第三十五次；1991年起每年五月第三个星期日。'),
+    annual('CN', '全民国防教育日', 2001, 9, 20, 2025, 25,
+        'https://www.mod.gov.cn/gfbw/gfjy_index/16410802.html', '国防部：2025-09-20第25个；每年九月第三个星期六。'),
+    annual('CN', '世界防治结核病日', 1996, 3, 24, 2025, 30,
+        'https://www.shanghai.gov.cn/gwk/search/content/9e61d155f9f046f28831081278cb88e9', '上海市疾控局转发国家疾控局通知：2025-03-24第30个；与1982年起的国际活动分别计数。', '中国官方宣传届数口径，自1996年起；不是国际活动总次数'),
 
     annual('*', '世界湿地日', 1997, 2, 2, 1997, 1,
         'https://www.ramsar.org/world-wetlands-day-1997', '湿地公约秘书处列明1997年首次举办；不从1971年公约计。'),
@@ -106,6 +134,82 @@ export const FESTIVAL_ORDINAL_DATA: FestivalOrdinalDefinition[] = [
         'https://www.un.org/pga/71/event2/tsunami-awareness-day/', '联合国：2015年12月设立，2016-11-05首次。'),
     annual('*', '世界艾滋病日', 1988, 12, 1, 2007, 20,
         'https://www.unaids.org/sites/default/files/web_story/071201_pp_wad_statement_en_0.pdf', 'UNAIDS：1988年首次，2007年为第20次。'),
+    annual('*', '国际海关日', 1983, 1, 26, 1983, 1,
+        'https://mpmc.gov.ws/pr-ministry-of-customs-revenue-commemorates-and-celebrates-international-customs-day/', '萨摩亚海关主管部门：1983年发起，每年1月26日；不从海关合作理事会成立计。'),
+    annual('*', '国际大屠杀纪念日', 2006, 1, 27, 2006, 1,
+        'https://www.un.org/en/holocaustremembrance/observance/2006', '联合国2006年活动档案：2006-01-27首个全球纪念日；2005年是决议年。'),
+    annual('*', '世界抗癌日', 2000, 2, 4, 2000, 1,
+        'https://www.uicc.org/what-we-do/events/world-cancer-day', 'UICC：2000年发起，每年2月4日举办。'),
+    annual('*', '国际消除种族歧视日', 1967, 3, 21, 1967, 1,
+        'https://digitallibrary.un.org/record/860183/files/1122896-EN.pdf', '联合国1967年年鉴明确1967-03-21首次纪念；不从1960年事件计。'),
+    annual('*', '世界防治结核病日', 1982, 3, 24, 1982, 1,
+        'https://iris.who.int/bitstream/handle/10665/179640/WHA50_1997-REC-3_eng.pdf', 'WHO第50届大会会议记录：自1982年举行，WHO自1996年全面支持；两种起点须区分。', '国际活动序号，自1982年起；CN查询采用中国官方宣传口径'),
+    annual('*', '国际儿童图书日', 1967, 4, 2, 1967, 1,
+        'https://www.ibby.org/fileadmin/user_upload/booklet_ICBD_2017.indd.pdf', 'IBBY：1966年提出，1967年起在4月2日前后举行；按纪念日正日计数，不计周边活动。'),
+    annual('*', '世界自闭症日', 2008, 4, 2, 2008, 1,
+        'https://documents.un.org/access.nsf/get?DS=A%2F63%2F183&Lang=E&OpenAgent=', '联合国A/63/183报告：2008-04-02首次；2007年决议并非首届。'),
+    annual('*', '国际地雷行动日', 2006, 4, 4, 2006, 1,
+        'https://www.unhcr.org/uk/news/stories/international-mine-awareness-day-unhcr-concerned-over-dangers-facing-returning', 'UNHCR首届公告：2006-04-04首次地雷意识和地雷行动援助国际日。'),
+    annual('*', '世界地球日', 1970, 4, 22, 1970, 1,
+        'https://www.archives.gov/topics/earth-day', '美国国家档案馆：1970-04-22首次；不与2009年联合国地球母亲日另设制度混算。', '4月22日Earth Day活动序号，自1970年起'),
+    annual('*', '世界安全生产与健康日', 2003, 4, 28, 2003, 1,
+        'https://webapps.ilo.org/static/english/protection/safework/worldday/products04/factsheet04_eng.pdf', 'ILO：2003年设立每年4月28日的本项纪念日；此前工会悼念活动不并计。', '国际劳工组织世界工作安全与健康日序号，自2003年起'),
+    annual('*', '世界金枪鱼日', 2017, 5, 2, 2017, 1,
+        'https://www.un.org/pga/71/2017/05/02/un-celebrates-first-ever-world-tuna-day/', '联合国首届声明：2017-05-02首次。'),
+    annual('*', '世界新闻自由日', 1994, 5, 3, 1994, 1,
+        'https://digitallibrary.un.org/record/199894/files/%5EST_DPI_PRESS_%5ESG_SM_5277-EN.pdf?ln=en', '联合国秘书长1994年首届文告：1993年12月决定，1994-05-03首次全球纪念。', '联合国全球纪念序号，自1994年首次全球纪念起'),
+    annual('*', '世界红十字日', 1948, 5, 8, 1948, 1,
+        'https://www.ifrc.org/world-red-cross-and-red-crescent-day', 'IFRC：1948-05-08首次，1984年改为世界红十字与红新月日，连续计数。'),
+    annual('*', '国际维和人员日', 2003, 5, 29, 2003, 1,
+        'https://www.un.org/unispal/document/auto-insert-201511/', '联合国首届新闻：2003-05-29首次；不从1948年首个维和任务计。'),
+    annual('*', '世界自行车日', 2018, 6, 3, 2018, 1,
+        'https://www.un.org/sg/en/content/highlight/2018-06-04.html', '联合国2018-06-04简报确认周日首个世界自行车日，即2018-06-03。'),
+    annual('*', '世界环境日', 1973, 6, 5, 1973, 1,
+        'https://www.unep.org/en/news-and-stories/story/five-decades-world-environment-day-continues-shape-global-movement', 'UNEP明确首次为1973年，每年6月5日；1972年是设立年，不写成首届。', 'UNEP首次举办起的序号，自1973年起，不按1972年设立周年计'),
+    annual('*', '世界献血日', 2004, 6, 14, 2004, 1,
+        'https://www.emro.who.int/press-releases/2005/world-blood-donor-day-2005.html', 'WHO：2004-06-14首次；2005年世界卫生大会确认为年度活动，不重置计数。'),
+    annual('*', '世界防治荒漠化与干旱日', 1995, 6, 17, 1995, 1,
+        'https://digitallibrary.un.org/nanna/record/222665/files/A_51_510-EN.pdf?registerDownload=1&version=1&withMetadata=0&withWatermark=0', '联合国A/51/510第19段：每年6月17日，自1995年起纪念。'),
+    annual('*', '世界人口日', 1990, 7, 11, 1990, 1,
+        'https://www.un.org/en/observances/world-population-day/background', '联合国：1990-07-11首次；不从1987年50亿人口日或1989年决定计。'),
+    annual('*', '曼德拉国际日', 2010, 7, 18, 2010, 1,
+        'https://www.un.org/en/events/mandeladay/', '联合国：2009年11月决定，2010年首次；不从曼德拉出生计。', '联合国正式曼德拉国际日序号，自2010年起'),
+    annual('*', '国际友谊日', 2011, 7, 30, 2011, 1,
+        'https://www.un.org/sg/en/content/former-secretary-general/statements/2011-07-30/secretary-generals-message-international-day-of-friendship', '联合国秘书长2011-07-30首届文告；不合并各国既有友谊节。'),
+    annual('*', '国际土著人日', 1995, 8, 9, 1995, 1,
+        'https://webtv.un.org/en/asset/k18/k18x3ftb29', '联合国档案回顾：1995-08-09首次；不从1982年工作组会议计。'),
+    annual('*', '国际民主日', 2008, 9, 15, 2008, 1,
+        'https://www.un.org/en/observances/democracy-day/past-events', '联合国历届页面明确2008-09-15首届。'),
+    annual('*', '国际臭氧层保护日', 1995, 9, 16, 1995, 1,
+        'https://www.ozone.unep.org/ru/node/112', 'UNEP臭氧秘书处年表：1994年宣布，自1995年9月16日起举办。'),
+    annual('*', '国际老年人日', 1991, 10, 1, 1991, 1,
+        'https://www.un.org/development/desa/ageing/wp-content/uploads/sites/24/2020/11/MIPAA-Master-Slide-Deck-12-Nov-2020.pdf', '联合国老龄问题资料：1991-10-01首次；1990年决议不算首届。'),
+    annual('*', '国际非暴力日', 2007, 10, 2, 2007, 1,
+        'https://www.unic.or.jp/news_press/messages_speeches/sg/743/?lang=en', '联合国新闻中心首届文告：2007-10-02。'),
+    annual('*', '世界粮食日', 1981, 10, 16, 1981, 1,
+        'https://www.fao.org/unfao/histo-e.htm', 'FAO历史记录：1981-10-16首次；1979年决定、1945年机构成立均非首届。'),
+    annual('*', '世界住房日', 1986, 10, 6, 1986, 1,
+        'https://www.un.org/en/observances/habitat-day', '联合国：1986年首次，日期为十月首个星期一；不从1985年决定计。'),
+    annual('*', '国际宽容日', 1996, 11, 16, 1996, 1,
+        'https://digitallibrary.un.org/record/262272/files/A_53_284-EN.pdf', '联合国A/53/284报告专节记载1996年首次全球纪念；1995年为宣言年。'),
+    annual('*', '世界厕所日', 2013, 11, 19, 2013, 1,
+        'https://www.un.org/development/desa/en/news/sustainable/world-toilet-day.html', '联合国经社部：2013年首次正式纪念；与2001年起的民间倡议区分。', '联合国正式纪念序号，自2013年起，不计此前民间倡议'),
+    annual('*', '国际声援巴勒斯坦人民日', 1978, 11, 29, 1978, 1,
+        'https://www.un.org/unispal/document/auto-insert-210103/', '联合国首届公报：1978-11-29首次；1977年决定不是首届。'),
+    annual('*', '世界残疾人日', 1992, 12, 3, 1992, 1,
+        'https://cdn.un.org/unyearbook/yun/chapter_pdf/1993YUN/1993_P3_CH11.pdf', '联合国1993年年鉴确认1992-12-03为首次；后续名称变化不重置。'),
+    annual('*', '国际志愿人员日', 1986, 12, 5, 1986, 1,
+        'https://digitallibrary.un.org/record/144493/files/UNDP_UNV%2802%29_M2-E.pdf', 'UNV1986年马塞卢宣言明确当年12月5日首次；1985年12月决议不算首届。'),
+    annual('*', '国际民航日', 1994, 12, 7, 1994, 1,
+        'https://www.icao.int/secretariat/SecretaryGeneral/aviation_day/2006/pio200615_e.pdf', 'ICAO明确1994-12-07首次；1996年联合国认可不重置。'),
+    annual('*', '国际反腐败日', 2004, 12, 9, 2004, 1,
+        'https://www.un.org/sg/en/content/highlight/2004-12-08.html', '联合国2004-12-08简报明确次日为首次；2003年公约签署不算首届。'),
+    annual('*', '世界人权日', 1950, 12, 10, 1950, 1,
+        'https://www.trumanlibrary.gov/library/proclamations/2913/united-nations-human-rights-day-1950', '1950年人权日官方公告；联合国同年12月4日设立，不从1948年宣言周年计。', '联合国正式人权日制度序号，自1950年起'),
+    annual('*', '国际山岳日', 2003, 12, 11, 2003, 1,
+        'https://www.fao.org/4/J1032e/J1032e.htm', 'FAO2003年大会报告：2003-12-11为首次。'),
+    annual('*', '国际移徙者日', 2000, 12, 18, 2000, 1,
+        'https://www.ilo.org/resource/news/ilo-joins-celebration-united-nations-international-migrants-day', 'ILO首届新闻：2000-12-18首次；不从1990年公约通过计。'),
 
     annual('JP', '元日', 1949, 1, 1, 1949, 1, jp, '1948年7月祝日法生效后的首次元日。', jpScope),
     annual('JP', '憲法記念日', 1949, 5, 3, 1949, 1, jp, '1948年7月立法后首次5月3日；并非宪法施行周年。', jpScope),
@@ -144,7 +248,7 @@ export const FESTIVAL_ORDINAL_DATA: FestivalOrdinalDefinition[] = [
 function row(region: string, name: string): FestivalOrdinalDefinition {
     return FESTIVAL_ORDINAL_DATA.find(d => d.region === region && d.names[0] === name)!;
 }
-function dates(region: string, name: string, rules: {fromYear: number; month: number; day?: number; week?: number; weekday?: number; firstFriday?: boolean}[]): void {
+function dates(region: string, name: string, rules: FestivalOrdinalDateRule[]): void {
     const r = row(region, name).recurrence;
     if (r.kind === 'yearly') r.dates = rules;
 }
@@ -159,6 +263,28 @@ dates('JP', 'スポーツの日', [{fromYear: 1966, month: 10, day: 10}, {fromYe
 row('JP', 'スポーツの日').names.push('体育の日', '体育の日（スポーツの日）');
 row('US', '马丁·路德·金纪念日').names.push('Birthday of Martin Luther King, Jr.');
 row('US', '六月节').names.push('Juneteenth National Independence Day');
+row('CN', '中国烈士纪念日').names.push('烈士纪念日');
+row('CN', '儿童预防接种宣传日').names.push('全国儿童预防接种日');
+row('CN', '全国测绘法宣传日').names.push('测绘法宣传日');
+row('CN', '植树节').names.push('中国植树节');
+row('*', '世界红十字日').names.push('世界红十字与红新月日');
+row('*', '世界自闭症日').names.push('世界提高自闭症意识日');
+row('*', '世界残疾人日').names.push('国际残疾人日');
+row('*', '国际志愿人员日').names.push('国际志愿者日');
+row('*', '世界献血日').names.push('世界献血者日');
+row('*', '国际山岳日').names.push('国际山日');
+row('*', '世界人权日').sources.push('https://mandates.un.org/mandate/A/RES/423%28V%29');
+row('*', '世界住房日').names.push('世界人居日');
+row('CN', '中国青年志愿者服务日').sources.push('https://www.zgzyz.org.cn/node_44102.htm');
+row('CN', '中国农民丰收节').sources.push('https://nmfsj.moa.gov.cn/xwzx_25646/ywjj/201809/t20180903_6156728.htm');
+row('CN', '全国中小学生安全教育日').sources.push('https://www.moe.gov.cn/jyb_xxgk/xxgk_jyta/jyta_jcys/201611/t20161104_287709.html');
+row('CN', '全国助残日').sources.push('https://www.mfa.gov.cn/web/ziliao_674904/zt_674979/ywzt_675099/wzzt_675579/2296_675789/200207/t20020705_7961975.shtml');
+row('CN', '全民国防教育日').sources.push('https://www.mod.gov.cn/gfbw/gfjy_index/4850847.html');
+dates('CN', '中国农民丰收节', [{fromYear: 2018, month: 9, term: 18}]);
+dates('CN', '全国中小学生安全教育日', [{fromYear: 1996, month: 3, week: -1, weekday: 1}]);
+dates('CN', '全国助残日', [{fromYear: 1991, month: 5, week: 3, weekday: 0}]);
+dates('CN', '全民国防教育日', [{fromYear: 2001, month: 9, week: 3, weekday: 6}]);
+dates('*', '世界住房日', [{fromYear: 1986, month: 10, week: 1, weekday: 1}]);
 dates('US', '马丁·路德·金纪念日', [{fromYear: 1986, month: 1, week: 3, weekday: 1}]);
 dates('IE', '圣布里吉德节', [{fromYear: 2023, month: 2, week: 1, weekday: 1, firstFriday: true}]);
 for (const name of ['元日', '憲法記念日', 'こどもの日', '文化の日', '勤労感謝の日', '成人の日', '天皇誕生日']) row('JP', name).sources.push(jpLaw);

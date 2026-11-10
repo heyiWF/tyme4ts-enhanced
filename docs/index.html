@@ -521,6 +521,8 @@ const ics = c.toIcs(2025);</pre>
     <div class="content-panel ordinal-guide">
       <h3>这一天是第几个节日？</h3>
       <p>例如，2026 年 11 月 9 日是<strong>第 35 个全国消防日</strong>。序号从首个适用的节日日期起算，首届为 1；它与历史事件的周年、人物年龄、节日持续的第几天分别计算。</p>
+      <p>新增核验覆盖<strong>中国烈士纪念日</strong>（2026 年第 13 个）、中国旅游日、全国助残日，以及世界环境日、世界粮食日、国际志愿人员日等。中国农民丰收节按秋分、全国中小学生安全教育日按三月最后一个星期一查询，不固定使用上一年的日期。</p>
+      <p>同名纪念日可能有不同口径：2025 年世界防治结核病日，中国官方宣传为<strong>第 30 个</strong>，自 1982 年起的国际活动为<strong>第 44 次</strong>。默认中国查询使用前者，显式传入地区 <code>'*'</code> 使用后者。世界环境日按 UNEP 1973 年首次举办计数；世界厕所日按联合国 2013 年首次正式纪念计数。请同时查看来源和计数范围。</p>
       <p>世界统计日自 2010 年起<strong>每五年一次</strong>，2025 年是第 4 次，2026 年不列此节日。日本祝日改期或改名延续原序列，2019 年缺席的天皇诞生日不计入。新西兰 Matariki 仅按法律列明的逐年日期计数。</p>
       <p>「未核定」表示缺少可靠起点或连续性依据，保留原名，不按公历年份猜测。补假、调休上班及连休的其他日期不重复计数。公共假日的次数不等于传统本身的年龄；未来序号是现行制度不变时的推算。</p>
       <pre class="api-code"><code>import {Festivals, FestivalOrdinals, SolarDay} from 'tyme4ts-enhanced';
@@ -530,7 +532,9 @@ console.log(fire?.getOrdinal());     // 35
 console.log(fire?.getOrdinalName()); // 第35个全国消防日
 console.log(fire?.getOrdinalInfo()); // 计数范围、核验日期与来源
 console.log(Festivals.of(day).getNames(true));
-console.log(FestivalOrdinals.get('世界统计日', SolarDay.fromYmd(2026, 10, 20))); // null</code></pre>
+console.log(FestivalOrdinals.get('世界统计日', SolarDay.fromYmd(2026, 10, 20))); // null
+console.log(FestivalOrdinals.get('中国烈士纪念日', SolarDay.fromYmd(2026, 9, 30))?.ordinal); // 13
+console.log(FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025, 3, 24), '*')?.ordinal); // 44</code></pre>
       <p>国家与地区页的假日也提供相同的 <code>getOrdinal()</code>、<code>getOrdinalName()</code> 和 <code>getOrdinalInfo()</code> 接口。原有 <code>getName()</code>、<code>toString()</code> 保持兼容。<a href="FESTIVAL-ORDINALS.md" target="_blank" rel="noopener noreferrer">完整核验报告与接口边界 ↗</a></p>
       <details><summary id="ordinal-summary">逐项核验清单</summary><p class="note">每个序列均保留来源锚点并单独测试；别名不重复计数。此清单仅覆盖已核定项目。</p><div class="api-table-wrap"><table class="ordinal-table"><thead><tr><th>地区</th><th>节日</th><th>起点与周期</th><th>口径与来源锚点</th></tr></thead><tbody id="ordinal-rows"></tbody></table></div></details>
     </div>
@@ -1570,7 +1574,7 @@ const CHECKS = [
     ['2025-12-13 纪念', '国家公祭日', () => A(2025, 12, 13).getFestivals().getByCategory(3).map((e) => e.getName()).join('、')],
     ['佛历条目数', '219', () => String(Festivals.getStat()['buddhist'])],
     ['道历条目数', '96', () => String(Festivals.getStat()['taoist'])],
-    ['纪念日条目数', '139', () => String(Festivals.getStat()['anniversary'])],
+    ['纪念日条目数', '140', () => String(Festivals.getStat()['anniversary'])],
     ['希伯来历换算', '5786年提斯利月1日', () => HebrewDay.fromSolarDay(SolarDay.fromYmd(2025, 9, 23)).toString()],
     ['希伯来闰年 5784', '是', () => HebrewDay.isLeapYear(5784) ? '是' : '否'],
     ['2025-09-23 犹太新年', '犹太新年第1日', () => HebrewFestival.of(SolarDay.fromYmd(2025, 9, 23)).getName()],

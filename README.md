@@ -14,13 +14,13 @@
 
 零运行时依赖，提供 CJS、ESM 与 TypeScript 声明，适合日历应用、节日聚合、通胜展示和跨语言移植。
 
-[在线 Wiki](https://heyiWF.github.io/tyme4ts-enhanced/) · [开发文档与 135 个字段示例](https://heyiWF.github.io/tyme4ts-enhanced/#tab-fields) · [官方资料与接入状态](./docs/SOURCES.md) · [逐项核验报告](./docs/DATA-REVIEW.md) · [历史审查报告](./docs/AUDIT.md) · [移植指南](./docs/PORTING.md) · [变更记录](./CHANGELOG.md)
+[在线 Wiki](https://heyiWF.github.io/tyme4ts-enhanced/) · [开发文档与 138 个字段示例](https://heyiWF.github.io/tyme4ts-enhanced/#tab-fields) · [官方资料与接入状态](./docs/SOURCES.md) · [逐项核验报告](./docs/DATA-REVIEW.md) · [历史审查报告](./docs/AUDIT.md) · [移植指南](./docs/PORTING.md) · [变更记录](./CHANGELOG.md)
 
 当前仓库版本 **1.16.0**：78 个地区代码、158 份数据文件，其中 **136 份已核验年度表、2,088 条日期记录**；另有 22 份待核验文件，不进入官方日历接口和 Wiki 自动导入。已完成原定六项优先接入：日本、台湾机关办公日历、香港天文台对照、美国 OPM、全国科普月、全民阅读活动周。本次未发布 npm 包；注册表版本可能晚于仓库。
 
 历法转换、民俗纪念日与法定放假是不同的数据层。算法可推算日期，但临时移日、行业适用范围、观月结果仍以当地公告为准。各项核验范围见资料目录。
 
-新增节日序号：`Festivals.of(SolarDay.fromYmd(2026, 11, 9)).getNames(true)` 可输出「第35个全国消防日」。条目、`SolarFestival` 和地区日历的 `Holiday` 支持 `getOrdinal()`、`getOrdinalName()`、`getOrdinalInfo()`；保留原有名称接口。已逐项核验的序列及范围见 [节日序号核验表](./docs/FESTIVAL-ORDINALS.md)，包括五年一次的世界统计日、改期与缺席规则。无法确定传统起点或完整次数的节日返回 `null`，不把周年或放假天数当作届数。
+新增节日序号：`Festivals.of(SolarDay.fromYmd(2026, 11, 9)).getNames(true)` 可输出「第35个全国消防日」。条目、`SolarFestival` 和地区日历的 `Holiday` 支持 `getOrdinal()`、`getOrdinalName()`、`getOrdinalInfo()`；保留原有名称接口。已逐项核验的序列及范围见 [节日序号核验表](./docs/FESTIVAL-ORDINALS.md)，现覆盖119个独立计数口径（59个国际、37个中国大陆及23个其他国家公共假日），包括2026年第13个中国烈士纪念日、五年一次的世界统计日、浮动星期和秋分规则。世界防治结核病日区分中国官方宣传与国际活动序列，查询结果保留计数范围。无法确定传统起点或完整次数的节日返回 `null`，不把周年或放假天数当作届数。
 
 ---
 
@@ -368,12 +368,12 @@ f.getEntries().map((e) => [Festivals.getCategoryName(e.getCategory()), e.getName
 // [['民俗','寒食节','folk'], ['宗教','眼光娘娘圣诞','taoist'], ['宗教','雷斋日','foto']]
 
 Festivals.getStat();
-// {anniversary:139, folk:29, buddhist:219, buddhistOther:30, guanyin:22, yangGong:13, taoist:96, deity:125}
+// {anniversary:140, folk:29, buddhist:219, buddhistOther:30, guanyin:22, yangGong:13, taoist:96, deity:125}
 ```
 
 | 来源 | 类 | 规模 | 说明 |
 | --- | --- | --- | --- |
-| 公历纪念日与国际日 | `AnniversaryFestival` | 139 键 / 164 名 | 上游 137 键；补国家宪法日、学生营养日、台湾光复纪念日等，7 项附设立年与来源 |
+| 公历纪念日与国际日 | `AnniversaryFestival` | 140 键 / 165 名 | 上游 137 键；补国家宪法日、学生营养日、台湾光复纪念日、全国高血压日等，8 项附起始年与来源 |
 | 农历民俗 | `FolkFestival` | 29 键 | 含寒食、春社秋社、中国农民丰收节 |
 | 佛历 | `BuddhistFestival` | 219 键 / 358 条 + 30 纪念日 | 因果犯忌带宜忌原文，另有观音斋 22 日、杨公忌 13 日、十斋/六斋/朔望判定 |
 | 道历 | `TaoistFestival` | 96 键 / 119 条 | 诸神圣诞带斋日备注，另有三元、五腊、八节、八会、戊日判定 |
