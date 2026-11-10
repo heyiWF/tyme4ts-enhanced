@@ -1,5 +1,7 @@
 import {AbstractCulture, AbstractCultureDay, AbstractDay, AbstractLeapMonth, AbstractMonth, AbstractTyme, AbstractWeek, AbstractYear, DayUnit, EventType, Gender, HideHeavenStemType, LoopTyme, MonthUnit, SecondUnit, Side, Week, WeekUnit, YearUnit, YinYang} from '../core/base';
 import {AbstractTraditionalYear, Constellation, Direction, Duty, EarthBranch, Element, God, HeavenStem, HideHeavenStem, HideHeavenStemDay, MinorRen, Nine, NineStar, SixStar, SixtyCycle, Taboo, ThreePhenology, TwelveStar, TwentyEightStar, Zodiac} from '../almanac/basic';
+import {FestivalOrdinals} from '../festival/ordinal';
+import {FestivalOrdinalInfo} from '../festival/ordinal-types';
 
 export class Phase extends LoopTyme {
     static NAMES: string[] = ['新月', '蛾眉月', '上弦月', '盈凸月', '满月', '亏凸月', '下弦月', '残月'];
@@ -1802,6 +1804,10 @@ export abstract class AbstractFestival extends AbstractTyme {
 }
 
 export class SolarFestival extends AbstractFestival {
+    getOrdinalInfo(): FestivalOrdinalInfo | null { return FestivalOrdinals.get(this.getName(), this.getDay(), 'CN'); }
+    getOrdinal(): number | null { return this.getOrdinalInfo()?.ordinal ?? null; }
+    getOrdinalName(): string { return FestivalOrdinals.format(this.getName(), this.getOrdinalInfo()); }
+
     static NAMES: string[] = ['元旦', '妇女节', '植树节', '劳动节', '青年节', '儿童节', '建党节', '建军节', '教师节', '国庆节'];
     static DATA: string = '0VV__0Ux0Xc__0Ux0Xg__0_Q0ZV__0Ux0ZY__0Ux0aV__0Ux0bV__0Uo0cV__0Ug0de__0_V0eV__0Ux';
 

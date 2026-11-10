@@ -1363,6 +1363,765 @@ class ThreePhenology extends LoopTyme {
   }
 }
 
+const MATARIKI_DATES = {
+  2022: "6-24",
+  2023: "7-14",
+  2024: "6-28",
+  2025: "6-20",
+  2026: "7-10",
+  2027: "6-25",
+  2028: "7-14",
+  2029: "7-6",
+  2030: "6-21",
+  2031: "7-11",
+  2032: "7-2",
+  2033: "6-24",
+  2034: "7-7",
+  2035: "6-29",
+  2036: "7-18",
+  2037: "7-10",
+  2038: "6-25",
+  2039: "7-15",
+  2040: "7-6",
+  2041: "7-19",
+  2042: "7-11",
+  2043: "7-3",
+  2044: "6-24",
+  2045: "7-7",
+  2046: "6-29",
+  2047: "7-19",
+  2048: "7-3",
+  2049: "6-25",
+  2050: "7-15",
+  2051: "6-30",
+  2052: "6-21"
+};
+
+const VERIFIED_ON = "2026-11-10";
+function annual(region, name, firstYear, month, day, referenceYear, referenceOrdinal, source, evidence, scope = region === "*" ? "\u56FD\u9645\u7EAA\u5FF5\u65E5\u7684\u4E3E\u529E\u5E8F\u53F7" : "\u5F53\u5730\u7EAA\u5FF5\u65E5\u7684\u4E3E\u529E\u5E8F\u53F7") {
+  return {
+    id: region + ":" + name,
+    region,
+    names: [name],
+    scope,
+    recurrence: { kind: "yearly", firstYear, intervalYears: 1, dates: [{ fromYear: firstYear, month, day }] },
+    sources: [source],
+    evidence,
+    verifiedOn: VERIFIED_ON,
+    reference: { date: `${referenceYear}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}`, ordinal: referenceOrdinal }
+  };
+}
+const jp = "https://www8.cao.go.jp/chosei/shukujitsu/gaiyou/kaku.html";
+const jpLaw = "https://www8.cao.go.jp/chosei/shukujitsu/gaiyou/kaku/keii.html";
+const jpMoves = "https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html";
+const jpScope = "\u65E5\u672C\u73B0\u884C\u795D\u65E5\u5236\u5EA6\u4E0B\u7684\u6B21\u6570\uFF0C\u4E0D\u8BA1\u6B64\u524D\u4F20\u7EDF\u6216\u5386\u53F2\u4E8B\u4EF6\u5468\u5E74";
+const FESTIVAL_ORDINAL_DATA = [
+  annual(
+    "CN",
+    "\u5168\u56FD\u6D88\u9632\u65E5",
+    1992,
+    11,
+    9,
+    2025,
+    34,
+    "https://www.119.gov.cn/qmxfxw/mtbd/wzbd/2025/52059.shtml",
+    "\u6D88\u9632\u6551\u63F4\u5C40\uFF1A2025-11-09 \u4E3A\u7B2C34\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u9632\u707E\u51CF\u707E\u65E5",
+    2009,
+    5,
+    12,
+    2025,
+    17,
+    "https://www.mem.gov.cn/gk/zfxxgkpt/fdzdgknr/202504/t20250415_514051.shtml",
+    "\u5E94\u6025\u7BA1\u7406\u90E8\u901A\u77E5\uFF1A2025\u5E74\u4E3A\u7B2C17\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u7231\u8033\u65E5",
+    2e3,
+    3,
+    3,
+    2025,
+    26,
+    "https://www.nhc.gov.cn/yzygj/c100068/202501/cbd9e4dd7a8e4d989bb5423ee9af7070.shtml",
+    "\u56FD\u5BB6\u536B\u751F\u5065\u5EB7\u59D4\uFF1A2025\u5E74\u7B2C\u4E8C\u5341\u516D\u6B21\u7231\u8033\u65E5\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u7231\u773C\u65E5",
+    1996,
+    6,
+    6,
+    2025,
+    30,
+    "https://wjw.shanxi.gov.cn/xwzx/szyw/202506/t20250609_9858172.shtml",
+    "\u536B\u751F\u5065\u5EB7\u59D4\u8BB0\u5F552025-06-06\u7B2C30\u4E2A\u5168\u56FD\u7231\u773C\u65E5\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u7231\u7259\u65E5",
+    1989,
+    9,
+    20,
+    2025,
+    37,
+    "https://www.nhc.gov.cn/ylyjs/zcwj/202509/b9275391bd8349e6bf5ebc9667b24ab8.shtml",
+    "\u56FD\u5BB6\u536B\u751F\u5065\u5EB7\u59D4\u901A\u77E5\uFF1A2025\u5E74\u4E3A\u7B2C37\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u759F\u75BE\u65E5",
+    2008,
+    4,
+    26,
+    2025,
+    18,
+    "https://www.ndcpa.gov.cn/jbkzzx/c100014/common/content/content_1910524077771493376.html",
+    "\u56FD\u5BB6\u75BE\u63A7\u5C40\u901A\u77E5\uFF1A2025\u5E74\u4E3A\u7B2C18\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u4EA4\u901A\u5B89\u5168\u65E5",
+    2012,
+    12,
+    2,
+    2025,
+    14,
+    "https://jtgl.beijing.gov.cn/jgj/jgxx/94246/mtlj/743874159/index.html",
+    "\u5317\u4EAC\u4EA4\u7BA1\u5C40\uFF1A2025-12-02\u7B2C14\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u6559\u5E08\u8282",
+    1985,
+    9,
+    10,
+    2025,
+    41,
+    "https://hudong.moe.gov.cn/srcsite/A10/s7002/202508/t20250827_1410731.html",
+    "\u6559\u80B2\u90E8\u901A\u77E5\uFF1A2025-09-10\u4E3A\u7B2C41\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u6C11\u56FD\u5BB6\u5B89\u5168\u6559\u80B2\u65E5",
+    2016,
+    4,
+    15,
+    2025,
+    10,
+    "https://legalinfo.moj.gov.cn/zhfxfzzx/fzzxtzgg/202504/t20250402_516833.html",
+    "\u53F8\u6CD5\u90E8\uFF1A2025\u5E74\u7B2C10\u4E2A\uFF1B2015\u5E74\u7ACB\u6CD5\u5E76\u975E\u9996\u5C4A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u822A\u5929\u65E5",
+    2016,
+    4,
+    24,
+    2025,
+    10,
+    "https://www.cnsa.gov.cn/n6758823/n6758838/c10659800/content.html",
+    "\u56FD\u5BB6\u822A\u5929\u5C40\uFF1A2025\u5E74\u7B2C10\u4E2A\uFF0C\u4E0D\u4ECE1970\u5E74\u53D1\u5C04\u4E8B\u4EF6\u8BA1\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u4EBA\u6C11\u8B66\u5BDF\u8282",
+    2021,
+    1,
+    10,
+    2026,
+    6,
+    "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2026nianzhuanti/2026renminjingchajie/2026rmjcj_yaowen/202601/t20260109_530448.html",
+    "\u53F8\u6CD5\u90E8\uFF1A2026-01-10\u7B2C6\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u6C11\u5065\u8EAB\u65E5",
+    2009,
+    8,
+    8,
+    2025,
+    17,
+    "https://www.sport.gov.cn/n20001280/n20001265/n20067533/c28888111/content.html",
+    "\u4F53\u80B2\u603B\u5C40\uFF1A2025\u5E74\u7B2C17\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u822A\u6D77\u65E5",
+    2005,
+    7,
+    11,
+    2025,
+    21,
+    "https://www.sport.gov.cn/sszx/n5207/c28881146/content.html",
+    "\u4E2D\u56FD\u822A\u6D77\u65E5\u516C\u544A\uFF1A2025\u5E74\u7B2C\u4E8C\u5341\u4E00\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u56FD\u5BB6\u5BAA\u6CD5\u65E5",
+    2014,
+    12,
+    4,
+    2025,
+    12,
+    "https://www.moj.gov.cn/pub/sfbgwapp/zwgk/tzggApp/202511/t20251127_528649.html",
+    "\u53F8\u6CD5\u90E8\uFF1A2025\u5E74\u7B2C12\u4E2A\uFF1B\u4E0E\u6CD5\u5236\u5BA3\u4F20\u65E5\u5206\u522B\u8BA1\u6570\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u534E\u6148\u5584\u65E5",
+    2016,
+    9,
+    5,
+    2025,
+    10,
+    "https://www.cswef.org/cswef/news/detail/id/1499.html",
+    "\u4E2D\u56FD\u793E\u4F1A\u798F\u5229\u57FA\u91D1\u4F1A\uFF1A2025\u5E74\u7B2C10\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u54C1\u724C\u65E5",
+    2017,
+    5,
+    10,
+    2025,
+    9,
+    "https://www.cbrand.com.cn/content-25-29962-1.html",
+    "\u5E02\u573A\u76D1\u7BA1\u603B\u5C40\u4E3B\u7BA1\u54C1\u724C\u520A\u7269\uFF1A2025\u5E74\u7B2C9\u4E2A\u30012017\u5E74\u9996\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u79D1\u6280\u5DE5\u4F5C\u8005\u65E5",
+    2017,
+    5,
+    30,
+    2025,
+    9,
+    "https://www.most.gov.cn/xxgk/xinxifenlei/fdzdgknr/qtwj/qtwj2025/202504/t20250422_193455.html",
+    "\u79D1\u6280\u90E8\u901A\u77E5\uFF1A2025\u5E74\u7B2C9\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u751F\u6001\u65E5",
+    2023,
+    8,
+    15,
+    2025,
+    3,
+    "https://www.mee.gov.cn/ywdt/hjywnews/202508/t20250818_1125516.shtml",
+    "\u751F\u6001\u73AF\u5883\u90E8\uFF1A2025\u5E74\u7B2C\u4E09\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u533B\u5E08\u8282",
+    2018,
+    8,
+    19,
+    2025,
+    8,
+    "https://www.nhc.gov.cn/yzygj/c100067/202508/8388948fcf164acb98a716c2497951ec.shtml",
+    "\u56FD\u5BB6\u536B\u751F\u5065\u5EB7\u59D4\uFF1A2025\u5E74\u7B2C8\u4E2A\uFF1B\u4E0D\u4ECE2017\u5E74\u6279\u590D\u8D77\u8BA1\u3002"
+  ),
+  annual(
+    "CN",
+    "\u4E2D\u56FD\u5B66\u751F\u8425\u517B\u65E5",
+    1990,
+    5,
+    20,
+    2025,
+    36,
+    "https://www.gxcdc.org.cn/html/2025/ztxsyyr_0517/15471.html",
+    "\u5E7F\u897F\u75BE\u63A7\uFF1A2025\u5E74\u7B2C36\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u5168\u56FD\u571F\u5730\u65E5",
+    1991,
+    6,
+    25,
+    2025,
+    35,
+    "https://www.hunan.gov.cn/zqt/zcsd/202506/t20250617_33710739.html",
+    "\u81EA\u7136\u8D44\u6E90\u90E8\u901A\u77E5\uFF1A2025\u5E74\u7B2C35\u4E2A\u3002"
+  ),
+  annual(
+    "CN",
+    "\u56FD\u5BB6\u516C\u796D\u65E5",
+    2014,
+    12,
+    13,
+    2025,
+    12,
+    "https://www.mva.gov.cn/xinwen/dfdt/202601/t20260104_525369.html",
+    "\u9000\u5F79\u519B\u4EBA\u4E8B\u52A1\u90E8\uFF1A2025\u5E74\u7B2C12\u4E2A\uFF0C\u4E0D\u4ECE1937\u5E74\u8BA1\u3002"
+  ),
+  annual(
+    "CN",
+    "\u8BB0\u8005\u8282",
+    2e3,
+    11,
+    8,
+    2025,
+    26,
+    "https://www.xinhuanet.com.cn/20251108/808932de79c84a3499e4c911cbcbbc6f/c.html",
+    "\u65B0\u534E\u793E\u672C\u793E\u8BB0\u8005\u8282\u62A5\u9053\uFF1A2025\u5E74\u7B2C26\u4E2A\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6E7F\u5730\u65E5",
+    1997,
+    2,
+    2,
+    1997,
+    1,
+    "https://www.ramsar.org/world-wetlands-day-1997",
+    "\u6E7F\u5730\u516C\u7EA6\u79D8\u4E66\u5904\u5217\u660E1997\u5E74\u9996\u6B21\u4E3E\u529E\uFF1B\u4E0D\u4ECE1971\u5E74\u516C\u7EA6\u8BA1\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u793E\u4F1A\u516C\u6B63\u65E5",
+    2009,
+    2,
+    20,
+    2009,
+    1,
+    "https://www.un.org/esa/socdev/social/intldays/IntlJustice/2011/Overview.pdf",
+    "\u8054\u5408\u56FD\uFF1A2007\u5E74\u51B3\u8BAE\uFF0C2009\u5E74\u9996\u6B21\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u6BCD\u8BED\u65E5",
+    2e3,
+    2,
+    21,
+    2e3,
+    1,
+    "https://www.unesco.org/en/days/mother-language",
+    "UNESCO\uFF1A1999\u5E74\u901A\u8FC7\uFF0C2000\u5E74\u8D77\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u91CE\u751F\u52A8\u690D\u7269\u65E5",
+    2014,
+    3,
+    3,
+    2014,
+    1,
+    "https://www.unep.org/news-and-stories/press-release/first-ever-world-wildlife-day-spotlights-far-reaching-impact-us19",
+    "UNEP\uFF1A2014-03-03\u4E3A\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5E78\u798F\u65E5",
+    2013,
+    3,
+    20,
+    2013,
+    1,
+    "https://www.un.org/development/desa/en/news/social/intl-day-happiness.html",
+    "\u8054\u5408\u56FD\uFF1A2013-03-20\u4E3A\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6C34\u65E5",
+    1993,
+    3,
+    22,
+    1993,
+    1,
+    "https://www.unwater.org/our-work/world-water-day",
+    "UN-Water\uFF1A\u81EA1993\u5E74\u8D77\u6BCF\u5E743\u670822\u65E5\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6C14\u8C61\u65E5",
+    1961,
+    3,
+    23,
+    1961,
+    1,
+    "https://extranet.wmo.int/edistrib_exped/grp_has/_en/01860-2025-CSG-SC-WMD25_en.pdf",
+    "WMO\uFF1A1961\u5E74\u8D77\u7EAA\u5FF5\uFF1B1950\u5E74\u662F\u516C\u7EA6\u751F\u6548\u5E74\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u536B\u751F\u65E5",
+    1950,
+    4,
+    7,
+    1950,
+    1,
+    "https://www.who.int/europe/campaigns/world-health-day",
+    "WHO\uFF1A\u81EA1950\u5E74\u8D77\u6BCF\u5E744\u67087\u65E5\u4E3E\u529E\uFF1B\u4E0D\u662FWHO\u673A\u6784\u5E74\u9F84\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u77E5\u8BC6\u4EA7\u6743\u65E5",
+    2001,
+    4,
+    26,
+    2001,
+    1,
+    "https://www.wipo.int/pressroom/en/prdocs/2001/wipo_pr_2001_264.html",
+    "WIPO\u9996\u5C4A\u516C\u544A\u660E\u786E2001-04-26\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5BB6\u5EAD\u65E5",
+    1994,
+    5,
+    15,
+    1994,
+    1,
+    "https://digitallibrary.un.org/record/180480/files/E_CN.5_1995_5-EN.pdf",
+    "\u8054\u5408\u56FD\u62A5\u544A\uFF1A1994-05-15\u9996\u6B21\uFF0C1995\u5E74\u7B2C\u4E8C\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6D77\u6D0B\u65E5",
+    2009,
+    6,
+    8,
+    2009,
+    1,
+    "https://legal.un.org/ola/media/info_from_lc/world_oceans_day.pdf",
+    "\u8054\u5408\u56FD\u9996\u6B21\u7EAA\u5FF5\u4E3A2009-06-08\uFF1B\u6B64\u524D\u6C11\u95F4\u6D3B\u52A8\u4E0D\u5E76\u8BA1\u3002",
+    "\u8054\u5408\u56FD\u6B63\u5F0F\u7EAA\u5FF5\u65E5\u5E8F\u53F7\uFF0C\u81EA2009\u5E74\u8D77"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u96BE\u6C11\u65E5",
+    2001,
+    6,
+    20,
+    2001,
+    1,
+    "https://www.unhcr.org/get-involved/take-action/world-refugee-day",
+    "UNHCR\uFF1A2001-06-20\u9996\u6B21\u5168\u7403\u7EAA\u5FF5\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u745C\u4F3D\u65E5",
+    2015,
+    6,
+    21,
+    2015,
+    1,
+    "https://www.un.org/pga/69/210615_statement-day-of-yoga/",
+    "\u8054\u5408\u56FD\u5927\u4F1A\u4E3B\u5E2D\u9996\u5C4A\u8BB2\u8BDD\uFF1A2015-06-21\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u9752\u5E74\u8282",
+    2e3,
+    8,
+    12,
+    2e3,
+    1,
+    "https://www.un.org/en/observances/youth-day/background",
+    "\u8054\u5408\u56FD\uFF1A2000-08-12\u9996\u6B21\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u4EBA\u9053\u4E3B\u4E49\u65E5",
+    2009,
+    8,
+    19,
+    2009,
+    1,
+    "https://www.un.org/sg/en/content/former-secretary-general/statements/2009-08-19/the-secretary-generals-message-world-humanitarian-day",
+    "\u8054\u5408\u56FD\u79D8\u4E66\u957F\uFF1A2009-08-19\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u626B\u76F2\u65E5",
+    1967,
+    9,
+    8,
+    1967,
+    1,
+    "https://www.unesco.org/en/days/literacy",
+    "UNESCO\uFF1A\u81EA1967\u5E74\u8D77\u6BCF\u5E749\u67088\u65E5\u4E3E\u529E\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u65C5\u6E38\u65E5",
+    1980,
+    9,
+    27,
+    1980,
+    1,
+    "https://www.un.org/en/observances/tourism-day/background",
+    "\u8054\u5408\u56FD\uFF1A1980\u5E74\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u56FD\u9645\u5973\u7AE5\u65E5",
+    2012,
+    10,
+    11,
+    2012,
+    1,
+    "https://2009-2017.state.gov/secretary/20092013clinton/rm/2012/10/198720.htm",
+    "\u7F8E\u56FD\u56FD\u52A1\u537F2012-10-11\u81F4\u8F9E\uFF1A\u9996\u4E2A\u56FD\u9645\u5973\u7AE5\u65E5\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u6D77\u5578\u65E5",
+    2016,
+    11,
+    5,
+    2016,
+    1,
+    "https://www.un.org/pga/71/event2/tsunami-awareness-day/",
+    "\u8054\u5408\u56FD\uFF1A2015\u5E7412\u6708\u8BBE\u7ACB\uFF0C2016-11-05\u9996\u6B21\u3002"
+  ),
+  annual(
+    "*",
+    "\u4E16\u754C\u827E\u6ECB\u75C5\u65E5",
+    1988,
+    12,
+    1,
+    2007,
+    20,
+    "https://www.unaids.org/sites/default/files/web_story/071201_pp_wad_statement_en_0.pdf",
+    "UNAIDS\uFF1A1988\u5E74\u9996\u6B21\uFF0C2007\u5E74\u4E3A\u7B2C20\u6B21\u3002"
+  ),
+  annual("JP", "\u5143\u65E5", 1949, 1, 1, 1949, 1, jp, "1948\u5E747\u6708\u795D\u65E5\u6CD5\u751F\u6548\u540E\u7684\u9996\u6B21\u5143\u65E5\u3002", jpScope),
+  annual("JP", "\u61B2\u6CD5\u8A18\u5FF5\u65E5", 1949, 5, 3, 1949, 1, jp, "1948\u5E747\u6708\u7ACB\u6CD5\u540E\u9996\u6B215\u67083\u65E5\uFF1B\u5E76\u975E\u5BAA\u6CD5\u65BD\u884C\u5468\u5E74\u3002", jpScope),
+  annual("JP", "\u3053\u3069\u3082\u306E\u65E5", 1949, 5, 5, 1949, 1, jp, "1948\u5E747\u6708\u7ACB\u6CD5\u540E\u9996\u6B215\u67085\u65E5\u3002", jpScope),
+  annual("JP", "\u6587\u5316\u306E\u65E5", 1948, 11, 3, 1948, 1, jp, "1948\u5E74\u795D\u65E5\u6CD5\u8BBE\u7ACB\u3002", jpScope),
+  annual("JP", "\u52E4\u52B4\u611F\u8B1D\u306E\u65E5", 1948, 11, 23, 1948, 1, jp, "1948\u5E74\u795D\u65E5\u6CD5\u8BBE\u7ACB\uFF0C\u4E0D\u8BA1\u65B0\u5C1D\u796D\u3002", jpScope),
+  annual("JP", "\u5EFA\u56FD\u8A18\u5FF5\u306E\u65E5", 1967, 2, 11, 1967, 1, jp, "1966\u5E7412\u6708\u786E\u5B9A\u65E5\u671F\u540E\u7684\u9996\u6B212\u670811\u65E5\u3002", jpScope),
+  annual("JP", "\u662D\u548C\u306E\u65E5", 2007, 4, 29, 2007, 1, jp, "2007\u5E74\u8D77\u65B0\u8BBE\u3002", jpScope),
+  annual("JP", "\u307F\u3069\u308A\u306E\u65E5", 1989, 4, 29, 1989, 1, jp, "1989\u5E74\u8BBE\u7ACB\uFF0C2007\u5E74\u79FB\u81F35\u67084\u65E5\uFF0C\u8FDE\u7EED\u8BA1\u6570\u3002", jpScope),
+  annual("JP", "\u6210\u4EBA\u306E\u65E5", 1949, 1, 15, 1949, 1, jp, "1949\u5E74\u9996\u6B21\uFF0C2000\u5E74\u79FB\u81F3\u4E00\u6708\u7B2C\u4E8C\u5468\u4E00\u3002", jpScope),
+  annual("JP", "\u6D77\u306E\u65E5", 1996, 7, 20, 1996, 1, jp, "1996\u5E74\u9996\u6B21\uFF0C2003\u5E74\u6539\u4E03\u6708\u7B2C\u4E09\u5468\u4E00\uFF1B\u542B\u5965\u8FD0\u79FB\u65E5\u3002", jpScope),
+  annual("JP", "\u5C71\u306E\u65E5", 2016, 8, 11, 2016, 1, jp, "2016\u5E74\u9996\u6B21\uFF1B\u542B\u5965\u8FD0\u79FB\u65E5\u3002", jpScope),
+  annual("JP", "\u656C\u8001\u306E\u65E5", 1966, 9, 15, 1966, 1, jp, "1966\u5E74\u8BBE\u7ACB\uFF0C2003\u5E74\u6539\u4E5D\u6708\u7B2C\u4E09\u5468\u4E00\u3002", jpScope),
+  annual("JP", "\u5929\u7687\u8A95\u751F\u65E5", 1949, 4, 29, 1949, 1, jp, "\u4F9D\u795D\u65E5\u6CD5\u8FDE\u7EED\u8BA1\u6570\uFF0C2019\u5E74\u65E0\u6B64\u795D\u65E5\uFF0C\u6263\u9664\u4E00\u5E74\u3002", jpScope),
+  annual("JP", "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", 1966, 10, 10, 1966, 1, jp, "\u6CBF\u75281966\u5E74\u4F53\u80B2\u306E\u65E5\u5E8F\u5217\uFF0C2020\u5E74\u6539\u540D\u4E0D\u91CD\u7F6E\u3002", jpScope),
+  annual(
+    "SG",
+    "\u56FD\u5E86\u65E5",
+    1966,
+    8,
+    9,
+    1966,
+    1,
+    "https://corporate.nas.gov.sg/discover-archives/media/independenceday/",
+    "\u65B0\u52A0\u5761\u56FD\u5BB6\u6863\u6848\u9986\uFF1A1966\u5E74\u9996\u6B21\u56FD\u5E86\u5E86\u795D\u3002",
+    "\u72EC\u7ACB\u540E\u56FD\u5E86\u7EAA\u5FF5\u6B21\u6570\uFF0C\u81EA1966\u5E74\u9996\u6B21\u5E86\u795D\u8D77"
+  ),
+  annual(
+    "IN",
+    "\u72EC\u7ACB\u65E5",
+    1947,
+    8,
+    15,
+    2025,
+    79,
+    "https://nfc.gov.in/news-and-events.html",
+    "\u5370\u5EA6\u539F\u5B50\u80FD\u90E8\u6838\u71C3\u6599\u4E2D\u5FC3\uFF1A2025-08-15\u7B2C79\u6B21\u3002",
+    "\u5370\u5EA6\u5B98\u65B9\u72EC\u7ACB\u65E5\u5E8F\u53F7\uFF0C\u542B1947\u5E74\u5F53\u65E5"
+  ),
+  annual(
+    "IN",
+    "\u5171\u548C\u56FD\u65E5",
+    1950,
+    1,
+    26,
+    2026,
+    77,
+    "https://nfc.gov.in/news-and-events.html",
+    "\u5370\u5EA6\u6838\u71C3\u6599\u4E2D\u5FC3\uFF1A2026-01-26\u7B2C77\u6B21\u3002",
+    "\u5370\u5EA6\u5B98\u65B9\u5171\u548C\u56FD\u65E5\u5E8F\u53F7\uFF0C\u542B1950\u5E74\u5F53\u65E5"
+  ),
+  annual(
+    "US",
+    "\u9A6C\u4E01\xB7\u8DEF\u5FB7\xB7\u91D1\u7EAA\u5FF5\u65E5",
+    1986,
+    1,
+    20,
+    1986,
+    1,
+    "https://www.govinfo.gov/content/pkg/STATUTE-98/pdf/STATUTE-98-Pg1473.pdf",
+    "\u516C\u6CD598-399\u660E\u786E1986-01-20\u4E3A\u9996\u4E2A\u8054\u90A6\u5047\u65E5\u3002",
+    "\u7F8E\u56FD\u8054\u90A6\u5047\u65E5\u6B21\u6570\uFF0C\u4E0D\u8BA1\u4E2A\u4EBA\u8BDE\u8FB0\u53CA\u5148\u524D\u5DDE\u7EA7\u7EAA\u5FF5"
+  ),
+  annual(
+    "US",
+    "\u516D\u6708\u8282",
+    2021,
+    6,
+    19,
+    2021,
+    1,
+    "https://www.congress.gov/crs_external_products/IN/PDF/IN11697/IN11697.3.pdf",
+    "\u56FD\u4F1A\u7814\u7A76\u5904\uFF1A2021\u5E74\u8BBE\u7ACB\u4E3A\u8054\u90A6\u5047\u65E5\uFF1B\u6B64\u524D\u4F20\u7EDF\u4E0D\u5E76\u8BA1\u3002",
+    "\u7F8E\u56FD\u8054\u90A6\u5047\u65E5\u6B21\u6570\uFF0C\u81EA2021\u5E74\u8D77\uFF0C\u4E0D\u662F\u81EA1865\u5E74\u4EE5\u6765\u7684\u5468\u5E74"
+  ),
+  annual(
+    "CA",
+    "\u5168\u56FD\u771F\u76F8\u4E0E\u548C\u89E3\u65E5",
+    2021,
+    9,
+    30,
+    2021,
+    1,
+    "https://www.gg.ca/en/node/14460",
+    "\u52A0\u62FF\u5927\u603B\u7763\uFF1A2021-09-30\u9996\u6B21\u3002",
+    "\u52A0\u62FF\u5927\u56FD\u5BB6\u7EAA\u5FF5\u65E5\u6B21\u6570\uFF0C\u4E0D\u4ECE\u6A59\u886B\u65E5\u8D77\u7B97"
+  ),
+  annual(
+    "IE",
+    "\u5723\u5E03\u91CC\u5409\u5FB7\u8282",
+    2023,
+    2,
+    6,
+    2023,
+    1,
+    "https://www.gov.ie/en/department-of-culture-communications-and-sport/press-releases/inaugural-saint-brigids-day-bank-holiday-cultural-programme-launched-to-celebrate-women-in-ireland/",
+    "2023\u5E74\u9996\u4E2A\u516C\u5171\u5047\u65E5\uFF1B\u4E8C\u6708\u9996\u4E2A\u5468\u4E00\uFF0C\u82E51\u65E5\u5468\u4E94\u5219\u53D61\u65E5\u3002",
+    "\u7231\u5C14\u5170\u516C\u5171\u5047\u65E5\u6B21\u6570\uFF0C\u81EA2023\u5E74\u8D77\uFF0C\u4E0D\u8BA1\u53E4\u8001\u8282\u4FD7"
+  ),
+  annual(
+    "SA",
+    "\u5EFA\u56FD\u65E5",
+    2022,
+    2,
+    22,
+    2022,
+    1,
+    "https://saudipedia.com/en/what-is-the-saudi-founding-day",
+    "\u6C99\u7279\u5B98\u65B9\u767E\u79D1\uFF1A2022-02-22\u9996\u6B21\u5E86\u795D\u3002",
+    "\u6C99\u7279\u5EFA\u56FD\u65E5\u8282\u65E5\u6B21\u6570\uFF0C\u81EA2022\u5E74\u8D77\uFF1B\u4E0D\u662F1727\u5E74\u4EE5\u6765\u7684\u5468\u5E74"
+  )
+];
+function row(region, name) {
+  return FESTIVAL_ORDINAL_DATA.find((d) => d.region === region && d.names[0] === name);
+}
+function dates(region, name, rules) {
+  const r = row(region, name).recurrence;
+  if (r.kind === "yearly") r.dates = rules;
+}
+dates("JP", "\u307F\u3069\u308A\u306E\u65E5", [{ fromYear: 1989, month: 4, day: 29 }, { fromYear: 2007, month: 5, day: 4 }]);
+dates("JP", "\u6210\u4EBA\u306E\u65E5", [{ fromYear: 1949, month: 1, day: 15 }, { fromYear: 2e3, month: 1, week: 2, weekday: 1 }]);
+dates("JP", "\u6D77\u306E\u65E5", [{ fromYear: 1996, month: 7, day: 20 }, { fromYear: 2003, month: 7, week: 3, weekday: 1 }]);
+dates("JP", "\u656C\u8001\u306E\u65E5", [{ fromYear: 1966, month: 9, day: 15 }, { fromYear: 2003, month: 9, week: 3, weekday: 1 }]);
+dates("JP", "\u5929\u7687\u8A95\u751F\u65E5", [{ fromYear: 1949, month: 4, day: 29 }, { fromYear: 1989, month: 12, day: 23 }, { fromYear: 2020, month: 2, day: 23 }]);
+const emperor = row("JP", "\u5929\u7687\u8A95\u751F\u65E5").recurrence;
+if (emperor.kind === "yearly") emperor.omittedYears = [2019];
+dates("JP", "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", [{ fromYear: 1966, month: 10, day: 10 }, { fromYear: 2e3, month: 10, week: 2, weekday: 1 }]);
+row("JP", "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5").names.push("\u4F53\u80B2\u306E\u65E5", "\u4F53\u80B2\u306E\u65E5\uFF08\u30B9\u30DD\u30FC\u30C4\u306E\u65E5\uFF09");
+row("US", "\u9A6C\u4E01\xB7\u8DEF\u5FB7\xB7\u91D1\u7EAA\u5FF5\u65E5").names.push("Birthday of Martin Luther King, Jr.");
+row("US", "\u516D\u6708\u8282").names.push("Juneteenth National Independence Day");
+dates("US", "\u9A6C\u4E01\xB7\u8DEF\u5FB7\xB7\u91D1\u7EAA\u5FF5\u65E5", [{ fromYear: 1986, month: 1, week: 3, weekday: 1 }]);
+dates("IE", "\u5723\u5E03\u91CC\u5409\u5FB7\u8282", [{ fromYear: 2023, month: 2, week: 1, weekday: 1, firstFriday: true }]);
+for (const name of ["\u5143\u65E5", "\u61B2\u6CD5\u8A18\u5FF5\u65E5", "\u3053\u3069\u3082\u306E\u65E5", "\u6587\u5316\u306E\u65E5", "\u52E4\u52B4\u611F\u8B1D\u306E\u65E5", "\u6210\u4EBA\u306E\u65E5", "\u5929\u7687\u8A95\u751F\u65E5"]) row("JP", name).sources.push(jpLaw);
+for (const [name, overrides] of [
+  ["\u6D77\u306E\u65E5", { 2020: "7-23", 2021: "7-22" }],
+  ["\u5C71\u306E\u65E5", { 2020: "8-10", 2021: "8-8" }],
+  ["\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", { 2020: "7-24", 2021: "7-23" }]
+]) {
+  const d = row("JP", name);
+  if (d.recurrence.kind === "yearly") d.recurrence.overrides = overrides;
+  d.sources.push(jpMoves);
+}
+const statistics = annual(
+  "*",
+  "\u4E16\u754C\u7EDF\u8BA1\u65E5",
+  2010,
+  10,
+  20,
+  2010,
+  1,
+  "https://unstats.un.org/unsd/wsd/2025/resources.html",
+  "\u8054\u5408\u56FD\u7EDF\u8BA1\u53F8\uFF1A2010\u5E74\u9996\u6B21\uFF0C\u4E4B\u540E\u6BCF\u4E94\u5E74\u4E00\u6B21\u3002"
+);
+if (statistics.recurrence.kind === "yearly") statistics.recurrence.intervalYears = 5;
+FESTIVAL_ORDINAL_DATA.push(statistics);
+FESTIVAL_ORDINAL_DATA.push({
+  id: "NZ:Matariki",
+  region: "NZ",
+  names: ["\u6BDB\u5229\u65B0\u5E74\uFF08Matariki\uFF09", "Matariki"],
+  scope: "\u65B0\u897F\u5170\u6BDB\u5229\u65B0\u5E74\u516C\u5171\u5047\u65E5\u6B21\u6570\uFF0C\u81EA2022\u5E74\u8D77\uFF1B\u4E0D\u662F\u6BDB\u5229\u4F20\u7EDF\u7684\u5E74\u9F84",
+  recurrence: { kind: "explicit", editions: Object.keys(MATARIKI_DATES).map((y) => {
+    const [m, d] = MATARIKI_DATES[+y].split("-");
+    return { start: `${y}-${("0" + m).slice(-2)}-${("0" + d).slice(-2)}`, ordinal: +y - 2021 };
+  }) },
+  sources: ["https://www.legislation.govt.nz/act/public/2022/14/en/latest/sections/LMS557893/"],
+  evidence: "\u6CD5\u6848\u9644\u8868\u9010\u5E74\u5217\u660E2022\u20142052\u5E74\u65E5\u671F\uFF1B\u8868\u5916\u4E0D\u5916\u63A8\u3002",
+  verifiedOn: VERIFIED_ON,
+  reference: { date: "2022-06-24", ordinal: 1 }
+});
+
+class FestivalOrdinals {
+  static definition(name, region) {
+    const key = region.toUpperCase();
+    const regions = [key, key.split("-")[0], "*"];
+    for (const r of regions) {
+      const found = FESTIVAL_ORDINAL_DATA.find((d) => d.region === r && d.names.indexOf(name) >= 0);
+      if (found) return found;
+    }
+    return void 0;
+  }
+  static getDefinitions() {
+    return JSON.parse(JSON.stringify(FESTIVAL_ORDINAL_DATA));
+  }
+  /** null means no verified edition for this name, jurisdiction and exact date. */
+  static get(name, day, region = "CN") {
+    const definition = FestivalOrdinals.definition(name, region);
+    if (!definition) return null;
+    const rule = definition.recurrence;
+    let ordinal;
+    if (rule.kind === "explicit") {
+      const date = `${("0000" + day.getYear()).slice(-4)}-${("0" + day.getMonth()).slice(-2)}-${("0" + day.getDay()).slice(-2)}`;
+      const edition = rule.editions.find((e) => date >= e.start && date <= (e.end || e.start));
+      if (!edition) return null;
+      ordinal = edition.ordinal;
+    } else {
+      const year = day.getYear();
+      const elapsed = year - rule.firstYear;
+      if (elapsed < 0 || elapsed % rule.intervalYears !== 0 || (rule.omittedYears || []).indexOf(year) >= 0) return null;
+      const override = rule.overrides && rule.overrides[year];
+      if (override !== void 0) {
+        if (override !== day.getMonth() + "-" + day.getDay()) return null;
+      } else {
+        const dates = rule.dates.filter((d) => year >= d.fromYear);
+        const date = dates[dates.length - 1];
+        if (!date || day.getMonth() !== date.month) return null;
+        if (date.day !== void 0) {
+          if (day.getDay() !== date.day) return null;
+        } else {
+          const first = day.next(1 - day.getDay()).getWeek().getIndex();
+          const target = date.firstFriday && first === 5 ? 1 : 1 + (date.weekday - first + 7) % 7 + 7 * (date.week - 1);
+          if (day.getDay() !== target) return null;
+        }
+      }
+      ordinal = elapsed / rule.intervalYears + 1 - (rule.omittedYears || []).filter((y) => y >= rule.firstYear && y < year && (y - rule.firstYear) % rule.intervalYears === 0).length;
+    }
+    return {
+      id: definition.id,
+      ordinal,
+      region: definition.region,
+      scope: definition.scope,
+      sources: definition.sources.slice(),
+      verifiedOn: definition.verifiedOn
+    };
+  }
+  /** null = unresearched; false = a researched observance is not held on this date. */
+  static isObserved(name, day, region = "CN") {
+    return FestivalOrdinals.definition(name, region) ? FestivalOrdinals.get(name, day, region) !== null : null;
+  }
+  static format(name, info) {
+    return info ? `\u7B2C${info.ordinal}\u4E2A${name}` : name;
+  }
+}
+
 class Phase extends LoopTyme {
   static NAMES = ["\u65B0\u6708", "\u86FE\u7709\u6708", "\u4E0A\u5F26\u6708", "\u76C8\u51F8\u6708", "\u6EE1\u6708", "\u4E8F\u51F8\u6708", "\u4E0B\u5F26\u6708", "\u6B8B\u6708"];
   lunarYear;
@@ -5618,6 +6377,15 @@ class AbstractFestival extends AbstractTyme {
   }
 }
 class SolarFestival extends AbstractFestival {
+  getOrdinalInfo() {
+    return FestivalOrdinals.get(this.getName(), this.getDay(), "CN");
+  }
+  getOrdinal() {
+    return this.getOrdinalInfo()?.ordinal ?? null;
+  }
+  getOrdinalName() {
+    return FestivalOrdinals.format(this.getName(), this.getOrdinalInfo());
+  }
   static NAMES = ["\u5143\u65E6", "\u5987\u5973\u8282", "\u690D\u6811\u8282", "\u52B3\u52A8\u8282", "\u9752\u5E74\u8282", "\u513F\u7AE5\u8282", "\u5EFA\u515A\u8282", "\u5EFA\u519B\u8282", "\u6559\u5E08\u8282", "\u56FD\u5E86\u8282"];
   static DATA = "0VV__0Ux0Xc__0Ux0Xg__0_Q0ZV__0Ux0ZY__0Ux0aV__0Ux0bV__0Uo0cV__0Ug0de__0_V0eV__0Ux";
   constructor(index, event, day) {
@@ -14292,6 +15060,7 @@ class HolidayRule extends AbstractCulture {
   sundayShift;
   startYear;
   endYear;
+  firstDayWeek = -1;
   /**
    * 逐年表，键为公历年，值为「月-日」
    */
@@ -14404,13 +15173,16 @@ class HolidayRule extends AbstractCulture {
   /**
    * @param weekIndex 第几个，负数自月末倒推
    * @param week 星期，0 为周日
+   * @param firstDayWeek 若月初一为此星期，改用初一；-1 表示不启用
    */
-  static week(month, weekIndex, week, name, startYear = 1) {
+  static week(month, weekIndex, week, name, startYear = 1, endYear = 9999, firstDayWeek = -1) {
     const o = new HolidayRule(2 /* WEEK */, name);
     o.month = month;
     o.weekIndex = weekIndex;
     o.week = week;
     o.startYear = startYear;
+    o.endYear = endYear;
+    o.firstDayWeek = firstDayWeek;
     return o;
   }
   /**
@@ -14495,8 +15267,11 @@ class HolidayRule extends AbstractCulture {
         return HolidayRule.getTermDay(year, this.termIndex).next(this.offset);
       case 3 /* EASTER */:
         return HolidayRule.getEasterDay(year).next(this.offset);
-      case 2 /* WEEK */:
+      case 2 /* WEEK */: {
+        const first = SolarDay.fromYmd(year, this.month, 1);
+        if (first.getWeek().getIndex() === this.firstDayWeek) return first;
         return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+      }
       case 10 /* TABLE */: {
         const md = this.table[year];
         if (!md) {
@@ -14646,40 +15421,6 @@ function HebrewRuleYear(gregorianYear, hebrewMonth) {
   return hebrewMonth >= 7 ? gregorianYear + 3761 : gregorianYear + 3760;
 }
 
-const MATARIKI_DATES = {
-  2022: "6-24",
-  2023: "7-14",
-  2024: "6-28",
-  2025: "6-20",
-  2026: "7-10",
-  2027: "6-25",
-  2028: "7-14",
-  2029: "7-6",
-  2030: "6-21",
-  2031: "7-11",
-  2032: "7-2",
-  2033: "6-24",
-  2034: "7-7",
-  2035: "6-29",
-  2036: "7-18",
-  2037: "7-10",
-  2038: "6-25",
-  2039: "7-15",
-  2040: "7-6",
-  2041: "7-19",
-  2042: "7-11",
-  2043: "7-3",
-  2044: "6-24",
-  2045: "7-7",
-  2046: "6-29",
-  2047: "7-19",
-  2048: "7-3",
-  2049: "6-25",
-  2050: "7-15",
-  2051: "6-30",
-  2052: "6-21"
-};
-
 function polandRules() {
   return [
     HolidayRule.solar(1, 1, "\u5143\u65E6"),
@@ -14780,7 +15521,9 @@ function icelandRules() {
 function irelandRules() {
   return [
     HolidayRule.solar(1, 1, "\u5143\u65E6"),
-    HolidayRule.week(2, 1, 1, "\u5723\u5E03\u91CC\u5409\u5FB7\u8282", 2023),
+    // 2023 onward: first Monday, except February 1 when that is Friday.
+    // https://www.gov.ie/en/department-of-culture-communications-and-sport/press-releases/inaugural-saint-brigids-day-bank-holiday-cultural-programme-launched-to-celebrate-women-in-ireland/
+    HolidayRule.week(2, 1, 1, "\u5723\u5E03\u91CC\u5409\u5FB7\u8282", 2023, 9999, 5),
     HolidayRule.solar(3, 17, "\u5723\u5E15\u7279\u91CC\u514B\u8282"),
     HolidayRule.easter(1, "\u590D\u6D3B\u8282\u661F\u671F\u4E00"),
     HolidayRule.week(5, 1, 1, "\u4E94\u6708\u94F6\u884C\u5047\u65E5"),
@@ -15224,20 +15967,34 @@ function federalTerritoryExtra() {
 }
 
 class Holiday extends AbstractCulture {
-  day;
-  name;
-  work;
-  constructor(day, name, work = false) {
+  constructor(day, name, work = false, region = "") {
     super();
+    this.region = region;
     this.day = day;
     this.name = name;
     this.work = work;
   }
+  day;
+  name;
+  work;
   getDay() {
     return this.day;
   }
   getName() {
     return this.name;
+  }
+  getRegion() {
+    return this.region;
+  }
+  /** Only the actual observance date; workdays, substitutes and combined labels do not count again. */
+  getOrdinalInfo() {
+    return this.work || !this.region ? null : FestivalOrdinals.get(this.name, this.day, this.region);
+  }
+  getOrdinal() {
+    return this.getOrdinalInfo()?.ordinal ?? null;
+  }
+  getOrdinalName() {
+    return FestivalOrdinals.format(this.name, this.getOrdinalInfo());
   }
   /**
    * 是否为调休上班日
@@ -15306,7 +16063,7 @@ class HolidayCalendar {
       case "TW":
         return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), "\u7EAA\u5FF5\u65E5\u4E0E\u6C11\u4FD7\u8282\u65E5\uFF1B\u8C03\u4F11\u4EE5\u884C\u653F\u9662\u516C\u544A\u4E3A\u51C6\u3002");
       case "JP":
-        return new HolidayCalendar(r, HolidayCalendar.japanRules(), "\u56FD\u6C11\u306E\u795D\u65E5\uFF0C\u542B\u632F\u66FF\u4F11\u65E5\u4E0E\u56FD\u6C11\u306E\u4F11\u65E5\uFF1B2020\u30012021 \u5E74\u5965\u8FD0\u8C03\u6574\u672A\u5355\u5217\u3002", 0, true);
+        return new HolidayCalendar(r, HolidayCalendar.japanRules(), "\u56FD\u6C11\u306E\u795D\u65E5\uFF0C\u542B\u632F\u66FF\u4F11\u65E5\u4E0E\u56FD\u6C11\u306E\u4F11\u65E5\uFF1B\u5305\u542B2020\u30012021\u5E74\u5965\u8FD0\u79FB\u65E5\u3002", 0, true);
       case "KR":
         return new HolidayCalendar(r, HolidayCalendar.koreaRules(), "\u6CD5\u5B9A\u516C\u4F11\u65E5\u6838\u5FC3\uFF1B\u66FF\u4EE3\u516C\u4F11\u65E5\u4E0E\u4E34\u65F6\u516C\u4F11\u65E5\u4EE5\u653F\u5E9C\u516C\u544A\u4E3A\u51C6\u3002");
       case "VN":
@@ -15362,7 +16119,7 @@ class HolidayCalendar {
       case "IS":
         return new HolidayCalendar(r, icelandRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF1B\u590F\u5B63\u9996\u65E5\u4E3A\u56DB\u6708\u5341\u4E5D\u65E5\u540E\u7684\u7B2C\u4E00\u4E2A\u661F\u671F\u56DB\u3002");
       case "IE":
-        return new HolidayCalendar(r, irelandRules(), "\u516C\u5171\u5047\u65E5\uFF1B\u5723\u5E03\u91CC\u5409\u5FB7\u8282\u81EA 2023 \u5E74\u8D77\u4E3A\u4E8C\u6708\u7B2C\u4E00\u4E2A\u661F\u671F\u4E00\u3002");
+        return new HolidayCalendar(r, irelandRules(), "\u516C\u5171\u5047\u65E5\uFF1B\u5723\u5E03\u91CC\u5409\u5FB7\u8282\u81EA2023\u5E74\u8D77\u4E3A\u4E8C\u6708\u9996\u4E2A\u5468\u4E00\uFF0C\u82E5\u4E8C\u6708\u4E00\u65E5\u4E3A\u5468\u4E94\u5219\u53D6\u8BE5\u65E5\u3002");
       case "PT":
         return new HolidayCalendar(r, portugalRules(), "\u5168\u56FD\u6CD5\u5B9A\u5047\u65E5\uFF0C\u542B\u5723\u4F53\u8282\u3002");
       case "CH":
@@ -15628,23 +16385,35 @@ class HolidayCalendar {
   }
   static japanRules() {
     return [
-      HolidayRule.solar(1, 1, "\u5143\u65E5"),
+      HolidayRule.solar(1, 1, "\u5143\u65E5", 1949),
+      HolidayRule.solar(1, 15, "\u6210\u4EBA\u306E\u65E5", 1949, 1999),
       HolidayRule.week(1, 2, 1, "\u6210\u4EBA\u306E\u65E5", 2e3),
-      HolidayRule.solar(2, 11, "\u5EFA\u56FD\u8A18\u5FF5\u306E\u65E5"),
+      HolidayRule.solar(2, 11, "\u5EFA\u56FD\u8A18\u5FF5\u306E\u65E5", 1967),
+      HolidayRule.solar(4, 29, "\u5929\u7687\u8A95\u751F\u65E5", 1949, 1988),
       HolidayRule.solar(12, 23, "\u5929\u7687\u8A95\u751F\u65E5", 1989, 2018),
       HolidayRule.solar(2, 23, "\u5929\u7687\u8A95\u751F\u65E5", 2020),
       HolidayRule.term(6, "\u6625\u5206\u306E\u65E5"),
       HolidayRule.solar(4, 29, "\u662D\u548C\u306E\u65E5", 2007),
-      HolidayRule.solar(5, 3, "\u61B2\u6CD5\u8A18\u5FF5\u65E5"),
+      HolidayRule.solar(5, 3, "\u61B2\u6CD5\u8A18\u5FF5\u65E5", 1949),
+      HolidayRule.solar(4, 29, "\u307F\u3069\u308A\u306E\u65E5", 1989, 2006),
       HolidayRule.solar(5, 4, "\u307F\u3069\u308A\u306E\u65E5", 2007),
-      HolidayRule.solar(5, 5, "\u3053\u3069\u3082\u306E\u65E5"),
-      HolidayRule.week(7, 3, 1, "\u6D77\u306E\u65E5", 2003),
-      HolidayRule.solar(8, 11, "\u5C71\u306E\u65E5", 2016),
+      HolidayRule.solar(5, 5, "\u3053\u3069\u3082\u306E\u65E5", 1949),
+      HolidayRule.solar(7, 20, "\u6D77\u306E\u65E5", 1996, 2002),
+      HolidayRule.week(7, 3, 1, "\u6D77\u306E\u65E5", 2003, 2019),
+      HolidayRule.table("\u6D77\u306E\u65E5", { 2020: "7-23", 2021: "7-22" }),
+      HolidayRule.week(7, 3, 1, "\u6D77\u306E\u65E5", 2022),
+      HolidayRule.solar(8, 11, "\u5C71\u306E\u65E5", 2016, 2019),
+      HolidayRule.table("\u5C71\u306E\u65E5", { 2020: "8-10", 2021: "8-8" }),
+      HolidayRule.solar(8, 11, "\u5C71\u306E\u65E5", 2022),
+      HolidayRule.solar(9, 15, "\u656C\u8001\u306E\u65E5", 1966, 2002),
       HolidayRule.week(9, 3, 1, "\u656C\u8001\u306E\u65E5", 2003),
       HolidayRule.term(18, "\u79CB\u5206\u306E\u65E5"),
-      HolidayRule.week(10, 2, 1, "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", 2020),
-      HolidayRule.solar(11, 3, "\u6587\u5316\u306E\u65E5"),
-      HolidayRule.solar(11, 23, "\u52E4\u52B4\u611F\u8B1D\u306E\u65E5")
+      HolidayRule.solar(10, 10, "\u4F53\u80B2\u306E\u65E5", 1966, 1999),
+      HolidayRule.week(10, 2, 1, "\u4F53\u80B2\u306E\u65E5", 2e3, 2019),
+      HolidayRule.table("\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", { 2020: "7-24", 2021: "7-23" }),
+      HolidayRule.week(10, 2, 1, "\u30B9\u30DD\u30FC\u30C4\u306E\u65E5", 2022),
+      HolidayRule.solar(11, 3, "\u6587\u5316\u306E\u65E5", 1948),
+      HolidayRule.solar(11, 23, "\u52E4\u52B4\u611F\u8B1D\u306E\u65E5", 1948)
     ];
   }
   static koreaRules() {
@@ -16075,7 +16844,7 @@ class HolidayCalendar {
         continue;
       }
       if (includeWork || !map[k].isWork()) {
-        l.push(map[k]);
+        l.push(new Holiday(map[k].getDay(), map[k].getName(), map[k].isWork(), this.region));
       }
     }
     l.sort((a, b) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
@@ -16261,7 +17030,7 @@ class HolidayCalendar {
     const l = [];
     for (const k in map) {
       if (map[k].getDay().getYear() === year && !map[k].isWork()) {
-        l.push(map[k]);
+        l.push(new Holiday(map[k].getDay(), map[k].getName(), map[k].isWork(), this.region));
       }
     }
     l.sort((a, b) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
@@ -16341,20 +17110,32 @@ var FestivalCategory = /* @__PURE__ */ ((FestivalCategory2) => {
   return FestivalCategory2;
 })(FestivalCategory || {});
 class FestivalEntry {
-  name;
-  category;
-  source;
-  note;
-  region;
-  constructor(name, category, source, note = "", region = "") {
+  constructor(name, category, source, note = "", region = "", ordinalInfo = null) {
+    this.ordinalInfo = ordinalInfo;
     this.name = name;
     this.category = category;
     this.source = source;
     this.note = note;
     this.region = region;
   }
+  name;
+  category;
+  source;
+  note;
+  region;
   getName() {
     return this.name;
+  }
+  /** Verified edition; unknown traditions and unverified origins return null. */
+  getOrdinal() {
+    return this.ordinalInfo ? this.ordinalInfo.ordinal : null;
+  }
+  getOrdinalInfo() {
+    return this.ordinalInfo ? { ...this.ordinalInfo, sources: this.ordinalInfo.sources.slice() } : null;
+  }
+  /** Opt-in display; getName() and toString() retain their existing meanings. */
+  getOrdinalName() {
+    return FestivalOrdinals.format(this.name, this.ordinalInfo);
   }
   getCategory() {
     return this.category;
@@ -17067,6 +17848,7 @@ class AnniversaryFestival extends AbstractCulture {
         return;
       }
       for (let i = 0; i < list.length; i++) {
+        if (FestivalOrdinals.isObserved(list[i], solarDay) === false) continue;
         if (names.indexOf(list[i]) < 0) {
           names.push(list[i]);
         }
@@ -17081,7 +17863,10 @@ class AnniversaryFestival extends AbstractCulture {
       entries.push(new FestivalEntry(
         names[i],
         AnniversaryFestival.classify(names[i]),
-        official ? official.source : "6tail"
+        official ? official.source : "6tail",
+        "",
+        "",
+        FestivalOrdinals.get(names[i], solarDay)
       ));
     }
     return new AnniversaryFestival(solarDay, entries);
@@ -17092,10 +17877,10 @@ class AnniversaryFestival extends AbstractCulture {
   getEntries() {
     return this.entries;
   }
-  getNames() {
+  getNames(withOrdinal = false) {
     const l = [];
     for (let i = 0; i < this.entries.length; i++) {
-      l.push(this.entries[i].getName());
+      l.push(withOrdinal ? this.entries[i].getOrdinalName() : this.entries[i].getName());
     }
     return l;
   }
@@ -18031,7 +18816,14 @@ class Festivals extends AbstractCulture {
         raw.push(new FestivalEntry(termName, FestivalCategory.SOLAR_TERM, "tyme"));
       }
     }
-    return new Festivals(solarDay, Festivals.dedupe(raw));
+    return new Festivals(solarDay, Festivals.dedupe(raw).map((e) => new FestivalEntry(
+      e.getName(),
+      e.getCategory(),
+      e.getSource(),
+      e.getNote(),
+      e.getRegion(),
+      e.getOrdinalInfo() || FestivalOrdinals.get(e.getName(), solarDay, e.getRegion() || "CN")
+    )));
   }
   /** 当日所在的多日活动；保留完整期间，不混入单日节日清单。 */
   getPeriods() {
@@ -18114,7 +18906,7 @@ class Festivals extends AbstractCulture {
     const l = [];
     for (let i = 0; i < order.length; i++) {
       const e = best[order[i]];
-      l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join("\u3001"), notes[order[i]].join("\uFF1B"), e.getRegion()));
+      l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join("\u3001"), notes[order[i]].join("\uFF1B"), e.getRegion(), e.getOrdinalInfo()));
     }
     l.sort((a, b) => {
       const p = getCategoryPriority(a.getCategory()) - getCategoryPriority(b.getCategory());
@@ -18135,10 +18927,18 @@ class Festivals extends AbstractCulture {
       n++;
     };
     const solarTable = (table) => {
+      const definitions = FestivalOrdinals.getDefinitions();
       for (const key in table) {
         const md = key.split("-");
         for (let i = 0; i < table[key].length; i++) {
-          put(table[key][i], Event.builder().solarDay(parseInt(md[0], 10), parseInt(md[1], 10), 0).build());
+          const name = table[key][i];
+          const definition = definitions.find((d) => (d.region === "CN" || d.region === "*") && d.names.indexOf(name) >= 0);
+          if (definition && (definition.recurrence.kind !== "yearly" || definition.recurrence.intervalYears !== 1)) {
+            EventManager.remove("\u8282\u65E5:" + name);
+            continue;
+          }
+          const start = definition?.recurrence.kind === "yearly" ? definition.recurrence.firstYear : 0;
+          put(name, Event.builder().solarDay(parseInt(md[0], 10), parseInt(md[1], 10), 0).startYear(start).build());
         }
       }
     };
@@ -18176,10 +18976,10 @@ class Festivals extends AbstractCulture {
     }
     return l;
   }
-  getNames() {
+  getNames(withOrdinal = false) {
     const l = [];
     for (let i = 0; i < this.entries.length; i++) {
-      l.push(this.entries[i].getName());
+      l.push(withOrdinal ? this.entries[i].getOrdinalName() : this.entries[i].getName());
     }
     return l;
   }
@@ -19695,4 +20495,4 @@ class DayAlmanac {
   }
 }
 
-export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, BanglaDay, Beast, BhutaneseDay, BikramSambatDay, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, EthiopianDay, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, FestivalPeriod, FestivalPeriods, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, IslamicFestival, JulianDay, KitchenGodSteed, KoreanLunarDay, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MongolianDay, MonthGeneral, MonthUnit, MyanmarDay, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, OfficialHolidayCalendar, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SakaDay, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThaiLunarDay, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, VietnameseLunarDay, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };
+export { ANNIVERSARY, AbstractChildLimitProvider, AbstractCulture, AbstractCultureDay, AbstractDay, AbstractFestival, AbstractLeapMonth, AbstractMonth, AbstractTraditionalYear, AbstractTyme, AbstractWeek, AbstractYear, Animal, AnniversaryFestival, BUDDHIST, BUDDHIST_OTHER, BanglaDay, Beast, BhutaneseDay, BikramSambatDay, BuddhistFestival, ChildLimit, ChildLimitInfo, China95ChildLimitProvider, Clash, Constellation, DailyNumbers, DayAlmanac, DayUnit, DecadeFortune, DefaultChildLimitProvider, DefaultEightCharProvider, DeityFestival, Dipper, Direction, DiyanetDay, Dog, DogDay, DreamOracle, Duty, DutyAdvice, EarthBranch, Ecliptic, EightChar, Element, ElementBalance, Era, EthiopianDay, Event, EventManager, EventType, FengShuiTip, FestivalCategory, FestivalEntry, FestivalOrdinals, FestivalPeriod, FestivalPeriods, Festivals, FetusDay, FetusEarthBranch, FetusHeavenStem, FetusMonth, FolkFestival, Fortune, GUANYIN, Gender, God, HeavenStem, HebrewDay, HebrewFestival, HebrewMonth, HideHeavenStem, HideHeavenStemDay, HideHeavenStemType, HijriDay, HijriMonth, HijriYear, HinduMonth, Holiday, HolidayCalendar, HolidayRule, HolidayType, HourFortune, IcsCalendar, IcsEvent, IndianDay, IndianFestival, IslamicFestival, JulianDay, KitchenGodSteed, KoreanLunarDay, LUNAR_FOLK, Land, LegalHoliday, LifeRelation, LoopTyme, Luck, LunarDay, LunarFestival, LunarHour, LunarMonth, LunarSeason, LunarSect1ChildLimitProvider, LunarSect2ChildLimitProvider, LunarSect2EightCharProvider, LunarWeek, LunarYear, MinorRen, MongolianDay, MonthGeneral, MonthUnit, MyanmarDay, NameSuggestion, Naming, Nine, NineDay, NineStar, NineStarChart, OfficialHolidayCalendar, Palace, PengZu, PengZuEarthBranch, PengZuHeavenStem, PersianDay, Phase, PhaseDay, Phenology, PhenologyDay, PlumRain, PlumRainDay, RabByungDay, RabByungElement, RabByungMonth, RabByungYear, SakaDay, SecondUnit, SevenStar, ShouXingUtil, Side, SixStar, Sixty, SixtyCycle, SixtyCycleDay, SixtyCycleHour, SixtyCycleMonth, SixtyCycleYear, SolarDay, SolarFestival, SolarHalfYear, SolarMonth, SolarSeason, SolarTerm, SolarTermDay, SolarTime, SolarWeek, SolarYear, Sound, TAOIST, Taboo, TaoistFestival, Ten, TenStar, Terrain, ThaiLunarDay, ThreePhenology, ThreePillars, Tithi, TwelveStar, Twenty, TwentyEightStar, UmmAlQuraDay, VegetarianType, VietnameseLunarDay, Week, WeekUnit, WuHouDay, YANG_GONG, YearUnit, YinYang, Zodiac, ZodiacFortune, ZodiacNumbers, Zone, findSankranti, getCategoryPriority, getSolarTermDay };

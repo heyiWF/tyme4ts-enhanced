@@ -17,7 +17,7 @@
     "build": "unbuild",
     "test": "mocha -r ts-node/register --config=.mocharc.json",
     "release": "npm run test && npm publish",
-    "docs": "npm run build && node -e \"require('fs').copyFileSync('dist/lib/index.mjs','docs/tyme.mjs')\" && node scripts/build-data-review.mjs && node scripts/build-docs-data.mjs && node scripts/build-api-docs.mjs",
+    "docs": "npm run build && node -e \"require('fs').copyFileSync('dist/lib/index.mjs','docs/tyme.mjs')\" && node scripts/build-data-review.mjs && node scripts/build-ordinal-review.mjs && node scripts/build-docs-data.mjs && node scripts/build-api-docs.mjs",
     "js": "unbuild && node build-js.js",
     "gen:festivals": "python scripts/gen-festival-data.py",
     "verify:festivals": "node scripts/verify-festivals.mjs",

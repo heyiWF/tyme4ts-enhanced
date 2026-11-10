@@ -48,6 +48,7 @@ export class HolidayRule extends AbstractCulture {
     protected sundayShift: number;
     protected startYear: number;
     protected endYear: number;
+    protected firstDayWeek: number = -1;
     /**
      * 逐年表，键为公历年，值为「月-日」
      */
@@ -171,13 +172,16 @@ export class HolidayRule extends AbstractCulture {
     /**
      * @param weekIndex 第几个，负数自月末倒推
      * @param week 星期，0 为周日
+     * @param firstDayWeek 若月初一为此星期，改用初一；-1 表示不启用
      */
-    static week(month: number, weekIndex: number, week: number, name: string, startYear: number = 1): HolidayRule {
+    static week(month: number, weekIndex: number, week: number, name: string, startYear: number = 1, endYear: number = 9999, firstDayWeek: number = -1): HolidayRule {
         const o: HolidayRule = new HolidayRule(HolidayType.WEEK, name);
         o.month = month;
         o.weekIndex = weekIndex;
         o.week = week;
         o.startYear = startYear;
+        o.endYear = endYear;
+        o.firstDayWeek = firstDayWeek;
         return o;
     }
 
@@ -271,8 +275,11 @@ export class HolidayRule extends AbstractCulture {
                 return HolidayRule.getTermDay(year, this.termIndex).next(this.offset);
             case HolidayType.EASTER:
                 return HolidayRule.getEasterDay(year).next(this.offset);
-            case HolidayType.WEEK:
+            case HolidayType.WEEK: {
+                const first = SolarDay.fromYmd(year, this.month, 1);
+                if (first.getWeek().getIndex() === this.firstDayWeek) return first;
                 return HolidayRule.getWeekDay(year, this.month, this.weekIndex, this.week);
+            }
             case HolidayType.TABLE: {
                 const md: string = this.table[year];
                 if (!md) {

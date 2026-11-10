@@ -3,6 +3,7 @@ import {SolarDay} from '../calendar/core';
 import {ANNIVERSARY} from './data-anniversary';
 import {FestivalCategory, FestivalEntry} from './types';
 import {CHINA_OBSERVANCES, ChinaObservance} from './china-observances';
+import {FestivalOrdinals} from './ordinal';
 
 /**
  * 公历纪念日与国际日
@@ -43,6 +44,7 @@ export class AnniversaryFestival extends AbstractCulture {
                 return;
             }
             for (let i: number = 0; i < list.length; i++) {
+                if (FestivalOrdinals.isObserved(list[i], solarDay) === false) continue;
                 if (names.indexOf(list[i]) < 0) {
                     names.push(list[i]);
                 }
@@ -58,6 +60,7 @@ export class AnniversaryFestival extends AbstractCulture {
                 names[i],
                 AnniversaryFestival.classify(names[i]),
                 official ? official.source : '6tail',
+                '', '', FestivalOrdinals.get(names[i], solarDay),
             ));
         }
         return new AnniversaryFestival(solarDay, entries);
@@ -71,10 +74,10 @@ export class AnniversaryFestival extends AbstractCulture {
         return this.entries;
     }
 
-    getNames(): string[] {
+    getNames(withOrdinal: boolean = false): string[] {
         const l: string[] = [];
         for (let i: number = 0; i < this.entries.length; i++) {
-            l.push(this.entries[i].getName());
+            l.push(withOrdinal ? this.entries[i].getOrdinalName() : this.entries[i].getName());
         }
         return l;
     }

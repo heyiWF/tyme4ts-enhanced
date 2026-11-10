@@ -1,6 +1,8 @@
 import {AbstractCulture} from '../core/base';
 import {LegalHoliday, SolarDay} from '../calendar/core';
 import {HolidayRule} from './rule';
+import {FestivalOrdinals} from '../festival/ordinal';
+import {FestivalOrdinalInfo} from '../festival/ordinal-types';
 import {MATARIKI_DATES} from './regions/new-zealand';
 import {
     austriaRules, belgiumRules, cyprusRules, czechRules, denmarkRules, finlandRules,
@@ -26,7 +28,7 @@ export class Holiday extends AbstractCulture {
     protected name: string;
     protected work: boolean;
 
-    constructor(day: SolarDay, name: string, work: boolean = false) {
+    constructor(day: SolarDay, name: string, work: boolean = false, protected region: string = '') {
         super();
         this.day = day;
         this.name = name;
@@ -40,6 +42,17 @@ export class Holiday extends AbstractCulture {
     getName(): string {
         return this.name;
     }
+
+    getRegion(): string { return this.region; }
+
+    /** Only the actual observance date; workdays, substitutes and combined labels do not count again. */
+    getOrdinalInfo(): FestivalOrdinalInfo | null {
+        return this.work || !this.region ? null : FestivalOrdinals.get(this.name, this.day, this.region);
+    }
+
+    getOrdinal(): number | null { return this.getOrdinalInfo()?.ordinal ?? null; }
+
+    getOrdinalName(): string { return FestivalOrdinals.format(this.name, this.getOrdinalInfo()); }
 
     /**
      * 是否为调休上班日
@@ -123,7 +136,7 @@ export class HolidayCalendar {
             case 'TW':
                 return new HolidayCalendar(r, HolidayCalendar.taiwanRules(), '纪念日与民俗节日；调休以行政院公告为准。');
             case 'JP':
-                return new HolidayCalendar(r, HolidayCalendar.japanRules(), '国民の祝日，含振替休日与国民の休日；2020、2021 年奥运调整未单列。', 0, true);
+                return new HolidayCalendar(r, HolidayCalendar.japanRules(), '国民の祝日，含振替休日与国民の休日；包含2020、2021年奥运移日。', 0, true);
             case 'KR':
                 return new HolidayCalendar(r, HolidayCalendar.koreaRules(), '法定公休日核心；替代公休日与临时公休日以政府公告为准。');
             case 'VN':
@@ -179,7 +192,7 @@ export class HolidayCalendar {
             case 'IS':
                 return new HolidayCalendar(r, icelandRules(), '全国法定假日；夏季首日为四月十九日后的第一个星期四。');
             case 'IE':
-                return new HolidayCalendar(r, irelandRules(), '公共假日；圣布里吉德节自 2023 年起为二月第一个星期一。');
+                return new HolidayCalendar(r, irelandRules(), '公共假日；圣布里吉德节自2023年起为二月首个周一，若二月一日为周五则取该日。');
             case 'PT':
                 return new HolidayCalendar(r, portugalRules(), '全国法定假日，含圣体节。');
             case 'CH':
@@ -382,24 +395,39 @@ export class HolidayCalendar {
     }
 
     protected static japanRules(): HolidayRule[] {
+        // Cabinet Office histories and Olympic exceptions, individually checked:
+        // https://www8.cao.go.jp/chosei/shukujitsu/gaiyou/kaku.html
+        // https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html
         return [
-            HolidayRule.solar(1, 1, '元日'),
+            HolidayRule.solar(1, 1, '元日', 1949),
+            HolidayRule.solar(1, 15, '成人の日', 1949, 1999),
             HolidayRule.week(1, 2, 1, '成人の日', 2000),
-            HolidayRule.solar(2, 11, '建国記念の日'),
+            HolidayRule.solar(2, 11, '建国記念の日', 1967),
+            HolidayRule.solar(4, 29, '天皇誕生日', 1949, 1988),
             HolidayRule.solar(12, 23, '天皇誕生日', 1989, 2018),
             HolidayRule.solar(2, 23, '天皇誕生日', 2020),
             HolidayRule.term(6, '春分の日'),
             HolidayRule.solar(4, 29, '昭和の日', 2007),
-            HolidayRule.solar(5, 3, '憲法記念日'),
+            HolidayRule.solar(5, 3, '憲法記念日', 1949),
+            HolidayRule.solar(4, 29, 'みどりの日', 1989, 2006),
             HolidayRule.solar(5, 4, 'みどりの日', 2007),
-            HolidayRule.solar(5, 5, 'こどもの日'),
-            HolidayRule.week(7, 3, 1, '海の日', 2003),
-            HolidayRule.solar(8, 11, '山の日', 2016),
+            HolidayRule.solar(5, 5, 'こどもの日', 1949),
+            HolidayRule.solar(7, 20, '海の日', 1996, 2002),
+            HolidayRule.week(7, 3, 1, '海の日', 2003, 2019),
+            HolidayRule.table('海の日', {2020: '7-23', 2021: '7-22'}),
+            HolidayRule.week(7, 3, 1, '海の日', 2022),
+            HolidayRule.solar(8, 11, '山の日', 2016, 2019),
+            HolidayRule.table('山の日', {2020: '8-10', 2021: '8-8'}),
+            HolidayRule.solar(8, 11, '山の日', 2022),
+            HolidayRule.solar(9, 15, '敬老の日', 1966, 2002),
             HolidayRule.week(9, 3, 1, '敬老の日', 2003),
             HolidayRule.term(18, '秋分の日'),
-            HolidayRule.week(10, 2, 1, 'スポーツの日', 2020),
-            HolidayRule.solar(11, 3, '文化の日'),
-            HolidayRule.solar(11, 23, '勤労感謝の日'),
+            HolidayRule.solar(10, 10, '体育の日', 1966, 1999),
+            HolidayRule.week(10, 2, 1, '体育の日', 2000, 2019),
+            HolidayRule.table('スポーツの日', {2020: '7-24', 2021: '7-23'}),
+            HolidayRule.week(10, 2, 1, 'スポーツの日', 2022),
+            HolidayRule.solar(11, 3, '文化の日', 1948),
+            HolidayRule.solar(11, 23, '勤労感謝の日', 1948),
         ];
     }
 
@@ -865,7 +893,7 @@ export class HolidayCalendar {
                 continue;
             }
             if (includeWork || !map[k].isWork()) {
-                l.push(map[k]);
+                l.push(new Holiday(map[k].getDay(), map[k].getName(), map[k].isWork(), this.region));
             }
         }
         l.sort((a: Holiday, b: Holiday) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());
@@ -1061,7 +1089,7 @@ export class HolidayCalendar {
         const l: Holiday[] = [];
         for (const k in map) {
             if (map[k].getDay().getYear() === year && !map[k].isWork()) {
-                l.push(map[k]);
+                l.push(new Holiday(map[k].getDay(), map[k].getName(), map[k].isWork(), this.region));
             }
         }
         l.sort((a: Holiday, b: Holiday) => a.getDay().getCompareIndex() - b.getDay().getCompareIndex());

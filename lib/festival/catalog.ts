@@ -13,6 +13,7 @@ import {BuddhistFestival} from './buddhist';
 import {DeityFestival, FolkFestival} from './lunar';
 import {TaoistFestival} from './taoist';
 import {FestivalCategory, FestivalEntry, getCategoryPriority} from './types';
+import {FestivalOrdinals} from './ordinal';
 
 /**
  * 节日聚合
@@ -135,7 +136,10 @@ export class Festivals extends AbstractCulture {
             }
         }
 
-        return new Festivals(solarDay, Festivals.dedupe(raw));
+        return new Festivals(solarDay, Festivals.dedupe(raw).map(e => new FestivalEntry(
+            e.getName(), e.getCategory(), e.getSource(), e.getNote(), e.getRegion(),
+            e.getOrdinalInfo() || FestivalOrdinals.get(e.getName(), solarDay, e.getRegion() || 'CN'),
+        )));
     }
 
     /** 当日所在的多日活动；保留完整期间，不混入单日节日清单。 */
@@ -229,7 +233,7 @@ export class Festivals extends AbstractCulture {
         const l: FestivalEntry[] = [];
         for (let i: number = 0; i < order.length; i++) {
             const e: FestivalEntry = best[order[i]];
-            l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join('、'), notes[order[i]].join('；'), e.getRegion()));
+            l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join('、'), notes[order[i]].join('；'), e.getRegion(), e.getOrdinalInfo()));
         }
         l.sort((a: FestivalEntry, b: FestivalEntry) => {
             const p: number = getCategoryPriority(a.getCategory()) - getCategoryPriority(b.getCategory());
@@ -251,10 +255,20 @@ export class Festivals extends AbstractCulture {
             n++;
         };
         const solarTable = (table: { [key: string]: string[] }) => {
+            const definitions = FestivalOrdinals.getDefinitions();
             for (const key in table) {
                 const md: string[] = key.split('-');
                 for (let i: number = 0; i < table[key].length; i++) {
-                    put(table[key][i], Event.builder().solarDay(parseInt(md[0], 10), parseInt(md[1], 10), 0).build());
+                    const name = table[key][i];
+                    const definition = definitions.find(d => (d.region === 'CN' || d.region === '*') && d.names.indexOf(name) >= 0);
+                    // Event's legacy encoding supports only annual recurrences. Do not
+                    // silently turn a five-year observance into an annual event.
+                    if (definition && (definition.recurrence.kind !== 'yearly' || definition.recurrence.intervalYears !== 1)) {
+                        EventManager.remove('节日:' + name);
+                        continue;
+                    }
+                    const start = definition?.recurrence.kind === 'yearly' ? definition.recurrence.firstYear : 0;
+                    put(name, Event.builder().solarDay(parseInt(md[0], 10), parseInt(md[1], 10), 0).startYear(start).build());
                 }
             }
         };
@@ -296,10 +310,10 @@ export class Festivals extends AbstractCulture {
         return l;
     }
 
-    getNames(): string[] {
+    getNames(withOrdinal: boolean = false): string[] {
         const l: string[] = [];
         for (let i: number = 0; i < this.entries.length; i++) {
-            l.push(this.entries[i].getName());
+            l.push(withOrdinal ? this.entries[i].getOrdinalName() : this.entries[i].getName());
         }
         return l;
     }

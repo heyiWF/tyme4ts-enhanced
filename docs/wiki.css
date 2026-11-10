@@ -184,8 +184,16 @@ table.checks td{padding:8px 12px}
 #fest-detail .checks{width:100%;table-layout:fixed}
 #fest-detail .checks th,#fest-detail .checks td{text-align:left}
 #fest-detail .checks th:nth-child(1),#fest-detail .checks td:nth-child(1){width:64px}
-#fest-detail .checks th:nth-child(2),#fest-detail .checks td:nth-child(2){width:180px}
+#fest-detail .checks th:nth-child(2),#fest-detail .checks td:nth-child(2){width:220px}
+#fest-detail .checks th:nth-child(3),#fest-detail .checks td:nth-child(3){width:auto;text-align:left;font-weight:400}
 #fest-detail .checks th:nth-child(4),#fest-detail .checks td:nth-child(4){width:140px;overflow-wrap:anywhere}
+.ordinal-guide p{line-height:1.8;color:var(--ink-2)}
+.ordinal-guide pre{max-width:100%;overflow:auto;padding:16px;border-radius:10px;background:#142b23;color:#e1eee7;font-size:12px;line-height:1.8}
+.ordinal-guide summary{cursor:pointer;font-weight:650;color:var(--green);padding:12px 0}
+.ordinal-table{width:100%;min-width:740px;border-collapse:collapse;text-align:left;font-size:12px}
+.ordinal-table th,.ordinal-table td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7}
+.ordinal-table th{background:var(--paper-2)}
+.ordinal-table td:nth-child(1){min-width:75px}.ordinal-table td:nth-child(2){min-width:150px}.ordinal-table td:nth-child(3){min-width:145px}
 table.spec td:nth-child(1){width:105px;color:var(--indigo);font-weight:650}
 table.spec td:nth-child(3){width:130px}
 #cal-table td:nth-child(1){width:110px;color:var(--indigo);font-weight:650}

@@ -28,4 +28,4 @@ jobs:
       - run: npm run gen:official
       - run: git diff --exit-code -- data lib/holiday/official-data.ts scripts/fixtures/hko-calendar.json
       - run: npm run docs
-      - run: git diff --exit-code -- docs/tyme.mjs docs/holidays-data.js docs/data-review.json docs/api-reference.js
+      - run: git diff --exit-code -- docs/tyme.mjs docs/holidays-data.js docs/data-review.json docs/api-reference.js docs/FESTIVAL-ORDINALS.md

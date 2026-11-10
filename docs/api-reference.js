@@ -887,7 +887,7 @@ export const API_FIELDS = [
     "expression": "Festivals.installEvents()",
     "description": "将单日节日注册到全局 EventManager，重复调用幂等更新；返回本次处理条数，不等于新增条数。不会注册多日活动。",
     "parameters": "无参数；此调用会修改全局事件注册表。",
-    "output": "343",
+    "output": "342",
     "returns": "number",
     "code": "import {DayAlmanac, Festivals} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.installEvents();\n// 返回类型：number\nconsole.log(value);"
   },
@@ -1440,5 +1440,49 @@ export const API_FIELDS = [
     "output": "[\n  {\n    \"name\": \"全民阅读活动周\",\n    \"start\": \"2026年4月20日\",\n    \"end\": \"2026年4月26日\",\n    \"days\": 7,\n    \"source\": \"https://www.nppa.gov.cn/xxfb/tzgs/202604/t20260411_984328.html\"\n  },\n  {\n    \"name\": \"全国科普月\",\n    \"start\": \"2026年9月1日\",\n    \"end\": \"2026年9月30日\",\n    \"days\": 30,\n    \"source\": \"https://www.nsfc.gov.cn/p1/3381/4121/2826/77672.html\"\n  }\n]",
     "returns": "{ name: string; start: string; end: string; days: number; source: string; }[]",
     "code": "import {DayAlmanac, FestivalPeriods} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = FestivalPeriods.getYear(2026).map(p => ({name:p.getName(),start:p.getStart().toString(),end:p.getEnd().toString(),days:p.getDayCount(),source:p.getSource()}));\n// 返回类型：{ name: string; start: string; end: string; days: number; source: string; }[]\nconsole.log(value);"
+  },
+  {
+    "id": "api-132",
+    "group": "节日",
+    "title": "节日序号",
+    "expression": "Festivals.of(SolarDay.fromYmd(2026,11,9)).getEntries().find(e => e.getName() === '全国消防日')?.getOrdinal() ?? null",
+    "description": "首个适用日期为第1个；2026年全国消防日为第35个。未知起点返回null，不猜测传统年龄。",
+    "parameters": "通过具体日期查询条目，再调用getOrdinal()。",
+    "output": "35",
+    "returns": "number | null",
+    "code": "import {DayAlmanac, Festivals, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.of(SolarDay.fromYmd(2026,11,9)).getEntries().find(e => e.getName() === '全国消防日')?.getOrdinal() ?? null;\n// 返回类型：number | null\nconsole.log(value);"
+  },
+  {
+    "id": "api-133",
+    "group": "节日",
+    "title": "带序号的节日名",
+    "expression": "Festivals.of(SolarDay.fromYmd(2026,11,9)).getNames(true)",
+    "description": "已核验条目输出第N个名称，其余保留原名。getNames()默认行为不变。",
+    "parameters": "withOrdinal: boolean，默认false。",
+    "output": "[\n  \"寒衣节\",\n  \"东皇大帝圣诞\",\n  \"四天王降\",\n  \"月朔\",\n  \"民岁腊\",\n  \"第35个全国消防日\"\n]",
+    "returns": "string[]",
+    "code": "import {DayAlmanac, Festivals, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.of(SolarDay.fromYmd(2026,11,9)).getNames(true);\n// 返回类型：string[]\nconsole.log(value);"
+  },
+  {
+    "id": "api-134",
+    "group": "节日",
+    "title": "计数依据与非年度节日",
+    "expression": "FestivalOrdinals.get('世界统计日', SolarDay.fromYmd(2025,10,20))",
+    "description": "返回第4次以及计数范围、地区、来源链接与核验日期。该节日每五年一次，2026年同日返回null。",
+    "parameters": "name: string, day: SolarDay, region: string = 'CN'；同名先匹配地区及父国家，再匹配国际日。",
+    "output": "{\n  \"id\": \"*:世界统计日\",\n  \"ordinal\": 4,\n  \"region\": \"*\",\n  \"scope\": \"国际纪念日的举办序号\",\n  \"sources\": [\n    \"https://unstats.un.org/unsd/wsd/2025/resources.html\"\n  ],\n  \"verifiedOn\": \"2026-11-10\"\n}",
+    "returns": "FestivalOrdinalInfo | null",
+    "code": "import {DayAlmanac, FestivalOrdinals, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = FestivalOrdinals.get('世界统计日', SolarDay.fromYmd(2025,10,20));\n// 返回类型：FestivalOrdinalInfo | null\nconsole.log(value);"
+  },
+  {
+    "id": "api-135",
+    "group": "官方数据",
+    "title": "地区假日序号",
+    "expression": "OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,6,19))?.getOrdinalInfo() ?? null",
+    "description": "美国六月节在联邦假日口径为第5次；不从1865年计数。补假或调休上班日不重复赋号。",
+    "parameters": "读取Holiday的getOrdinalInfo()；规则日历和官方年度日历使用同一计数元数据。",
+    "output": "{\n  \"id\": \"US:六月节\",\n  \"ordinal\": 5,\n  \"region\": \"US\",\n  \"scope\": \"美国联邦假日次数，自2021年起，不是自1865年以来的周年\",\n  \"sources\": [\n    \"https://www.congress.gov/crs_external_products/IN/PDF/IN11697/IN11697.3.pdf\"\n  ],\n  \"verifiedOn\": \"2026-11-10\"\n}",
+    "returns": "FestivalOrdinalInfo | null",
+    "code": "import {DayAlmanac, OfficialHolidayCalendar, SolarDay} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,6,19))?.getOrdinalInfo() ?? null;\n// 返回类型：FestivalOrdinalInfo | null\nconsole.log(value);"
   }
 ];

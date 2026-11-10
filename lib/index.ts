@@ -26,6 +26,8 @@ export * from './holiday/rule';
 export * from './holiday/calendar';
 export * from './holiday/official';
 export * from './festival/types';
+export * from './festival/ordinal-types';
+export * from './festival/ordinal';
 export * from './festival/period';
 export * from './festival/data-anniversary';
 export * from './festival/data-lunar-folk';

@@ -113,7 +113,9 @@ export function icelandRules(): HolidayRule[] {
 export function irelandRules(): HolidayRule[] {
     return [
         HolidayRule.solar(1, 1, '元旦'),
-        HolidayRule.week(2, 1, 1, '圣布里吉德节', 2023),
+        // 2023 onward: first Monday, except February 1 when that is Friday.
+        // https://www.gov.ie/en/department-of-culture-communications-and-sport/press-releases/inaugural-saint-brigids-day-bank-holiday-cultural-programme-launched-to-celebrate-women-in-ireland/
+        HolidayRule.week(2, 1, 1, '圣布里吉德节', 2023, 9999, 5),
         HolidayRule.solar(3, 17, '圣帕特里克节'),
         HolidayRule.easter(1, '复活节星期一'),
         HolidayRule.week(5, 1, 1, '五月银行假日'),

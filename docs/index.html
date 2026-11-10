@@ -508,7 +508,7 @@ const ics = c.toIcs(2025);</pre>
 
   <section id="page-festivals" class="doc hide">
     <div class="page-heading tone-red">
-      <div><span class="eyebrow">FESTIVAL CATALOG</span><h2>节日总览</h2><p>按年列出八类节日：法定、传统、民俗、纪念、国际、宗教、节气、外历。点击某日查看备注与出处。</p></div>
+      <div><span class="eyebrow">FESTIVAL CATALOG</span><h2>节日总览</h2><p>按年列出八类节日：法定、传统、民俗、纪念、国际、宗教、节气、外历。已核验的节日显示「第几个」，点击某日查看计数口径与出处。</p></div>
       <span class="page-badge">8 类来源</span>
     </div>
     <div class="searchbar">
@@ -518,6 +518,22 @@ const ics = c.toIcs(2025);</pre>
       <button id="fexport" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg><span>导出 JSON</span></button>
     </div>
     <div id="fcats" class="cats"></div>
+    <div class="content-panel ordinal-guide">
+      <h3>这一天是第几个节日？</h3>
+      <p>例如，2026 年 11 月 9 日是<strong>第 35 个全国消防日</strong>。序号从首个适用的节日日期起算，首届为 1；它与历史事件的周年、人物年龄、节日持续的第几天分别计算。</p>
+      <p>世界统计日自 2010 年起<strong>每五年一次</strong>，2025 年是第 4 次，2026 年不列此节日。日本祝日改期或改名延续原序列，2019 年缺席的天皇诞生日不计入。新西兰 Matariki 仅按法律列明的逐年日期计数。</p>
+      <p>「未核定」表示缺少可靠起点或连续性依据，保留原名，不按公历年份猜测。补假、调休上班及连休的其他日期不重复计数。公共假日的次数不等于传统本身的年龄；未来序号是现行制度不变时的推算。</p>
+      <pre class="api-code"><code>import {Festivals, FestivalOrdinals, SolarDay} from 'tyme4ts-enhanced';
+const day = SolarDay.fromYmd(2026, 11, 9);
+const fire = Festivals.of(day).getEntries().find(e =&gt; e.getName() === '全国消防日');
+console.log(fire?.getOrdinal());     // 35
+console.log(fire?.getOrdinalName()); // 第35个全国消防日
+console.log(fire?.getOrdinalInfo()); // 计数范围、核验日期与来源
+console.log(Festivals.of(day).getNames(true));
+console.log(FestivalOrdinals.get('世界统计日', SolarDay.fromYmd(2026, 10, 20))); // null</code></pre>
+      <p>国家与地区页的假日也提供相同的 <code>getOrdinal()</code>、<code>getOrdinalName()</code> 和 <code>getOrdinalInfo()</code> 接口。原有 <code>getName()</code>、<code>toString()</code> 保持兼容。<a href="FESTIVAL-ORDINALS.md" target="_blank" rel="noopener noreferrer">完整核验报告与接口边界 ↗</a></p>
+      <details><summary id="ordinal-summary">逐项核验清单</summary><p class="note">每个序列均保留来源锚点并单独测试；别名不重复计数。此清单仅覆盖已核定项目。</p><div class="api-table-wrap"><table class="ordinal-table"><thead><tr><th>地区</th><th>节日</th><th>起点与周期</th><th>口径与来源锚点</th></tr></thead><tbody id="ordinal-rows"></tbody></table></div></details>
+    </div>
     <div class="content-panel" id="festival-periods"></div>
     <div id="fest-months" class="fest-months"></div>
     <div id="fest-detail"></div>
@@ -634,7 +650,7 @@ const ics = c.toIcs(2025);</pre>
 import {DATASETS, VERSION, SOURCES} from './holidays-data.js';
 import {API_FIELDS} from './api-reference.js';
 if (location.hash.startsWith('#api-')) history.scrollRestoration = 'manual';
-import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, OfficialHolidayCalendar, FestivalPeriods, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
+import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, OfficialHolidayCalendar, FestivalPeriods, FestivalOrdinals, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
@@ -1423,7 +1439,7 @@ function renderRegionDetail() {
     : datasets.length ? '本年旧数据尚待逐项核实，未自动加载；下方仅显示内置规则，不是完整公告。原因：' + datasets.map(d => d.scope || '缺少可复查来源').join('；')
       : '本年未加载独立年度公告，当前显示内置数据或规则推算；请留意地区说明中的覆盖边界。';
   const list = c.getDays(current.getFullYear());
-  $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}</span></div>`).join('')
+  $('region-list').innerHTML = list.map((h) => `<div><b>${h.getDay().getMonth()} 月 ${h.getDay().getDay()} 日 · ${esc(h.getOrdinalName())}</b><span>${WEEK[h.getDay().getWeek().getIndex()]}${h.getOrdinalInfo() ? ' · ' + esc(h.getOrdinalInfo().scope) : ''}</span></div>`).join('')
     || '<div><b>本年暂无</b><span></span></div>';
   const rule = c.getRuleDays(current.getFullYear());
   const ruleKeys = new Set(rule.map((h) => h.getDay().getMonth() + '-' + h.getDay().getDay()));
@@ -1650,6 +1666,15 @@ const CAT_ALL = [0, 1, 2, 3, 4, 5, 6, 7];
 let festCats = [0, 1, 2, 3, 4, 6];
 let festYear = new Date().getFullYear();
 
+const ordinalDefinitions = FestivalOrdinals.getDefinitions();
+$('ordinal-summary').textContent = `逐项核验清单 · ${ordinalDefinitions.length} 个独立序列 · 2026-11-10`;
+$('ordinal-rows').innerHTML = ordinalDefinitions.map(d => {
+  const r = d.recurrence;
+  const cycle = r.kind === 'yearly' ? `${r.firstYear} 年首届，每 ${r.intervalYears} 年一次${r.omittedYears?.length ? '；扣除 ' + r.omittedYears.join('、') + ' 年' : ''}` : '逐次日期表；表外不推算';
+  const links = d.sources.map((url, i) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">依据 ${i + 1} ↗</a>`).join(' · ');
+  return `<tr><td>${esc(d.region === '*' ? '国际' : (CN[d.region] || d.region))}</td><td>${esc(d.names[0])}</td><td>${esc(cycle)}</td><td>${esc(d.scope)}<br>${esc(d.evidence)}<br>${esc(d.reference.date)}：第 ${d.reference.ordinal} 个 · ${links}</td></tr>`;
+}).join('');
+
 function renderFestCats() {
   $('fcats').innerHTML = CAT_ALL.map((c) =>
     `<label class="${festCats.indexOf(c) > -1 ? 'on' : ''}" data-c="${c}"><i class="cat-dot c${c}"></i>${Festivals.getCategoryName(c)}</label>`).join('');
@@ -1677,10 +1702,10 @@ function renderFestivals() {
     for (let d = 1; d <= count; d++) {
       const f = DayAlmanac.fromYmd(y, m, d).getFestivals(true);
       let entries = f.getEntries().filter((e) => festCats.indexOf(e.getCategory()) > -1);
-      if (q) entries = entries.filter((e) => e.getName().indexOf(q) > -1 || e.getNote().indexOf(q) > -1);
+      if (q) entries = entries.filter((e) => e.getOrdinalName().indexOf(q) > -1 || e.getNote().indexOf(q) > -1);
       if (!entries.length) continue;
       total += entries.length;
-      days.push(`<div class="fday" data-d="${m}-${d}"><b>${d}</b><span>${entries.slice(0, 2).map((e) => `<i class="cat-dot c${e.getCategory()}"></i>${esc(e.getName())}`).join('、')}${entries.length > 2 ? ' +' + (entries.length - 2) : ''}</span></div>`);
+      days.push(`<div class="fday" data-d="${m}-${d}"><b>${d}</b><span>${entries.slice(0, 2).map((e) => `<i class="cat-dot c${e.getCategory()}"></i>${esc(e.getOrdinalName())}`).join('、')}${entries.length > 2 ? ' +' + (entries.length - 2) : ''}</span></div>`);
     }
     months.push(`<div class="month"><h4>${m} 月</h4>${days.join('') || '<div class="fday empty"><span>—</span></div>'}</div>`);
   }
@@ -1690,9 +1715,13 @@ function renderFestivals() {
     el.onclick = () => {
       const [m, d] = el.dataset.d.split('-').map(Number);
       const f = DayAlmanac.fromYmd(y, m, d).getFestivals(true);
-      const rows = f.getEntries().map((e) =>
-        `<tr><td>${Festivals.getCategoryName(e.getCategory())}</td><td>${esc(e.getName())}</td><td>${esc(e.getNote() || '—')}</td><td>${esc(e.getSource())}</td></tr>`).join('');
-      $('fest-detail').innerHTML = `<h3>${y} 年 ${m} 月 ${d} 日</h3><table class="checks"><tr><th>类别</th><th>名称</th><th>备注</th><th>出处</th></tr>${rows || '<tr><td colspan="4">无</td></tr>'}</table>`;
+      const rows = f.getEntries().map((e) => {
+        const info = e.getOrdinalInfo();
+        const note = [e.getNote(), info ? info.scope : '序号未核定'].filter(Boolean).join('；');
+        const sources = info ? '<br>' + info.sources.map((url, i) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">计数依据 ${i + 1} ↗</a>`).join('<br>') : '';
+        return `<tr><td>${Festivals.getCategoryName(e.getCategory())}</td><td>${esc(e.getOrdinalName())}</td><td>${esc(note)}</td><td>${esc(e.getSource())}${sources}</td></tr>`;
+      }).join('');
+      $('fest-detail').innerHTML = `<h3>${y} 年 ${m} 月 ${d} 日</h3><table class="checks"><tr><th>类别</th><th>名称与序号</th><th>备注与计数口径</th><th>出处</th></tr>${rows || '<tr><td colspan="4">无</td></tr>'}</table>`;
     };
   });
   $('fest-detail').innerHTML = '';
@@ -1709,7 +1738,7 @@ $('fexport').onclick = () => {
       const f = DayAlmanac.fromYmd(festYear, m, d).getFestivals(true);
       for (const e of f.getEntries()) {
         if (festCats.indexOf(e.getCategory()) < 0) continue;
-        out.push({date: `${festYear}-${pad(m)}-${pad(d)}`, name: e.getName(), category: Festivals.getCategoryName(e.getCategory()), note: e.getNote(), source: e.getSource(), region: e.getRegion()});
+        out.push({date: `${festYear}-${pad(m)}-${pad(d)}`, name: e.getName(), ordinal: e.getOrdinal(), ordinalName: e.getOrdinalName(), ordinalInfo: e.getOrdinalInfo(), category: Festivals.getCategoryName(e.getCategory()), note: e.getNote(), source: e.getSource(), region: e.getRegion()});
       }
     }
   }

@@ -1046,5 +1046,37 @@
     "expression": "FestivalPeriods.getYear(2026).map(p => ({name:p.getName(),start:p.getStart().toString(),end:p.getEnd().toString(),days:p.getDayCount(),source:p.getSource()}))",
     "description": "以结构化对象保留完整期间，不压缩成一个节日日期。",
     "parameters": "示例使用明确的公历日期；年月日从 1 开始。"
+  },
+  {
+    "id": "api-132",
+    "group": "节日",
+    "title": "节日序号",
+    "expression": "Festivals.of(SolarDay.fromYmd(2026,11,9)).getEntries().find(e => e.getName() === '全国消防日')?.getOrdinal() ?? null",
+    "description": "首个适用日期为第1个；2026年全国消防日为第35个。未知起点返回null，不猜测传统年龄。",
+    "parameters": "通过具体日期查询条目，再调用getOrdinal()。"
+  },
+  {
+    "id": "api-133",
+    "group": "节日",
+    "title": "带序号的节日名",
+    "expression": "Festivals.of(SolarDay.fromYmd(2026,11,9)).getNames(true)",
+    "description": "已核验条目输出第N个名称，其余保留原名。getNames()默认行为不变。",
+    "parameters": "withOrdinal: boolean，默认false。"
+  },
+  {
+    "id": "api-134",
+    "group": "节日",
+    "title": "计数依据与非年度节日",
+    "expression": "FestivalOrdinals.get('世界统计日', SolarDay.fromYmd(2025,10,20))",
+    "description": "返回第4次以及计数范围、地区、来源链接与核验日期。该节日每五年一次，2026年同日返回null。",
+    "parameters": "name: string, day: SolarDay, region: string = 'CN'；同名先匹配地区及父国家，再匹配国际日。"
+  },
+  {
+    "id": "api-135",
+    "group": "官方数据",
+    "title": "地区假日序号",
+    "expression": "OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,6,19))?.getOrdinalInfo() ?? null",
+    "description": "美国六月节在联邦假日口径为第5次；不从1865年计数。补假或调休上班日不重复赋号。",
+    "parameters": "读取Holiday的getOrdinalInfo()；规则日历和官方年度日历使用同一计数元数据。"
   }
 ]

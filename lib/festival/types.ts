@@ -1,3 +1,6 @@
+import {FestivalOrdinalInfo} from './ordinal-types';
+import {FestivalOrdinals} from './ordinal';
+
 /**
  * 节日分类
  *
@@ -36,7 +39,8 @@ export class FestivalEntry {
     protected note: string;
     protected region: string;
 
-    constructor(name: string, category: FestivalCategory, source: string, note: string = '', region: string = '') {
+    constructor(name: string, category: FestivalCategory, source: string, note: string = '', region: string = '',
+        protected ordinalInfo: FestivalOrdinalInfo | null = null) {
         this.name = name;
         this.category = category;
         this.source = source;
@@ -47,6 +51,16 @@ export class FestivalEntry {
     getName(): string {
         return this.name;
     }
+
+    /** Verified edition; unknown traditions and unverified origins return null. */
+    getOrdinal(): number | null { return this.ordinalInfo ? this.ordinalInfo.ordinal : null; }
+
+    getOrdinalInfo(): FestivalOrdinalInfo | null {
+        return this.ordinalInfo ? {...this.ordinalInfo, sources: this.ordinalInfo.sources.slice()} : null;
+    }
+
+    /** Opt-in display; getName() and toString() retain their existing meanings. */
+    getOrdinalName(): string { return FestivalOrdinals.format(this.name, this.ordinalInfo); }
 
     getCategory(): FestivalCategory {
         return this.category;
