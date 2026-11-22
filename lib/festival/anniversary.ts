@@ -2,8 +2,9 @@ import {AbstractCulture} from '../core/base';
 import {SolarDay} from '../calendar/core';
 import {ANNIVERSARY} from './data-anniversary';
 import {FestivalCategory, FestivalEntry} from './types';
-import {CHINA_OBSERVANCES, ChinaObservance} from './china-observances';
+import {CHINA_OBSERVANCES} from './china-observances';
 import {FestivalOrdinals} from './ordinal';
+import {UN_OBSERVANCES} from './ordinal-data';
 
 /**
  * 公历纪念日与国际日
@@ -50,7 +51,8 @@ export class AnniversaryFestival extends AbstractCulture {
                 }
             }
         };
-        const verified: ChinaObservance[] = CHINA_OBSERVANCES.filter((row) => row.month + '-' + row.day === key);
+        const verified = [...CHINA_OBSERVANCES, ...UN_OBSERVANCES].filter(
+            row => row.month === solarDay.getMonth() && row.day === solarDay.getDay());
         add((ANNIVERSARY[key] || []).filter((name) => !verified.some((row) => row.name === name)));
         add(verified.filter((row) => solarDay.getYear() >= row.startYear).map((row) => row.name));
         const entries: FestivalEntry[] = [];
@@ -103,13 +105,11 @@ export class AnniversaryFestival extends AbstractCulture {
     }
 
     static getSize(): number {
-        let n: number = Object.keys(ANNIVERSARY).length;
-        for (const k in AnniversaryFestival.CHINA_EXTRA) {
-            if (!ANNIVERSARY[k]) {
-                n++;
-            }
-        }
-        return n;
+        return new Set([
+            ...Object.keys(ANNIVERSARY),
+            ...Object.keys(AnniversaryFestival.CHINA_EXTRA),
+            ...UN_OBSERVANCES.map(row => `${row.month}-${row.day}`),
+        ]).size;
     }
 
     toString(): string {

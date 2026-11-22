@@ -19,6 +19,8 @@ class UmmAlQuraTest {
             ['1447', '10', '1', '2026-3-20'],
             ['1447', '12', '10', '2026-5-27'],
             ['1448', '1', '1', '2026-6-16'],
+            ['1448', '10', '1', '2027-3-9'],
+            ['1448', '12', '10', '2027-5-16'],
         ];
         for (let i: number = 0; i < cases.length; i++) {
             const c: string[] = cases[i];
@@ -55,6 +57,11 @@ class UmmAlQuraTest {
         // 原表 1364 年舍尔邦月差一日，仅有这一处
         equal(short, 1);
         equal(UmmAlQuraDay.getMonthDays(1364, 8), 28);
+        // moment-hijri 3.0.0 移动两个月首，各年的年长不变。
+        equal(UmmAlQuraDay.getMonthDays(1446, 5), 29);
+        equal(UmmAlQuraDay.getMonthDays(1446, 6), 30);
+        equal(UmmAlQuraDay.getMonthDays(1485, 9), 29);
+        equal(UmmAlQuraDay.getMonthDays(1485, 10), 30);
         // 年长只允许 353–355
         for (let y: number = 1356; y <= 1500; y++) {
             const n: number = UmmAlQuraDay.getYearDays(y);

@@ -1,7 +1,7 @@
 {
   "region": "LK",
   "year": 2027,
-  "source": "Central Bank of Sri Lanka / gazetted holidays; dataset by Hirantha Sandaruwan, CC BY 4.0 (https://github.com/HiranthaSandaruwan/sri-lanka-public-holidays)",
+  "source": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027",
   "days": [
     {
       "date": "2027-01-15",
@@ -104,8 +104,8 @@
       "name": "圣诞节"
     }
   ],
-  "verification": "pending",
-  "scope": "2026 年基础官方日历可核对，2025/2027 央行页面访问受限；尚需核查后续公报（包括 2026 卫塞节调整），不将第三方汇编认证为完整现行公告。",
-  "reviewSource": "https://moha.gov.lk/web/images/latest_document/government_holidays/2026/2026_E.pdf",
-  "reviewedOn": "2026-11-02"
+  "verification": "official",
+  "scope": "公报 2493/05 与央行 B/P 日期一致。收录公众假日；普通银行周末及单独的商业假日分类不在表内。",
+  "mode": "replace",
+  "verifiedOn": "2026-11-23"
 }

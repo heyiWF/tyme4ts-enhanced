@@ -238,7 +238,7 @@ export class HolidayCalendar {
                     HolidayRule.solar(12, 25, '圣诞节'),
                 ], '公历固定假日由规则推算；Poya、开斋节、古尔邦节、排灯节与耶稣受难日按政府公报逐年公布，已提供 LK-2025、2026、2027 数据。');
             case 'US-CA':
-                return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(californiaExtra()), '联邦法定假日 + 加州塞萨尔·查韦斯日；县市假另计。', 1);
+                return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(californiaExtra()), '联邦法定假日 + 加州农场工人日（2026 年前称塞萨尔·查韦斯日）；县市假另计。', 1);
             case 'US-NY':
                 return new HolidayCalendar(r, HolidayCalendar.unitedStatesRules().concat(newYorkExtra()), '联邦法定假日 + 纽约州林肯诞辰；市假另计。', 1);
             case 'US-TX':
@@ -439,8 +439,11 @@ export class HolidayCalendar {
             HolidayRule.lunar(1, 1, '春节', 1),
             HolidayRule.solar(3, 1, '三一节'),
             HolidayRule.lunar(4, 8, '佛诞节'),
+            HolidayRule.solar(5, 1, '劳动节', 2026),
             HolidayRule.solar(5, 5, '儿童节'),
             HolidayRule.solar(6, 6, '显忠日'),
+            HolidayRule.solar(7, 17, '制宪节', 1949, 2007),
+            HolidayRule.solar(7, 17, '制宪节', 2026),
             HolidayRule.solar(8, 15, '光复节'),
             HolidayRule.lunar(8, 15, '秋夕', -1),
             HolidayRule.lunar(8, 15, '秋夕'),
@@ -460,7 +463,9 @@ export class HolidayCalendar {
             HolidayRule.lunar(3, 10, '雄王忌日'),
             HolidayRule.solar(4, 30, '南方解放日'),
             HolidayRule.solar(5, 1, '劳动节'),
+            HolidayRule.solar(7, 27, '荣军烈士日', 2027),
             HolidayRule.solar(9, 2, '国庆日'),
+            HolidayRule.solar(11, 24, '越南文化日', 2026),
         ];
     }
 
@@ -507,6 +512,7 @@ export class HolidayCalendar {
             HolidayRule.solar(10, 23, '朱拉隆功纪念日'),
             HolidayRule.solar(12, 5, '父亲节'),
             HolidayRule.solar(12, 10, '宪法日'),
+            HolidayRule.table('诗丽吉王太后火化大典特别公休日', {2026: '12-16'}),
             HolidayRule.solar(12, 31, '除夕'),
         ];
     }
@@ -621,6 +627,7 @@ export class HolidayCalendar {
             HolidayRule.solar(5, 1, '劳动节'),
             HolidayRule.solar(6, 2, '共和国日'),
             HolidayRule.solar(8, 15, '圣母升天节'),
+            HolidayRule.solar(10, 4, '圣方济各节', 2026),
             HolidayRule.solar(11, 1, '诸圣节'),
             HolidayRule.solar(12, 8, '圣母无原罪节'),
             HolidayRule.solar(12, 25, '圣诞节'),
@@ -714,6 +721,7 @@ export class HolidayCalendar {
             HolidayRule.solar(6, 16, '青年节'),
             HolidayRule.solar(8, 9, '妇女节'),
             HolidayRule.solar(9, 24, '遗产日'),
+            HolidayRule.table('地方政府选举日', {2026: '11-04'}),
             HolidayRule.solar(12, 16, '和解日'),
             HolidayRule.solar(12, 25, '圣诞节'),
             HolidayRule.solar(12, 26, '善意节'),

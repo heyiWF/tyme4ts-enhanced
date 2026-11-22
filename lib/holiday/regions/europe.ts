@@ -18,6 +18,7 @@ export function polandRules(): HolidayRule[] {
         HolidayRule.solar(8, 15, '圣母升天节'),
         HolidayRule.solar(11, 1, '诸圣节'),
         HolidayRule.solar(11, 11, '独立日'),
+        HolidayRule.solar(12, 24, '平安夜', 2025),
         HolidayRule.solar(12, 25, '圣诞节'),
         HolidayRule.solar(12, 26, '圣诞节次日'),
     ];
@@ -216,6 +217,7 @@ export function hungaryRules(): HolidayRule[] {
         HolidayRule.solar(8, 20, '圣斯蒂芬日'),
         HolidayRule.solar(10, 23, '共和国日'),
         HolidayRule.solar(11, 1, '诸圣节'),
+        HolidayRule.solar(12, 24, '平安夜', 2026),
         HolidayRule.solar(12, 25, '圣诞节'),
         HolidayRule.solar(12, 26, '圣诞节次日'),
     ];

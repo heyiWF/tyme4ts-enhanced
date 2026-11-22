@@ -33,6 +33,7 @@ if (process.argv.includes('--apply')) {
     for (const file of readdirSync('data/holidays').filter(f => /^(MY|TH|LK)[-.].*\.json$/.test(f))) {
         const path = `data/holidays/${file}`;
         const data = JSON.parse(readFileSync(path, 'utf8'));
+        if (data.verification === 'official' || data.reviewedOn > review.checkedOn) continue;
         const reviewInfo = review.partialSources[data.region.split('-')[0]];
         Object.assign(data, {verification:'pending', scope:reviewInfo.reason, reviewSource:reviewInfo.source, reviewedOn:review.checkedOn});
         writeFileSync(path, JSON.stringify(data,null,2)+'\n');

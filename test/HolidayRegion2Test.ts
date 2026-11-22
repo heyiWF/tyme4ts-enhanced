@@ -8,9 +8,31 @@ class HolidayRegion2Test {
     test0(): void {
         // 波兰：复活节星期一与圣体节按西方复活节推算
         const pl: HolidayCalendar = HolidayCalendar.of('PL');
-        equal(pl.getDays(2025).length, 11);
+        equal(pl.getDays(2025).length, 12);
         equal(pl.getHoliday(SolarDay.fromYmd(2025, 4, 21))!.getName(), '复活节星期一');
         equal(pl.getHoliday(SolarDay.fromYmd(2025, 6, 19))!.getName(), '圣体节');
+        equal(pl.getHoliday(SolarDay.fromYmd(2024, 12, 24)), null);
+        equal(pl.getHoliday(SolarDay.fromYmd(2025, 12, 24))!.getName(), '平安夜');
+    }
+
+    @test
+    publicHolidayEffectiveYears(): void {
+        const vn = HolidayCalendar.of('VN');
+        equal(vn.getHoliday(SolarDay.fromYmd(2025, 11, 24)), null);
+        equal(vn.getHoliday(SolarDay.fromYmd(2026, 11, 24))!.getName(), '越南文化日');
+        equal(vn.getHoliday(SolarDay.fromYmd(2026, 7, 27)), null);
+        equal(vn.getHoliday(SolarDay.fromYmd(2027, 7, 27))!.getName(), '荣军烈士日');
+        const hu = HolidayCalendar.of('HU');
+        equal(hu.getHoliday(SolarDay.fromYmd(2025, 12, 24)), null);
+        equal(hu.getHoliday(SolarDay.fromYmd(2026, 12, 24))!.getName(), '平安夜');
+        equal(hu.getHoliday(SolarDay.fromYmd(2026, 12, 12)), null);
+        const kr = HolidayCalendar.of('KR');
+        equal(kr.getHoliday(SolarDay.fromYmd(2025, 7, 17)), null);
+        equal(kr.getHoliday(SolarDay.fromYmd(2026, 7, 17))!.getName(), '制宪节');
+        equal(kr.getHoliday(SolarDay.fromYmd(2026, 5, 1))!.getName(), '劳动节');
+        const it = HolidayCalendar.of('IT');
+        equal(it.getHoliday(SolarDay.fromYmd(2025, 10, 4)), null);
+        equal(it.getHoliday(SolarDay.fromYmd(2026, 10, 4))!.getName(), '圣方济各节');
     }
 
     @test

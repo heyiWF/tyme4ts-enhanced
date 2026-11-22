@@ -1,19 +1,27 @@
 # 从 moment-hijri 的源码提取 KACST 的乌姆库拉月首表，生成 lib/calendar/data-ummalqura.ts
 #
 # 用法：
-#   curl -sL https://cdn.jsdelivr.net/npm/moment-hijri@2.1.2/moment-hijri.js -o .tmp-mh.js
-#   python scripts/gen-ummalqura.py
+#   curl -fsSL https://cdn.jsdelivr.net/npm/moment-hijri@3.0.0/moment-hijri.js -o .tmp-mh.js
+#   python scripts/gen-ummalqura.py .tmp-mh.js
 import io
 import re
+import sys
+from itertools import accumulate
 
-SRC = '.tmp-mh.js'
+SRC = sys.argv[1] if len(sys.argv) > 1 else '.tmp-mh.js'
 OUT = 'lib/calendar/data-ummalqura.ts'
 
 s = io.open(SRC, encoding='utf-8').read()
-i = s.index('ummalquraData: [')
-j = s.index(']', i)
-nums = [int(x) for x in re.findall(r'\d+', s[i + len('ummalquraData: ['):j])]
-assert len(nums) == 1741, len(nums)
+table = re.search(r'let ummalquraDatByMonth = \[([^\]]+)\];\s*let sum = (\d+);', s)
+assert table, 'Expected moment-hijri 3.0.0 month lengths and initial MJDN'
+rows = re.findall(r'/\*\s*(\d+)=\s*\*/\s*([\d, ]+)', table[1])
+assert [int(year) for year, _ in rows] == list(range(1356, 1501))
+lengths = []
+for year, row in rows:
+    months = [int(value) for value in re.findall(r'\d+', row)]
+    assert len(months) == 12 and all(28 <= value <= 30 for value in months), year
+    lengths.extend(months)
+nums = list(accumulate(lengths, initial=int(table[2])))
 
 lines = []
 for k in range(0, len(nums), 12):
@@ -28,7 +36,7 @@ head = """/**
  * 该历自 1423 年（2002）起由沙特阿拉伯阿卜杜勒阿齐兹国王科技城（KACST）按「麦加月落迟于日落」
  * 的判据编算，为沙特、阿联酋的官方民用历。本表与观月无关，是纯表历。
  *
- * 数据取自 moment-hijri（MIT）所附的 KACST 表，已用沙特官方节日核对：
+ * 数据取自 moment-hijri 3.0.0（MIT）所附的 KACST 表，已用沙特官方节日核对：
  * 1446 年开斋节 2025-03-30、宰牲节 2025-06-06、1447 年开斋节 2026-03-20、宰牲节 2026-05-27 全部吻合。
  *
  * 已知瑕疵：索引 104（1364 年舍尔邦月）与前一月相差 28 日，为原表笔误；该月属 1945 年，

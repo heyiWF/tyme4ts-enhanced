@@ -14,6 +14,7 @@ import {DeityFestival, FolkFestival} from './lunar';
 import {TaoistFestival} from './taoist';
 import {FestivalCategory, FestivalEntry, getCategoryPriority} from './types';
 import {FestivalOrdinals} from './ordinal';
+import {UN_OBSERVANCES} from './ordinal-data';
 
 /**
  * 节日聚合
@@ -273,7 +274,7 @@ export class Festivals extends AbstractCulture {
             }
         };
         solarTable(ANNIVERSARY);
-        for (const row of CHINA_OBSERVANCES) {
+        for (const row of [...CHINA_OBSERVANCES, ...UN_OBSERVANCES]) {
             put(row.name, Event.builder().solarDay(row.month, row.day, 0).startYear(row.startYear).build());
         }
         put('中国农民丰收节', Event.builder().termDay(18, 0).startYear(2018).build());

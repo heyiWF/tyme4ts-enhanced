@@ -36,9 +36,9 @@ const HAJI_2 = {2025: '2025-06-08', 2026: '2026-05-28', 2027: '2027-05-18'};
 // - 北三州（吉打、吉兰丹、登嘉楼）周末为周五周六，周日逢节不设周一补假；
 // - 砂拉不过屠妖节（卫塞节补假跨过达雅节落在 6 月 3 日，由规则顺延生成）。
 const EXTRA_EXCLUDE = {
-    'MY-KDH': ['2025-09-01', '2026-06-02', '2026-11-09'],
-    'MY-KTN': ['2025-09-01', '2026-06-02', '2026-11-09'],
-    'MY-TRG': ['2025-09-01', '2026-06-02'],
+    'MY-KDH': ['2025-09-01', '2026-06-02', '2026-11-09', '2027-06-08'],
+    'MY-KTN': ['2025-09-01', '2026-06-02', '2026-11-09', '2027-06-08'],
+    'MY-TRG': ['2025-09-01', '2026-06-02', '2027-06-08'],
     'MY-SWK': ['2025-10-20', '2026-11-08', '2026-11-09', '2027-10-28'],
 };
 
@@ -66,6 +66,8 @@ const STATE_EXTRA = {
         ...named(HAJI_2, '哈芝节次日'),
         // 吉兰丹周末为周五周六，古兰经降示日逢周六补于周日
         ['2026-03-08', '古兰经降示日补假'],
+        // 州政府 2026 年开斋节通告另增 3 月 19 日。
+        ['2026-03-19', '开斋节特别公休日'],
     ],
     'MY-MLK': [
         // 马六甲开斋节第三天；2026 年该日已含在联邦补假中，不重复列
@@ -135,10 +137,6 @@ for (const [region, extras] of Object.entries(STATE_EXTRA)) {
         region,
         years: YEARS,
         source: SOURCE,
-        verification: 'pending',
-        scope: '旧有州级增补，尚未逐项确认全部临时通告、补假与适用范围；不进入官方日历接口或 Wiki 自动导入。',
-        reviewSource: 'https://www.kelantanlibrary.gov.my/v4/images/download/jadual-hari-kelepasan-am/HKA-2026.pdf',
-        reviewedOn: '2026-11-02',
         note: '州级增补：仅含该州在联邦假日之外的日期，使用时须先导入 MY-<年>.json',
         days,
     };
@@ -153,7 +151,13 @@ for (const [region, extras] of Object.entries(STATE_EXTRA)) {
             doc.note += '；并按本州周末或节日口径扣掉不适用的联邦补假';
         }
     }
-    writeFileSync(join(DIR, `${region}.json`), JSON.stringify(doc, null, 1) + '\n', 'utf8');
+    Object.assign(doc, {
+        verification: 'pending',
+        scope: '已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。',
+        reviewSource: 'https://www.kelantanlibrary.gov.my/v4/images/download/jadual-hari-kelepasan-am/HKA-2026.pdf',
+        reviewedOn: '2026-11-02',
+    });
+    writeFileSync(join(DIR, `${region}.json`), JSON.stringify(doc, null, 2) + '\n', 'utf8');
     n++;
 }
 

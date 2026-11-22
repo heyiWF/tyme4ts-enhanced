@@ -11,7 +11,7 @@ const files = new Set(report.files.map((f) => f.path));
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 for (const file of [pkg.main, pkg.module, pkg.types, ...Object.values(pkg.exports['.']),
     'README.md', 'LICENSE', 'data/holidays/GB-2026.json', 'data/holidays/JP-2020.json',
-    'data/holidays/TW-2026.json', 'data/holidays/US-2027.json', 'data/quality-review.json']) {
+    'data/holidays/TW-2026.json', 'data/holidays/TW-2027.json', 'data/holidays/US-2027.json', 'data/quality-review.json']) {
     assert(files.has(file.replace(/^\.\//, '')), `Published package is missing ${file}`);
 }
 for (const file of files) {

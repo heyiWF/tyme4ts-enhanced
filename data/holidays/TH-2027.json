@@ -1,7 +1,7 @@
 {
   "region": "TH",
   "year": 2027,
-  "source": "泰国内阁 2027 年公休日公告（经 officeholidays、timefyi、worldpublicholiday 三家汇总比对）",
+  "source": "officeholidays、timefyi、worldpublicholiday 年度汇编",
   "days": [
     {
       "date": "2027-01-01",
@@ -101,7 +101,17 @@
     }
   ],
   "verification": "pending",
-  "scope": "原文件混合政府和银行假期。BOT 表仅适用金融机构，不能据此认证全国公众假日；保留待核实。",
+  "scope": "原表混合政府及银行假期。7 月 19 日和 20 日的安排随适用机构而异，尚未取得覆盖全国政府机关的年度表。",
   "reviewSource": "https://www.bot.or.th/en/financial-institutions-holiday.html",
-  "reviewedOn": "2026-11-02"
+  "reviewedOn": "2026-11-23",
+  "amendments": [
+    {
+      "source": "https://iprocurement.ieat.go.th/?cal=2570-07&page=1",
+      "scope": "国营机构日历将补假列在 7 月 19 日；泰国央行日历亦列同日，适用于金融机构。"
+    },
+    {
+      "source": "https://regis.kmutt.ac.th/web/calendar2026?gmonth=7&tab=academic&type=holiday&year=2569",
+      "scope": "蒙库国王科技大学列 7 月 19 日守夏节、7 月 20 日三宝佛节补假。待全国政府机关公告确认。"
+    }
+  ]
 }

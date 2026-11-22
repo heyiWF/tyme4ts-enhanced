@@ -27,6 +27,15 @@ class MalaysiaStateDataTest {
     }
 
     @test
+    islamicNewYearSubstituteDependsOnStateWeekend(): void {
+        const day = SolarDay.fromYmd(2027, 6, 8);
+        equal(MalaysiaStateDataTest.state('MY-SGR', 2027).getHoliday(day)!.getName(), '伊斯兰新年补假');
+        for (const region of ['MY-KDH', 'MY-KTN', 'MY-TRG']) {
+            equal(MalaysiaStateDataTest.state(region, 2027).getHoliday(day), null, region);
+        }
+    }
+
+    @test
     test0(): void {
         // 柔佛：有大宝森节与斋戒月首日，不过古兰经降示日
         const jhr: HolidayCalendar = MalaysiaStateDataTest.state('MY-JHR', 2025);

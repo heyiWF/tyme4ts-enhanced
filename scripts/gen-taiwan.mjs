@@ -17,8 +17,8 @@ for (const [y, record] of Object.entries(input.years)) {
     const days=[...map].map(([date,name])=>({date,name}));
     days.push(...record.work.map(d=>({date:`${y}-${d}`,name:'补行上班',work:true})));
     days.sort((a,b)=>a.date.localeCompare(b.date));
-    output.push({region:'TW',year,mode:'replace',verification:'official',source:input.source,attachment:record.attachment,
-        scope:input.scope,verifiedOn:input.verifiedOn,snapshotSha256:createHash('sha256').update(JSON.stringify(input)).digest('hex'),days});
+    output.push({region:'TW',year,mode:'replace',verification:'official',source:record.source || input.source,attachment:record.attachment,
+        scope:input.scope,verifiedOn:record.verifiedOn || input.verifiedOn,snapshotSha256:createHash('sha256').update(JSON.stringify(input)).digest('hex'),days});
 }
 for (const data of output) writeFileSync(`data/holidays/TW-${data.year}.json`,JSON.stringify(data,null,2)+'\n');
-console.log('Taiwan government offices: 2025 revised / 2026 generated');
+console.log(`Taiwan government offices: ${output.map(data => data.year).join(', ')} generated`);

@@ -9,7 +9,8 @@ import {HolidayRule} from '../rule';
 
 export function californiaExtra(): HolidayRule[] {
     return [
-        HolidayRule.solar(3, 31, '塞萨尔·查韦斯日'),
+        HolidayRule.solar(3, 31, '塞萨尔·查韦斯日', 1, 2025),
+        HolidayRule.solar(3, 31, '农场工人日', 2026),
     ];
 }
 

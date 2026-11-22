@@ -92,6 +92,10 @@
       "name": "宪法日"
     },
     {
+      "date": "2026-12-16",
+      "name": "诗丽吉王太后火化大典特别公休日"
+    },
+    {
       "date": "2026-12-31",
       "name": "除夕"
     }
@@ -99,5 +103,15 @@
   "verification": "pending",
   "scope": "原文件混合政府和银行假期。BOT 表仅适用金融机构，不能据此认证全国公众假日；保留待核实。",
   "reviewSource": "https://www.bot.or.th/en/financial-institutions-holiday.html",
-  "reviewedOn": "2026-11-02"
+  "reviewedOn": "2026-11-23",
+  "amendments": [
+    {
+      "source": "https://thailand.go.th/public/issue-focus-detail/cabinet-declares-16-december-a-special-government-holiday-for-royal-cremation-ceremony",
+      "publishedOn": "2026-11-11",
+      "add": [
+        "2026-12-16"
+      ],
+      "scope": "泰国内阁批准的一次性政府公休日；泰国央行另行公告适用于金融机构。"
+    }
+  ]
 }

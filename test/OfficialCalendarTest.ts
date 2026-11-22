@@ -49,6 +49,12 @@ class OfficialCalendarTest {
         equal(next.getDays().length, 120);
         ok(next.getHoliday(SolarDay.fromYmd(2026, 5, 1)));
         equal(next.getDays(true).filter(h => h.isWork()).length, 0);
+        const year2027 = OfficialHolidayCalendar.create('TW', 2027);
+        equal(year2027.getDays(true).length, 121);
+        equal(year2027.getDays(true).some(h => h.isWork()), false);
+        equal(year2027.getHoliday(SolarDay.fromYmd(2027, 2, 10))!.getName(), '春节补假');
+        equal(year2027.getHoliday(SolarDay.fromYmd(2027, 4, 6))!.getName(), '儿童节补假');
+        equal(year2027.getHoliday(SolarDay.fromYmd(2027, 12, 31))!.getName(), '开国纪念日补假');
     }
 
     @test

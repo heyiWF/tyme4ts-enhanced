@@ -1,8 +1,8 @@
 # 节日序号：计数口径与逐项核验
 
-核验日期：2026-11-10。共 **119 个独立序列**，9 个国家/地区口径及国际纪念日；别名不重复计入覆盖数量。每行对应一个独立来源锚点测试。来源里的第N个用于反推首届年；明确首届或法律生效时间的记录取首个适用日期为第1个。这是日期制度的计数，不表示逐年核实了线下庆典是否实际举行。
+首轮核验日期：2026-11-10。来源及新增联合国纪念日复核：2026-11-23。共 **122 个独立序列**，9 个国家/地区口径及国际纪念日；别名不重复计入覆盖数量。每行对应一个独立来源锚点测试。来源里的第N个用于反推首届年；明确首届或法律生效时间的记录取首个适用日期为第1个。这是日期制度的计数，不表示逐年核实了线下庆典是否实际举行。
 
-其中 **59 个国际口径**、**37 个中国大陆口径**，以及 23 个其他国家/地区公共假日口径。世界防治结核病日有两个有意分开的地区口径，不能把序列数量直接理解为不同节日名称的数量。
+其中 **62 个国际口径**、**37 个中国大陆口径**，以及 23 个其他国家/地区公共假日口径。世界防治结核病日有两个有意分开的地区口径，不能把序列数量直接理解为不同节日名称的数量。
 
 ## 调用
 
@@ -42,7 +42,7 @@ FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025, 3, 24), 
 
 | 地区 | 节日/已核对别名 | 首届与周期 | 来源锚点 | 计数范围与核验结论 | 来源 |
 | --- | --- | --- | --- | --- | --- |
-| CN | 全国消防日 | 1992年首届；每1年一次 | 2025-11-09：第34个 | 当地纪念日的举办序号；消防救援局：2025-11-09 为第34个。 | [依据1](https://www.119.gov.cn/qmxfxw/mtbd/wzbd/2025/52059.shtml) |
+| CN | 全国消防日 | 1992年首届；每1年一次 | 2026-11-09：第35个 | 当地纪念日的举办序号；国务院安委会办公室、国家消防救援局：2026-11-09 为第35个。 | [依据1](https://zj.119.gov.cn/col/col1229456259/art/2026/art_bfcbcf0cb56640a4b51c8cceff03c98c.html) |
 | CN | 全国防灾减灾日 | 2009年首届；每1年一次 | 2025-05-12：第17个 | 当地纪念日的举办序号；应急管理部通知：2025年为第17个。 | [依据1](https://www.mem.gov.cn/gk/zfxxgkpt/fdzdgknr/202504/t20250415_514051.shtml) |
 | CN | 全国爱耳日 | 2000年首届；每1年一次 | 2025-03-03：第26个 | 当地纪念日的举办序号；国家卫生健康委：2025年第二十六次爱耳日。 | [依据1](https://www.nhc.gov.cn/yzygj/c100068/202501/cbd9e4dd7a8e4d989bb5423ee9af7070.shtml) |
 | CN | 全国爱眼日 | 1996年首届；每1年一次 | 2025-06-06：第30个 | 当地纪念日的举办序号；卫生健康委记录2025-06-06第30个全国爱眼日。 | [依据1](https://wjw.shanxi.gov.cn/xwzx/szyw/202506/t20250609_9858172.shtml) |
@@ -57,7 +57,7 @@ FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025, 3, 24), 
 | CN | 中国航海日 | 2005年首届；每1年一次 | 2025-07-11：第21个 | 当地纪念日的举办序号；中国航海日公告：2025年第二十一个。 | [依据1](https://www.sport.gov.cn/sszx/n5207/c28881146/content.html) |
 | CN | 国家宪法日 | 2014年首届；每1年一次 | 2025-12-04：第12个 | 当地纪念日的举办序号；司法部：2025年第12个；与法制宣传日分别计数。 | [依据1](https://www.moj.gov.cn/pub/sfbgwapp/zwgk/tzggApp/202511/t20251127_528649.html) |
 | CN | 中华慈善日 | 2016年首届；每1年一次 | 2025-09-05：第10个 | 当地纪念日的举办序号；中国社会福利基金会：2025年第10个。 | [依据1](https://www.cswef.org/cswef/news/detail/id/1499.html) |
-| CN | 中国品牌日 | 2017年首届；每1年一次 | 2025-05-10：第9个 | 当地纪念日的举办序号；市场监管总局主管品牌刊物：2025年第9个、2017年首个。 | [依据1](https://www.cbrand.com.cn/content-25-29962-1.html) |
+| CN | 中国品牌日 | 2017年首届；每1年一次 | 2026-05-10：第10个 | 当地纪念日的举办序号；国家发展改革委：2017年设立，2026年第10个。 | [依据1](https://www.ndrc.gov.cn/xwdt/wszb/202605xwfbh/wzsl/202605/t20260522_1405402.html) |
 | CN | 全国科技工作者日 | 2017年首届；每1年一次 | 2025-05-30：第9个 | 当地纪念日的举办序号；科技部通知：2025年第9个。 | [依据1](https://www.most.gov.cn/xxgk/xinxifenlei/fdzdgknr/qtwj/qtwj2025/202504/t20250422_193455.html) |
 | CN | 全国生态日 | 2023年首届；每1年一次 | 2025-08-15：第3个 | 当地纪念日的举办序号；生态环境部：2025年第三个。 | [依据1](https://www.mee.gov.cn/ywdt/hjywnews/202508/t20250818_1125516.shtml) |
 | CN | 中国医师节 | 2018年首届；每1年一次 | 2025-08-19：第8个 | 当地纪念日的举办序号；国家卫生健康委：2025年第8个；不从2017年批复起计。 | [依据1](https://www.nhc.gov.cn/yzygj/c100067/202508/8388948fcf164acb98a716c2497951ec.shtml) |
@@ -84,30 +84,33 @@ FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025, 3, 24), 
 | * | 国际母语日 | 2000年首届；每1年一次 | 2000-02-21：第1个 | 国际纪念日的举办序号；UNESCO：1999年通过，2000年起举办。 | [依据1](https://www.unesco.org/en/days/mother-language) |
 | * | 世界野生动植物日 | 2014年首届；每1年一次 | 2014-03-03：第1个 | 国际纪念日的举办序号；UNEP：2014-03-03为首次。 | [依据1](https://www.unep.org/news-and-stories/press-release/first-ever-world-wildlife-day-spotlights-far-reaching-impact-us19) |
 | * | 国际幸福日 | 2013年首届；每1年一次 | 2013-03-20：第1个 | 国际纪念日的举办序号；联合国：2013-03-20为首次。 | [依据1](https://www.un.org/development/desa/en/news/social/intl-day-happiness.html) |
+| * | 和平共处国际日 | 2026年首届；每1年一次 | 2026-01-28：第1个 | 国际纪念日的举办序号；联合国大会 A/RES/79/269；联合国确认 2026-01-28 首次纪念。 | [依据1](https://www.un.org/en/un-chronicle/peaceful-coexistence-moral-choice-%E2%80%93-and-shared-responsibility) |
+| * | 内陆发展中国家特殊发展需求和挑战认识国际日 | 2025年首届；每1年一次 | 2025-08-06：第1个 | 国际纪念日的举办序号；联合国第三次内陆发展中国家会议于 2025-08-06 首次纪念。 | [依据1](https://webtv.un.org/en/asset/k1z/k1zl2wawfk) |
+| * | 世界土著妇女和女童国际日 | 2026年首届；每1年一次 | 2026-09-05：第1个 | 国际纪念日的举办序号；联合国大会 A/RES/80/10 于 2025 年 11 月通过；首个适用日为 2026-09-05。 | [依据1](https://www.un.org/zh/node/237574) |
 | * | 世界水日 | 1993年首届；每1年一次 | 1993-03-22：第1个 | 国际纪念日的举办序号；UN-Water：自1993年起每年3月22日举办。 | [依据1](https://www.unwater.org/our-work/world-water-day) |
 | * | 世界气象日 | 1961年首届；每1年一次 | 1961-03-23：第1个 | 国际纪念日的举办序号；WMO：1961年起纪念；1950年是公约生效年。 | [依据1](https://extranet.wmo.int/edistrib_exped/grp_has/_en/01860-2025-CSG-SC-WMD25_en.pdf) |
 | * | 世界卫生日 | 1950年首届；每1年一次 | 1950-04-07：第1个 | 国际纪念日的举办序号；WHO：自1950年起每年4月7日举办；不是WHO机构年龄。 | [依据1](https://www.who.int/europe/campaigns/world-health-day) |
 | * | 世界知识产权日 | 2001年首届；每1年一次 | 2001-04-26：第1个 | 国际纪念日的举办序号；WIPO首届公告明确2001-04-26。 | [依据1](https://www.wipo.int/pressroom/en/prdocs/2001/wipo_pr_2001_264.html) |
 | * | 国际家庭日 | 1994年首届；每1年一次 | 1994-05-15：第1个 | 国际纪念日的举办序号；联合国报告：1994-05-15首次，1995年第二次。 | [依据1](https://digitallibrary.un.org/record/180480/files/E_CN.5_1995_5-EN.pdf) |
-| * | 世界海洋日 | 2009年首届；每1年一次 | 2009-06-08：第1个 | 联合国正式纪念日序号，自2009年起；联合国首次纪念为2009-06-08；此前民间活动不并计。 | [依据1](https://legal.un.org/ola/media/info_from_lc/world_oceans_day.pdf) |
+| * | 世界海洋日 | 2009年首届；每1年一次 | 2009-06-08：第1个 | 联合国正式纪念日序号，自2009年起；联合国首次纪念为2009-06-08；此前民间活动不并计。 | [依据1](https://www.un.org/depts/los/wod/past-events.html) |
 | * | 世界难民日 | 2001年首届；每1年一次 | 2001-06-20：第1个 | 国际纪念日的举办序号；UNHCR：2001-06-20首次全球纪念。 | [依据1](https://www.unhcr.org/get-involved/take-action/world-refugee-day) |
 | * | 国际瑜伽日 | 2015年首届；每1年一次 | 2015-06-21：第1个 | 国际纪念日的举办序号；联合国大会主席首届讲话：2015-06-21。 | [依据1](https://www.un.org/pga/69/210615_statement-day-of-yoga/) |
 | * | 国际青年节 | 2000年首届；每1年一次 | 2000-08-12：第1个 | 国际纪念日的举办序号；联合国：2000-08-12首次举办。 | [依据1](https://www.un.org/en/observances/youth-day/background) |
 | * | 世界人道主义日 | 2009年首届；每1年一次 | 2009-08-19：第1个 | 国际纪念日的举办序号；联合国秘书长：2009-08-19首次。 | [依据1](https://www.un.org/sg/en/content/former-secretary-general/statements/2009-08-19/the-secretary-generals-message-world-humanitarian-day) |
 | * | 世界扫盲日 | 1967年首届；每1年一次 | 1967-09-08：第1个 | 国际纪念日的举办序号；UNESCO：自1967年起每年9月8日举办。 | [依据1](https://www.unesco.org/en/days/literacy) |
-| * | 世界旅游日 | 1980年首届；每1年一次 | 1980-09-27：第1个 | 国际纪念日的举办序号；联合国：1980年首次。 | [依据1](https://www.un.org/en/observances/tourism-day/background) |
+| * | 世界旅游日 | 1980年首届；每1年一次 | 1980-09-27：第1个 | 国际纪念日的举办序号；联合国：1980年首次。 | [依据1](https://www.untourism.int/world-tourism-day) |
 | * | 国际女童日 | 2012年首届；每1年一次 | 2012-10-11：第1个 | 国际纪念日的举办序号；美国国务卿2012-10-11致辞：首个国际女童日。 | [依据1](https://2009-2017.state.gov/secretary/20092013clinton/rm/2012/10/198720.htm) |
 | * | 世界海啸日 | 2016年首届；每1年一次 | 2016-11-05：第1个 | 国际纪念日的举办序号；联合国：2015年12月设立，2016-11-05首次。 | [依据1](https://www.un.org/pga/71/event2/tsunami-awareness-day/) |
 | * | 世界艾滋病日 | 1988年首届；每1年一次 | 2007-12-01：第20个 | 国际纪念日的举办序号；UNAIDS：1988年首次，2007年为第20次。 | [依据1](https://www.unaids.org/sites/default/files/web_story/071201_pp_wad_statement_en_0.pdf) |
 | * | 国际海关日 | 1983年首届；每1年一次 | 1983-01-26：第1个 | 国际纪念日的举办序号；萨摩亚海关主管部门：1983年发起，每年1月26日；不从海关合作理事会成立计。 | [依据1](https://mpmc.gov.ws/pr-ministry-of-customs-revenue-commemorates-and-celebrates-international-customs-day/) |
 | * | 国际大屠杀纪念日 | 2006年首届；每1年一次 | 2006-01-27：第1个 | 国际纪念日的举办序号；联合国2006年活动档案：2006-01-27首个全球纪念日；2005年是决议年。 | [依据1](https://www.un.org/en/holocaustremembrance/observance/2006) |
-| * | 世界抗癌日 | 2000年首届；每1年一次 | 2000-02-04：第1个 | 国际纪念日的举办序号；UICC：2000年发起，每年2月4日举办。 | [依据1](https://www.uicc.org/what-we-do/events/world-cancer-day) |
+| * | 世界抗癌日 | 2000年首届；每1年一次 | 2000-02-04：第1个 | 国际纪念日的举办序号；UICC：2000年发起，每年2月4日举办。 | [依据1](https://www.worldcancerday.org/about/our-story) |
 | * | 国际消除种族歧视日 | 1967年首届；每1年一次 | 1967-03-21：第1个 | 国际纪念日的举办序号；联合国1967年年鉴明确1967-03-21首次纪念；不从1960年事件计。 | [依据1](https://digitallibrary.un.org/record/860183/files/1122896-EN.pdf) |
 | * | 世界防治结核病日 | 1982年首届；每1年一次 | 1982-03-24：第1个 | 国际活动序号，自1982年起；CN查询采用中国官方宣传口径；WHO第50届大会会议记录：自1982年举行，WHO自1996年全面支持；两种起点须区分。 | [依据1](https://iris.who.int/bitstream/handle/10665/179640/WHA50_1997-REC-3_eng.pdf) |
 | * | 国际儿童图书日 | 1967年首届；每1年一次 | 1967-04-02：第1个 | 国际纪念日的举办序号；IBBY：1966年提出，1967年起在4月2日前后举行；按纪念日正日计数，不计周边活动。 | [依据1](https://www.ibby.org/fileadmin/user_upload/booklet_ICBD_2017.indd.pdf) |
-| * | 世界自闭症日 / 世界提高自闭症意识日 | 2008年首届；每1年一次 | 2008-04-02：第1个 | 国际纪念日的举办序号；联合国A/63/183报告：2008-04-02首次；2007年决议并非首届。 | [依据1](https://documents.un.org/access.nsf/get?DS=A%2F63%2F183&Lang=E&OpenAgent=) |
+| * | 世界自闭症日 / 世界提高自闭症意识日 | 2008年首届；每1年一次 | 2008-04-02：第1个 | 国际纪念日的举办序号；联合国A/63/183报告：2008-04-02首次；2007年决议并非首届。 | [依据1](https://documents.un.org/api/symbol/access?l=en&s=A%2F63%2F183&t=pdf) |
 | * | 国际地雷行动日 | 2006年首届；每1年一次 | 2006-04-04：第1个 | 国际纪念日的举办序号；UNHCR首届公告：2006-04-04首次地雷意识和地雷行动援助国际日。 | [依据1](https://www.unhcr.org/uk/news/stories/international-mine-awareness-day-unhcr-concerned-over-dangers-facing-returning) |
-| * | 世界地球日 | 1970年首届；每1年一次 | 1970-04-22：第1个 | 4月22日Earth Day活动序号，自1970年起；美国国家档案馆：1970-04-22首次；不与2009年联合国地球母亲日另设制度混算。 | [依据1](https://www.archives.gov/topics/earth-day) |
+| * | 世界地球日 | 1970年首届；每1年一次 | 1970-04-22：第1个 | 4月22日Earth Day活动序号，自1970年起；美国国家档案馆：1970-04-22首次；不与2009年联合国地球母亲日另设制度混算。 | [依据1](https://www.archives.gov/news/topics/earth-day) |
 | * | 世界安全生产与健康日 | 2003年首届；每1年一次 | 2003-04-28：第1个 | 国际劳工组织世界工作安全与健康日序号，自2003年起；ILO：2003年设立每年4月28日的本项纪念日；此前工会悼念活动不并计。 | [依据1](https://webapps.ilo.org/static/english/protection/safework/worldday/products04/factsheet04_eng.pdf) |
 | * | 世界金枪鱼日 | 2017年首届；每1年一次 | 2017-05-02：第1个 | 国际纪念日的举办序号；联合国首届声明：2017-05-02首次。 | [依据1](https://www.un.org/pga/71/2017/05/02/un-celebrates-first-ever-world-tuna-day/) |
 | * | 世界新闻自由日 | 1994年首届；每1年一次 | 1994-05-03：第1个 | 联合国全球纪念序号，自1994年首次全球纪念起；联合国秘书长1994年首届文告：1993年12月决定，1994-05-03首次全球纪念。 | [依据1](https://digitallibrary.un.org/record/199894/files/%5EST_DPI_PRESS_%5ESG_SM_5277-EN.pdf?ln=en) |
@@ -116,7 +119,7 @@ FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025, 3, 24), 
 | * | 世界自行车日 | 2018年首届；每1年一次 | 2018-06-03：第1个 | 国际纪念日的举办序号；联合国2018-06-04简报确认周日首个世界自行车日，即2018-06-03。 | [依据1](https://www.un.org/sg/en/content/highlight/2018-06-04.html) |
 | * | 世界环境日 | 1973年首届；每1年一次 | 1973-06-05：第1个 | UNEP首次举办起的序号，自1973年起，不按1972年设立周年计；UNEP明确首次为1973年，每年6月5日；1972年是设立年，不写成首届。 | [依据1](https://www.unep.org/en/news-and-stories/story/five-decades-world-environment-day-continues-shape-global-movement) |
 | * | 世界献血日 / 世界献血者日 | 2004年首届；每1年一次 | 2004-06-14：第1个 | 国际纪念日的举办序号；WHO：2004-06-14首次；2005年世界卫生大会确认为年度活动，不重置计数。 | [依据1](https://www.emro.who.int/press-releases/2005/world-blood-donor-day-2005.html) |
-| * | 世界防治荒漠化与干旱日 | 1995年首届；每1年一次 | 1995-06-17：第1个 | 国际纪念日的举办序号；联合国A/51/510第19段：每年6月17日，自1995年起纪念。 | [依据1](https://digitallibrary.un.org/nanna/record/222665/files/A_51_510-EN.pdf?registerDownload=1&version=1&withMetadata=0&withWatermark=0) |
+| * | 世界防治荒漠化与干旱日 | 1995年首届；每1年一次 | 1995-06-17：第1个 | 国际纪念日的举办序号；联合国大会 A/RES/49/115：每年6月17日，自1995年起纪念。 | [依据1](https://digitallibrary.un.org/nanna/record/168274/files/A_RES_49_115-EN.pdf?registerDownload=1&version=1&withMetadata=0&withWatermark=0) |
 | * | 世界人口日 | 1990年首届；每1年一次 | 1990-07-11：第1个 | 国际纪念日的举办序号；联合国：1990-07-11首次；不从1987年50亿人口日或1989年决定计。 | [依据1](https://www.un.org/en/observances/world-population-day/background) |
 | * | 曼德拉国际日 | 2010年首届；每1年一次 | 2010-07-18：第1个 | 联合国正式曼德拉国际日序号，自2010年起；联合国：2009年11月决定，2010年首次；不从曼德拉出生计。 | [依据1](https://www.un.org/en/events/mandeladay/) |
 | * | 国际友谊日 | 2011年首届；每1年一次 | 2011-07-30：第1个 | 国际纪念日的举办序号；联合国秘书长2011-07-30首届文告；不合并各国既有友谊节。 | [依据1](https://www.un.org/sg/en/content/former-secretary-general/statements/2011-07-30/secretary-generals-message-international-day-of-friendship) |
@@ -127,12 +130,12 @@ FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(2025, 3, 24), 
 | * | 国际非暴力日 | 2007年首届；每1年一次 | 2007-10-02：第1个 | 国际纪念日的举办序号；联合国新闻中心首届文告：2007-10-02。 | [依据1](https://www.unic.or.jp/news_press/messages_speeches/sg/743/?lang=en) |
 | * | 世界粮食日 | 1981年首届；每1年一次 | 1981-10-16：第1个 | 国际纪念日的举办序号；FAO历史记录：1981-10-16首次；1979年决定、1945年机构成立均非首届。 | [依据1](https://www.fao.org/unfao/histo-e.htm) |
 | * | 世界住房日 / 世界人居日 | 1986年首届；每1年一次 | 1986-10-06：第1个 | 国际纪念日的举办序号；联合国：1986年首次，日期为十月首个星期一；不从1985年决定计。 | [依据1](https://www.un.org/en/observances/habitat-day) |
-| * | 国际宽容日 | 1996年首届；每1年一次 | 1996-11-16：第1个 | 国际纪念日的举办序号；联合国A/53/284报告专节记载1996年首次全球纪念；1995年为宣言年。 | [依据1](https://digitallibrary.un.org/record/262272/files/A_53_284-EN.pdf) |
+| * | 国际宽容日 | 1996年首届；每1年一次 | 1996-11-16：第1个 | 国际纪念日的举办序号；联合国A/53/284报告专节记载1996年首次全球纪念；1995年为宣言年。 | [依据1](https://digitallibrary.un.org/nanna/record/262272/files/A_53_284-EN.pdf?registerDownload=1&version=1&withMetadata=0&withWatermark=0) |
 | * | 世界厕所日 | 2013年首届；每1年一次 | 2013-11-19：第1个 | 联合国正式纪念序号，自2013年起，不计此前民间倡议；联合国经社部：2013年首次正式纪念；与2001年起的民间倡议区分。 | [依据1](https://www.un.org/development/desa/en/news/sustainable/world-toilet-day.html) |
 | * | 国际声援巴勒斯坦人民日 | 1978年首届；每1年一次 | 1978-11-29：第1个 | 国际纪念日的举办序号；联合国首届公报：1978-11-29首次；1977年决定不是首届。 | [依据1](https://www.un.org/unispal/document/auto-insert-210103/) |
-| * | 世界残疾人日 / 国际残疾人日 | 1992年首届；每1年一次 | 1992-12-03：第1个 | 国际纪念日的举办序号；联合国1993年年鉴确认1992-12-03为首次；后续名称变化不重置。 | [依据1](https://cdn.un.org/unyearbook/yun/chapter_pdf/1993YUN/1993_P3_CH11.pdf) |
+| * | 世界残疾人日 / 国际残疾人日 | 1992年首届；每1年一次 | 1992-12-03：第1个 | 国际纪念日的举办序号；联合国残疾事务大事记：1992 年起定于 12 月 3 日；后续名称变化不重置。 | [依据1](https://www.un.org/development/desa/disabilities/about-us/history-of-disability-and-the-united-nations/the-united-nations-and-persons-with-disabilities-chronology-1980s-present.html) |
 | * | 国际志愿人员日 / 国际志愿者日 | 1986年首届；每1年一次 | 1986-12-05：第1个 | 国际纪念日的举办序号；UNV1986年马塞卢宣言明确当年12月5日首次；1985年12月决议不算首届。 | [依据1](https://digitallibrary.un.org/record/144493/files/UNDP_UNV%2802%29_M2-E.pdf) |
-| * | 国际民航日 | 1994年首届；每1年一次 | 1994-12-07：第1个 | 国际纪念日的举办序号；ICAO明确1994-12-07首次；1996年联合国认可不重置。 | [依据1](https://www.icao.int/secretariat/SecretaryGeneral/aviation_day/2006/pio200615_e.pdf) |
+| * | 国际民航日 | 1994年首届；每1年一次 | 1994-12-07：第1个 | 国际纪念日的举办序号；ICAO明确1994-12-07首次；1996年联合国认可不重置。 | [依据1](https://www.icao.int/sites/default/files/postalhistory/the_international_civil_aviation_day.htm) |
 | * | 国际反腐败日 | 2004年首届；每1年一次 | 2004-12-09：第1个 | 国际纪念日的举办序号；联合国2004-12-08简报明确次日为首次；2003年公约签署不算首届。 | [依据1](https://www.un.org/sg/en/content/highlight/2004-12-08.html) |
 | * | 世界人权日 | 1950年首届；每1年一次 | 1950-12-10：第1个 | 联合国正式人权日制度序号，自1950年起；1950年人权日官方公告；联合国同年12月4日设立，不从1948年宣言周年计。 | [依据1](https://www.trumanlibrary.gov/library/proclamations/2913/united-nations-human-rights-day-1950)、[依据2](https://mandates.un.org/mandate/A/RES/423%28V%29) |
 | * | 国际山岳日 / 国际山日 | 2003年首届；每1年一次 | 2003-12-11：第1个 | 国际纪念日的举办序号；FAO2003年大会报告：2003-12-11为首次。 | [依据1](https://www.fao.org/4/J1032e/J1032e.htm) |

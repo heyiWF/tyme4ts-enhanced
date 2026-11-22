@@ -52,6 +52,10 @@
       "name": "最高元首诞辰"
     },
     {
+      "date": "2027-06-08",
+      "name": "伊斯兰新年补假"
+    },
+    {
       "date": "2027-08-15",
       "name": "先知诞辰"
     },
@@ -77,7 +81,16 @@
     }
   ],
   "verification": "pending",
-  "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
-  "reviewSource": "https://www.kelantanlibrary.gov.my/v4/images/download/jadual-hari-kelepasan-am/HKA-2026.pdf",
-  "reviewedOn": "2026-11-02"
+  "scope": "包含各州适用日期及补假。6 月 8 日回历新年补假见雪兰莪政府机构日历，吉打、吉兰丹、登嘉楼在州级增补中排除；尚未逐项核实全表。",
+  "reviewSource": "https://www.kabinet.gov.my/hari-kelepasan-am/",
+  "reviewedOn": "2026-11-23",
+  "amendments": [
+    {
+      "source": "https://nmrr.gov.my/storage/7JnPDHJfyP97xyRG858sBUnWTejICGSO2MyB1XSC.pdf",
+      "add": [
+        "2027-06-08"
+      ],
+      "scope": "雪兰莪日历列 6 月 6 日伊斯兰新年、6 月 7 日最高元首诞辰、6 月 8 日补假。"
+    }
+  ]
 }

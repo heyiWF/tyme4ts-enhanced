@@ -13,7 +13,7 @@ const rows = definitions.map(d => `| ${d.region} | ${d.names.join(' / ')} | ${sc
 const changes = JSON.parse(readFileSync('scripts/fixtures/ordinal-conformance-changes.json', 'utf8'));
 writeFileSync('docs/FESTIVAL-ORDINALS.md', `# 节日序号：计数口径与逐项核验
 
-核验日期：2026-11-10。共 **${definitions.length} 个独立序列**，${regions.filter(r => r !== '*').length} 个国家/地区口径及国际纪念日；别名不重复计入覆盖数量。每行对应一个独立来源锚点测试。来源里的第N个用于反推首届年；明确首届或法律生效时间的记录取首个适用日期为第1个。这是日期制度的计数，不表示逐年核实了线下庆典是否实际举行。
+首轮核验日期：2026-11-10。来源及新增联合国纪念日复核：2026-11-23。共 **${definitions.length} 个独立序列**，${regions.filter(r => r !== '*').length} 个国家/地区口径及国际纪念日；别名不重复计入覆盖数量。每行对应一个独立来源锚点测试。来源里的第N个用于反推首届年；明确首届或法律生效时间的记录取首个适用日期为第1个。这是日期制度的计数，不表示逐年核实了线下庆典是否实际举行。
 
 其中 **${internationalCount} 个国际口径**、**${cnCount} 个中国大陆口径**，以及 ${definitions.length - cnCount - internationalCount} 个其他国家/地区公共假日口径。世界防治结核病日有两个有意分开的地区口径，不能把序列数量直接理解为不同节日名称的数量。
 

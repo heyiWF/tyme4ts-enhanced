@@ -1575,7 +1575,7 @@ const CHECKS = [
     ['2025-12-13 纪念', '国家公祭日', () => A(2025, 12, 13).getFestivals().getByCategory(3).map((e) => e.getName()).join('、')],
     ['佛历条目数', '219', () => String(Festivals.getStat()['buddhist'])],
     ['道历条目数', '96', () => String(Festivals.getStat()['taoist'])],
-    ['纪念日条目数', '140', () => String(Festivals.getStat()['anniversary'])],
+    ['纪念日日期键数', '141', () => String(Festivals.getStat()['anniversary'])],
     ['希伯来历换算', '5786年提斯利月1日', () => HebrewDay.fromSolarDay(SolarDay.fromYmd(2025, 9, 23)).toString()],
     ['希伯来闰年 5784', '是', () => HebrewDay.isLeapYear(5784) ? '是' : '否'],
     ['2025-09-23 犹太新年', '犹太新年第1日', () => HebrewFestival.of(SolarDay.fromYmd(2025, 9, 23)).getName()],
@@ -1672,7 +1672,7 @@ let festCats = [0, 1, 2, 3, 4, 6];
 let festYear = new Date().getFullYear();
 
 const ordinalDefinitions = FestivalOrdinals.getDefinitions();
-$('ordinal-summary').textContent = `逐项核验清单 · ${ordinalDefinitions.length} 个独立序列 · 2026-11-10`;
+$('ordinal-summary').textContent = `逐项核验清单 · ${ordinalDefinitions.length} 个独立序列 · 最近更新 2026-11-23`;
 $('ordinal-rows').innerHTML = ordinalDefinitions.map(d => {
   const r = d.recurrence;
   const cycle = r.kind === 'yearly' ? `${r.firstYear} 年首届，每 ${r.intervalYears} 年一次${r.omittedYears?.length ? '；扣除 ' + r.omittedYears.join('、') + ' 年' : ''}` : '逐次日期表；表外不推算';

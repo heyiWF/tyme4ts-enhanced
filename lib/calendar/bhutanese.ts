@@ -7,7 +7,8 @@ import {JulianDay, LunarDay, RabByungMonth, RabByungYear, SolarDay} from './core
  * 不丹 Kālacakra 历的 Lhawang Lodro 系统。月份与闰月规则和西藏 Phugpa 历不同，
  * 重复日以 `leapDay=true` 表示两次中的第一日。
  *
- * 算法与常数移植自 bhutanese-calendar（MIT License），原始数学来自
+ * 算法与常数移植自 bhutanese-calendar（MIT License）。上游 1.0.0 与 1.1.0 的农历和公历换算源文件一致。
+ * 原始数学来自
  * Svante Janson, Tibetan Calendar Mathematics 附录 A.4 与 Edward Henning 的纪元常数。
  */
 

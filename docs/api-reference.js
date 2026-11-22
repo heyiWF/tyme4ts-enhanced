@@ -876,7 +876,7 @@ export const API_FIELDS = [
     "expression": "Festivals.getStat()",
     "description": "返回各来源日期键数量；不是去重后的全年放假天数。",
     "parameters": "使用示例中构造的日期对象；本查询无需额外输入。",
-    "output": "{\n  \"anniversary\": 140,\n  \"folk\": 29,\n  \"buddhist\": 219,\n  \"buddhistOther\": 30,\n  \"guanyin\": 22,\n  \"yangGong\": 13,\n  \"taoist\": 96,\n  \"deity\": 125\n}",
+    "output": "{\n  \"anniversary\": 141,\n  \"folk\": 29,\n  \"buddhist\": 219,\n  \"buddhistOther\": 30,\n  \"guanyin\": 22,\n  \"yangGong\": 13,\n  \"taoist\": 96,\n  \"deity\": 125\n}",
     "returns": "{ [key: string]: number; }",
     "code": "import {DayAlmanac, Festivals} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.getStat();\n// 返回类型：{ [key: string]: number; }\nconsole.log(value);"
   },
@@ -887,7 +887,7 @@ export const API_FIELDS = [
     "expression": "Festivals.installEvents()",
     "description": "将单日节日注册到全局 EventManager，重复调用幂等更新；返回本次处理条数，不等于新增条数。不会注册多日活动。",
     "parameters": "无参数；此调用会修改全局事件注册表。",
-    "output": "343",
+    "output": "346",
     "returns": "number",
     "code": "import {DayAlmanac, Festivals} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = Festivals.installEvents();\n// 返回类型：number\nconsole.log(value);"
   },
@@ -1360,7 +1360,7 @@ export const API_FIELDS = [
     "expression": "OfficialHolidayCalendar.getAvailableYears('TW')",
     "description": "返回已核验年份数组；空数组表示无可用年度。",
     "parameters": "region: string，地区代码不区分大小写。",
-    "output": "[\n  2025,\n  2026\n]",
+    "output": "[\n  2025,\n  2026,\n  2027\n]",
     "returns": "number[]",
     "code": "import {DayAlmanac, OfficialHolidayCalendar} from 'tyme4ts-enhanced';\n\nconst a = DayAlmanac.fromYmd(2025, 4, 3);\nconst value = OfficialHolidayCalendar.getAvailableYears('TW');\n// 返回类型：number[]\nconsole.log(value);"
   },

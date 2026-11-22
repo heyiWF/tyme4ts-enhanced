@@ -16,11 +16,11 @@
 
 [在线 Wiki](https://heyiWF.github.io/tyme4ts-enhanced/) · [开发文档与 138 个字段示例](https://heyiWF.github.io/tyme4ts-enhanced/#tab-fields) · [官方资料与接入状态](./docs/SOURCES.md) · [逐项核验报告](./docs/DATA-REVIEW.md) · [历史审查报告](./docs/AUDIT.md) · [移植指南](./docs/PORTING.md) · [变更记录](./CHANGELOG.md)
 
-当前仓库版本 **1.16.0**：78 个地区代码、158 份数据文件，其中 **136 份已核验年度表、2,088 条日期记录**；另有 22 份待核验文件，不进入官方日历接口和 Wiki 自动导入。已完成原定六项优先接入：日本、台湾机关办公日历、香港天文台对照、美国 OPM、全国科普月、全民阅读活动周。本次未发布 npm 包；注册表版本可能晚于仓库。
+当前仓库版本 **1.16.0**：78 个地区代码、159 份数据文件，其中 **138 份已核验年度表、2,234 条日期记录**；另有 21 份待核验文件，不进入官方日历接口和 Wiki 自动导入。已完成原定六项优先接入：日本、台湾机关办公日历、香港天文台对照、美国 OPM、全国科普月、全民阅读活动周。本次未发布 npm 包；注册表版本可能晚于仓库。
 
 历法转换、民俗纪念日与法定放假是不同的数据层。算法可推算日期，但临时移日、行业适用范围、观月结果仍以当地公告为准。各项核验范围见资料目录。
 
-新增节日序号：`Festivals.of(SolarDay.fromYmd(2026, 11, 9)).getNames(true)` 可输出「第35个全国消防日」。条目、`SolarFestival` 和地区日历的 `Holiday` 支持 `getOrdinal()`、`getOrdinalName()`、`getOrdinalInfo()`；保留原有名称接口。已逐项核验的序列及范围见 [节日序号核验表](./docs/FESTIVAL-ORDINALS.md)，现覆盖119个独立计数口径（59个国际、37个中国大陆及23个其他国家公共假日），包括2026年第13个中国烈士纪念日、五年一次的世界统计日、浮动星期和秋分规则。世界防治结核病日区分中国官方宣传与国际活动序列，查询结果保留计数范围。无法确定传统起点或完整次数的节日返回 `null`，不把周年或放假天数当作届数。
+新增节日序号：`Festivals.of(SolarDay.fromYmd(2026, 11, 9)).getNames(true)` 可输出「第35个全国消防日」。条目、`SolarFestival` 和地区日历的 `Holiday` 支持 `getOrdinal()`、`getOrdinalName()`、`getOrdinalInfo()`；保留原有名称接口。已逐项核验的序列及范围见 [节日序号核验表](./docs/FESTIVAL-ORDINALS.md)，现覆盖122个独立计数口径（62个国际、37个中国大陆及23个其他国家公共假日），包括2026年第13个中国烈士纪念日、五年一次的世界统计日、浮动星期和秋分规则。世界防治结核病日区分中国官方宣传与国际活动序列，查询结果保留计数范围。无法确定传统起点或完整次数的节日返回 `null`，不把周年或放假天数当作届数。
 
 ---
 
@@ -227,7 +227,7 @@ gb.importJson(readFileSync('data/holidays/GB-SCT-2026.json', 'utf8'));
 
 各地区均带 `getNote()` 说明覆盖范围，例如美国仅列联邦假日、德国仅列全德统一假日，州省与宗教节日可用 `importJson` 追加。
 
-年度 JSON 位于 [`data/holidays/`](./data/holidays/)。每份表包含 `verification`、`scope` 和来源；136 份已核验表使用完整替换。马来西亚、泰国、斯里兰卡的 22 份旧文件仍待核验，不能作为已认证的完整放假安排。逐日清单可查 [`data/quality-review.json`](./data/quality-review.json)。
+年度 JSON 位于 [`data/holidays/`](./data/holidays/)。每份表包含 `verification`、`scope` 和来源；138 份已核验表使用完整替换。马来西亚、泰国、斯里兰卡的 21 份旧文件仍待核验，不能作为已认证的完整放假安排。逐日清单可查 [`data/quality-review.json`](./data/quality-review.json)。
 
 ```ts
 import {readFileSync} from 'node:fs';
@@ -284,7 +284,7 @@ DiyanetDay.fromSolarDay(SolarDay.fromYmd(2025, 3, 30)).toString();    // 1446年
 DiyanetDay.fromYmd(1447, 12, 10).getSolarDay().toString();             // 2026年5月27日
 ```
 
-乌姆库拉核对记录：1446 年开斋节 2025-03-30、宰牲节 2025-06-06、1447 年开斋节 2026-03-20、宰牲节 2026-05-27 与沙特官方公告逐日一致。原表在 1364 年舍尔邦月有一处 28 日的笔误（1945 年），已如实保留并由测试锁定，未擅自改动累计值。
+乌姆库拉月首表取自 [moment-hijri 3.0.0](https://github.com/xsoh/moment-hijri/releases/tag/v3.0.0)。新版修正 1446 年和 1485 年的各一处月首。日期核对记录：1446 年开斋节 2025-03-30、宰牲节 2025-06-06、1447 年开斋节 2026-03-20、宰牲节 2026-05-27 与沙特官方公告逐日一致。原表在 1364 年舍尔邦月有一处 28 日的笔误（1945 年），已如实保留并由测试锁定，未擅自改动累计值。
 
 Diyanet 核对记录：2015–2027 年开斋节、古尔邦节共 26 个官方日期，24 个可由判据算出；2016 年开斋节（公布 7 月 5 日，算出 7 月 6 日）与 2016 年古尔邦节（公布 9 月 12 日，算出 9 月 11 日）差一日，差异固定在 `test/DiyanetTest.ts` 中。月首按「第 29 日傍晚能否见月」逐月递推并夹到 29 或 30 日，不会出现 31 日的月份；月首链自 1440 年穆哈兰姆月缓存，首次查 2025 年约 12 ms。
 
@@ -368,12 +368,12 @@ f.getEntries().map((e) => [Festivals.getCategoryName(e.getCategory()), e.getName
 // [['民俗','寒食节','folk'], ['宗教','眼光娘娘圣诞','taoist'], ['宗教','雷斋日','foto']]
 
 Festivals.getStat();
-// {anniversary:140, folk:29, buddhist:219, buddhistOther:30, guanyin:22, yangGong:13, taoist:96, deity:125}
+// {anniversary:141, folk:29, buddhist:219, buddhistOther:30, guanyin:22, yangGong:13, taoist:96, deity:125}
 ```
 
 | 来源 | 类 | 规模 | 说明 |
 | --- | --- | --- | --- |
-| 公历纪念日与国际日 | `AnniversaryFestival` | 140 键 / 165 名 | 上游 137 键；补国家宪法日、学生营养日、台湾光复纪念日、全国高血压日等，8 项附起始年与来源 |
+| 公历纪念日与国际日 | `AnniversaryFestival` | 141 键 / 168 名 | 上游 137 键；补国家宪法日、学生营养日、台湾光复纪念日、全国高血压日等，8 项中国纪念日及 3 项联合国纪念日附起始年与来源 |
 | 农历民俗 | `FolkFestival` | 29 键 | 含寒食、春社秋社、中国农民丰收节 |
 | 佛历 | `BuddhistFestival` | 219 键 / 358 条 + 30 纪念日 | 因果犯忌带宜忌原文，另有观音斋 22 日、杨公忌 13 日、十斋/六斋/朔望判定 |
 | 道历 | `TaoistFestival` | 96 键 / 119 条 | 诸神圣诞带斋日备注，另有三元、五腊、八节、八会、戊日判定 |
@@ -480,7 +480,7 @@ c.toTymeEvents().forEach((e) => EventManager.update(e.getName(), e));
 | 韩国 / 不丹 / 蒙古 | 1900–2050 / 1900–2100 / 1900–2100 |
 | 尼泊尔 Bikram Sambat | 1975–2084 BS（可用 `importJson()` 续年） |
 | 泰国阴历 / 越南农历 / 缅甸历 | 1250–1470 CS / 1800–2199 / 见模块测试 |
-| 节假日 | 已核验年度表：日本 1955–2027、台湾机关 2025–2026、美国 OPM 2011–2030、英国 2019–2028 等；完整范围及待核验文件见 DATA-REVIEW.md |
+| 节假日 | 已核验年度表：日本 1955–2027、台湾机关 2025–2027、美国 OPM 2011–2030、英国 2019–2028 等；完整范围及待核验文件见 DATA-REVIEW.md |
 
 ---
 

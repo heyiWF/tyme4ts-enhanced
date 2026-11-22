@@ -2,7 +2,7 @@
  * 逐年节假日公告数据（自动生成，请勿手工编辑）
  *
  * 由 scripts/build-docs-data.mjs 从 data/holidays/*.json 生成。
- * 覆盖 CN-2027、CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、GB-2019、GB-2020、GB-2021、GB-2022、GB-2023、GB-2024、GB-2025、GB-2026、GB-2027、GB-2028、GB-NIR-2019、GB-NIR-2020、GB-NIR-2021、GB-NIR-2022、GB-NIR-2023、GB-NIR-2024、GB-NIR-2025、GB-NIR-2026、GB-NIR-2027、GB-NIR-2028、GB-SCT-2019、GB-SCT-2020、GB-SCT-2021、GB-SCT-2022、GB-SCT-2023、GB-SCT-2024、GB-SCT-2025、GB-SCT-2026、GB-SCT-2027、GB-SCT-2028、ID-2026、ID-2027、JP-1955、JP-1956、JP-1957、JP-1958、JP-1959、JP-1960、JP-1961、JP-1962、JP-1963、JP-1964、JP-1965、JP-1966、JP-1967、JP-1968、JP-1969、JP-1970、JP-1971、JP-1972、JP-1973、JP-1974、JP-1975、JP-1976、JP-1977、JP-1978、JP-1979、JP-1980、JP-1981、JP-1982、JP-1983、JP-1984、JP-1985、JP-1986、JP-1987、JP-1988、JP-1989、JP-1990、JP-1991、JP-1992、JP-1993、JP-1994、JP-1995、JP-1996、JP-1997、JP-1998、JP-1999、JP-2000、JP-2001、JP-2002、JP-2003、JP-2004、JP-2005、JP-2006、JP-2007、JP-2008、JP-2009、JP-2010、JP-2011、JP-2012、JP-2013、JP-2014、JP-2015、JP-2016、JP-2017、JP-2018、JP-2019、JP-2020、JP-2021、JP-2022、JP-2023、JP-2024、JP-2025、JP-2026、JP-2027、LK-2025、LK-2026、LK-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027、TW-2025、TW-2026、US-2011、US-2012、US-2013、US-2014、US-2015、US-2016、US-2017、US-2018、US-2019、US-2020、US-2021、US-2022、US-2023、US-2024、US-2025、US-2026、US-2027、US-2028、US-2029、US-2030，另有马来西亚 13 个州级增补文件。
+ * 覆盖 CN-2027、CN-NX-2025、CN-NX-2026、CN-XJ-2025、CN-XJ-2026、EG-2026、GB-2019、GB-2020、GB-2021、GB-2022、GB-2023、GB-2024、GB-2025、GB-2026、GB-2027、GB-2028、GB-NIR-2019、GB-NIR-2020、GB-NIR-2021、GB-NIR-2022、GB-NIR-2023、GB-NIR-2024、GB-NIR-2025、GB-NIR-2026、GB-NIR-2027、GB-NIR-2028、GB-SCT-2019、GB-SCT-2020、GB-SCT-2021、GB-SCT-2022、GB-SCT-2023、GB-SCT-2024、GB-SCT-2025、GB-SCT-2026、GB-SCT-2027、GB-SCT-2028、ID-2026、ID-2027、JP-1955、JP-1956、JP-1957、JP-1958、JP-1959、JP-1960、JP-1961、JP-1962、JP-1963、JP-1964、JP-1965、JP-1966、JP-1967、JP-1968、JP-1969、JP-1970、JP-1971、JP-1972、JP-1973、JP-1974、JP-1975、JP-1976、JP-1977、JP-1978、JP-1979、JP-1980、JP-1981、JP-1982、JP-1983、JP-1984、JP-1985、JP-1986、JP-1987、JP-1988、JP-1989、JP-1990、JP-1991、JP-1992、JP-1993、JP-1994、JP-1995、JP-1996、JP-1997、JP-1998、JP-1999、JP-2000、JP-2001、JP-2002、JP-2003、JP-2004、JP-2005、JP-2006、JP-2007、JP-2008、JP-2009、JP-2010、JP-2011、JP-2012、JP-2013、JP-2014、JP-2015、JP-2016、JP-2017、JP-2018、JP-2019、JP-2020、JP-2021、JP-2022、JP-2023、JP-2024、JP-2025、JP-2026、JP-2027、LK-2025、LK-2026、LK-2027、MY-2025、MY-2026、MY-2027、SG-2025、SG-2026、SG-2027、TH-2025、TH-2026、TH-2027、TW-2025、TW-2026、TW-2027、US-2011、US-2012、US-2013、US-2014、US-2015、US-2016、US-2017、US-2018、US-2019、US-2020、US-2021、US-2022、US-2023、US-2024、US-2025、US-2026、US-2027、US-2028、US-2029、US-2030，另有马来西亚 13 个州级增补文件。
  */
 export const VERSION = "1.16.0";
 
@@ -8277,7 +8277,7 @@ export const DATASETS = [
   "reviewedOn": "2026-11-02",
   "amendments": [
    {
-    "source": "https://documents.gov.lk/view/extra-gazettes/2026/4/2485-14_E.pdf",
+    "source": "https://documents.gov.lk/view/egz/2026/4/2485-14_E.pdf",
     "gazette": "2485/14",
     "publishedOn": "2026-04-21",
     "removed": "2026-05-02",
@@ -8289,7 +8289,7 @@ export const DATASETS = [
  {
   "region": "LK",
   "year": 2027,
-  "source": "Central Bank of Sri Lanka / gazetted holidays; dataset by Hirantha Sandaruwan, CC BY 4.0 (https://github.com/HiranthaSandaruwan/sri-lanka-public-holidays)",
+  "source": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027",
   "days": [
    {
     "date": "2027-01-15",
@@ -8392,10 +8392,10 @@ export const DATASETS = [
     "name": "圣诞节"
    }
   ],
-  "verification": "pending",
-  "scope": "2026 年基础官方日历可核对，2025/2027 央行页面访问受限；尚需核查后续公报（包括 2026 卫塞节调整），不将第三方汇编认证为完整现行公告。",
-  "reviewSource": "https://moha.gov.lk/web/images/latest_document/government_holidays/2026/2026_E.pdf",
-  "reviewedOn": "2026-11-02"
+  "verification": "official",
+  "scope": "公报 2493/05 与央行 B/P 日期一致。收录公众假日；普通银行周末及单独的商业假日分类不在表内。",
+  "mode": "replace",
+  "verifiedOn": "2026-11-23"
  },
  {
   "region": "MY",
@@ -8617,6 +8617,10 @@ export const DATASETS = [
     "name": "最高元首诞辰"
    },
    {
+    "date": "2027-06-08",
+    "name": "伊斯兰新年补假"
+   },
+   {
     "date": "2027-08-15",
     "name": "先知诞辰"
    },
@@ -8642,9 +8646,18 @@ export const DATASETS = [
    }
   ],
   "verification": "pending",
-  "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
-  "reviewSource": "https://www.kelantanlibrary.gov.my/v4/images/download/jadual-hari-kelepasan-am/HKA-2026.pdf",
-  "reviewedOn": "2026-11-02"
+  "scope": "包含各州适用日期及补假。6 月 8 日回历新年补假见雪兰莪政府机构日历，吉打、吉兰丹、登嘉楼在州级增补中排除；尚未逐项核实全表。",
+  "reviewSource": "https://www.kabinet.gov.my/hari-kelepasan-am/",
+  "reviewedOn": "2026-11-23",
+  "amendments": [
+   {
+    "source": "https://nmrr.gov.my/storage/7JnPDHJfyP97xyRG858sBUnWTejICGSO2MyB1XSC.pdf",
+    "add": [
+     "2027-06-08"
+    ],
+    "scope": "雪兰莪日历列 6 月 6 日伊斯兰新年、6 月 7 日最高元首诞辰、6 月 8 日补假。"
+   }
+  ]
  },
  {
   "region": "MY-JHR",
@@ -8764,7 +8777,8 @@ export const DATASETS = [
    "2026-03-07",
    "2026-06-02",
    "2026-11-09",
-   "2027-02-24"
+   "2027-02-24",
+   "2027-06-08"
   ],
   "verification": "pending",
   "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
@@ -8794,6 +8808,10 @@ export const DATASETS = [
     "name": "古兰经降示日补假"
    },
    {
+    "date": "2026-03-19",
+    "name": "开斋节特别公休日"
+   },
+   {
     "date": "2026-05-26",
     "name": "阿拉法日"
    },
@@ -8813,7 +8831,8 @@ export const DATASETS = [
   "exclude": [
    "2025-09-01",
    "2026-06-02",
-   "2026-11-09"
+   "2026-11-09",
+   "2027-06-08"
   ],
   "verification": "pending",
   "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
@@ -9176,7 +9195,8 @@ export const DATASETS = [
   ],
   "exclude": [
    "2025-09-01",
-   "2026-06-02"
+   "2026-06-02",
+   "2027-06-08"
   ],
   "verification": "pending",
   "scope": "已找到 2026 年联邦及州矩阵，但原文件混入补假、不同州适用日期且含 2025/2027；未逐项确认所有临时通告与补假，不能称完整官方公告。",
@@ -9577,6 +9597,10 @@ export const DATASETS = [
     "name": "宪法日"
    },
    {
+    "date": "2026-12-16",
+    "name": "诗丽吉王太后火化大典特别公休日"
+   },
+   {
     "date": "2026-12-31",
     "name": "除夕"
    }
@@ -9584,12 +9608,22 @@ export const DATASETS = [
   "verification": "pending",
   "scope": "原文件混合政府和银行假期。BOT 表仅适用金融机构，不能据此认证全国公众假日；保留待核实。",
   "reviewSource": "https://www.bot.or.th/en/financial-institutions-holiday.html",
-  "reviewedOn": "2026-11-02"
+  "reviewedOn": "2026-11-23",
+  "amendments": [
+   {
+    "source": "https://thailand.go.th/public/issue-focus-detail/cabinet-declares-16-december-a-special-government-holiday-for-royal-cremation-ceremony",
+    "publishedOn": "2026-11-11",
+    "add": [
+     "2026-12-16"
+    ],
+    "scope": "泰国内阁批准的一次性政府公休日；泰国央行另行公告适用于金融机构。"
+   }
+  ]
  },
  {
   "region": "TH",
   "year": 2027,
-  "source": "泰国内阁 2027 年公休日公告（经 officeholidays、timefyi、worldpublicholiday 三家汇总比对）",
+  "source": "officeholidays、timefyi、worldpublicholiday 年度汇编",
   "days": [
    {
     "date": "2027-01-01",
@@ -9689,9 +9723,19 @@ export const DATASETS = [
    }
   ],
   "verification": "pending",
-  "scope": "原文件混合政府和银行假期。BOT 表仅适用金融机构，不能据此认证全国公众假日；保留待核实。",
+  "scope": "原表混合政府及银行假期。7 月 19 日和 20 日的安排随适用机构而异，尚未取得覆盖全国政府机关的年度表。",
   "reviewSource": "https://www.bot.or.th/en/financial-institutions-holiday.html",
-  "reviewedOn": "2026-11-02"
+  "reviewedOn": "2026-11-23",
+  "amendments": [
+   {
+    "source": "https://iprocurement.ieat.go.th/?cal=2570-07&page=1",
+    "scope": "国营机构日历将补假列在 7 月 19 日；泰国央行日历亦列同日，适用于金融机构。"
+   },
+   {
+    "source": "https://regis.kmutt.ac.th/web/calendar2026?gmonth=7&tab=academic&type=holiday&year=2569",
+    "scope": "蒙库国王科技大学列 7 月 19 日守夏节、7 月 20 日三宝佛节补假。待全国政府机关公告确认。"
+   }
+  ]
  },
  {
   "region": "TW",
@@ -9702,7 +9746,7 @@ export const DATASETS = [
   "attachment": "https://www.dgpa.gov.tw/FileConversion?filename=dgpa/files/202506/35a05d52-ff82-43f6-a534-cf44707af0b0.pdf&name=附表2.pdf&nfix=",
   "scope": "政府行政机关办公日历，包含普通周六日休息及补班；不代表全部行业，特殊机关及学校另有安排。",
   "verifiedOn": "2026-11-02",
-  "snapshotSha256": "a13eab57d4caca6c76c995a9a41289935730c4738e8e9f4b354808ae6e4f3470",
+  "snapshotSha256": "c7bad9fcda0e3e3a8fd61a1c5fd7c98089597804c8ab2f5f367290ccc9ff1687",
   "days": [
    {
     "date": "2025-01-01",
@@ -10192,7 +10236,7 @@ export const DATASETS = [
   "attachment": "https://www.dgpa.gov.tw/FileConversion?filename=dgpa/files/202506/c13f29c8-a3ce-4dff-ae1b-0fb7b52a1217.pdf&name=附表4.pdf&nfix=",
   "scope": "政府行政机关办公日历，包含普通周六日休息及补班；不代表全部行业，特殊机关及学校另有安排。",
   "verifiedOn": "2026-11-02",
-  "snapshotSha256": "a13eab57d4caca6c76c995a9a41289935730c4738e8e9f4b354808ae6e4f3470",
+  "snapshotSha256": "c7bad9fcda0e3e3a8fd61a1c5fd7c98089597804c8ab2f5f367290ccc9ff1687",
   "days": [
    {
     "date": "2026-01-01",
@@ -10673,6 +10717,503 @@ export const DATASETS = [
    {
     "date": "2026-12-27",
     "name": "例假日"
+   }
+  ]
+ },
+ {
+  "region": "TW",
+  "year": 2027,
+  "mode": "replace",
+  "verification": "official",
+  "source": "https://www.dgpa.gov.tw/information?pid=12982&uid=55",
+  "attachment": "https://www.dgpa.gov.tw/FileConversion?filename=dgpa%2Ffiles%2F202605%2F94b2a2e8-d975-4d96-b8fa-93aae9c1229c.pdf&name=%E9%99%84%E8%A1%A82.pdf&nfix=",
+  "scope": "政府行政机关办公日历，包含普通周六日休息及补班；不代表全部行业，特殊机关及学校另有安排。",
+  "verifiedOn": "2026-11-23",
+  "snapshotSha256": "c7bad9fcda0e3e3a8fd61a1c5fd7c98089597804c8ab2f5f367290ccc9ff1687",
+  "days": [
+   {
+    "date": "2027-01-01",
+    "name": "开国纪念日"
+   },
+   {
+    "date": "2027-01-02",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-03",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-09",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-10",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-16",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-17",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-23",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-24",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-30",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-01-31",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-02-04",
+    "name": "除夕及春节连休"
+   },
+   {
+    "date": "2027-02-05",
+    "name": "除夕及春节连休"
+   },
+   {
+    "date": "2027-02-06",
+    "name": "除夕及春节连休"
+   },
+   {
+    "date": "2027-02-07",
+    "name": "除夕及春节连休"
+   },
+   {
+    "date": "2027-02-08",
+    "name": "除夕及春节连休"
+   },
+   {
+    "date": "2027-02-09",
+    "name": "春节补假"
+   },
+   {
+    "date": "2027-02-10",
+    "name": "春节补假"
+   },
+   {
+    "date": "2027-02-13",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-02-14",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-02-20",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-02-21",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-02-27",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-02-28",
+    "name": "和平纪念日"
+   },
+   {
+    "date": "2027-03-01",
+    "name": "和平纪念日补假"
+   },
+   {
+    "date": "2027-03-06",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-07",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-13",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-14",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-20",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-21",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-27",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-03-28",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-03",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-04",
+    "name": "儿童节"
+   },
+   {
+    "date": "2027-04-05",
+    "name": "清明节"
+   },
+   {
+    "date": "2027-04-06",
+    "name": "儿童节补假"
+   },
+   {
+    "date": "2027-04-10",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-11",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-17",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-18",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-24",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-25",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-04-30",
+    "name": "劳动节补假"
+   },
+   {
+    "date": "2027-05-01",
+    "name": "劳动节"
+   },
+   {
+    "date": "2027-05-02",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-08",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-09",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-15",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-16",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-22",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-23",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-29",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-05-30",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-05",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-06",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-09",
+    "name": "端午节"
+   },
+   {
+    "date": "2027-06-12",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-13",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-19",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-20",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-26",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-06-27",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-03",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-04",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-10",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-11",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-17",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-18",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-24",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-25",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-07-31",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-01",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-07",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-08",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-14",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-15",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-21",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-22",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-28",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-08-29",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-04",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-05",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-11",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-12",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-15",
+    "name": "中秋节"
+   },
+   {
+    "date": "2027-09-18",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-19",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-25",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-26",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-09-28",
+    "name": "孔子诞辰纪念日／教师节"
+   },
+   {
+    "date": "2027-10-02",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-03",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-09",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-10",
+    "name": "国庆日"
+   },
+   {
+    "date": "2027-10-11",
+    "name": "国庆日补假"
+   },
+   {
+    "date": "2027-10-16",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-17",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-23",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-24",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-25",
+    "name": "台湾光复暨金门古宁头大捷纪念日"
+   },
+   {
+    "date": "2027-10-30",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-10-31",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-06",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-07",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-13",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-14",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-20",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-21",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-27",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-11-28",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-04",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-05",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-11",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-12",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-18",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-19",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-24",
+    "name": "行宪纪念日补假"
+   },
+   {
+    "date": "2027-12-25",
+    "name": "行宪纪念日"
+   },
+   {
+    "date": "2027-12-26",
+    "name": "例假日"
+   },
+   {
+    "date": "2027-12-31",
+    "name": "开国纪念日补假"
    }
   ]
  },
@@ -11755,7 +12296,7 @@ export const DATASETS = [
 ];
 
 export const SOURCES = {
- "verifiedOn": "2026-11-08",
+ "verifiedOn": "2026-11-23",
  "sources": [
   {
    "title": "英国 · GOV.UK 银行假日",
@@ -11809,8 +12350,8 @@ export const SOURCES = {
    "title": "中国台湾 · 人事行政总处办公日历",
    "status": "已接入",
    "format": "年度公告与附件",
-   "url": "https://www.dgpa.gov.tw/information?pid=12574&uid=83",
-   "scope": "2025 修订版与 2026 机关办公日历，全年休息日 118/120 天，另含 2025 年 2 月 8 日补班。",
+   "url": "https://www.dgpa.gov.tw/information?pid=12982&uid=55",
+   "scope": "2025 修订版、2026 与 2027 机关办公日历，全年休息日 118/120/121 天，另含 2025 年 2 月 8 日补班。",
    "boundary": "包含普通周末，仅适用于政府机关，不代表全部行业。"
   },
   {
@@ -11824,9 +12365,9 @@ export const SOURCES = {
   {
    "title": "中国大陆 · 全民阅读活动周",
    "status": "已接入",
-   "format": "年度通知 · 多日活动",
+   "format": "国务院令第 823 号第十三条、年度通知 · 多日活动",
    "url": "https://www.nppa.gov.cn/xxfb/tzgs/202604/t20260411_984328.html",
-   "scope": "2026 年 4 月 20–26 日，共七天。",
+   "scope": "条例规定每年 4 月第四周。2026 年年度通知明确为 4 月 20–26 日，共七天。",
    "boundary": "其他年度不擅自将第四周推算成第四个星期一。"
   },
   {
