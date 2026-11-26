@@ -515,7 +515,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 ## 十五、开发
 
 ```bash
-npm ci            # 使用已提交的 lockfile，开发/CI 使用 Node.js 20 或 22
+npm ci            # 使用已提交的 lockfile，开发/CI 使用 Node.js 24 或 26
 npm run check     # lint、类型检查、659 项测试、构建、上游数据比对
 npm run gen:official # 从已提交官方资料离线再生成表、核验清单与运行时数据
 npm run audit:holidays
