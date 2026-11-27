@@ -343,18 +343,26 @@ footer{border-top:1px solid rgba(255,255,255,.08);padding:24px 0 32px;color:rgba
 .ics-years{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .ics-years input{width:96px}
 .cats input{flex:none;margin:0;accent-color:var(--green)}
-.ics-toggles{display:flex;flex-direction:column;gap:7px;margin-top:16px;font-size:13px;color:var(--ink-2)}
-.ics-toggles label{display:flex;align-items:center;gap:8px;cursor:pointer}
-.ics-toggles input{flex:none;margin:0;accent-color:var(--green)}
+.ics-advanced{margin-top:16px;font-size:13px;color:var(--ink-2)}
+.ics-advanced summary{cursor:pointer;color:var(--green);font-weight:600}
+#ics-rest-option{display:block;margin-top:10px}
+#ics-stats,.ics-pager{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+#ics-stats span{background:var(--green-soft);color:#21533a;border-radius:7px;padding:4px 9px;font-size:12px}
+#ics-stats [data-type=holiday],#ics-stats [data-type=deity]{background:#fae5df;color:#843e32}
+#ics-stats [data-type=work],#ics-stats [data-type=lunar],#ics-stats [data-type=indian]{background:#faeed5;color:#735014}
+#ics-stats [data-type=term],#ics-stats [data-type=international],#ics-stats [data-type=islamic]{background:#dcf0f2;color:#235763}
+#ics-stats [data-type=foto],#ics-stats [data-type=activity],#ics-stats [data-type=hebrew]{background:#eee5f4;color:#614374}
+#ics-stats [data-type=anniversary],#ics-stats [data-type=persian],#ics-stats [data-type=easter]{background:#e4eafa;color:#405789}
+#ics-stats b{margin-left:4px;font-variant-numeric:tabular-nums}
+.ics-pager{font-size:12px;color:var(--ink-2)}
 .ics-actions{align-items:center;flex-wrap:wrap;margin-top:18px;margin-bottom:0}
 #ics-status{flex:1;min-width:160px;font-size:12.5px;color:var(--ink-2);overflow-wrap:anywhere}
 #ics-status.no{color:var(--red)}
 .ics-table{width:100%;min-width:660px;border-collapse:collapse;font-size:12.5px;text-align:left}
 .ics-table th,.ics-table td{padding:6px 10px;border-bottom:1px solid var(--line-2);vertical-align:top;white-space:nowrap}
 .ics-table th{font-size:11px;font-weight:650;color:var(--ink-3);background:#fafbf9}
-.ics-table td:nth-child(6){white-space:normal;min-width:120px}
-.ics-table tfoot td{color:var(--ink-3);font-size:12px}
+.ics-table td:not(:first-child){white-space:normal;overflow-wrap:anywhere;min-width:80px}
 .ics-raw summary{cursor:pointer;font-weight:650;color:var(--green);padding:12px 0 8px}
 .ics-raw pre{font-size:12px;line-height:1.7;max-height:340px;overflow:auto}
-#ics-result>.count{margin-left:10px;font-size:12px;color:var(--ink-3)}
+#ics-count{margin-left:10px;font-size:12px;color:var(--ink-3)}
 @media(max-width:900px){.ics-config{grid-template-columns:1fr;gap:6px}.pick{max-height:200px}}

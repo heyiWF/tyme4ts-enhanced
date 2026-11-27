@@ -63,6 +63,7 @@ export class AnniversaryFestival extends AbstractCulture {
                 AnniversaryFestival.classify(names[i]),
                 official ? official.source : '6tail',
                 '', '', FestivalOrdinals.get(names[i], solarDay),
+                official ? [CHINA_OBSERVANCES.includes(official) ? 'CN' : '*'] : undefined,
             ));
         }
         return new AnniversaryFestival(solarDay, entries);

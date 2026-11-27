@@ -1,5 +1,6 @@
 import {FestivalOrdinalInfo} from './ordinal-types';
 import {FestivalOrdinals} from './ordinal';
+import {chineseCalendar, festivalRegions} from './regions';
 
 /**
  * 节日分类
@@ -40,7 +41,7 @@ export class FestivalEntry {
     protected region: string;
 
     constructor(name: string, category: FestivalCategory, source: string, note: string = '', region: string = '',
-        protected ordinalInfo: FestivalOrdinalInfo | null = null) {
+        protected ordinalInfo: FestivalOrdinalInfo | null = null, protected regions?: string[]) {
         this.name = name;
         this.category = category;
         this.source = source;
@@ -85,6 +86,15 @@ export class FestivalEntry {
      */
     getRegion(): string {
         return this.region;
+    }
+
+    /** 目录中此日期的适用地区；* 表示国际通用，国家代码同时适用于其子地区。 */
+    getRegions(): string[] {
+        if (this.regions) return this.regions.slice();
+        if (this.region) return [this.region];
+        if (this.category === FestivalCategory.INTERNATIONAL) return ['*'];
+        if (this.category === FestivalCategory.SOLAR_TERM) return chineseCalendar.slice();
+        return festivalRegions(this.name, this.source, this.note);
     }
 
     toString(): string {

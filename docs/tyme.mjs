@@ -15893,6 +15893,9 @@ class HolidayRule extends AbstractCulture {
   static getTermDay(year, termIndex) {
     return SolarTerm.fromIndex(termIndex === 0 ? year + 1 : year, termIndex).getSolarDay();
   }
+  getType() {
+    return this.type;
+  }
   getName() {
     return this.name;
   }
@@ -17755,6 +17758,91 @@ class OfficialHolidayCalendar {
   }
 }
 
+const chineseCalendar = ["CN", "HK", "MO", "TW"];
+const islamicCalendar = ["AE", "EG", "ID", "IR", "MY", "SA", "TR", "NG", "SG", "CN-NX", "CN-XJ", "IN", "LK", "KE"];
+const shared = {};
+function assign(names, regions) {
+  for (const name of names) shared[name] = regions;
+}
+assign(["\u6625\u8282", "\u5143\u5BB5\u8282", "\u4E2D\u79CB\u8282", "\u7AEF\u5348\u8282", "\u4E2D\u5143\u8282", "\u9664\u5915", "\u6E05\u660E\u8282", "\u51AC\u81F3\u8282"], [...chineseCalendar, "SG", "MY"]);
+assign(["\u91CD\u9633\u8282", "\u4E03\u5915\u8282", "\u814A\u516B\u8282", "\u6D74\u4F5B\u8282", "\u796D\u7076\u65E5"], chineseCalendar);
+assign(["\u5C3E\u7259", "\u5929\u7A7F\u8282"], ["CN", "TW"]);
+assign(["\u9999\u6E2F\u56DE\u5F52\u7EAA\u5FF5\u65E5"], ["CN", "HK"]);
+assign(["\u8F9B\u4EA5\u9769\u547D\u7EAA\u5FF5\u65E5", "\u5B59\u4E2D\u5C71\u8BDE\u8FB0\u7EAA\u5FF5\u65E5", "\u5B59\u4E2D\u5C71\u901D\u4E16\u7EAA\u5FF5\u65E5"], ["CN", "TW"]);
+assign(["\u767D\u8272\u60C5\u4EBA\u8282"], ["CN", "HK", "TW", "JP", "KR"]);
+assign([
+  "\u9ED1\u8272\u60C5\u4EBA\u8282",
+  "\u65E5\u8BB0\u60C5\u4EBA\u8282",
+  "\u73AB\u7470\u60C5\u4EBA\u8282",
+  "\u4EB2\u4EB2\u60C5\u4EBA\u8282",
+  "\u94F6\u8272\u60C5\u4EBA\u8282",
+  "\u7EFF\u8272\u60C5\u4EBA\u8282",
+  "\u76F8\u7247\u60C5\u4EBA\u8282",
+  "\u8461\u8404\u9152\u60C5\u4EBA\u8282",
+  "\u7535\u5F71\u60C5\u4EBA\u8282",
+  "\u62E5\u62B1\u60C5\u4EBA\u8282"
+], ["KR"]);
+assign(["\u5217\u5B81\u901D\u4E16\u7EAA\u5FF5\u65E5", "\u5217\u5B81\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"], ["CN", "RU"]);
+assign(["\u9A6C\u514B\u601D\u901D\u4E16\u7EAA\u5FF5\u65E5", "\u9A6C\u514B\u601D\u8BDE\u8FB0\u7EAA\u5FF5\u65E5", "\u6069\u683C\u65AF\u901D\u4E16\u7EAA\u5FF5\u65E5", "\u6069\u683C\u65AF\u8BDE\u8FB0\u7EAA\u5FF5\u65E5"], ["CN", "DE"]);
+assign(["\u611F\u6069\u8282"], ["US"]);
+assign(["\u6BCD\u4EB2\u8282"], [...chineseCalendar, "US", "CA", "AU", "NZ", "DE", "IT", "JP", "SG", "MY", "PH", "BR", "ZA", "IN"]);
+assign(["\u7236\u4EB2\u8282"], ["CN", "HK", "MO", "US", "CA", "GB", "FR", "JP", "SG", "MY", "PH", "ZA", "IN"]);
+assign(["\u4E07\u5723\u591C", "\u4E07\u5723\u8282"], ["US", "CA", "GB", "IE", "FR", "DE", "IT", "ES", "PT", "AT", "BE", "PL", "PH", "MX"]);
+assign(["\u5723\u8BDE\u8282", "\u5E73\u5B89\u591C"], [
+  "HK",
+  "MO",
+  "TW",
+  "US",
+  "CA",
+  "GB",
+  "IE",
+  "FR",
+  "DE",
+  "IT",
+  "ES",
+  "PT",
+  "AT",
+  "BE",
+  "CH",
+  "PL",
+  "NL",
+  "DK",
+  "FI",
+  "IS",
+  "NO",
+  "SE",
+  "CZ",
+  "HU",
+  "GR",
+  "CY",
+  "RO",
+  "AU",
+  "NZ",
+  "BR",
+  "MX",
+  "SG",
+  "MY",
+  "PH",
+  "IN",
+  "ID",
+  "LK",
+  "ZA",
+  "KE",
+  "NG"
+]);
+assign(["\u5987\u5973\u8282", "\u62A4\u58EB\u8282", "\u4E16\u754C\u4F4F\u623F\u65E5", "\u6D88\u8D39\u8005\u6743\u76CA\u65E5", "\u60C5\u4EBA\u8282", "\u611A\u4EBA\u8282"], ["*"]);
+function festivalRegions(name, source, note) {
+  if (source === "islamic") {
+    if (note.includes("\u4EC0\u53F6\u6D3E")) return ["IR"];
+    return note.includes("\u900A\u5C3C\u6D3E") ? islamicCalendar.filter((r) => r !== "IR") : islamicCalendar.slice();
+  }
+  if (source === "foto" || source === "taoist" || source === "yuxiaji") {
+    return chineseCalendar.slice();
+  }
+  if (!["tyme", "folk", "6tail"].includes(source)) return [];
+  return (shared[name] || ["CN"]).slice();
+}
+
 var FestivalCategory = /* @__PURE__ */ ((FestivalCategory2) => {
   FestivalCategory2[FestivalCategory2["STATUTORY"] = 0] = "STATUTORY";
   FestivalCategory2[FestivalCategory2["TRADITIONAL"] = 1] = "TRADITIONAL";
@@ -17768,8 +17856,9 @@ var FestivalCategory = /* @__PURE__ */ ((FestivalCategory2) => {
   return FestivalCategory2;
 })(FestivalCategory || {});
 class FestivalEntry {
-  constructor(name, category, source, note = "", region = "", ordinalInfo = null) {
+  constructor(name, category, source, note = "", region = "", ordinalInfo = null, regions) {
     this.ordinalInfo = ordinalInfo;
+    this.regions = regions;
     this.name = name;
     this.category = category;
     this.source = source;
@@ -17815,6 +17904,14 @@ class FestivalEntry {
    */
   getRegion() {
     return this.region;
+  }
+  /** 目录中此日期的适用地区；* 表示国际通用，国家代码同时适用于其子地区。 */
+  getRegions() {
+    if (this.regions) return this.regions.slice();
+    if (this.region) return [this.region];
+    if (this.category === 4 /* INTERNATIONAL */) return ["*"];
+    if (this.category === 6 /* SOLAR_TERM */) return chineseCalendar.slice();
+    return festivalRegions(this.name, this.source, this.note);
   }
   toString() {
     return this.note ? `${this.name}\uFF08${this.note}\uFF09` : this.name;
@@ -18533,7 +18630,8 @@ class AnniversaryFestival extends AbstractCulture {
         official ? official.source : "6tail",
         "",
         "",
-        FestivalOrdinals.get(names[i], solarDay)
+        FestivalOrdinals.get(names[i], solarDay),
+        official ? [CHINA_OBSERVANCES.includes(official) ? "CN" : "*"] : void 0
       ));
     }
     return new AnniversaryFestival(solarDay, entries);
@@ -18899,6 +18997,13 @@ class FolkFestival extends AbstractCulture {
     "4-8": ["\u6D74\u4F5B\u8282"],
     "6-6": ["\u6652\u7ECF\u8282"]
   };
+  /** 由农历月日表直接定义的民俗，用于区别同目录中的公历、节气与星期规则。 */
+  static isLunarFestival(name) {
+    return FolkFestival.LUNAR_NAMES.has(name);
+  }
+  static LUNAR_NAMES = new Set(
+    [].concat(...Object.values(LUNAR_FOLK), ...Object.values(FolkFestival.LUNAR_EXTRA))
+  );
   /**
    * 公历月日，已见于公历节日表者不再重复
    */
@@ -19408,7 +19513,8 @@ class Festivals extends AbstractCulture {
     this.solarDay = solarDay;
     this.entries = entries;
   }
-  static of(solarDay, includeForeign = false) {
+  /** 各来源的原始条目，含完整二十四节气，可先按地区与来源筛选再去重。 */
+  static getSourceEntries(solarDay, includeForeign = false) {
     const raw = [];
     const lunar = solarDay.getLunarDay();
     const solarFestival = solarDay.getFestival();
@@ -19470,24 +19576,21 @@ class Festivals extends AbstractCulture {
     const termDay = solarDay.getTermDay();
     if (termDay.getDayIndex() === 0) {
       const termName = termDay.getSolarTerm().getName();
-      let exists = false;
-      for (let i = 0; i < raw.length; i++) {
-        if (raw[i].getName() === termName || raw[i].getName() === termName + "\u8282") {
-          exists = true;
-          break;
-        }
-      }
-      if (!exists) {
-        raw.push(new FestivalEntry(termName, FestivalCategory.SOLAR_TERM, "tyme"));
-      }
+      raw.push(new FestivalEntry(termName, FestivalCategory.SOLAR_TERM, "tyme"));
     }
-    return new Festivals(solarDay, Festivals.dedupe(raw).map((e) => new FestivalEntry(
+    return raw;
+  }
+  static of(solarDay, includeForeign = false) {
+    const raw = Festivals.getSourceEntries(solarDay, includeForeign);
+    const displayed = raw.filter((e) => e.getCategory() !== FestivalCategory.SOLAR_TERM || !raw.some((other) => other !== e && (other.getName() === e.getName() || other.getName() === e.getName() + "\u8282")));
+    return new Festivals(solarDay, Festivals.dedupe(displayed).map((e) => new FestivalEntry(
       e.getName(),
       e.getCategory(),
       e.getSource(),
       e.getNote(),
       e.getRegion(),
-      e.getOrdinalInfo() || FestivalOrdinals.get(e.getName(), solarDay, e.getRegion() || "CN")
+      e.getOrdinalInfo() || FestivalOrdinals.get(e.getName(), solarDay, e.getRegion() || "CN"),
+      e.getRegions()
     )));
   }
   /** 当日所在的多日活动；保留完整期间，不混入单日节日清单。 */
@@ -19530,6 +19633,7 @@ class Festivals extends AbstractCulture {
     const best = {};
     const sources = {};
     const notes = {};
+    const regions = {};
     const better = (a, b) => {
       const pa = getCategoryPriority(a.getCategory());
       const pb = getCategoryPriority(b.getCategory());
@@ -19555,11 +19659,13 @@ class Festivals extends AbstractCulture {
         best[key] = e;
         sources[key] = [e.getSource()];
         notes[key] = e.getNote() ? [e.getNote()] : [];
+        regions[key] = new Set(e.getRegions());
         continue;
       }
       if (better(e, best[key])) {
         best[key] = e;
       }
+      for (const region of e.getRegions()) regions[key].add(region);
       if (sources[key].indexOf(e.getSource()) < 0) {
         sources[key].push(e.getSource());
       }
@@ -19571,7 +19677,7 @@ class Festivals extends AbstractCulture {
     const l = [];
     for (let i = 0; i < order.length; i++) {
       const e = best[order[i]];
-      l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join("\u3001"), notes[order[i]].join("\uFF1B"), e.getRegion(), e.getOrdinalInfo()));
+      l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join("\u3001"), notes[order[i]].join("\uFF1B"), e.getRegion(), e.getOrdinalInfo(), Array.from(regions[order[i]])));
     }
     l.sort((a, b) => {
       const p = getCategoryPriority(a.getCategory()) - getCategoryPriority(b.getCategory());

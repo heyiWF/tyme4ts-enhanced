@@ -43,7 +43,8 @@ export class Festivals extends AbstractCulture {
         this.entries = entries;
     }
 
-    static of(solarDay: SolarDay, includeForeign: boolean = false): Festivals {
+    /** 各来源的原始条目，含完整二十四节气，可先按地区与来源筛选再去重。 */
+    static getSourceEntries(solarDay: SolarDay, includeForeign: boolean = false): FestivalEntry[] {
         const raw: FestivalEntry[] = [];
         const lunar: LunarDay = solarDay.getLunarDay();
 
@@ -125,21 +126,18 @@ export class Festivals extends AbstractCulture {
         const termDay: SolarTermDay = solarDay.getTermDay();
         if (termDay.getDayIndex() === 0) {
             const termName: string = termDay.getSolarTerm().getName();
-            let exists: boolean = false;
-            for (let i: number = 0; i < raw.length; i++) {
-                if (raw[i].getName() === termName || raw[i].getName() === termName + '节') {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) {
-                raw.push(new FestivalEntry(termName, FestivalCategory.SOLAR_TERM, 'tyme'));
-            }
+            raw.push(new FestivalEntry(termName, FestivalCategory.SOLAR_TERM, 'tyme'));
         }
+        return raw;
+    }
 
-        return new Festivals(solarDay, Festivals.dedupe(raw).map(e => new FestivalEntry(
+    static of(solarDay: SolarDay, includeForeign: boolean = false): Festivals {
+        const raw = Festivals.getSourceEntries(solarDay, includeForeign);
+        const displayed = raw.filter(e => e.getCategory() !== FestivalCategory.SOLAR_TERM || !raw.some(other =>
+            other !== e && (other.getName() === e.getName() || other.getName() === e.getName() + '节')));
+        return new Festivals(solarDay, Festivals.dedupe(displayed).map(e => new FestivalEntry(
             e.getName(), e.getCategory(), e.getSource(), e.getNote(), e.getRegion(),
-            e.getOrdinalInfo() || FestivalOrdinals.get(e.getName(), solarDay, e.getRegion() || 'CN'),
+            e.getOrdinalInfo() || FestivalOrdinals.get(e.getName(), solarDay, e.getRegion() || 'CN'), e.getRegions(),
         )));
     }
 
@@ -193,6 +191,7 @@ export class Festivals extends AbstractCulture {
         const best: { [key: string]: FestivalEntry } = {};
         const sources: { [key: string]: string[] } = {};
         const notes: { [key: string]: string[] } = {};
+        const regions: { [key: string]: Set<string> } = {};
         const better = (a: FestivalEntry, b: FestivalEntry): boolean => {
             const pa: number = getCategoryPriority(a.getCategory());
             const pb: number = getCategoryPriority(b.getCategory());
@@ -218,11 +217,13 @@ export class Festivals extends AbstractCulture {
                 best[key] = e;
                 sources[key] = [e.getSource()];
                 notes[key] = e.getNote() ? [e.getNote()] : [];
+                regions[key] = new Set(e.getRegions());
                 continue;
             }
             if (better(e, best[key])) {
                 best[key] = e;
             }
+            for (const region of e.getRegions()) regions[key].add(region);
             if (sources[key].indexOf(e.getSource()) < 0) {
                 sources[key].push(e.getSource());
             }
@@ -234,7 +235,7 @@ export class Festivals extends AbstractCulture {
         const l: FestivalEntry[] = [];
         for (let i: number = 0; i < order.length; i++) {
             const e: FestivalEntry = best[order[i]];
-            l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join('、'), notes[order[i]].join('；'), e.getRegion(), e.getOrdinalInfo()));
+            l.push(new FestivalEntry(e.getName(), e.getCategory(), sources[order[i]].join('、'), notes[order[i]].join('；'), e.getRegion(), e.getOrdinalInfo(), Array.from(regions[order[i]])));
         }
         l.sort((a: FestivalEntry, b: FestivalEntry) => {
             const p: number = getCategoryPriority(a.getCategory()) - getCategoryPriority(b.getCategory());

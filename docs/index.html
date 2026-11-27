@@ -505,23 +505,23 @@ c.importJson(JSON.stringify({
 
 <span class="c">// 反向导出为 iCalendar，可订阅或再解析</span>
 const ics = c.toIcs(2025);</pre>
-      <p class="note">免代码导出：在<a href="#tab-export">日历导出</a>页按国家/地区、历法、数据来源与节日种类组合筛选，生成并下载 ICS 文件。</p>
+      <p class="note">免代码导出：在<a href="#tab-export">日历导出</a>页先选地区，再选该地区收录的事件类型，生成并下载 ICS 文件。</p>
     </div>
   </section>
 
   <section id="page-export" class="doc hide">
     <div class="page-heading tone-violet">
-      <div><span class="eyebrow">CALENDAR EXPORT</span><h2>日历导出</h2><p>按国家/地区、历法、数据来源与节日种类自由组合，在浏览器本地生成符合 RFC 5545 的 ICS 日历文件，可导入 Outlook、Apple 日历、Google 日历等。全部计算在本机完成，口径与「节日」「地区」两页一致；公告数据仅适用其公布范围。</p></div>
+      <div><span class="eyebrow">CALENDAR EXPORT</span><h2>日历导出</h2><p>选择国家或地区，再勾选要导出的假日、节气或历法节日。可在下载前查看全部事件，生成的 ICS 文件可导入 Apple 日历、Outlook 或 Google 日历。</p></div>
       <span class="page-badge">RFC 5545</span>
     </div>
     <div class="content-panel">
       <h3>导出配置</h3>
       <div class="ics-config">
         <div>
-          <div class="ics-label">国家/地区<span class="note">法定节假日所属地区；默认取黄历页当前地区</span></div>
+          <div class="ics-label">国家/地区<span class="note">可多选，默认使用黄历页当前地区</span></div>
           <div class="searchbar ics-region-tools">
             <input id="ics-region-query" type="search" aria-label="搜索导出地区" placeholder="名称或代码，例如 GB">
-            <button id="ics-region-all" type="button">全选</button>
+            <button id="ics-region-all" type="button">选中搜索结果</button>
             <button id="ics-region-none" type="button">清空</button>
             <span class="count" id="ics-region-count" aria-live="polite"></span>
           </div>
@@ -534,16 +534,14 @@ const ics = c.toIcs(2025);</pre>
             <span>至</span>
             <input id="ics-to" type="number" min="1900" max="2100" step="1" aria-label="结束年份">
           </div>
-          <div class="ics-label">节日种类</div>
-          <div class="cats" id="ics-cats"></div>
-          <div class="ics-label">历法<span class="help" data-k="导出历法">?</span></div>
-          <div class="cats" id="ics-cals"></div>
-          <div class="ics-label">数据来源<span class="help" data-k="导出数据来源">?</span></div>
-          <div class="cats" id="ics-sources"></div>
-          <div class="ics-toggles">
-            <label><input id="ics-work" type="checkbox">包含调休上班日（标题附「调休上班」）</label>
-            <label><input id="ics-rest" type="checkbox" checked>剔除普通周末休息日（如台湾「例假日」）</label>
-          </div>
+          <div class="ics-label" id="ics-type-label">事件类型</div>
+          <div class="cats" id="ics-cats" role="group" aria-labelledby="ics-type-label"></div>
+          <details class="ics-advanced">
+            <summary>更多筛选</summary>
+            <div class="ics-label" id="ics-source-label">数据来源</div>
+            <div class="cats" id="ics-sources" role="group" aria-labelledby="ics-source-label"></div>
+            <label id="ics-rest-option"><input id="ics-rest" type="checkbox" checked>略过普通周末休息日</label>
+          </details>
         </div>
       </div>
       <div class="searchbar ics-actions">
@@ -554,16 +552,20 @@ const ics = c.toIcs(2025);</pre>
     </div>
     <div class="content-panel hide" id="ics-result">
       <h3>生成结果<span class="count" id="ics-count"></span></h3>
+      <div id="ics-stats" aria-label="事件类型统计"></div>
+      <nav id="ics-pager" class="ics-pager" aria-label="预览分页">
+        <button type="button" id="ics-prev">上一页</button><span id="ics-page" aria-live="polite"></span><button type="button" id="ics-next">下一页</button>
+      </nav>
       <div class="api-table-wrap" id="ics-list"></div>
-      <details class="ics-raw"><summary>查看 ICS 文本</summary><pre id="ics-text"></pre></details>
+      <details class="ics-raw"><summary>查看完整 ICS 文本</summary><pre id="ics-text"></pre></details>
     </div>
     <div class="content-panel">
       <h3>说明</h3>
       <ul>
         <li><strong>文件格式：</strong>iCalendar 2.0（RFC 5545），UTF-8 编码，CRLF 换行，超过 75 字节的行自动折叠。事件均为全天事件，<code>DTEND</code> 为不含当日的结束日；多日活动导出为跨天事件。</li>
-        <li><strong>文件命名：</strong><code>tyme-年份-地区-holiday-fest种类数.ics</code>。年份为单年或「起-止」；选了地区且含法定时写地区代码（多个用 <code>+</code> 连接，超过 3 个写成「首个代码+其余数regions」），含调休上班日时为 <code>holiday-work</code>；<code>fest</code> 后为所选节日种类数。</li>
-        <li><strong>合并规则：</strong>同日同名条目合并为一个事件，类别、来源与地区写入事件说明；选择多个地区时，法定假日标题前列出地区名。</li>
-        <li><strong>数据口径：</strong>已核验年度表以公告为准且仅适用其公布范围；规则推算与未来年份以当地正式公告为准。补假、观月与临时安排等无法推算的日期归入「逐年公布」历法。</li>
+        <li>节日按本目录收录的日期和地区筛选。子地区继承全国适用的节日，法定安排取所选地区自己的日历。国际日可在所有地区选取。</li>
+        <li>同日同名、期间一致的事件会合并，调休上班单独列出。各类型分别计数，一个事件可以属于多个类型。</li>
+        <li>公告仅适用于公布的年份和范围。伊斯兰历节日表采用算术回历，可能与当地观月公告相差一天。只需当地放假安排时，可单选法定节假日。</li>
         <li><strong>程序接口：</strong><code>HolidayCalendar.of('CN').toIcs(2026)</code> 可在代码中导出单地区单年的法定节假日；本页的组合筛选在浏览器内完成，不上传任何数据。</li>
       </ul>
     </div>
@@ -714,6 +716,7 @@ console.log(FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(20
 <footer><div class="wrap"><span id="ver"></span> · MIT License · 历法基础来自 6tail/tyme4ts · 全部计算在浏览器本地完成</div></footer>
 
 <script type="module">
+import {eventTypes, sourceLabels, exportRegions, importDataset, regionalYear, selectEvents} from './ics-events.mjs';
 import {DATASETS, VERSION, SOURCES} from './holidays-data.js';
 import {API_FIELDS} from './api-reference.js';
 if (location.hash.startsWith('#api-')) history.scrollRestoration = 'manual';
@@ -789,14 +792,14 @@ function loadDatasets() {
     for (const y of d.years) {
       const src = byYear[base + '-' + y];
       if (src) {
-        try { HolidayCalendar.of(d.region).importJson(JSON.stringify(src)); } catch (e) { /* ignore */ }
+        try { importDataset(d.region, src); } catch (e) { /* ignore */ }
       }
     }
   }
   for (const d of DATASETS) {
     if (d.verification !== 'official') continue;
     try {
-      HolidayCalendar.of(d.region).importJson(JSON.stringify(d));
+      importDataset(d.region, d);
     } catch (e) { /* 单个文件损坏不影响其他 */ }
   }
 }
@@ -1092,8 +1095,6 @@ const HELP = {
   '生肖运程': ['生肖流月运程', '以月建与十二生肖的六合、三合、冲、刑、害、破关系推演。', '地支关系'],
   '取名': ['出生取名', '按八字五行旺衰取喜用神，再从字库中选同五行字。', '子平术 + 字库'],
   '节假日': ['法定节假日', '规则引擎加逐年公告数据，公告优先。', '国务院办公厅通知等'],
-  '导出历法': ['历法', '节日与假日的推算历法：公历（固定日期与星期规则）、农历、节气、复活节（含东正教）、伊斯兰历、波斯历、希伯来历、印度历。补假、观月与临时安排等无法推算、只能逐年公布的日期归入「逐年公布」。', '各地区规则与各历法数据表的落点'],
-  '导出数据来源': ['数据来源', '法定公告数据为导入的年度表与内置公告，规则推算不含公告；其余为八类节日各自的数据表。同一条目合并多个来源时，任一来源入选即导出。', 'docs/SOURCES.md'],
   '节日条目': ['节日条目', '当日全部节日，按类别排序并去重。', '本项目 Festivals'],
   '含外历': ['含外历节日', '在八类基础上并入希伯来、印度节日。', 'HebrewFestival / IndianFestival'],
   '按类取': ['按类筛选', '用 FestivalCategory 过滤，0 法定、2 民俗、5 宗教等。', 'FestivalCategory'],
@@ -1887,308 +1888,16 @@ $('region-year').onchange = () => {
 };
 
 /* ---------- 日历导出（ICS） ---------- */
-const ICS_MIN_YEAR = 1900, ICS_MAX_YEAR = 2100, ICS_MAX_SPAN = 5;
-const ICS_PREVIEW_ROWS = 100, ICS_RAW_LINES = 40;
-/* 节日与假日的推算历法；table 为只能逐年公布或由公告调整的日期 */
-const ICS_CAL = {solar: '公历', lunar: '农历', term: '节气', easter: '复活节', islamic: '伊斯兰历', persian: '波斯历', hebrew: '希伯来历', indian: '印度历', table: '逐年公布'};
-/* 数据来源分组；notice 为导入的年度表与内置公告，rule 为不含公告的规则推算 */
-const ICS_SOURCE = [['notice', '法定公告数据'], ['rule', '规则推算'], ['tyme', 'tyme 节日表'], ['folk', '民俗节日表'], ['6tail', '6tail 纪念日表'], ['official', '官方核验条目'], ['foto', '佛历'], ['taoist', '道历'], ['yuxiaji', '神诞（玉匣记）'], ['foreign', '外历节日表']];
-const ICS_LABEL = Object.fromEntries(ICS_SOURCE);
-/* 条目出处标识到来源分组的映射，http 链接为带官方来源的纪念日 */
-const ICS_TOKEN = {tyme: 'tyme', folk: 'folk', '6tail': '6tail', foto: 'foto', taoist: 'taoist', yuxiaji: 'yuxiaji', hebrew: 'foreign', islamic: 'foreign', timeanddate: 'foreign'};
-const ICS_SUBSTITUTE = /（补假）$|\(补假\)$|补假$/;
-const ICS_EXTRA_REGION = {IL: '以色列'};
+const ICS_PAGE_SIZE = 50;
+const icsRegionName = code => CN[code] || (code === 'IL' ? '以色列' : code);
+const icsLabels = (values, label) => [...values].map(label).join('、');
+const icsTypeNames = types => icsLabels(types, type => eventTypes[type]);
+const icsPlaces = regions => icsLabels(regions, icsRegionName);
 
-/* 库未公开规则的推算历法，以下仅用公开接口，按规则在抽样年份与导出年前后两年的落点反推 */
-const ICS_SAMPLE_YEARS = Array.from({length: 21}, (_, i) => ICS_MIN_YEAR + i * 10);
-const ICS_SHIFTS = [0, -1, 1, -2, 2, -3, 3];
-const icsSafe = (fn) => { try { return fn(); } catch (e) { return null; } };
-const icsMd = (x) => x.getMonth() + '-' + x.getDay();
-const icsTerm = (d) => d.getTermDay().getSolarTerm();
-const icsStem = (d) => d.getSixtyCycleDay().getSixtyCycle().getHeavenStem().getName();
-const icsLunarKey = (d) => { const l = d.getLunarDay(); return (l.getLunarMonth().isLeap() ? -l.getMonth() : l.getMonth()) + '-' + l.getDay(); };
-const ICS_RULE_CALENDARS = [
-  ['persian', [(d) => icsSafe(() => icsMd(PersianDay.fromSolarDay(d)))]],
-  ['islamic', [
-    (d) => icsSafe(() => icsMd(d.getHijriDay())),
-    (d) => UmmAlQuraDay.inRange(d) ? icsSafe(() => icsMd(UmmAlQuraDay.fromSolarDay(d))) : null,
-    (d) => icsSafe(() => icsMd(DiyanetDay.fromSolarDay(d))),
-  ]],
-  ['lunar', [icsLunarKey]],
-];
-
-/* 各年同为固定公历月日 */
-function icsSameFixed(dates) {
-  return dates.every((d) => d.getMonth() === dates[0].getMonth() && d.getDay() === dates[0].getDay());
-}
-
-/* 公历月日落在同一 7 天窗口内，如逢周日提前的荷兰国王节 */
-function icsNearFixed(dates) {
-  const pos = (d) => SolarDay.fromYmd(2000, d.getMonth(), d.getDay()).getIndexInYear();
-  const first = pos(dates[0]);
-  return dates.every((d) => Math.abs(pos(d) - first) <= 6);
-}
-
-/* 某月第 n 个星期几（或月末最后一个），或不早于固定日期的第一个星期几 */
-function icsWeekRule(dates) {
-  const first = dates[0];
-  const week = first.getWeek().getIndex();
-  if (!dates.every((d) => d.getWeek().getIndex() === week)) return false;
-  const slot = (d) => d.getMonth() + '|' + (d.next(7).getMonth() === d.getMonth() ? Math.ceil(d.getDay() / 7) : 'last');
-  const slot0 = slot(first);
-  if (dates.every((d) => slot(d) === slot0)) return true;
-  for (let m = first.getMonth() - 1; m <= first.getMonth() + 1; m++) {
-    for (let day = 1; day <= 31; day++) {
-      if (dates.every((d) => {
-        const a = icsSafe(() => SolarDay.fromYmd(d.getYear() + (m < 1 ? -1 : m > 12 ? 1 : 0), (m + 11) % 12 + 1, day));
-        return a && a.next(a.getWeek().stepsTo(week)).subtract(d) === 0;
-      })) return true;
-    }
-  }
-  return false;
-}
-
-/* 各年落在同一节气当日；shifts 为相对节气日的偏移，给定 name 时规则名须含节气名 */
-function icsSameTerm(dates, shifts, name) {
-  return shifts.some((s) => {
-    const t0 = dates[0].next(-s);
-    return t0.getTermDay().getDayIndex() === 0 && (!name || name.indexOf(icsTerm(t0).getName()) > -1)
-      && dates.every((d) => { const x = d.next(-s); return x.getTermDay().getDayIndex() === 0 && icsTerm(x).getName() === icsTerm(t0).getName(); });
-  });
-}
-
-/* 节气后第 n 个某干日，如立春后第五个戊日为春社 */
-function icsStemTerm(dates) {
-  const stem = icsStem(dates[0]);
-  let common = null;
-  return dates.every((d) => {
-    if (icsStem(d) !== stem) return false;
-    const keys = new Set();
-    let term = icsTerm(d);
-    for (let k = 0; k < 4; k++) {
-      const dist = d.subtract(term.getSolarDay());
-      if (dist >= 1 && dist <= 60) keys.add(term.getName() + '|' + Math.ceil(dist / 10));
-      term = term.next(-1);
-    }
-    common = common ? new Set([...common].filter((x) => keys.has(x))) : keys;
-    return common.size > 0;
-  });
-}
-
-/* 各年与西方或东正教复活节保持固定间隔 */
-function icsSameEaster(probes) {
-  return [HolidayRule.getEasterDay, HolidayRule.getOrthodoxEasterDay].some((easter) => {
-    const offset = probes[0][1].subtract(easter(probes[0][0]));
-    return probes.every(([y, d]) => d.subtract(easter(y)) === offset);
-  });
-}
-
-/* 平移固定天数后，在某历法中的月日恒定 */
-function icsSameIn(dates, keys) {
-  return ICS_SHIFTS.some((s) => keys.some((key) => {
-    const k0 = key(dates[0].next(-s));
-    return k0 !== null && dates.every((d) => key(d.next(-s)) === k0);
-  }));
-}
-
-function icsRuleCalendar(probes, name) {
-  const dates = probes.map((p) => p[1]);
-  if (probes.length < 2) return 'table';
-  if (icsSameTerm(dates, [0], name)) return 'term';
-  if (probes.length < 3) return 'table';
-  if (icsSameEaster(probes)) return 'easter';
-  if (icsSameFixed(dates)) return 'solar';
-  for (const [calendar, keys] of ICS_RULE_CALENDARS) if (icsSameIn(dates, keys)) return calendar;
-  return icsWeekRule(dates) || icsNearFixed(dates) ? 'solar' : 'table';
-}
-
-function icsFolkCalendarOf(dates) {
-  if (dates.length < 3) return 'lunar';
-  if (icsSameTerm(dates, [0, -1]) || icsStemTerm(dates)) return 'term';
-  if (icsSameFixed(dates) || icsWeekRule(dates)) return 'solar';
-  return icsSameIn(dates, [icsLunarKey]) ? 'lunar' : 'table';
-}
-
-const icsRuleSamples = new Map();   // 地区 → 各规则在抽样年份的落点
-const icsRuleCache = new Map();     // 地区|年份 → {byDate, byName}
-/* 地区规则的历法：byDate 为导出年各落点的历法，byName 供公告中的补假等按名称回溯 */
-function icsRegionCalendars(code, year) {
-  const key = code + '|' + year;
-  const hit = icsRuleCache.get(key);
-  if (hit) return hit;
-  let samples = icsRuleSamples.get(code);
-  if (!samples) {
-    samples = HolidayCalendar.of(code).getRules().map((rule) => [rule, ICS_SAMPLE_YEARS.map((y) => [y, rule.getDay(y)])]);
-    icsRuleSamples.set(code, samples);
-  }
-  const byDate = {}, byName = {};
-  for (const [rule, sample] of samples) {
-    const probes = sample.filter((p) => p[1]);
-    for (let y = year - 2; y <= year + 2; y++) { const d = rule.getDay(y); if (d) probes.push([y, d]); }
-    if (!probes.length) continue;
-    const calendar = icsRuleCalendar(probes, rule.getName());
-    const today = rule.getDay(year);
-    if (today) {
-      const dateKey = ymd(today);
-      if (!byDate[dateKey]) byDate[dateKey] = new Set();
-      byDate[dateKey].add(calendar);
-      byName[rule.getName()] = calendar;
-    } else {
-      byName[rule.getName()] = byName[rule.getName()] || calendar;
-    }
-  }
-  const result = {byDate, byName};
-  icsRuleCache.set(key, result);
-  return result;
-}
-
-const icsFolkDates = new Map();   // 年份 → 民俗名称 → 落点
-const icsFolkCache = new Map();   // 年份|名称 → 历法
-/* 民俗条目混有农历、公历、节气与干支规则，按名称在导出年前后两年的落点反推 */
-function icsFolkCalendar(name, year) {
-  const key = year + '|' + name;
-  const hit = icsFolkCache.get(key);
-  if (hit) return hit;
-  const dates = [];
-  for (let y = year - 2; y <= year + 2; y++) {
-    let map = icsFolkDates.get(y);
-    if (!map) {
-      map = {};
-      let d = SolarDay.fromYmd(y, 1, 1);
-      while (d.getYear() === y) {
-        const names = FolkFestival.of(d).getName();
-        if (names) for (const n of names.split('、')) { if (!map[n]) map[n] = []; map[n].push(d); }
-        d = d.next(1);
-      }
-      icsFolkDates.set(y, map);
-    }
-    for (const d of map[name] || []) dates.push(d);
-  }
-  const calendar = icsFolkCalendarOf(dates);
-  icsFolkCache.set(key, calendar);
-  return calendar;
-}
-
-/* 节日条目的历法：节气日同名的条目按节气，其余由出处与类别确定 */
-function icsEntryCalendar(e, termName, year) {
-  const name = e.getName();
-  if (termName && (name === termName || name === termName + '节')) return 'term';
-  const tokens = e.getSource().split('、');
-  if (tokens.indexOf('hebrew') > -1) return 'hebrew';
-  if (tokens.indexOf('islamic') > -1) return 'islamic';
-  if (tokens.indexOf('timeanddate') > -1) return 'indian';
-  if (e.getCategory() === 2) return icsFolkCalendar(name, year);
-  return e.getCategory() === 1 || e.getCategory() === 5 ? 'lunar' : 'solar';
-}
-
-function icsSourceGroups(source) {
-  const groups = new Set();
-  for (const token of source.split('、')) groups.add(/^https?:\/\//.test(token) ? 'official' : ICS_TOKEN[token]);
-  groups.delete(undefined);   // 无可识别出处时不按来源筛选
-  return groups;
-}
-
-/* 合并条目时取并集的字段 */
-const ICS_MERGE = ['categories', 'calendars', 'groups', 'regions', 'texts', 'notes'];
-const icsSet = (...items) => new Set(items);
-const icsTexts = (...items) => new Set(items.filter(Boolean));
-const icsRegionName = (code) => CN[code] || ICS_EXTRA_REGION[code] || code;
-const icsHost = (source) => icsSafe(() => new URL(source).hostname.replace(/^www\./, '')) || source;
-
-/* 同日同名条目合并：类别、历法、来源与地区并入同一事件 */
-function icsPush(map, ev) {
-  const old = map.get(ev.date + '|' + ev.name);
-  if (!old) {
-    map.set(ev.date + '|' + ev.name, ev);
-    return;
-  }
-  for (const k of ICS_MERGE) for (const v of ev[k]) old[k].add(v);
-  old.work = old.work || ev.work;
-  if (ev.end > old.end) { old.end = ev.end; old.last = ev.last; }
-}
-
-/* 法定节假日：公告数据按规则落点或名称回溯历法；来源区分公告与规则推算 */
-function icsCollectRegion(cfg, year, map, notes) {
-  for (const code of cfg.regions) {
-    const c = HolidayCalendar.of(code);
-    const data = DATASETS.find((d) => d.region === code && d.year === year && d.verification === 'official' && d.mode === 'replace');
-    if (data) notes.add(`${icsRegionName(code)} ${year} 年使用已核验年度表（${icsHost(data.source)}）：${data.scope}`);
-    const rules = new Set(c.getRuleDays(year).map((h) => ymd(h.getDay()) + '|' + h.getName()));
-    const cal = icsRegionCalendars(code, year);
-    for (const h of c.getDays(year, cfg.work)) {
-      const date = ymd(h.getDay()), name = h.getName();
-      if (cfg.skipRest && name === '例假日' && h.getDay().getWeek().getIndex() % 6 === 0) continue;
-      // 公告优先于规则：已核验年度表或内置公告（LegalHoliday）覆盖的日期不记为规则推算
-      const notice = !!data || !!h.getDay().getLegalHoliday();
-      const rule = !notice && rules.has(date + '|' + name);
-      const calendars = new Set();
-      const hit = cal.byDate[date];
-      if (hit) hit.forEach((x) => calendars.add(x));
-      else for (const n of name.split('、')) calendars.add(cal.byName[n.replace(ICS_SUBSTITUTE, '')] || 'table');
-      const note = data && (data.days.find((x) => x.date === date) || {}).note;
-      icsPush(map, {date, end: ymd(h.getDay().next(1)), last: date, name, categories: icsSet(0), calendars,
-        groups: icsSet(rule ? 'rule' : 'notice'), regions: icsSet(code),
-        texts: icsTexts(data ? '已核验年度表' : rule ? '规则推算' : '内置公告数据'), notes: icsTexts(note, h.isWork() && '调休上班日'), work: h.isWork()});
-    }
-  }
-}
-
-function icsCollectFestivals(cfg, year, map) {
-  const foreign = cfg.cats.has(7);
-  // 法定类条目只来自公历节日表，仅选法定时无需逐日聚合八类节日
-  const statutoryOnly = cfg.cats.size === 1 && cfg.cats.has(0);
-  let day = SolarDay.fromYmd(year, 1, 1);
-  while (day.getYear() === year) {
-    if (statutoryOnly && !day.getFestival()) { day = day.next(1); continue; }
-    const term = day.getTermDay();
-    const termName = term.getDayIndex() === 0 ? term.getSolarTerm().getName() : '';
-    for (const e of Festivals.of(day, foreign).getEntries()) {
-      if (!cfg.cats.has(e.getCategory())) continue;
-      const groups = icsSourceGroups(e.getSource());
-      icsPush(map, {date: ymd(day), end: ymd(day.next(1)), last: ymd(day), name: e.getName(), categories: icsSet(e.getCategory()),
-        calendars: icsSet(icsEntryCalendar(e, termName, year)), groups, regions: icsTexts(e.getRegion()),
-        texts: new Set([...groups].map((g) => ICS_LABEL[g])), notes: icsTexts(e.getNote()), work: false});
-    }
-    day = day.next(1);
-  }
-  if (!cfg.cats.has(8)) return;
-  for (const p of FestivalPeriods.getYear(year)) {
-    icsPush(map, {date: ymd(p.getStart()), end: ymd(p.getEnd().next(1)), last: ymd(p.getEnd()), name: p.getName(), categories: icsSet(8),
-      calendars: icsSet('solar'), groups: icsSet('official'), regions: new Set(), texts: icsSet(ICS_LABEL.official), notes: icsSet('活动期间，不代表放假'), work: false});
-  }
-}
-
-function icsFinish(cfg, map) {
-  const list = [];
-  for (const ev of map.values()) {
-    if (![...ev.calendars].some((c) => cfg.cals.has(c))) continue;
-    if (ev.groups.size && ![...ev.groups].some((g) => cfg.sources.has(g))) continue;
-    list.push(ev);
-  }
-  list.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : Math.min(...a.categories) - Math.min(...b.categories) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
-  const multi = cfg.regions.length > 1;
-  for (const ev of list) ev.summary = icsSummary(ev, multi);
-  return list;
-}
-
-/* 多地区导出时法定假日标题前列出地区名（外历节日不受所选地区影响，不加）；调休上班日附说明 */
 function icsSummary(ev, multi) {
-  let text = ev.name;
-  if (multi && ev.categories.has(0) && ev.regions.size) text = icsRegionList(ev.regions) + ' ' + text;
-  if (ev.work && text.indexOf('上班') < 0 && text.indexOf('（班）') < 0) text += '（调休上班）';
-  return text;
-}
-
-function icsEventDescription(ev) {
-  const line = (label, values) => values.size ? label + [...values].join('、') : '';
-  return [
-    line('类别：', new Set([...ev.categories].map((c) => Festivals.getCategoryName(c)))),
-    line('地区：', new Set([...ev.regions].map((r) => icsRegionName(r) + '（' + r + '）'))),
-    line('历法：', new Set([...ev.calendars].map((c) => ICS_CAL[c]))),
-    line('数据来源：', ev.texts),
-    ev.work ? '类型：调休上班日' : '',
-    line('备注：', ev.notes),
-  ].filter(Boolean).join('\n');
+  let name = ev.name;
+  if (ev.work && !/上班|（班）/.test(name)) name += '（调休上班）';
+  return multi && (ev.types.has('holiday') || ev.work) ? icsPlaces(ev.holidayRegions) + ' ' + name : name;
 }
 
 const icsEscape = (text) => text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r\n|\r|\n/g, '\\n');
@@ -2211,172 +1920,172 @@ function icsHash(text) {
   return h.toString(36);
 }
 
-function icsRegionList(codes) {
-  const labels = [...codes].sort().map(icsRegionName);
-  return labels.length > 3 ? labels.slice(0, 3).join('、') + `等${labels.length}个地区` : labels.join('、');
-}
-
-function icsTitle(cfg) {
-  const years = cfg.from === cfg.to ? String(cfg.from) : cfg.from + '–' + cfg.to;
-  const regional = cfg.regions.length > 0 && cfg.cats.has(0);
-  const parts = [];
-  if (regional) parts.push(icsRegionList(cfg.regions) + '法定节假日');
-  const cats = [...cfg.cats].filter((c) => !regional || c !== 0).sort((a, b) => a - b);
-  if (cats.length) parts.push('节日（' + cats.map((c) => Festivals.getCategoryName(c)).join('、') + '）');
-  return `Tyme Enhanced ${years} ${parts.join(' + ')}`;
-}
-
-/* 文件名：tyme-年份[-年份]-[地区代码[-holiday[-work]]]-fest种类数.ics，纯 ASCII；历法与来源筛选只写入日历说明 */
-function icsFileName(cfg) {
-  const codes = [...cfg.regions].sort();
-  const years = cfg.from === cfg.to ? String(cfg.from) : cfg.from + '-' + cfg.to;
-  const parts = [];
-  if (codes.length && cfg.cats.has(0)) parts.push(codes.length > 3 ? codes[0] + '+' + (codes.length - 1) + 'regions' : codes.join('+'), cfg.work ? 'holiday-work' : 'holiday');
-  parts.push('fest' + cfg.cats.size);
-  return `tyme-${years}-${parts.join('-')}.ics`;
-}
-
-function icsSerialize(cfg, events, notes) {
+function icsSerialize(cfg, events) {
   const prop = (key, value) => key + ':' + icsEscape(value);
-  const date = (s) => s.replace(/-/g, '');
+  const date = s => s.replace(/-/g, '');
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  const all = (set, total, label) => set.size === total ? '全部' : [...set].map(label).join('、');
   const lines = [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tyme Enhanced//Wiki Calendar Export//ZH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-    prop('X-WR-CALNAME', icsTitle(cfg)),
+    prop('X-WR-CALNAME', 'Tyme Enhanced ' + cfg.years + ' ' + icsPlaces(cfg.regions)),
     prop('X-WR-CALDESC', [
-      `由 Tyme Enhanced Wiki v${VERSION} 导出，共 ${events.length} 个全天事件。`,
-      `筛选：${cfg.from === cfg.to ? cfg.from + ' 年' : cfg.from + '–' + cfg.to + ' 年'}；国家/地区 ${cfg.regions.length ? icsRegionList(cfg.regions) : '未选'}；节日种类 ${[...cfg.cats].sort((a, b) => a - b).map((c) => Festivals.getCategoryName(c)).join('、')}；历法 ${all(cfg.cals, Object.keys(ICS_CAL).length, (c) => ICS_CAL[c])}；数据来源 ${all(cfg.sources, ICS_SOURCE.length, (s) => ICS_LABEL[s])}；调休上班日 ${cfg.work ? '含' : '不含'}。`,
-      '口径：公告数据仅适用其公布范围；规则推算及未来年份以当地正式公告为准；无法推算的补假、观月与临时安排归入「逐年公布」。',
-      notes.size ? '数据：' + [...notes].join('；') : '',
-    ].filter(Boolean).join('\n')),
+      '地区：' + icsPlaces(cfg.regions), '事件类型：' + icsTypeNames(cfg.types),
+      '来源：' + icsLabels(cfg.sources, s => sourceLabels[s]), '略过普通周末：' + (cfg.skipRest ? '是' : '否'),
+      '公告仅适用其公布范围。规则推算与未来年份以当地公告为准。',
+    ].join('\n')),
   ];
   for (const ev of events) {
-    const categories = [...ev.categories].map((c) => Festivals.getCategoryName(c)).concat([...ev.calendars].map((c) => ICS_CAL[c]), [...ev.regions]);
-    lines.push('BEGIN:VEVENT', `UID:${date(ev.date)}-${icsHash(ev.date + ev.name)}@tyme-enhanced.wiki`, 'DTSTAMP:' + stamp,
-      'DTSTART;VALUE=DATE:' + date(ev.date), 'DTEND;VALUE=DATE:' + date(ev.end), prop('SUMMARY', ev.summary),
-      prop('DESCRIPTION', icsEventDescription(ev)), 'CATEGORIES:' + categories.map(icsEscape).join(','), 'END:VEVENT');
+    // Retain the previous UID for single-day holidays when re-importing a calendar.
+    const suffix = ev.work ? '-work' : ev.last !== ev.date ? '-' + date(ev.last) : '';
+    const description = ['类型：' + icsTypeNames(ev.types), '地区：' + icsPlaces(ev.regions),
+      '来源：' + [...ev.sources].join('、'), ...ev.notes].join('\n');
+    lines.push('BEGIN:VEVENT', 'UID:' + date(ev.date) + '-' + icsHash(ev.date + ev.name) + suffix + '@tyme-enhanced.wiki',
+      'DTSTAMP:' + stamp, 'DTSTART;VALUE=DATE:' + date(ev.date), 'DTEND;VALUE=DATE:' + date(ev.end),
+      prop('SUMMARY', icsSummary(ev, cfg.regions.length > 1)), prop('DESCRIPTION', description),
+      'CATEGORIES:' + [...[...ev.types].map(t => eventTypes[t]), ...ev.regions].map(icsEscape).join(','), 'END:VEVENT');
   }
-  lines.push('END:VCALENDAR');
-  return lines.map(icsFold).join('\r\n') + '\r\n';
+  return lines.concat('END:VCALENDAR').map(icsFold).join('\r\n') + '\r\n';
 }
 
-let icsResult = null, icsBusy = false;
+const icsChecked = id => [...$(id).querySelectorAll('input:checked')].map(input => input.value);
+let icsRows = [], icsResult = null, icsPage = 0, icsRevision = 0;
+const typePreferences = new Map(), sourcePreferences = new Map();
 
-function setIcsStatus(text, error) {
-  const el = $('ics-status');
-  el.textContent = text;
-  el.classList.toggle('no', !!error);
+function setIcsStatus(text, error = false) {
+  $('ics-status').textContent = text;
+  $('ics-status').classList.toggle('no', error);
 }
 
-function icsInvalidate() {
+function clearIcsResult() {
   icsResult = null;
   $('ics-result').classList.add('hide');
+  $('ics-text').textContent = '';
   setIcsStatus('');
 }
 
-const icsChecked = (id) => [...$(id).querySelectorAll('input:checked')].map((input) => input.value);
+function icsChips(id, labels, available, preferences, defaultOn) {
+  $(id).innerHTML = Object.entries(labels).filter(([key]) => available.has(key)).map(([key, label]) => {
+    const checked = preferences.get(key) ?? defaultOn(key);
+    return `<label class="${checked ? 'on' : ''}"><input type="checkbox" value="${key}"${checked ? ' checked' : ''}>${esc(label)}</label>`;
+  }).join('');
+}
 
-function icsRegionCount() {
-  $('ics-region-count').textContent = `已选 ${icsChecked('ics-regions').length} / ${HolidayCalendar.getRegions().length}`;
+function refreshIcsSources() {
+  const types = new Set(icsChecked('ics-cats'));
+  const matching = icsRows.filter(row => row.types.some(t => types.has(t)));
+  $('ics-rest-option').classList.toggle('hide', !matching.some(row => row.weekend));
+  const sources = new Set(matching.filter(row => !row.weekend || !$('ics-rest').checked).map(row => row.group));
+  icsChips('ics-sources', sourceLabels, sources, sourcePreferences, () => true);
 }
 
 function filterIcsRegions() {
   const q = $('ics-region-query').value.trim().toLowerCase();
-  $('ics-regions').querySelectorAll('label').forEach((el) => el.classList.toggle('hide', !(el.dataset.r + ' ' + el.textContent).toLowerCase().includes(q)));
-  icsRegionCount();
+  $('ics-regions').querySelectorAll('label').forEach(el => el.classList.toggle('hide', !(el.dataset.r + ' ' + el.textContent).toLowerCase().includes(q)));
+}
+
+async function refreshIcsTypes() {
+  const revision = ++icsRevision;
+  clearIcsResult();
+  icsRows = [];
+  $('ics-cats').replaceChildren();
+  refreshIcsSources();
+  $('ics-preview').disabled = $('ics-download').disabled = true;
+  const regions = icsChecked('ics-regions');
+  $('ics-region-count').textContent = `已选 ${regions.length} / ${exportRegions.length}`;
+  const from = $('ics-from'), to = $('ics-to');
+  if (!regions.length) { setIcsStatus('请选择至少一个国家或地区。'); return; }
+  if (!from.value || !to.value || !from.validity.valid || !to.validity.valid) {
+    setIcsStatus('请输入 1900 至 2100 之间的整数年份。', true); return;
+  }
+  const start = Number(from.value), end = Number(to.value);
+  if (start > end || end - start >= 5) { setIcsStatus('起始年份不能晚于结束年份，一次最多连续 5 年。', true); return; }
+  const rows = [];
+  try {
+    for (let year = start; year <= end; year++) {
+      setIcsStatus(`正在读取 ${year} 年事件…`);
+      await new Promise(resolve => setTimeout(resolve, 16));
+      if (revision !== icsRevision) return;
+      rows.push(...regionalYear(regions, year));
+    }
+    icsRows = rows;
+    const available = new Set(rows.flatMap(row => row.types));
+    const primary = available.has('holiday') ? 'holiday' : available.has('hebrew') ? 'hebrew' : [...available][0];
+    icsChips('ics-cats', eventTypes, available, typePreferences, key => key === primary);
+    refreshIcsSources();
+    $('ics-preview').disabled = $('ics-download').disabled = !available.size;
+    setIcsStatus(available.size ? '' : '所选地区和年份没有收录事件。');
+  } catch (e) { setIcsStatus('读取日历失败：' + e.message, true); }
 }
 
 function initIcs() {
   if ($('ics-regions').childElementCount) return;
-  $('ics-regions').innerHTML = HolidayCalendar.getRegions().map((r) => `<label data-r="${r}"><input type="checkbox" value="${r}"><b>${esc(CN[r] || r)}</b><span>${r}</span></label>`).join('');
-  $('ics-regions').querySelector(`input[value="${region}"]`).checked = true;
+  $('ics-regions').innerHTML = exportRegions.map(code => `<label data-r="${code}"><input type="checkbox" value="${code}"${code === region ? ' checked' : ''}><b>${esc(icsRegionName(code))}</b><span>${code}</span></label>`).join('');
   $('ics-from').value = $('ics-to').value = current.getFullYear();
-  const chip = (value, label, on, lead = '', color) => `<label class="${on ? 'on' : ''}"${color === undefined ? '' : ` data-c="${color}"`}><input type="checkbox" value="${value}"${on ? ' checked' : ''}>${lead}${esc(label)}</label>`;
-  $('ics-cats').innerHTML = CAT_ALL.concat(8).map((c) => chip(c, Festivals.getCategoryName(c), c === 0, `<i class="cat-dot c${c}"></i>`, c)).join('');
-  $('ics-cals').innerHTML = Object.entries(ICS_CAL).map(([v, label]) => chip(v, label, true)).join('');
-  $('ics-sources').innerHTML = ICS_SOURCE.map(([v, label]) => chip(v, label, true)).join('');
-  filterIcsRegions();
+  refreshIcsTypes();
 }
 
-/* 读取并校验配置；输入框约束交给原生校验，其余错误以中文提示 */
-function icsConfig() {
-  const from = $('ics-from'), to = $('ics-to');
-  if (!from.value || !to.value) { setIcsStatus('请填写起止年份。', true); return null; }
-  if (!from.reportValidity() || !to.reportValidity()) return null;
-  const start = Number(from.value), end = Number(to.value);
-  if (start > end) throw new Error('起始年份不能晚于结束年份。');
-  if (end - start >= ICS_MAX_SPAN) throw new Error(`一次最多导出连续 ${ICS_MAX_SPAN} 年。`);
-  const regions = icsChecked('ics-regions');
-  const cats = new Set(icsChecked('ics-cats').map(Number));
-  if (!regions.length && !cats.size) throw new Error('请至少选择一个国家/地区或节日种类。');
-  return {from: start, to: end, regions, cats, cals: new Set(icsChecked('ics-cals')), sources: new Set(icsChecked('ics-sources')),
-    work: $('ics-work').checked, skipRest: $('ics-rest').checked};
-}
-
-/* 逐年生成，年份之间让出主线程以刷新状态；任一年出错即中止，不导出残缺文件 */
-async function runIcs() {
-  let cfg;
-  try { cfg = icsConfig(); } catch (e) { setIcsStatus(e.message, true); return null; }
-  if (!cfg || icsBusy) return null;
-  icsBusy = true;
-  icsResult = null;
-  $('ics-preview').disabled = $('ics-download').disabled = true;
-  try {
-    const map = new Map(), notes = new Set();
-    for (let year = cfg.from; year <= cfg.to; year++) {
-      setIcsStatus(`正在生成 ${year} 年…`);
-      await new Promise((resolve) => setTimeout(resolve, 20));
-      try {
-        if (cfg.regions.length && cfg.cats.has(0)) icsCollectRegion(cfg, year, map, notes);
-        if (cfg.cats.size) icsCollectFestivals(cfg, year, map);
-      } catch (e) {
-        throw new Error(`${year} 年数据生成失败：${e.message}`);
-      }
-    }
-    const events = icsFinish(cfg, map);
-    if (!events.length) throw new Error('当前筛选条件下没有可导出的条目，请放宽国家/地区、历法、数据来源或节日种类。');
-    icsResult = {events, notes, text: icsSerialize(cfg, events, notes), file: icsFileName(cfg)};
-  } catch (e) {
-    setIcsStatus(e.message, true);
-  } finally {
-    icsBusy = false;
-    $('ics-preview').disabled = $('ics-download').disabled = false;
+function generateIcs() {
+  const types = new Set(icsChecked('ics-cats')), sources = new Set(icsChecked('ics-sources'));
+  if (!types.size || !sources.size) {
+    setIcsStatus(types.size ? '请至少选择一个数据来源。' : '请至少选择一种事件类型。', true); return null;
   }
-  if (icsResult) setIcsStatus(`已生成 ${icsResult.events.length} 个事件 · ${icsResult.file}`);
+  const regions = icsChecked('ics-regions'), from = $('ics-from').value, to = $('ics-to').value;
+  const years = from === to ? from : from + '-' + to, skipRest = $('ics-rest').checked;
+  const events = selectEvents(icsRows, types, sources, skipRest);
+  if (!events.length) { setIcsStatus('当前筛选条件下没有可导出的事件。', true); return null; }
+  const cfg = {regions, years, types, sources, skipRest};
+  const codes = regions.length > 3 ? regions[0] + '+' + (regions.length - 1) + 'regions' : regions.join('+');
+  const file = `tyme-${years}-${codes}-${[...types].join('-')}.ics`;
+  icsResult = {events, multi: regions.length > 1, text: icsSerialize(cfg, events), file};
+  icsPage = 0;
+  const counts = new Map();
+  for (const ev of events) for (const t of ev.types) counts.set(t, (counts.get(t) || 0) + 1);
+  $('ics-count').textContent = `共 ${events.length} 个事件`;
+  $('ics-stats').innerHTML = Object.keys(eventTypes).filter(t => counts.has(t)).map(t =>
+    `<span data-type="${t}">${eventTypes[t]} <b>${counts.get(t)}</b></span>`).join('');
+  $('ics-text').textContent = icsResult.text;
+  $('ics-result').classList.remove('hide');
+  renderIcsPage();
+  setIcsStatus(file);
   return icsResult;
 }
 
-function renderIcsResult(result, full) {
-  const count = {};
-  for (const ev of result.events) for (const c of ev.categories) count[c] = (count[c] || 0) + 1;
-  const labels = (values, label) => [...values].map(label).join('、') || '—';
-  const rows = result.events.slice(0, ICS_PREVIEW_ROWS).map((ev) => `<tr><td>${ev.date === ev.last ? ev.date : ev.date + ' 至 ' + ev.last}</td><td>${esc(ev.summary)}</td><td>${esc(labels(ev.categories, (c) => Festivals.getCategoryName(c)))}</td><td>${esc(labels(ev.calendars, (c) => ICS_CAL[c]))}</td><td>${esc(labels(ev.texts, (t) => t))}</td><td>${esc(labels(ev.regions, icsRegionName))}</td></tr>`);
-  $('ics-count').textContent = `${result.events.length} 个事件 · ` + Object.keys(count).sort().map((c) => `${Festivals.getCategoryName(c)} ${count[c]}`).join(' · ');
-  $('ics-list').innerHTML = `<table class="ics-table"><thead><tr><th>日期</th><th>事件</th><th>类别</th><th>历法</th><th>数据来源</th><th>地区</th></tr></thead><tbody>${rows.join('')}</tbody>${result.events.length > rows.length ? `<tfoot><tr><td colspan="6" class="note">仅列出前 ${rows.length} 条，其余 ${result.events.length - rows.length} 条见下载文件。</td></tr></tfoot>` : ''}</table>`;
-  $('ics-text').textContent = full ? result.text : result.text.split('\r\n').slice(0, ICS_RAW_LINES).join('\n');
-  $('ics-result').querySelector('summary').textContent = full ? '查看 ICS 文本（完整内容）' : `查看 ICS 文本（前 ${ICS_RAW_LINES} 行）`;
-  $('ics-result').classList.remove('hide');
+function renderIcsPage() {
+  const {events, multi} = icsResult;
+  const pages = Math.ceil(events.length / ICS_PAGE_SIZE);
+  const start = icsPage * ICS_PAGE_SIZE, end = Math.min(start + ICS_PAGE_SIZE, events.length);
+  $('ics-pager').classList.toggle('hide', pages <= 1);
+  $('ics-prev').disabled = icsPage === 0;
+  $('ics-next').disabled = icsPage === pages - 1;
+  $('ics-page').textContent = `第 ${icsPage + 1} / ${pages} 页 · ${start + 1}–${end} 条`;
+  const rows = events.slice(start, end).map(ev => {
+    const cells = [ev.date === ev.last ? ev.date : ev.date + ' 至 ' + ev.last, icsSummary(ev, multi),
+      icsTypeNames(ev.types), icsPlaces(ev.regions), [...ev.sources].join('、')];
+    return '<tr>' + cells.map(value => '<td>' + esc(value) + '</td>').join('') + '</tr>';
+  });
+  $('ics-list').innerHTML = '<table class="ics-table"><thead><tr><th>日期</th><th>事件</th><th>事件类型</th><th>地区</th><th>来源</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>';
 }
 
-['ics-cats', 'ics-cals', 'ics-sources', 'ics-regions'].forEach((id) => {
-  $(id).addEventListener('change', (e) => {
-    const input = e.target.closest('input[type=checkbox]');
-    if (!input) return;
-    if (id !== 'ics-regions') input.parentElement.classList.toggle('on', input.checked);
-    if (id === 'ics-regions') icsRegionCount();
-    icsInvalidate();
-  });
-});
+$('ics-prev').onclick = () => { icsPage--; renderIcsPage(); };
+$('ics-next').onclick = () => { icsPage++; renderIcsPage(); };
+$('ics-regions').onchange = refreshIcsTypes;
 $('ics-region-query').oninput = filterIcsRegions;
-$('ics-region-all').onclick = () => { $('ics-regions').querySelectorAll('label:not(.hide) input').forEach((i) => { i.checked = true; }); icsRegionCount(); icsInvalidate(); };
-$('ics-region-none').onclick = () => { $('ics-regions').querySelectorAll('input').forEach((i) => { i.checked = false; }); icsRegionCount(); icsInvalidate(); };
-['ics-from', 'ics-to', 'ics-work', 'ics-rest'].forEach((id) => { $(id).oninput = icsInvalidate; });
-$('ics-preview').onclick = async () => { const result = await runIcs(); if (result) renderIcsResult(result, false); };
-$('ics-download').onclick = async () => {
-  const result = icsResult || await runIcs();
+$('ics-region-all').onclick = () => { $('ics-regions').querySelectorAll('label:not(.hide) input').forEach(i => { i.checked = true; }); refreshIcsTypes(); };
+$('ics-region-none').onclick = () => { $('ics-regions').querySelectorAll('input').forEach(i => { i.checked = false; }); refreshIcsTypes(); };
+['ics-from', 'ics-to'].forEach(id => { $(id).oninput = refreshIcsTypes; });
+$('ics-rest').onchange = () => { clearIcsResult(); refreshIcsSources(); };
+for (const [id, prefs] of [['ics-cats', typePreferences], ['ics-sources', sourcePreferences]]) {
+  $(id).onchange = e => {
+    const input = e.target;
+    prefs.set(input.value, input.checked);
+    input.parentElement.classList.toggle('on', input.checked);
+    clearIcsResult();
+    if (id === 'ics-cats') refreshIcsSources();
+  };
+}
+$('ics-preview').onclick = () => { if (!icsResult) generateIcs(); };
+$('ics-download').onclick = () => {
+  const result = icsResult || generateIcs();
   if (!result) return;
-  renderIcsResult(result, false);
   try {
     const url = URL.createObjectURL(new Blob([result.text], {type: 'text/calendar;charset=utf-8'}));
     const a = document.createElement('a');
@@ -2385,11 +2094,9 @@ $('ics-download').onclick = async () => {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (e) {
-    renderIcsResult(result, true);
-    setIcsStatus(`下载失败：${e.message}。可展开「查看 ICS 文本」复制全部内容，保存为 .ics 文件。`, true);
+    setIcsStatus('下载失败：' + e.message + '。可展开「查看完整 ICS 文本」复制内容。', true);
   }
 };
-
 function activate(page, scroll) {
   if (TABS.indexOf(page) < 0) page = 'almanac';
   document.querySelectorAll('nav.tabs button').forEach((x) => x.classList.toggle('on', x.dataset.page === page));

@@ -252,6 +252,10 @@ export class HolidayRule extends AbstractCulture {
         return SolarTerm.fromIndex(termIndex === 0 ? year + 1 : year, termIndex).getSolarDay();
     }
 
+    getType(): HolidayType {
+        return this.type;
+    }
+
     getName(): string {
         return this.name;
     }

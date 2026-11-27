@@ -367,6 +367,9 @@ const f = DayAlmanac.fromYmd(2025, 4, 3).getFestivals();
 f.getEntries().map((e) => [Festivals.getCategoryName(e.getCategory()), e.getName(), e.getSource()]);
 // [['民俗','寒食节','folk'], ['宗教','眼光娘娘圣诞','taoist'], ['宗教','雷斋日','foto']]
 
+// 需要先按地区筛选时，可读取去重前的条目。getRegions() 返回适用地区代码，* 表示国际通用。
+Festivals.getSourceEntries(f.getSolarDay(), true).map(e => [e.getName(), e.getRegions()]);
+
 Festivals.getStat();
 // {anniversary:141, folk:29, buddhist:219, buddhistOther:30, guanyin:22, yangGong:13, taoist:96, deity:125}
 ```
@@ -416,10 +419,12 @@ npm run build && npm run audit:holidays
 
 ---
 
-## 十、ICS 订阅转换
+## 十、ICS 日历导出与订阅转换
+
+在 [Wiki 日历导出页](https://heyiWF.github.io/tyme4ts-enhanced/#tab-export) 选择地区和年份，即可勾选当地收录的事件。中国大陆可分别导出法定节假日、调休上班日、二十四节气、农历节日和道历等。多选地区时，共有事件合并并列出适用地区。预览按类型统计，支持翻页查看全部事件，下载与预览使用同一份结果。
 
 ```ts
-import {IcsCalendar, EventManager} from 'tyme4ts-enhanced';
+import {IcsCalendar, EventManager, HolidayCalendar} from 'tyme4ts-enhanced';
 
 const c = IcsCalendar.parse(icsText);
 
@@ -516,7 +521,7 @@ npm run build && npm run gen:conformance   # 重新生成向量
 
 ```bash
 npm ci            # 使用已提交的 lockfile，开发/CI 使用 Node.js 24 或 26
-npm run check     # lint、类型检查、659 项测试、构建、上游数据比对
+npm run check     # lint、类型检查、809 项测试、构建、上游数据与发布包校验
 npm run gen:official # 从已提交官方资料离线再生成表、核验清单与运行时数据
 npm run audit:holidays
 npm run build     # 生成 CJS / ESM / d.ts

@@ -1,6 +1,6 @@
 {
   "diff": true,
-  "extension": ["ts"],
+  "extension": ["ts", "mjs"],
   "package": "./package.json",
   "slow": 1500,
   "timeout": 20000,

@@ -30,6 +30,14 @@ export class FolkFestival extends AbstractCulture {
         '6-6': ['晒经节'],
     };
 
+    /** 由农历月日表直接定义的民俗，用于区别同目录中的公历、节气与星期规则。 */
+    static isLunarFestival(name: string): boolean {
+        return FolkFestival.LUNAR_NAMES.has(name);
+    }
+
+    protected static LUNAR_NAMES = new Set(
+        ([] as string[]).concat(...Object.values(LUNAR_FOLK), ...Object.values(FolkFestival.LUNAR_EXTRA)));
+
     /**
      * 公历月日，已见于公历节日表者不再重复
      */
