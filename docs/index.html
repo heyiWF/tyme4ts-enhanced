@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tyme Enhanced · 多历法与通胜知识库</title>
-<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、78 个地区节假日、ICS 日历导出、传统通胜、API 字段与实时校验。">
+<meta name="description" content="Tyme Enhanced 知识库：多历法对照、八类节日、78 个地区节假日、ICS 日历导出、传统通胜与 API 字段。">
 <link rel="icon" href="./wiki-icon.svg" type="image/svg+xml">
 <style>
 :root{
@@ -168,13 +168,9 @@ table.checks th{background:#f1efe4;text-align:left;padding:8px 10px;font-size:11
 table.checks td{padding:7px 10px;border-top:1px solid var(--line-2);vertical-align:top}
 table.checks td:nth-child(1){width:44%}
 table.checks td:nth-child(3){width:56px;text-align:center;font-weight:700}
-table.checks td.ok{color:var(--green)}
 table.spec td:nth-child(1){width:96px;white-space:nowrap}
 table.spec td:nth-child(3){width:118px;text-align:left;font-weight:400;white-space:nowrap}
 table.spec td:nth-child(4){width:34%}
-table.checks td.no{color:var(--red)}
-.sum-ok{color:var(--green);font-weight:600}
-.sum-no{color:var(--red);font-weight:600}
 footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);font-size:12.5px}
 .hide{display:none}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 22px}
@@ -236,7 +232,6 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--ink-3);f
       <button data-page="regions"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18"/></svg>地区</button>
       <button data-page="export"><svg viewBox="0 0 24 24"><path d="M12 3v10m-3.5-3.5L12 13l3.5-3.5M5 15v3a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-3"/></svg>导出</button>
       <button data-page="calendars"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(30 12 12)"/></svg>历法</button>
-      <button data-page="check"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.7-3.3 7.7-8 9-4.7-1.3-8-4.3-8-9V6z"/><path d="M8 12l2.5 2.5L16 9"/></svg>校验</button>
       <button data-page="data"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>数据</button>
     </nav>
   </div>
@@ -642,24 +637,6 @@ console.log(FestivalOrdinals.get('世界防治结核病日', SolarDay.fromYmd(20
     </div>
   </section>
 
-  <section id="page-check" class="doc hide">
-    <div class="page-heading tone-jade">
-      <div><span class="eyebrow">LIVE VERIFICATION</span><h2>实时校验</h2><p>下列断言在浏览器内实时计算，与公开发布的黄历、政府公告逐项比对。任一不符即标红。</p></div>
-      <span class="page-badge">实时断言</span>
-    </div>
-    <div class="searchbar"><span class="count" id="check-summary"></span></div>
-    <div id="checks"></div>
-    <div class="content-panel">
-      <h3>口径说明</h3>
-      <ul>
-        <li>基准日为 2025-04-03（乙巳年三月初六，壬寅日），对照多家公开黄历。</li>
-        <li>社日对照《统天万年历》「立春后五戊为春社，立秋后五戊为秋社」及公开社日表。</li>
-        <li>美国补假对照 OPM 与 FederalPay 公布的 2027 年补假安排。</li>
-        <li>英国银行假日对照 GOV.UK 公布的英格兰及威尔士 2025 年列表。</li>
-      </ul>
-    </div>
-  </section>
-
   <section id="page-data" class="doc hide">
     <div class="page-heading tone-gold">
       <div><span class="eyebrow">DATA &amp; LICENSE</span><h2>数据来源与许可</h2><p>数据分别来自官方资料、开源数据与传统文本，核验程度与许可逐项说明。凡无公开算法的栏目（原版吉数、三级时辰吉凶、出版社运程文案），一律标注为「推演」，不与原版数值混同。</p></div>
@@ -720,7 +697,7 @@ import {eventTypes, sourceLabels, exportRegions, importDataset, regionalYear, se
 import {DATASETS, VERSION, SOURCES} from './holidays-data.js';
 import {API_FIELDS} from './api-reference.js';
 if (location.hash.startsWith('#api-')) history.scrollRestoration = 'manual';
-import {DayAlmanac, SolarDay, SolarTerm, HolidayCalendar, OfficialHolidayCalendar, FestivalPeriods, FestivalOrdinals, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay, AnniversaryFestival, BuddhistFestival, TaoistFestival, HolidayRule, findSankranti} from './tyme.mjs';
+import {DayAlmanac, SolarDay, HolidayCalendar, FestivalPeriods, FestivalOrdinals, Era, Naming, Gender, FolkFestival, Festivals, HebrewDay, HebrewFestival, IndianDay, IndianFestival, Tithi, UmmAlQuraDay, DiyanetDay, PersianDay, SakaDay, BanglaDay, EthiopianDay, KoreanLunarDay, MyanmarDay, BikramSambatDay, BhutaneseDay, MongolianDay, ThaiLunarDay, VietnameseLunarDay} from './tyme.mjs';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => (n < 10 ? '0' : '') + n;
@@ -1546,167 +1523,6 @@ function renderData() {
     `<div class="s"><b>${esc(c[1])}</b><span>${esc(c[0])}</span><em>${esc(c[2])}</em></div>`).join('');
 }
 
-const A = (y, m, d) => DayAlmanac.fromYmd(y, m, d);
-const name = (x) => (x ? x.getName() : '');
-
-function dayNames(list) {
-  return list.map((h) => h.getDay().getMonth() + '/' + h.getDay().getDay() + ' ' + h.getName()).join(' | ');
-}
-
-const CHECKS = [
-  ['基准日 2025-04-03', [
-    ['农历', '农历乙巳年三月初六', () => A(2025, 4, 3).getLunarDay().toString()],
-    ['日干支', '壬寅', () => A(2025, 4, 3).getSixtyCycleDay().getSixtyCycle().getName()],
-    ['建除', '闭', () => A(2025, 4, 3).getDuty().getName()],
-    ['冲煞', '冲猴(丙申)煞北', () => A(2025, 4, 3).getClash().toString()],
-    ['值神', '青龙 · 黄道', () => name(A(2025, 4, 3).getSixtyCycleDay().getTwelveStar()) + ' · ' + name(A(2025, 4, 3).getSixtyCycleDay().getTwelveStar().getEcliptic())],
-    ['二十八宿', '角 蛟 吉', () => { const s = A(2025, 4, 3).getSixtyCycleDay().getTwentyEightStar(); return s.getName() + ' ' + s.getAnimal().getName() + ' ' + s.getLuck().getName(); }],
-    ['胎神', '仓库炉 房内南', () => A(2025, 4, 3).getSixtyCycleDay().getFetusDay().getName()],
-    ['日九星', '九紫火', () => A(2025, 4, 3).getSixtyCycleDay().getNineStar().toString()],
-    ['喜神 / 财神 / 福神', '南 / 南 / 东南', () => { const s = A(2025, 4, 3).getSixtyCycleDay().getSixtyCycle().getHeavenStem(); return s.getJoyDirection().getName() + ' / ' + s.getWealthDirection().getName() + ' / ' + s.getFortuneDirection().getName(); }],
-    ['阳贵 / 阴贵', '东 / 东南', () => { const s = A(2025, 4, 3).getSixtyCycleDay().getSixtyCycle().getHeavenStem(); return s.getYangDirection().getName() + ' / ' + s.getYinDirection().getName(); }],
-    ['旬空', '辰巳', () => A(2025, 4, 3).getVoidBranches().map((b) => b.getName()).join('')],
-    ['武侯择日', '下元 青龙头 吉', () => { const w = A(2025, 4, 3).getWuHouDay(); return w.getYuan().getName() + ' ' + w.getName() + ' ' + w.getLuck().getName(); }],
-    ['六合号码', '猪 07 19 31 43', () => A(2025, 4, 3).getCombineZodiacNumbers().toString()],
-    ['月将', '河魁（戌）', () => A(2025, 4, 3).getMonthGeneral().toString()],
-    ['宜', '冠笄 立券 交易 修造 动土 安机械 入殓 安葬 破土', () => A(2025, 4, 3).getSixtyCycleDay().getRecommends().map((t) => t.getName()).join(' ')],
-    ['忌', '嫁娶 祈福 出火 入宅', () => A(2025, 4, 3).getSixtyCycleDay().getAvoids().map((t) => t.getName()).join(' ')],
-    ['民俗节日', '寒食节', () => A(2025, 4, 3).getFolkFestivals().getName()],
-    ['神诞', '眼光娘娘等圣诞', () => { const d = A(2025, 4, 3).getDeityFestival(); return d ? d.getName() : ''; }],
-  ]],
-  ['节气时刻（东八区）', [
-    ['2025 立春', '2025年2月3日 22:10:28', () => SolarTermOf(2025, 3)],
-    ['2025 春分', '2025年3月20日 17:01:29', () => SolarTermOf(2025, 6)],
-    ['2025 清明', '2025年4月4日 20:48:36', () => SolarTermOf(2025, 7)],
-  ]],
-  ['春社秋社（立春/立秋后五戊）', [
-    ['2020', '春 3-16 / 秋 9-22', () => sheDay(2020)],
-    ['2021', '春 3-21 / 秋 9-17', () => sheDay(2021)],
-    ['2022', '春 3-26 / 秋 9-22', () => sheDay(2022)],
-    ['2023', '春 3-21 / 秋 9-27', () => sheDay(2023)],
-    ['2024', '春 3-25 / 秋 9-21', () => sheDay(2024)],
-    ['2025', '春 3-20 / 秋 9-26', () => sheDay(2025)],
-  ]],
-  ['美国官方工作日安排（OPM）', [
-    ['2025 假日数', '11', () => String(OfficialHolidayCalendar.create('US',2025).getDays().length)],
-    ['2025 感恩节', 'Thanksgiving Day', () => name(OfficialHolidayCalendar.create('US',2025).getHoliday(SolarDay.fromYmd(2025,11,27)))],
-    ['2027 六月节补假', 'Juneteenth National Independence Day', () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,6,18)))],
-    ['2027 独立日补假', 'Independence Day', () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,7,5)))],
-    ['2027 圣诞补假', 'Christmas Day', () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,12,24)))],
-    ['2028 元旦在 2027 年补假', "New Year’s Day", () => name(OfficialHolidayCalendar.create('US',2027).getHoliday(SolarDay.fromYmd(2027,12,31)))],
-  ]],
-  ['多日活动与机关日历', [
-    ['2026 阅读周', '7', () => String(FestivalPeriods.getYear(2026).find(p => p.getName() === '全民阅读活动周').getDayCount())],
-    ['2027 阅读周不推算', 'false', () => String(FestivalPeriods.getYear(2027).some(p => p.getName() === '全民阅读活动周'))],
-    ['2025 科普月', '30', () => String(FestivalPeriods.getYear(2025)[0].getDayCount())],
-    ['台湾 2025 机关休息日', '118', () => String(OfficialHolidayCalendar.create('TW',2025).getDays().length)],
-    ['台湾 2025 补班', 'true', () => String(OfficialHolidayCalendar.create('TW',2025).getHoliday(SolarDay.fromYmd(2025,2,8)).isWork())],
-  ]],
-  ['国家历法', [
-    ['Saka 1947 首日', '2025年3月22日', () => SakaDay.fromYmd(1947, 1, 1).getSolarDay().toString()],
-    ['Bangla 1426 首日', '2019年4月14日', () => BanglaDay.fromYmd(1426, 1, 1).getSolarDay().toString()],
-    ['埃塞俄比亚 2012 首日', '2019年9月12日', () => EthiopianDay.fromYmd(2012, 1, 1).getSolarDay().toString()],
-    ['韩国 2017 闰五月初一', '2017年6月24日', () => KoreanLunarDay.fromYmd(2017, 5, 1, true).getSolarDay().toString()],
-    ['缅甸 1386 后得固月6日', '2025年4月3日', () => MyanmarDay.fromYmd(1386, 13, 6).getSolarDay().toString()],
-    ['尼泊尔 2082 首日', '2025年4月14日', () => BikramSambatDay.fromYmd(2082, 1, 1).getSolarDay().toString()],
-    ['不丹 2026 新年', '2026年2月18日', () => BhutaneseDay.fromYmd(2026, 1, 1).getSolarDay().toString()],
-    ['蒙古 2025 正月初二', '2025年3月1日', () => MongolianDay.fromYmd(2025, 1, 2).getSolarDay().toString()],
-    ['泰历 1383 闰八月', '2021年7月10日', () => ThaiLunarDay.fromYmd(1383, 8, 1, true).getSolarDay().toString()],
-    ['越南 2007 春节', '2007年2月17日', () => VietnameseLunarDay.fromYmd(2007, 1, 1).getSolarDay().toString()],
-    ['地区总数', '78', () => String(HolidayCalendar.getRegions().length)],
-  ]],
-  ['其他地区', [
-    ['英国 2025 假日数', '8', () => String(HolidayCalendar.of('GB').getDays(2025).length)],
-    ['英国 2025 夏季银行假日（官方公告）', '8/25 Summer bank holiday', () => dayNames(HolidayCalendar.of('GB').getDays(2025).filter((h) => h.getName() === 'Summer bank holiday'))],
-    ['日本 2025 假日数', '19', () => String(HolidayCalendar.of('JP').getDays(2025).length)],
-    ['日本 2025 振替休日', '2/24 休日', () => dayNames(HolidayCalendar.of('JP').getDays(2025).filter((h) => h.getDay().getMonth() === 2 && h.getDay().getDay() === 24))],
-    ['中国 2025 假日数', '28', () => String(HolidayCalendar.of('CN').getDays(2025).length)],
-    ['韩国 2025 佛诞与儿童节', '5/5 佛诞节、儿童节', () => dayNames(HolidayCalendar.of('KR').getDays(2025).filter((h) => h.getDay().getMonth() === 5 && h.getDay().getDay() === 5))],
-    ['荷兰 2025 国王节', '4/26 国王节', () => dayNames(HolidayCalendar.of('NL').getDays(2025).filter((h) => h.getName() === '国王节'))],
-    ['南非 2025 自由日补假', '4/28 自由日（补假）', () => dayNames(HolidayCalendar.of('ZA').getDays(2025).filter((h) => h.getName().indexOf('（补假）') > -1 && h.getName().indexOf('自由日') === 0))],
-    ['马来西亚州级代码', '14', () => String(HolidayCalendar.getRegions().filter((x) => x.indexOf('MY-') === 0).length)],
-    ['柔佛 2025 苏丹诞辰补假', '3/24 苏丹诞辰（补假）', () => dayNames(HolidayCalendar.of('MY-JHR').getDays(2025).filter((h) => h.getName() === '苏丹诞辰（补假）'))],
-    ['吉打 2026 苏丹诞辰', '6/21 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-KDH').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
-    ['沙巴 2026 州元首诞辰', '3/30 州元首诞辰', () => dayNames(HolidayCalendar.of('MY-SBH').getDays(2026).filter((h) => h.getName() === '州元首诞辰'))],
-    ['砂拉越 2026 州元首诞辰', '10/10 州元首诞辰', () => dayNames(HolidayCalendar.of('MY-SWK').getDays(2026).filter((h) => h.getName() === '州元首诞辰'))],
-    ['霹雳 2026 苏丹诞辰', '11/6 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-PRK').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
-    ['槟城 2026 州元首诞辰', '7/11 州元首诞辰', () => dayNames(HolidayCalendar.of('MY-PNG').getDays(2026).filter((h) => h.getName() === '州元首诞辰'))],
-    ['彭亨 2026 苏丹诞辰', '7/31 苏丹诞辰', () => dayNames(HolidayCalendar.of('MY-PHG').getDays(2026).filter((h) => h.getName() === '苏丹诞辰'))],
-  ]],
-  ['节日与历法', [
-    ['2025-04-03 节日', '寒食节、眼光娘娘圣诞、雷斋日', () => A(2025, 4, 3).getFestivals().getNames().join('、')],
-    ['2025-01-29 春节', '春节', () => A(2025, 1, 29).getFestivals().getByCategory(1).map((e) => e.getName()).join('、')],
-    ['2025-10-01 法定', '国庆节', () => A(2025, 10, 1).getFestivals().getByCategory(0).map((e) => e.getName()).join('、')],
-    ['2025-12-13 纪念', '国家公祭日', () => A(2025, 12, 13).getFestivals().getByCategory(3).map((e) => e.getName()).join('、')],
-    ['佛历条目数', '219', () => String(Festivals.getStat()['buddhist'])],
-    ['道历条目数', '96', () => String(Festivals.getStat()['taoist'])],
-    ['纪念日日期键数', '141', () => String(Festivals.getStat()['anniversary'])],
-    ['希伯来历换算', '5786年提斯利月1日', () => HebrewDay.fromSolarDay(SolarDay.fromYmd(2025, 9, 23)).toString()],
-    ['希伯来闰年 5784', '是', () => HebrewDay.isLeapYear(5784) ? '是' : '否'],
-    ['2025-09-23 犹太新年', '犹太新年第1日', () => HebrewFestival.of(SolarDay.fromYmd(2025, 9, 23)).getName()],
-    ['2025-05-01 以色列独立日', '独立日', () => HebrewFestival.of(SolarDay.fromYmd(2025, 5, 1)).getName()],
-    ['2025-10-20 排灯节', 'Diwali', () => IndianFestival.of(SolarDay.fromYmd(2025, 10, 20)).getName()],
-    ['Makar Sankranti 2025', '2025年1月14日', () => findSankranti(2025, 9).toString()],
-    ['东正教复活节 2025', '2025年4月20日', () => HolidayRule.getOrthodoxEasterDay(2025).toString()],
-    ['东正教复活节 2024', '2024年5月5日', () => HolidayRule.getOrthodoxEasterDay(2024).toString()],
-    ['2025-03-31 伊斯兰开斋节', '开斋节', () => A(2025, 3, 31).getFestivals(true).getByCategory(7).map((e) => e.getName()).join('、')],
-    ['波斯历 1405 诺鲁孜', '2026年3月21日', () => PersianDay.getNowruz(1405).toString()],
-    ['波斯历 1403 闰年', '是', () => PersianDay.isLeapYear(1403) ? '是' : '否'],
-    ['伊朗 2026 伊斯兰革命日', '2/11 伊斯兰革命纪念日', () => dayNames(HolidayCalendar.of('IR').getDays(2026).filter((h) => h.getName() === '伊斯兰革命纪念日'))],
-    ['Diyanet 1446 开斋节', '2025年3月30日', () => DiyanetDay.fromYmd(1446, 10, 1).getSolarDay().toString()],
-    ['Diyanet 1447 宰牲节', '2026年5月27日', () => DiyanetDay.fromYmd(1447, 12, 10).getSolarDay().toString()],
-    ['土耳其 2025 开斋节', '3/30 开斋节', () => dayNames(HolidayCalendar.of('TR').getDays(2025).filter((h) => h.getName() === '开斋节'))],
-    ['乌姆库拉 1446 开斋节', '2025年3月30日', () => UmmAlQuraDay.fromYmd(1446, 10, 1).getSolarDay().toString()],
-    ['乌姆库拉 1447 宰牲节', '2026年5月27日', () => UmmAlQuraDay.fromYmd(1447, 12, 10).getSolarDay().toString()],
-    ['沙特 2026 开斋节', '3/20 开斋节', () => dayNames(HolidayCalendar.of('SA').getDays(2026).filter((h) => h.getName() === '开斋节'))],
-    ['阿联酋 2026 伊斯兰新年', '6/16 伊斯兰新年', () => dayNames(HolidayCalendar.of('AE').getDays(2026).filter((h) => h.getName() === '伊斯兰新年'))],
-    ['波兰 2025 圣体节', '6/19 圣体节', () => dayNames(HolidayCalendar.of('PL').getDays(2025).filter((h) => h.getName() === '圣体节'))],
-    ['希腊 2025 净周一', '3/3 净周一', () => dayNames(HolidayCalendar.of('GR').getDays(2025).filter((h) => h.getName() === '净周一'))],
-    ['瑞典 2025 仲夏节', '6/21 仲夏节', () => dayNames(HolidayCalendar.of('SE').getDays(2025).filter((h) => h.getName() === '仲夏节'))],
-    ['加州 2025 假日数', '12', () => String(HolidayCalendar.of('US-CA').getDays(2025).length)],
-  ]],
-];
-
-function SolarTermOf(y, i) {
-  return SolarTerm.fromIndex(y, i).getJulianDay().getSolarTime().toString();
-}
-
-function sheDay(y) {
-  const found = [];
-  let d = SolarDay.fromYmd(y, 1, 1);
-  for (let i = 0; i < 366; i++) {
-    const n = FolkFestival.of(d).getName();
-    if (n.indexOf('春社') > -1) found.push('春 ' + d.getMonth() + '-' + d.getDay());
-    if (n.indexOf('秋社') > -1) found.push('秋 ' + d.getMonth() + '-' + d.getDay());
-    d = d.next(1);
-  }
-  return found.join(' / ');
-}
-
-let checkRendered = false;
-function renderChecks() {
-  let total = 0, pass = 0;
-  let html = '';
-  for (const group of CHECKS) {
-    html += `<h3>${group[0]}</h3><table class="checks"><tr><th>项目</th><th>期望</th><th>结果</th></tr>`;
-    for (const item of group[1]) {
-      let actual = '';
-      try { actual = String(item[2]()); } catch (e) { actual = '异常：' + e.message; }
-      const ok = actual === item[1];
-      total++;
-      if (ok) pass++;
-      html += `<tr><td>${esc(item[0])}</td><td>${esc(item[1])}</td><td class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'}</td></tr>`;
-      if (!ok) html += `<tr><td colspan="3" style="color:var(--red);font-size:12px">实际：${esc(actual)}</td></tr>`;
-    }
-    html += '</table>';
-  }
-  $('checks').innerHTML = html;
-  $('check-summary').innerHTML = pass === total
-    ? `<span class="sum-ok">${pass} / ${total} 项通过</span>`
-    : `<span class="sum-no">${pass} / ${total} 项通过</span>`;
-  checkRendered = true;
-}
-
 $('prev').onclick = () => shift(-1);
 $('next').onclick = () => shift(1);
 $('today').onclick = setToday;
@@ -1722,7 +1538,7 @@ $('region').onchange = (e) => {
 $('genname').onclick = () => renderNames(almanac());
 $('q').oninput = () => renderFields();
 
-const TABS = ['almanac', 'fields', 'festivals', 'regions', 'export', 'calendars', 'check', 'data'];
+const TABS = ['almanac', 'fields', 'festivals', 'regions', 'export', 'calendars', 'data'];
 
 function hashPage() {
   if (location.hash.startsWith('#api-')) return 'fields';
@@ -2106,7 +1922,6 @@ function activate(page, scroll) {
   if (page === 'regions') { renderRegionCards(); renderRegionDetail(); }
   if (page === 'export') initIcs();
   if (page === 'calendars') { if (!$('cdate').value) $('cdate').value = todayStr(); renderCalendars(); }
-  if (page === 'check') renderChecks();
   if (page === 'data') renderData();
   if (scroll) window.scrollTo({top: 0, behavior: 'smooth'});
 }
