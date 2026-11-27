@@ -2178,9 +2178,7 @@ export class LunarMonth extends AbstractLeapMonth {
     }
 
     getJupiterDirection(): Direction {
-        const sixtyCycle: SixtyCycle = this.getSixtyCycle();
-        const n: number = [7, -1, 1, 3][sixtyCycle.getEarthBranch().next(-2).getIndex() % 4];
-        return n !== -1 ? Direction.fromIndex(n) : sixtyCycle.getHeavenStem().getDirection();
+        return Direction.monthJupiter(this.getSixtyCycle());
     }
 
     getFetus(): FetusMonth | null {
@@ -2335,8 +2333,7 @@ export class LunarDay extends AbstractDay {
     }
 
     getJupiterDirection(): Direction {
-        const index: number = this.getSixtyCycle().getIndex();
-        return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : this.getLunarMonth().getLunarYear().getJupiterDirection();
+        return Direction.dayJupiter(this.getLunarMonth().getLunarYear().getJupiterDirection(), this.getSixtyCycle());
     }
 
     getFetusDay(): FetusDay {
@@ -2368,7 +2365,7 @@ export class LunarDay extends AbstractDay {
     }
 
     getTwentyEightStar(): TwentyEightStar {
-        return TwentyEightStar.fromIndex([10, 18, 26, 6, 14, 22, 2][this.getSolarDay().getWeek().getIndex()]).next(-7 * this.getSixtyCycle().getEarthBranch().getIndex());
+        return TwentyEightStar.fromDay(this.getSixtyCycle(), this.getWeek());
     }
 
     getFestival(): LunarFestival | null {
@@ -2509,9 +2506,7 @@ export class SixtyCycleMonth extends AbstractTyme {
     }
 
     getJupiterDirection(): Direction {
-        const sixtyCycle: SixtyCycle = this.getSixtyCycle();
-        const n: number = [7, -1, 1, 3][sixtyCycle.getEarthBranch().next(-2).getIndex() % 4];
-        return n === -1 ? sixtyCycle.getHeavenStem().getDirection() : Direction.fromIndex(n);
+        return Direction.monthJupiter(this.month);
     }
 }
 
@@ -2572,7 +2567,7 @@ export class SixtyCycleDay extends AbstractTyme {
     }
 
     getTwelveStar(): TwelveStar {
-        return TwelveStar.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() + (8 - this.getMonth().getEarthBranch().getIndex() % 6) * 2);
+        return TwelveStar.fromDay(this.getMonth(), this.day);
     }
 
     getNineStar(): NineStar {
@@ -2580,8 +2575,7 @@ export class SixtyCycleDay extends AbstractTyme {
     }
 
     getJupiterDirection(): Direction {
-        const index: number = this.getSixtyCycle().getIndex();
-        return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : this.month.getSixtyCycleYear().getJupiterDirection();
+        return Direction.dayJupiter(this.month.getSixtyCycleYear().getJupiterDirection(), this.day);
     }
 
     getFetusDay(): FetusDay {
@@ -2589,7 +2583,7 @@ export class SixtyCycleDay extends AbstractTyme {
     }
 
     getTwentyEightStar(): TwentyEightStar {
-        return TwentyEightStar.fromIndex([10, 18, 26, 6, 14, 22, 2][this.solarDay.getWeek().getIndex()]).next(-7 * this.day.getEarthBranch().getIndex());
+        return TwentyEightStar.fromDay(this.day, this.solarDay.getWeek());
     }
 
     getGods(): God[] {
@@ -2714,7 +2708,7 @@ export class SixtyCycleHour extends AbstractTyme {
     }
 
     getTwelveStar(): TwelveStar {
-        return TwelveStar.fromIndex(this.hour.getEarthBranch().getIndex() + (8 - this.getDay().getEarthBranch().getIndex() % 6) * 2);
+        return TwelveStar.fromHour(this.getDay(), this.hour);
     }
 
     getNineStar(): NineStar {
@@ -2918,7 +2912,7 @@ export class LunarHour extends SecondUnit {
     }
 
     getTwelveStar(): TwelveStar {
-        return TwelveStar.fromIndex(this.getSixtyCycle().getEarthBranch().getIndex() + (8 - this.getSixtyCycleHour().getDay().getEarthBranch().getIndex() % 6) * 2);
+        return TwelveStar.fromHour(this.getSixtyCycleHour().getDay(), this.getSixtyCycle());
     }
 
     getNineStar(): NineStar {

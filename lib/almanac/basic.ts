@@ -1,4 +1,4 @@
-import {AbstractCulture, AbstractCultureDay, AbstractYear, HideHeavenStemType, LoopTyme, SevenStar, YinYang} from '../core/base';
+import {AbstractCulture, AbstractCultureDay, AbstractYear, HideHeavenStemType, LoopTyme, SevenStar, Week, YinYang} from '../core/base';
 
 export class Animal extends LoopTyme {
 
@@ -38,6 +38,10 @@ export class TwentyEightStar extends LoopTyme {
 
     static fromName(name: string): TwentyEightStar {
         return new TwentyEightStar(name);
+    }
+
+    static fromDay(day: SixtyCycle, week: Week): TwentyEightStar {
+        return TwentyEightStar.fromIndex(10 + 8 * week.getIndex() - 7 * day.getEarthBranch().getIndex());
     }
 
     next(n: number): TwentyEightStar {
@@ -102,6 +106,16 @@ export class Direction extends LoopTyme {
 
     static fromName(name: string): Direction {
         return new Direction(name);
+    }
+
+    static monthJupiter(month: SixtyCycle): Direction {
+        const n: number = [7, -1, 1, 3][month.getEarthBranch().next(-2).getIndex() % 4];
+        return n === -1 ? month.getHeavenStem().getDirection() : Direction.fromIndex(n);
+    }
+
+    static dayJupiter(yearJupiter: Direction, day: SixtyCycle): Direction {
+        const index: number = day.getIndex();
+        return index % 12 < 6 ? Element.fromIndex(~~(index / 12)).getDirection() : yearJupiter;
     }
 
     next(n: number): Direction {
@@ -1176,6 +1190,18 @@ export class TwelveStar extends LoopTyme {
 
     static fromName(name: string): TwelveStar {
         return new TwelveStar(name);
+    }
+
+    protected static fromSixtyCycle(parent: SixtyCycle, base: SixtyCycle): TwelveStar {
+        return TwelveStar.fromIndex(base.getEarthBranch().getIndex() + (8 - parent.getEarthBranch().getIndex() % 6) * 2);
+    }
+
+    static fromDay(month: SixtyCycle, day: SixtyCycle): TwelveStar {
+        return TwelveStar.fromSixtyCycle(month, day);
+    }
+
+    static fromHour(day: SixtyCycle, hour: SixtyCycle): TwelveStar {
+        return TwelveStar.fromSixtyCycle(day, hour);
     }
 
     next(n: number): TwelveStar {
