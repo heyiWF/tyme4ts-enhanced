@@ -1,9 +1,15 @@
 import {suite, test} from '@testdeck/mocha';
 import {SolarMonth} from '../lib';
-import {equal} from 'assert';
+import {deepStrictEqual, equal} from 'assert';
 
 @suite
 class SolarMonthTest {
+    @test
+    skipsGregorianReformGap(): void {
+        const days = SolarMonth.fromYm(1582, 10).getDays();
+        deepStrictEqual(days.map(d => d.getDay()), [1, 2, 3, 4, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]);
+    }
+
     @test
     test0(): void {
         const m: SolarMonth = SolarMonth.fromYm(2019, 5);

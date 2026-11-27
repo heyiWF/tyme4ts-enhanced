@@ -6469,6 +6469,15 @@ class SolarMonth extends AbstractMonth {
   }
   getDays() {
     const l = [];
+    if (this.year === 1582 && this.month === 10) {
+      for (let i = 1; i <= 4; i++) {
+        l.push(SolarDay.fromYmd(this.year, this.month, i));
+      }
+      for (let i = 15; i <= 31; i++) {
+        l.push(SolarDay.fromYmd(this.year, this.month, i));
+      }
+      return l;
+    }
     for (let i = 1, j = this.getDayCount(); i <= j; i++) {
       l.push(SolarDay.fromYmd(this.year, this.month, i));
     }
@@ -8944,7 +8953,7 @@ class Event extends AbstractCulture {
     return new EventBuilder();
   }
   static fromName(name) {
-    const matcher = new RegExp(EventManager.REGEX + `(${name})`, "g").exec(EventManager.DATA);
+    const matcher = EventManager.getRegex(name).exec(EventManager.DATA);
     return matcher ? new Event(name, matcher[1]) : null;
   }
   getCharIndex(index) {
@@ -9007,7 +9016,7 @@ class Event extends AbstractCulture {
   }
   static all() {
     const l = [];
-    const reg = new RegExp(EventManager.REGEX + `(.[^@]+)`, "g");
+    const reg = new RegExp(EventManager.REGEX + "([^@]+)", "g");
     let matcher;
     while (matcher = reg.exec(EventManager.DATA)) {
       l.push(new Event(matcher[2], matcher[1]));
@@ -9056,7 +9065,11 @@ class Event extends AbstractCulture {
       if (delay === 0) {
         return null;
       } else if (delay < 0) {
-        return isLunar ? LunarDay.fromYmd(y, m, d + delay).getSolarDay() : SolarDay.fromYmd(y, m, d + delay);
+        const day = d + delay;
+        if (day > 0 && day <= lastDay) {
+          return isLunar ? LunarDay.fromYmd(y, m, day).getSolarDay() : SolarDay.fromYmd(y, m, day);
+        }
+        return null;
       }
       return isLunar ? LunarDay.fromYmd(y, m, lastDay).getSolarDay().next(delay) : SolarDay.fromYmd(y, m, lastDay).next(delay);
     }
@@ -9179,15 +9192,17 @@ class EventManager {
   static REGEX = "(@[0-9A-Za-z_]{8})";
   static DATA = "";
   static CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTU_VWXYZabcdefghijklmnopqrstuvwxyz";
+  static getRegex(name) {
+    const literal = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(EventManager.REGEX + "(" + literal + ")(?=@|$)", "g");
+  }
   static remove(name) {
     EventManager.saveOrUpdate(name, "");
   }
   static saveOrUpdate(name, data) {
-    const o = EventManager.REGEX + name;
-    const reg = new RegExp(o, "g");
-    const matcher = reg.exec(EventManager.DATA);
-    if (matcher) {
-      EventManager.DATA = EventManager.DATA.replace(reg, data);
+    const reg = EventManager.getRegex(name);
+    if (reg.test(EventManager.DATA)) {
+      EventManager.DATA = EventManager.DATA.replace(reg, () => data);
     } else {
       EventManager.DATA += data;
     }

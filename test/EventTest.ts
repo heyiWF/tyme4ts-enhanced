@@ -1,6 +1,6 @@
 import {suite, test} from '@testdeck/mocha';
 import {EventManager, Event, SolarDay} from '../lib';
-import {equal, ifError, ok} from 'assert';
+import {deepStrictEqual, equal, ifError, ok} from 'assert';
 
 @suite
 class EventTest {
@@ -140,6 +140,38 @@ class EventTest {
         const d: SolarDay | null = e.getSolarDay(2018);
         ok(d);
         equal(d.toString(), '2018年3月26日');
+    }
+
+    @test
+    matchesWholeLiteralNames(): void {
+        const previous = EventManager.DATA;
+        const first = Event.builder().solarDay(1, 1, 0).build();
+        const second = Event.builder().solarDay(1, 2, 0).build();
+        const name = '生日(家庭).$&$1';
+        try {
+            EventManager.DATA = '';
+            EventManager.update('生日会', first);
+            equal(Event.fromName('生日'), null);
+            EventManager.update('生日', second);
+            EventManager.update('甲', first);
+            EventManager.update(name, first);
+            EventManager.update(name, second);
+            deepStrictEqual(Event.all().map(e => e.getName()), ['生日会', '生日', '甲', name]);
+            deepStrictEqual(Event.fromSolarDay(SolarDay.fromYmd(2026, 1, 2)).map(e => e.getName()), ['生日', name]);
+            EventManager.remove('生日');
+            EventManager.remove(name);
+            deepStrictEqual(Event.all().map(e => e.getName()), ['生日会', '甲']);
+        } finally {
+            EventManager.DATA = previous;
+        }
+    }
+
+    @test
+    rejectsOutOfMonthFallbackDays(): void {
+        equal(Event.builder().solarDay(2, 31, -31).build().getSolarDay(2026), null);
+        equal(Event.builder().solarDay(2, 31, -1).build().getSolarDay(2026), null);
+        equal(Event.builder().lunarDay(1, 31, -31).build().getSolarDay(2026), null);
+        equal(Event.builder().solarDay(2, 31, -3).build().getSolarDay(2026)?.toString(), '2026年2月28日');
     }
 
 }

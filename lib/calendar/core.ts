@@ -1146,6 +1146,15 @@ export class SolarMonth extends AbstractMonth {
 
     getDays(): SolarDay[] {
         const l: SolarDay[] = [];
+        if (this.year === 1582 && this.month === 10) {
+            for (let i: number = 1; i <= 4; i++) {
+                l.push(SolarDay.fromYmd(this.year, this.month, i));
+            }
+            for (let i: number = 15; i <= 31; i++) {
+                l.push(SolarDay.fromYmd(this.year, this.month, i));
+            }
+            return l;
+        }
         for (let i: number = 1, j: number = this.getDayCount(); i <= j; i++) {
             l.push(SolarDay.fromYmd(this.year, this.month, i));
         }
@@ -4125,7 +4134,7 @@ export class Event extends AbstractCulture {
     }
 
     static fromName(name: string): Event | null {
-        const matcher: RegExpExecArray | null = new RegExp(EventManager.REGEX + `(${name})`, 'g').exec(EventManager.DATA);
+        const matcher: RegExpExecArray | null = EventManager.getRegex(name).exec(EventManager.DATA);
         return matcher ? new Event(name, matcher[1]) : null;
     }
 
@@ -4190,7 +4199,7 @@ export class Event extends AbstractCulture {
 
     static all(): Event[] {
         const l: Event[] = [];
-        const reg: RegExp = new RegExp(EventManager.REGEX + `(.[^@]+)`, 'g');
+        const reg: RegExp = new RegExp(EventManager.REGEX + '([^@]+)', 'g');
         let matcher: RegExpExecArray | null;
         while (matcher = reg.exec(EventManager.DATA)) {
             l.push(new Event(matcher[2], matcher[1]));
@@ -4241,7 +4250,11 @@ export class Event extends AbstractCulture {
             if (delay === 0) {
                 return null;
             } else if (delay < 0) {
-                return isLunar ? LunarDay.fromYmd(y, m, d + delay).getSolarDay() : SolarDay.fromYmd(y, m, d + delay);
+                const day: number = d + delay;
+                if (day > 0 && day <= lastDay) {
+                    return isLunar ? LunarDay.fromYmd(y, m, day).getSolarDay() : SolarDay.fromYmd(y, m, day);
+                }
+                return null;
             }
             return isLunar ? LunarDay.fromYmd(y, m, lastDay).getSolarDay().next(delay) : SolarDay.fromYmd(y, m, lastDay).next(delay);
         }
@@ -4394,16 +4407,19 @@ export class EventManager {
     static DATA: string = '';
     static CHARS: string = '0123456789ABCDEFGHIJKLMNOPQRSTU_VWXYZabcdefghijklmnopqrstuvwxyz';
 
+    static getRegex(name: string): RegExp {
+        const literal = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return new RegExp(EventManager.REGEX + '(' + literal + ')(?=@|$)', 'g');
+    }
+
     static remove(name: string): void {
         EventManager.saveOrUpdate(name, '');
     }
 
     static saveOrUpdate(name: string, data: string): void {
-        const o: string = EventManager.REGEX + name;
-        const reg: RegExp = new RegExp(o, 'g');
-        const matcher: RegExpExecArray | null = reg.exec(EventManager.DATA);
-        if (matcher) {
-            EventManager.DATA = EventManager.DATA.replace(reg, data);
+        const reg: RegExp = EventManager.getRegex(name);
+        if (reg.test(EventManager.DATA)) {
+            EventManager.DATA = EventManager.DATA.replace(reg, () => data);
         } else {
             EventManager.DATA += data;
         }
